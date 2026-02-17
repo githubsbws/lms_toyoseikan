@@ -3763,8 +3763,10 @@ class AdminController extends Controller
 
     // new p
     function pgroup(){
+        
         if(AuthFacade::useradmin()){
             $p_group = Pgroup::where('active','y')->get();
+            
             return view("admin.pgroup.pgroup",compact('p_group'));
         }else{
             return redirect()->route('login.admin');

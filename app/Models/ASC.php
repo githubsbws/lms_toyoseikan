@@ -5,22 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Pgroup extends Model
+class ASC extends Model
 {
     use HasFactory;
 
     protected $connection = 'pgsql_noprefix';
-    protected $table = 'p_group';
+    protected $table = 'asc';
     protected $primaryKey = 'id';
-    protected $fillable = [
-        'group_name',
-        'active',
-        'create_by',               
-        'update_by'
-    ];
-
-    const CREATED_AT = 'create_date'; // Custom created_at column
-    const UPDATED_AT = 'update_date'; // Custom update_at column
+    
+    const CREATED_AT = 'created_date'; // Custom created_at column
+    const UPDATED_AT = 'updated_date'; // Custom update_at column
 
     public static function findById($id)
     {
