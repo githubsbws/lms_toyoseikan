@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Captcha extends Model
 {
     use HasFactory;
-    protected $connection = 'mysql_noprefix';
+    protected $connection = 'pgsql_noprefix';
 
     protected $table = 'config_captcha';
 

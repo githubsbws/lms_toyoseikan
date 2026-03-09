@@ -9,7 +9,7 @@ class Ques_ans extends Model
 {
     use HasFactory;
 
-    protected $connection = 'mysql_noprefix';
+    protected $connection = 'pgsql_noprefix';
 
     protected $table = 'q_answers';
 

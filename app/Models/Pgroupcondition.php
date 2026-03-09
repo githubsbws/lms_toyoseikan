@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Pgroupcondition extends Model
 {
     use HasFactory;
-    protected $connection = 'mysql_noprefix';
+    protected $connection = 'pgsql_noprefix';
     protected $table = 'p_group_permission';
     protected $prefix = '';
     protected $primaryKey = 'id';

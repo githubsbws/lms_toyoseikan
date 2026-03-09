@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class QQuestion extends Model
 {
     use HasFactory;
-    protected $connection = 'mysql_noprefix';
+    protected $connection = 'pgsql_noprefix';
     protected $table = 'q_questions';
     protected $prefix = '';
     protected $primaryKey = 'question_id';

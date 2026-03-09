@@ -11,7 +11,7 @@ class Logusers extends Model
 
     public $timestamps = false;
 
-    protected $connection = 'mysql_noprefix';
+    protected $connection = 'pgsql_noprefix';
 
     protected $table = 'log_users';
 

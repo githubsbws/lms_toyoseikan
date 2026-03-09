@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class QChoice extends Model
 {
     use HasFactory;
-    protected $connection = 'mysql_noprefix';
+    protected $connection = 'pgsql_noprefix';
     protected $table = 'q_option_choices';
     protected $prefix = '';
     protected $primaryKey = 'option_choice_id';
