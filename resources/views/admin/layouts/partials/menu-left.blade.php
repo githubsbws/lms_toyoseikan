@@ -136,7 +136,7 @@
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item {{ request()->is('ocr*') ? 'menu-open' : '' }}">
+                {{-- <li class="nav-item {{ request()->is('ocr*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('ocr*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-cogs"></i>
                         <p>
@@ -151,7 +151,7 @@
                             </a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
                 <li class="nav-item {{ request()->is('news*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('news*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-cogs"></i>
