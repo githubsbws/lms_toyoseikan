@@ -27,6 +27,7 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\ForgotController; 
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\LoginLController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\NewController;
 use App\Http\Controllers\UsabilityController;
 use App\Http\Controllers\VirtualclassroomController;
@@ -60,6 +61,10 @@ Route::get('logins', [LoginController::class,'showLoginForm'])->name('login');
     Route::post('logins', [LoginController::class,'login'])->name('logins')->middleware('single_login');
     Route::post('logout', [LoginController::class,'logout'])->name('logout');
 
+
+Route::get('registers', [RegisterController::class,'registers'])->name('registers');
+
+Route::post('register', [RegisterController::class,'store'])->name('register');
 
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.forgot');
 Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');

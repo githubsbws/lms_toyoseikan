@@ -204,6 +204,10 @@ use App\Models\Usability;
                 <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
                     <a href="{{ url('logins') }}" class="navbar-btn btn btn-primary"><i class="fa fa-fw fa-user"></i> เข้าสู่ระบบ</a>
                 </div> 
+
+                <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
+                    <a href="{{ url('registers') }}" class="navbar-btn btn btn-primary"><i class="fa fa-fw fa-user"></i> สมัครสมาชิก</a>
+                </div> 
                 @endif
             </div>
 

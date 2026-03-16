@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Validator;
 use App\Services\MailConfigService;
+use Illuminate\Support\Facades\Blade;
+use App\Helpers\PermissionHelper;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -27,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
             // Return true if the validation passes, false otherwise
             return true;
         });
-
+        Blade::if('canmenu', function ($menuKey) {
+                    return PermissionHelper::can($menuKey);
+                });
         MailConfigService::apply();
     }
 }

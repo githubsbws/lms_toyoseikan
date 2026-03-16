@@ -3644,13 +3644,13 @@ class AdminController extends Controller
             //dd($request);
             $userRole = Users::where('id',$id)->first();
             //dd($userRole);
-            if(!$userRole->group)
-            {
-                $userRole->update(['group_id' => $request->group_role]);
-            }else{
-                $userRole->group = $request->group_role;
-                $userRole->save();
-            }
+
+            $userRole->update([
+                'group_id' => $request->group_role,
+                'teacher_status' => $request->has('supervisor_permission') ? 1 : 0
+            ]);
+
+            $userRole->save();
             return redirect()->route('user_admin')->with('success','บันทึกสำเร็จ');
         }else{
             return redirect()->route('login.admin');
@@ -3765,7 +3765,7 @@ class AdminController extends Controller
     function pgroup(){
         
         if(AuthFacade::useradmin()){
-            $p_group = Pgroup::where('active','y')->get();
+            $p_group = Pgroup::where('active','y')->orderBy('id')->get();
             
             return view("admin.pgroup.pgroup",compact('p_group'));
         }else{
@@ -3810,6 +3810,7 @@ class AdminController extends Controller
                 $permission = new Permission();
                 $permission->group_id = $group_id;
                 $permission->group_parent_id = $menu_id; // เริ่มต้นให้ใช้ admin_menu_id เป็นเมนูย่อยที่เลือก
+                $permission->active = 1;
                 // $permission->group_parent_id = $menu->parent_id;
         
                 $permission->save();

@@ -52,16 +52,25 @@
 
 								<div class="form-group">
 									<label for="cms_short_title">เลือกกลุ่มผู้ใช้งาน </label>
-                                    <select class="form-control" name="group_role">
+                                    <select class="form-control" name="group_role" id="group_role">
                                         <option value="">---เลือก---</option>
                                         @foreach ($groupRole as $role)
                                             <option value="{{ $role->id }}"
+                                                data-name="{{ $role->group_name }}"
                                                 {{ $user->user->group_id == $role->id ? 'selected' : '' }}>
                                                 {{ $role->group_name }}
                                             </option>
                                         @endforeach
                                     </select>
 								</div>
+
+                                <div class="form-group" id="supervisor_extra" style="display:none;">
+                                    <label>สิทธิ์เพิ่มเติมสำหรับ Supervisor</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="supervisor_permission[]" value="approve">
+                                        <label class="form-check-label">เป็นผู้สอน</label>
+                                    </div>
+                                </div>
 
 								<button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
 							</form>
@@ -75,4 +84,24 @@
 		</div>
 		<div class="clearfix"></div>
 </body>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    function checkSupervisor() {
+        let select = document.getElementById("group_role");
+        let selected = select.options[select.selectedIndex].dataset.name;
+
+        if(selected === "Supervisor"){
+            document.getElementById("supervisor_extra").style.display = "block";
+        }else{
+            document.getElementById("supervisor_extra").style.display = "none";
+        }
+    }
+
+    document.getElementById("group_role").addEventListener("change", checkSupervisor);
+
+    // run ตอนโหลดหน้า
+    checkSupervisor();
+});
+</script>
 @endsection

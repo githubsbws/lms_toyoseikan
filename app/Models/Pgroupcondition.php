@@ -21,7 +21,7 @@ class Pgroupcondition extends Model
     const CREATED_AT = 'create_date'; // Custom created_at column
     const UPDATED_AT = 'update_date'; // Custom update_at column
 
-    public static function fingById($id)
+    public static function findById($id)
     {
         return static::where('id', $id)->first();
     }
