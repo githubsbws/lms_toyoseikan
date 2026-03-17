@@ -1659,7 +1659,7 @@ class AdminController extends Controller
                 ]);
 
                 if ($validator->fails()) {
-
+                    dd($validator->errors()->all());
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -1780,9 +1780,9 @@ class AdminController extends Controller
 
         if ($request->isMethod('post')) {
             // ✅ ตรวจสอบข้อมูลที่ส่งมา
-            // dd($request->all());
+
             $validator = Validator::make($request->all(), [
-                'course_id' => 'required|string',
+                'course_id' => 'required',
                 'title' => 'required|string',
                 'description' => 'required|string',
                 'cate_amount' => 'required',
@@ -1793,12 +1793,11 @@ class AdminController extends Controller
                 'doc.*' => 'nullable|mimes:pdf,docx,pptx',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
             ]);
-
+            
             if ($validator->fails()) {
                 Log::error('Validation failed: ', $validator->errors()->toArray());
                 return redirect()->back()->withErrors($validator)->withInput();
             }
-
             // ✅ บันทึกข้อมูลลงใน `lesson`
             $lesson_create = new Lesson();
             $lesson_create->course_id = $request->course_id;

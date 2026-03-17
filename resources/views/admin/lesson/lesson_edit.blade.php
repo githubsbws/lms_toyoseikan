@@ -166,7 +166,11 @@
                             <div class="form-group">
                                 <div id="picture_show" style="">
                                     ภาพประกอบ <br>
-                                    <img src="{{ asset('images/uploads/lesson/'.$lesson->id.'/original/'. $lesson->image) }}" name="course_picture"><br><br>
+                                    @if($lesson->image !==null)
+                                        <img src="{{ asset('images/uploads/lesson/'.$lesson->id.'/original/'. $lesson->image) }}" name="course_picture"><br><br>
+                                    @else
+                                        <h5>ไม่มีรูป</h5>
+                                    @endif
                                 </div>
                             </div>
 
@@ -180,6 +184,7 @@
 										<input type="file" name="image" id="imageInput" onchange="previewImageFile()">
 									</span>
 								</div>
+                                <img id="previewImage" src="#" alt="Preview Image" style="display: none; width: 100px; margin-top: 10px;">
                             </div>
 
                             <div class="form-group">
@@ -295,7 +300,7 @@
 		function previewImageFile() {
 			var input = document.getElementById('imageInput');
 			var previewImage = document.getElementById('previewImage');
-
+            console.log(previewImage);
 			if (input.files && input.files[0]) {
 				var reader = new FileReader();
 				reader.onload = function(e) {
