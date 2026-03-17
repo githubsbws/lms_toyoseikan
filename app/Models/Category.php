@@ -19,7 +19,8 @@ class Category extends Model
         'cate_image',
         'create_date',
         'update_date',
-        'active'
+        'active',
+        'cate_org_id'
     ];
     const CREATED_AT = 'create_date'; // Custom created_at column
     const UPDATED_AT = 'update_date'; // Custom update_at column

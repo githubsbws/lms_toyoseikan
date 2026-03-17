@@ -15,7 +15,7 @@ class PermissionHelper
 
         if ($user->superuser == 1) return true;
 
-        if($user->teacher_status == 1 && in_array($menuKey,[10,11,12,13])){
+        if($user->teacher_status == 1 && in_array($menuKey,[9,10,11,12,13])){
             return true;
         }
 

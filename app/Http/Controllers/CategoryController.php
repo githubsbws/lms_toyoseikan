@@ -42,7 +42,8 @@ class CategoryController extends Controller
             'cate_title' => $request->input('Category.cate_title'),
             'cate_short_detail' => $request->input('Category.cate_short_detail'),
             'cate_detail' => $request->input('Category.cate_detail'),
-            'cate_image' => $filename,
+            'cate_image' => $filename
+            // 'cate_org_id' => Auth::user()->
         ]);
         $fileCategory = $category->filecategories()->create([
             'filename' => $filename_vdo,
@@ -50,7 +51,7 @@ class CategoryController extends Controller
         $redirectUrl = route('category');
         return redirect($redirectUrl);
     }
-    
+
     // category edit
     function categoryedit(Request $request, $id)
     {
