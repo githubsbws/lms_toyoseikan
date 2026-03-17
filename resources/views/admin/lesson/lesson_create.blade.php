@@ -51,12 +51,12 @@
                                 <textarea name="description" id="summernote" class="form-control"></textarea>
                             </div>
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="view_all">สิทธิ์การดูบทเรียนนี้</label>
                                 <div>
                                     <input type="checkbox" name="view_all" value="y" data-toggle="toggle" data-on="ดูได้ทั้งหมด" data-off="ดูได้เฉพาะกลุ่ม" data-onstyle="success" data-offstyle="danger" />
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <div class="form-group">
                                 <label for="cate_amount">จำนวนครั้งที่สามารถทำข้อสอบได้ <span class="required" style="color:red">*</span></label>
@@ -128,7 +128,7 @@
                         </form>
                     </div>
                 </div>
-            </div>	
+            </div>
 			<div id="sidebar">
 			</div><!-- sidebar -->
 		</div>
@@ -141,8 +141,8 @@
 
 	$(document).ready(function() {
 		$('#summernote2').summernote();
-		});	
-		
+		});
+
 
 		// แสดงชื่อไฟล์ที่เลือก
 		function displayFileNames(inputId, listId) {

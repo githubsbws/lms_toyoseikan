@@ -23,6 +23,7 @@ use App\Jobs\ProcessPdfJob;
 use App\Jobs\ProcessPdfPageJob;
 use Illuminate\Support\Facades\Cache;
 use Elastic\Elasticsearch\ClientBuilder;
+use Illuminate\Support\Facades\File as FileStore;
 
 // use Intervention\Image\Facades\Image;
 use App\Models\Questionnaireout;
@@ -125,15 +126,15 @@ class AdminController extends Controller
             $credentials = $request->only('username', 'password');
             if (Auth::attempt($credentials)) {
                 // Authentication passed
-    
+
                 // เก็บ _token ลงในฐานข้อมูล
                 $user = Auth::user();
                 $user->_token = $request->session()->get('_token'); // หรือดึงจาก $request->_token ตามที่ถูกต้อง
                 $user->save();
-    
+
                 $userAdmin = AuthFacade::useradmin();
                 // dd($userAdmin->toArray());
-                
+
                 if($userAdmin){
                     return redirect()->intended('admin');
                 }else{
@@ -170,20 +171,20 @@ class AdminController extends Controller
                 ]);
 
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
                 $about_new = new About;
                 $about_new->about_title = $request->input('about_title');
-                $about_new->about_detail = htmlspecialchars($request->input('about_detail')); 
-                $about_new->create_by = Auth::user()->id;   
+                $about_new->about_detail = htmlspecialchars($request->input('about_detail'));
+                $about_new->create_by = Auth::user()->id;
                 $about_new->update_by = Auth::user()->id;
                 $about_new->active = 'y';
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $about_new->save();
-        
+
                 return redirect()->route('aboutus')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
 
             }
@@ -210,21 +211,21 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
-        
+
                 $about_update = About::findById($id);
                 $about_update->about_title = $request->input('about_title');
-                $about_update->about_detail = htmlspecialchars($request->input('about_detail'));    
+                $about_update->about_detail = htmlspecialchars($request->input('about_detail'));
                 $about_update->update_by = Auth::user()->id;
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $about_update->save();
-        
+
                 return redirect()->route('aboutus')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-        
+
             return view("admin.aboutus.aboutus_update", ['about_detail' => $about_detail]);
         }else{
             return redirect()->route('login.admin');
@@ -270,21 +271,21 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
-        
+
                 $conditions_update = Conditions::findById($id);
                 $conditions_update->conditions_title = $request->input('conditions_title');
                 $conditions_update->conditions_detail = htmlspecialchars($request->input('conditions_detail'));
                 $conditions_update->update_by = Auth::user()->id;
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $conditions_update->save();
-        
+
                 return redirect()->route('condition')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-        
+
             return view("admin.condition.condition_update", ['conditions' => $conditions]);
         }else{
             return redirect()->route('login.admin');
@@ -293,7 +294,7 @@ class AdminController extends Controller
     function setting(){
         if(AuthFacade::useradmin()){
             $setting = Setting::first();
-        
+
             return view("admin.setting.setting",['setting' => $setting]);
         }else{
             return redirect()->route('login.admin');
@@ -316,10 +317,10 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
-        
+
                 $setting_update = Setting::findById($id);
                 $setting_update->email_room = $request->input('email_room');
                 $setting_update->pass_email_room = $request->input('pass_email_room');
@@ -341,9 +342,9 @@ class AdminController extends Controller
                     $setting_update->settings_testing = '0';
                 }
 
-        
+
                 $setting_update->save();
-        
+
                 return redirect()->route('setting')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             return view("admin.setting.setting",['setting' => $setting]);
@@ -430,10 +431,10 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
-        
+
                 $contactus_update = Contactus::findById($id);
                 $contactus_update->contac_by_name = $request->input('contac_by_name');
                 $contactus_update->contac_by_surname = $request->input('contac_by_surname');
@@ -444,9 +445,9 @@ class AdminController extends Controller
                 $contactus_update->contac_ans_subject = $request->input('contac_ans_subject');
                 $contactus_update->contac_ans_detail = $request->input('contac_ans_detail');
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $contactus_update->save();
-        
+
                 return redirect()->route('contactus')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             // dd($contactus_edit_page);
@@ -516,7 +517,7 @@ class AdminController extends Controller
     function video_detail($vdo_id){
         if(AuthFacade::useradmin()){
             $vdo = Video::where('vdo_id',$vdo_id)->first();
-            
+
             return view("admin.video.video_detail",['vdo'=> $vdo]);
         }else{
             return redirect()->route('login.admin');
@@ -621,7 +622,7 @@ class AdminController extends Controller
                 $document = new DownloadFileDoc;
                 $document->filedoc_name = $request->input('filedoc_name');
                 $document->active = 'y';
-                
+
 
                 $document_file = new DownloadFile;
                 $document_file->download_id = $document_cate->download_id;
@@ -650,7 +651,7 @@ class AdminController extends Controller
                 }
                 // dd($document->toArray());
                 $document->save();
-                
+
                 return redirect()->route('document')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             return view("admin.document.document_create",['document_type' => $document_type,'document_title' => $document_title]);
@@ -774,9 +775,9 @@ class AdminController extends Controller
                 $document_type = Downloadtitle::findById($id);
                 $document_type->title_name = $request->input('title_name');
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $document_type->save();
-                
+
                 return redirect()->route('document.head')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             return view("admin.document.document_head_edit",['document_head' =>$document_head]);
@@ -824,9 +825,9 @@ class AdminController extends Controller
                 $document_type->download_name = $request->input('download_name');
                 $document_type->title_id = $request->input('document_title');
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $document_type->save();
-                
+
                 return redirect()->route('document.type')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             return view("admin.document.document_type_edit",['document_type' =>$document_type,'document_title' =>$document_title]);
@@ -844,9 +845,9 @@ class AdminController extends Controller
                 $document_type->title_id = $request->input('document_title');
                 $document_type->active = 'y';
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $document_type->save();
-                
+
                 return redirect()->route('document.type')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             return view("admin.document.document_type_create",['document_title' => $document_title]);
@@ -880,7 +881,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -897,9 +898,9 @@ class AdminController extends Controller
                 $imageName = $image->getClientOriginalName();
                 $news_create->cms_picture = $imageName;
                 }
-                
+
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $news_create->save();
                 // dd($news_create->toArray());
                 if($request->file('image')){
@@ -918,7 +919,7 @@ class AdminController extends Controller
                     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม
                     $image->move($idFolder2, $imageName);
 
-                    
+
                 }
                 return redirect()->route('news')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
@@ -940,7 +941,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -967,12 +968,12 @@ class AdminController extends Controller
                     $image->move($idFolder2, $imageName);
 
                     $news_update->cms_picture = $imageName;
-                    
+
                 }
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $news_update->save();
-        
+
                 return redirect()->route('news')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             return view("admin.news.News-edit",['news' => $news]);
@@ -987,7 +988,7 @@ class AdminController extends Controller
         }else{
             return redirect()->route('login.admin');
         }
-    }  
+    }
     function news_detail($id){
         if(AuthFacade::useradmin()){
             $news = News::where('cms_id',$id)->first();
@@ -995,7 +996,7 @@ class AdminController extends Controller
         }else{
             return redirect()->route('login.admin');
         }
-    }  
+    }
     function news_delete($id){
         if(AuthFacade::useradmin()){
             $news_del=[
@@ -1042,7 +1043,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -1062,18 +1063,18 @@ class AdminController extends Controller
                     $image = $request->file('image');
                     $imageName = time() . '_' . $image->getClientOriginalName(); // ตั้งชื่อไฟล์ใหม่ป้องกันซ้ำ
                     $idFolder = public_path('images/uploads/category/' . $category_create->cate_id . '/original');
-            
+
                     if (!file_exists($idFolder)) {
                         mkdir($idFolder, 0775, true); // ใช้ recursive และกำหนด permission
                     }
-            
+
                     $image->move($idFolder, $imageName); // ย้ายไฟล์ไปโฟลเดอร์
-            
+
                     // อัปเดตชื่อไฟล์ภาพลงฐานข้อมูล
                     $category_create->cate_image = $imageName;
                     $category_create->save();
                 }
-        
+
                 return redirect()->route('category')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             return view("admin.category.category_create");
@@ -1154,16 +1155,16 @@ class AdminController extends Controller
                 $category_update = Category::findById($id);
                 $category_update->cate_show = $showValue;
                 $category_update->update_by = Auth::user()->id;
-                
+
                 $category_update->save();
-        
+
                 return redirect()->route('category')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             return redirect()->route('category');
         }else{
             return redirect()->route('login.admin');
         }
     }
-    
+
     function courseonline(){
         if(AuthFacade::useradmin()){
             $course_online = Course::join('category', 'category.cate_id', '=', 'course_online.cate_id')->where('course_online.active', 'y')->orderBy('sortOrder', 'desc')->get();
@@ -1210,7 +1211,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -1223,24 +1224,18 @@ class AdminController extends Controller
                 $course_update->course_note = $request->input('course_note');
                 $course_update->update_by = Auth::user()->id;
 
-                if ($request->has('recommend')) {
-                    $course_update->recommend = 'y';
-                }else{
-                    $course_update->recommend = 'n';
-                }
+                // if ($request->has('recommend')) {
+                //     $course_update->recommend = 'y';
+                // }else{
+                //     $course_update->recommend = 'n';
+                // }
 
                 if($request->file('image')){
                     $image = $request->file('image');
 
-                    $idFolder = public_path('images/uploads/courseonline/'.$id);
-                    $idFolder2 = public_path('images/uploads/courseonline/'.$id.'/original/'); // ✅ ย้ายมาด้านนอก
-
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder, 0775, true);
-                    }
-
-                    if (!file_exists($idFolder2)) {
-                        mkdir($idFolder2, 0775, true); // ✅ ใช้งานได้เสมอ เพราะถูกประกาศแล้ว
+                    $idFolder = public_path('images/uploads/courseonline/'.$course_update->course_id.'/original/');
+                    if (!FileStore::isDirectory($idFolder)) {
+                        FileStore::makeDirectory($idFolder, 0775, true, true);
                     }
 
                     Log::info('Uploading image...');
@@ -1287,13 +1282,13 @@ class AdminController extends Controller
 
                 ]);
                 $teacher = Teacher::where('teacher_name',$request->input('teacher_name'))->first();
-                
+
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
-                
+
                 $course_update = new Course;
                 $course_update->cate_id = $request->input('cate_id');
                 $course_update->course_lecturer = $request->input('teacher_name');
@@ -1305,11 +1300,11 @@ class AdminController extends Controller
                 $course_update->create_by = Auth::user()->id;
                 $course_update->active = 'y';
 
-                if ($request->has('recommend')) {
-                    $course_update->recommend = 'y';
-                }else{
-                    $course_update->recommend = 'n';
-                }
+                // if ($request->has('recommend')) {
+                //     $course_update->recommend = 'y';
+                // }else{
+                //     $course_update->recommend = 'n';
+                // }
 
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
 
@@ -1320,22 +1315,23 @@ class AdminController extends Controller
                     $imageName = $image->getClientOriginalName();
                     $course_update->course_picture = $imageName;
 
-                    $idFolder = public_path('images/uploads/courseonline/'.$course_update->course_id);
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder);
-
-                        $idFolder2 = public_path('images/uploads/courseonline/'.$course_update->course_id.'/original/');
-                        if (!file_exists($idFolder2)) {
-                            mkdir($idFolder2);
-                        }
+                    $idFolder = public_path('images/uploads/courseonline/'.$course_update->course_id.'/original/');
+                    if (!FileStore::isDirectory($idFolder)) {
+                        FileStore::makeDirectory($idFolder, 0775, true, true);
                     }
+                    // if (!file_exists($idFolder)) {
+                    //     mkdir($idFolder);
+
+                    //     $idFolder2 = public_path('images/uploads/courseonline/'.$course_update->course_id.'/original/');
+                    //     if (!file_exists($idFolder2)) {
+                    //         mkdir($idFolder2);
+                    //     }
+                    // }
 
                     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
-                    
-                    $image->move($idFolder2, $imageName);
 
-                    
-                    
+                    $image->move($idFolder, $imageName);
+
                 }
                 $course_update->sortOrder = $course_update->course_id;
                 $course_update->save();
@@ -1360,13 +1356,13 @@ class AdminController extends Controller
                     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
 
                 ]);
-                
+
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
-                
+
                 $teacher = new Teacher;
                 $teacher->teacher_name = $request->input('teacher_name');
                 $teacher->teacher_detail = htmlspecialchars($request->input('teacher_detail'));
@@ -1416,7 +1412,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -1507,7 +1503,7 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-    // course edit to 
+    // course edit to
     function courseonlineeditto(Request $request, $id)
     {
         if(AuthFacade::useradmin()){
@@ -1589,7 +1585,7 @@ class AdminController extends Controller
             $lesson = Lesson::join('course_online','course_online.course_id','=','lesson.course_id')->where('lesson.id',$id)->first();
             $file = File::where('lesson_id',$id)->where('active','y')->first();
             $filedoc = FileDoc::where('lesson_id',$id)->where('active','y')->first();
-            
+
             return view("admin.lesson.lesson_detail",compact('lesson','file','filedoc'));
         }else{
             return redirect()->route('login.admin');
@@ -1599,16 +1595,16 @@ class AdminController extends Controller
          // Retrieve the file information from the database
          $file = FileDoc::where('id',$id)->first();
          // Check if the file exists
-     
+
          // Construct the full file path
          $file_path = public_path('images/uploads/filedoc'.DIRECTORY_SEPARATOR. $file->filename);
-    
-    
+
+
          // Check if the file actually exists on the server
          if (!file_exists($file_path)) {
              return response()->json(['error' => 'File not found on the server'], 404);
          }
-     
+
          // Generate the response for downloading the file
          return response()->download($file_path, $file->original_filename);
     }
@@ -1623,7 +1619,7 @@ class AdminController extends Controller
         }else{
             return redirect()->route('login.admin');
         }
-    }  
+    }
 
     function lesson_delete_video($id){
         if(AuthFacade::useradmin()){
@@ -1636,7 +1632,7 @@ class AdminController extends Controller
         }else{
             return redirect()->route('login.admin');
         }
-    }  
+    }
 
     function lesson_edit(Request $request,$id){
         if(AuthFacade::useradmin()){
@@ -1647,7 +1643,7 @@ class AdminController extends Controller
 
             if ($request->isMethod('post')) {
                 // dd($request->all());
-                
+
                 $validator = Validator::make($request->all(), [
                     'course_id' => 'nullable', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                     'title' =>'nullable',
@@ -1656,14 +1652,14 @@ class AdminController extends Controller
                     'cate_amount'=>'nullable',
                     'time_test'=>'nullable',
                     'content'=>'nullable',
-                    'filename.*' => 'nullable|mimes:mp3,mp4', 
-                    'doc.*' => 'nullable|mimes:pdf,docx,pptx', 
+                    'filename.*' => 'nullable|mimes:mp3,mp4',
+                    'doc.*' => 'nullable|mimes:pdf,docx,pptx',
                     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
 
                 ]);
-                
+
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -1688,7 +1684,7 @@ class AdminController extends Controller
                         $Folder_file = public_path("images/uploads/lesson/");
                         $fileName = time() . "_" . $file->getClientOriginalName();
                         $file->move($Folder_file, $fileName);
-    
+
                         // 🔹 บันทึกลง Database
                         File::create([
                             'lesson_id' => $id,
@@ -1702,19 +1698,19 @@ class AdminController extends Controller
                         ]);
                     }
                 }
-                
+
                 if($request->hasFile('doc')){
                     $doc = $request->file('doc');
                     $doc_name = $doc->getClientOriginalName();
                     // dd($doc_name);
                     if(!$doc_name){
-                        return redirect()->back()->withErrors($validator)->withInput(); 
+                        return redirect()->back()->withErrors($validator)->withInput();
                     }
                     $doc_update = FileDoc::where('lesson_id',$id)->first();
                     // dd($doc_update->toArray());
                     if($doc_update == null){
                         $doc_new = new FileDoc;
-                        $doc_new->file_position = "1";
+                        $doc_new->file_position = 1;
                         $doc_new->file_name = $lesson->title;
                         $doc_new->filename = $doc_name;
                         $doc_new->length = '2.00';
@@ -1729,7 +1725,7 @@ class AdminController extends Controller
                         }
                         $doc->move($idFolder, $doc_name);
                     }else{
-                        $doc_update->file_position = "1";
+                        $doc_update->file_position = 1;
                         $doc_update->filename = $doc_name;
                         $doc_update->update_by = Auth::user()->id;
                         $doc_update->save();
@@ -1741,7 +1737,7 @@ class AdminController extends Controller
                         $doc->move($idFolder, $doc_name);
                     }
                 }
-                
+
                 if($request->file('image')){
                     $image = $request->file('image');
 
@@ -1760,7 +1756,7 @@ class AdminController extends Controller
                     $image->move($idFolder2, $imageName);
 
                     $lesson_update->image = $imageName;
-                    
+
                 }
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
 
@@ -1793,27 +1789,27 @@ class AdminController extends Controller
                 'view_all' => 'nullable',
                 'time_test' => 'required',
                 'content' => 'required',
-                'filename.*' => 'nullable|mimes:mp3,mp4', 
-                'doc.*' => 'nullable|mimes:pdf,docx,pptx', 
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif' 
+                'filename.*' => 'nullable|mimes:mp3,mp4',
+                'doc.*' => 'nullable|mimes:pdf,docx,pptx',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
             ]);
 
             if ($validator->fails()) {
                 Log::error('Validation failed: ', $validator->errors()->toArray());
                 return redirect()->back()->withErrors($validator)->withInput();
             }
-            
+
             // ✅ บันทึกข้อมูลลงใน `lesson`
             $lesson_create = new Lesson();
             $lesson_create->course_id = $request->course_id;
             $lesson_create->title = $request->title;
             $lesson_create->content = htmlspecialchars($request->content);
             $lesson_create->description = $request->description;
-            if ($request->has('view_all')) {
-                $lesson_create->view_all = "y";
-            }else{
-                $lesson_create->view_all = "n";
-            }
+            // if ($request->has('view_all')) {
+            //     $lesson_create->view_all = "y";
+            // }else{
+            //     $lesson_create->view_all = "n";
+            // }
             $lesson_create->view_all = $request->view_all;
             $lesson_create->cate_amount = $request->cate_amount;
             $lesson_create->time_test = $request->time_test;
@@ -1823,16 +1819,16 @@ class AdminController extends Controller
 
             // 📂 **จัดการการสร้างโฟลเดอร์**
             $lessonFolder = public_path("images/uploads/lesson/".$lesson_create->id);
-            if (!file_exists($lessonFolder)) {
-                mkdir($lessonFolder);
+            if (!FileStore::isDirectory($lessonFolder)) {
+                FileStore::makeDirectory($lessonFolder, 0777, true,true);
             }
             $Folder = public_path("images/uploads/lesson/{$lesson_create->id}");
             $originalFolder = "{$Folder}/original";
             $filedocFolder = public_path("images/uploads/filedoc/");
-            
+
             foreach ([$originalFolder, $filedocFolder] as $folder) {
-                if (!File::exists($folder)) {
-                    File::makeDirectory($folder, 0777, true);
+                if (!FileStore::isDirectory($folder)) {
+                    FileStore::makeDirectory($folder, 0777, true,true);
                 }
             }
 
@@ -1897,11 +1893,11 @@ class AdminController extends Controller
 
         return view("admin.lesson.lesson_create", compact('course_online'));
     }
-    
+
     function filemanagers(Request $request, $id = null){
         if(AuthFacade::useradmin()){
             if($id !== null){
-                $file = File::where('lesson_id', $id)->where('active', 'y')->orderBy(DB::raw('CAST(file_position AS UNSIGNED)'), 'ASC')->get();
+                $file = File::where('lesson_id', $id)->where('active', 'y')->orderBy('file_position', 'ASC')->get();
             } else {
                 $file = File::where('active', 'y')->get();
             }
@@ -1943,7 +1939,7 @@ class AdminController extends Controller
     function file_edit(Request $request, $id){
         if(AuthFacade::useradmin()){
             if($id !== null){
-                $file = File::where('lesson_id', $id)->where('active', 'y')->orderBy(DB::raw('CAST(file_position AS UNSIGNED)'), 'ASC')->get();
+                $file = File::where('lesson_id', $id)->where('active', 'y')->orderBy('file_position', 'ASC')->get();
             } else {
                 $file = File::where('active', 'y')->get();
             }
@@ -1977,9 +1973,9 @@ class AdminController extends Controller
                     'group_title' =>'required|string'
 
                 ]);
-                
+
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -2016,7 +2012,7 @@ class AdminController extends Controller
             } else {
                 $grouptesting = Grouptesting::whereIn('active', ['y', 'w'])->orderBy('create_date','DESC')->get();
             }
-            
+
             return view("admin.grouptesting.grouptesting",['grouptesting' => $grouptesting]);
         }else{
             return redirect()->route('login.admin');
@@ -2026,7 +2022,7 @@ class AdminController extends Controller
     function grouptesting_plan(Request $request, $id = null, $type = null){
         if(AuthFacade::useradmin()){
             $group = Grouptesting::where('lesson_id',$id)->where('active','w')->get();
-            
+
             $group_active = Grouptesting::join('lesson', 'lesson.id', '=', 'grouptesting.lesson_id')
                 ->join('manage', 'manage.group_id', '=', 'grouptesting.group_id')
                 ->where('grouptesting.active', 'y')
@@ -2101,9 +2097,9 @@ class AdminController extends Controller
                 $validator = Validator::make($request->all(), [
                     'group_title' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                 ]);
-                
+
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -2127,7 +2123,7 @@ class AdminController extends Controller
     function grouptesting_detail($id){
         if(AuthFacade::useradmin()){
             $group = Grouptesting::join('lesson','lesson.id','=','grouptesting.lesson_id')->where('group_id',$id)->first();
-            
+
             return view("admin.grouptesting.grouptesting_detail",['group' => $group ]);
         }else{
             return redirect()->route('login.admin');
@@ -2161,7 +2157,7 @@ class AdminController extends Controller
                 // dd(request()->input('QuestionType'));
                 // dd(request()->input('QuestionType'));
                 foreach(request('Question') as $ques => $question) {
-                    // dump($question); 
+                    // dump($question);
                     $key = 1;
                     $questionTypeArray = ['checkbox' => 1, 'radio' => 2, 'textarea' => 3];
                     // $questionTitle = $question;
@@ -2184,7 +2180,7 @@ class AdminController extends Controller
                     $questionModel->create_by = Auth::user()->id;
                     $questionModel->update_by = Auth::user()->id;
                     $questionModel->active = 'y';
-                    
+
                     if ($questionModel->save()) {
                         if($questionType != 'textarea') {
                             $choicesss =request('Choice');
@@ -2200,7 +2196,7 @@ class AdminController extends Controller
                                     if (is_array($choiceDetails)) {
                                         // dd($choiceDetails);
                                         foreach ($choiceDetails as $index => $choiceDetail) {
-                                            
+
                                             // สร้างและบันทึกข้อมูลตัวเลือก (Choice)
                                             $choiceModel = new Choice();
                                             $choiceModel->ques_id = $questionModel->ques_id;
@@ -2229,7 +2225,7 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-    
+
     function group_question($id = null){
         if(AuthFacade::useradmin()){
             if($id !== null){
@@ -2252,7 +2248,7 @@ class AdminController extends Controller
     function group_question_detail($id){
         if(AuthFacade::useradmin()){
             $group = Question::where('ques_id',$id)->first();
-            
+
             return view("admin.grouptesting.ques_detail",['group' => $group ]);
         }else{
             return redirect()->route('login.admin');
@@ -2272,7 +2268,7 @@ class AdminController extends Controller
 
                 return redirect()->route('group_question');
             }
-            
+
             return view("admin.grouptesting.ques_edit",['group' => $group,'id' => $id ]);
         }else{
             return redirect()->route('login.admin');
@@ -2302,18 +2298,18 @@ class AdminController extends Controller
                         'import_excel.required' => 'คุณยังไม่ได้ Uploadfile',
                         'import_excel.mimes' => 'กรุณาใช้ไฟล์สกุล xlsx xls'
                     ]
-        
-        
+
+
                 ]);
-        
+
                 $excel = Excel::import(new QuesImport($id), $request->file('import_excel'));
 
                 // dd($excel);
-        
+
                 // return redirect()->back()->with('success', 'Excel imported successfully!');
                 return redirect()->route('grouptesting');
             }
-            
+
             return view("admin.grouptesting.ques_excel",['group' => $group]);
         }else{
             return redirect()->route('login.admin');
@@ -2331,9 +2327,9 @@ class AdminController extends Controller
                     'group_title' =>'required|string'
 
                 ]);
-                
+
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -2370,7 +2366,7 @@ class AdminController extends Controller
     function coursegrouptesting_plan(Request $request, $id = null){
         if(AuthFacade::useradmin()){
             $course_group = Coursegrouptesting::where('course_id',$id)->where('active','n')->get();
-            
+
             $course_group_active = Coursegrouptesting::join('course_online','course_online.course_id','=','coursegrouptesting.course_id')->where('coursegrouptesting.active','y')->where('coursegrouptesting.course_id',$id)->get();
 
             if ($request->has('id')) {
@@ -2384,7 +2380,7 @@ class AdminController extends Controller
 
                 // กรณีที่ไม่มีการส่งค่า id มา
                 // คุณสามารถตัดสินใจปฏิเสธคำขอหรือดำเนินการอื่น ๆ ตามที่ต้องการได้
-                return response()->json(['success' => true]);       
+                return response()->json(['success' => true]);
             }
             return view("admin.coursegrouptesting.coursegrouptesting_plan",['course_group' => $course_group,'course_group_active' => $course_group_active,'id' => $id]);
         }else{
@@ -2412,19 +2408,19 @@ class AdminController extends Controller
                         'import_excel.required' => 'คุณยังไม่ได้ Uploadfile',
                         'import_excel.mimes' => 'กรุณาใช้ไฟล์สกุล xlsx xls'
                     ]
-        
-        
+
+
                 ]);
-        
+
                 $excel = Excel::import(new QuestionnaireImport, $request->file('import_excel'));
                 // dd($excel);
 
                 // dd($excel);
-        
+
                 // return redirect()->back()->with('success', 'Excel imported successfully!');
                 return redirect()->route('questionnaireout');
             }
-            
+
             return view("admin.questionnaireout.questionnaireout_excel");
         }else{
             return redirect()->route('login.admin');
@@ -2439,7 +2435,7 @@ class AdminController extends Controller
                 // คืนค่า JSON แจ้งข้อผิดพลาดว่าไม่มีค่า ID ถูกส่งมา
                 $lesson_id = $request->input('id');
                 $header_id = $request->input('header_id');
-                
+
                 $lesson = Lesson::findById($lesson_id);
 
                 if (!$lesson) {
@@ -2449,7 +2445,7 @@ class AdminController extends Controller
                 $lesson->header_id = $header_id;
                 $lesson->save();
 
-                return response()->json(['success' => true]);       
+                return response()->json(['success' => true]);
             }
             return view("admin.questionnaireout.questionnaireout_plan",compact('survey_headers','lesson_id'));
         }else{
@@ -2461,19 +2457,19 @@ class AdminController extends Controller
             if ($request->isMethod('post')) {
                 if ($request->has('sectionTitle') && $request->has('questionType') && $request->has('questionTitle')) {
                     $inputTypeArray = ['input' => 1, 'radio' => 2, 'checkbox' => 3, 'contentment' => 4, 'text' => 5];
-                    
+
                     $headerModel = new QHeader;
                     $headerModel->survey_name = $request->input('surveyHeader');
                     $headerModel->instructions = htmlspecialchars($request->input('surveyHeaderDetail'));
                     $headerModel->active = "y";
-                    
+
                     if ($headerModel->save()) {
                         foreach ($request->input('sectionTitle') as $sectionKey => $sectionValue) {
                             $sectionModel = new QSection;
                             $sectionModel->survey_header_id = $headerModel->survey_header_id;
                             $sectionModel->section_title = $sectionValue;
                             $sectionModel->section_required_yn = "n";
-                            
+
                             if ($sectionModel->save()) {
                                 foreach ($request->input('questionType')[$sectionKey] as $questionKey => $questionValue) {
                                     $questionModel = new QQuestion;
@@ -2482,11 +2478,11 @@ class AdminController extends Controller
                                     $questionModel->question_name = $request->input('questionTitle')[$sectionKey][$questionKey];
                                     $questionModel->answer_required_yn = "n";
                                     $questionModel->allow_multiple_option_answers_yn = "n";
-                                    
+
                                     if ($questionModel->input_type_id == 4) {
                                         $questionModel->question_range = $request->input('questionRange')[$sectionKey][$questionKey];
                                     }
-                                    
+
                                     if ($questionModel->save()) {
                                         if ($questionModel->input_type_id != 5 && $questionModel->input_type_id != 1) {
                                             foreach ($request->input('choiceTitle')[$sectionKey][$questionKey] as $choiceKey => $choiceValue) {
@@ -2494,17 +2490,17 @@ class AdminController extends Controller
                                                 $choiceModel->question_id = $questionModel->question_id;
                                                 $choiceModel->option_choice_name = $choiceValue;
                                                 $choiceModel->option_choice_type = 'normal';
-                                                
+
                                                 if ($request->input('choiceSpecify')[$sectionKey][$questionKey][$choiceKey] == "y") {
                                                     $choiceModel->option_choice_type = 'specify';
                                                 }
-                                                
+
                                                 $choiceModel->save();
                                             }
                                         } else {
                                             $choiceModel = new QChoice;
                                             $choiceModel->question_id = $questionModel->question_id;
-                                            
+
                                             if ($questionModel->input_type_id == 5) {
                                                 $choiceModel->option_choice_name = "text";
                                                 $choiceModel->option_choice_type = "normal";
@@ -2512,7 +2508,7 @@ class AdminController extends Controller
                                                 $choiceModel->option_choice_name = "input";
                                                 $choiceModel->option_choice_type = "normal";
                                             }
-                                            
+
                                             $choiceModel->save();
                                         }
                                     }
@@ -2733,7 +2729,7 @@ class AdminController extends Controller
                 'ques_explain'=>$request->ques_explain,
                 'update_date'=>$date,
                 'update_by'=> Auth::user()->id
-            ]; 
+            ];
             DB::table('question')->where('ques_id',$id)->update($question_edit);
             return redirect("/question");
         }else{
@@ -2781,7 +2777,7 @@ class AdminController extends Controller
         if ($filterUsername) {
             $query->where('username', 'like', '%' . $filterUsername . '%');
         }
-        
+
         // Paginate filtered or non-filtered results
         $user = $query->get();
 
@@ -2808,14 +2804,14 @@ class AdminController extends Controller
             if ($request->has('remove_users')) {
                 // รับข้อมูลผู้ใช้ที่ถูกเลือกจากฟอร์ม
                 $selectedUsers = $request->input('remove_users');
-                
+
                 // ดำเนินการต่อไปตามต้องการ เช่น ลบผู้ใช้ หรือทำการปรับปรุงข้อมูลต่าง ๆ
                 foreach ($selectedUsers as $userId) {
                     OrgchartUser::where('user_id', $userId)
                                 ->where('orgchart_id', $org_id)
                                 ->delete();
                 }
-                
+
                 // สามารถทำการ redirect หรือส่งข้อมูลกลับไปยังหน้าอื่นตามต้องการ
                 return redirect()->route('orgchart.users',['org_id' => $org_id])->with('success', 'ข้อมูลผู้ใช้ถูกลบเรียบร้อยแล้ว');
             } else {
@@ -2869,7 +2865,7 @@ class AdminController extends Controller
                  OrgchartUser::where('user_id', $id)
                             ->where('orgchart_id', $org_id)
                             ->delete();
-                
+
                 // สามารถทำการ redirect หรือส่งข้อมูลกลับไปยังหน้าอื่นตามต้องการ
                 return redirect()->route('orgchart.users',['org_id' => $org_id])->with('success', 'ข้อมูลผู้ใช้ถูกลบเรียบร้อยแล้ว');
             } else {
@@ -2909,7 +2905,7 @@ class AdminController extends Controller
             if($request->has('post_value') && $request->has('text') ){
                 $res = $request->input('post_value');
                 $text = $request->input('text');
-                
+
                 $find_id = Orgchart::findById($request->post_value);
                 if($find_id){
                     $org = new Orgchart;
@@ -2936,11 +2932,11 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             if($request->has('post_del')){
                 $res = $request->input('post_del');
-        
+
                 $find_id = Orgchart::findById($res);
                     $find_id->active = 'n';
                     $find_id->save();
-                
+
             }
             return redirect()->route('orgchart');
         }else{
@@ -2953,11 +2949,11 @@ class AdminController extends Controller
             if($request->has('post_edit')){
                 $res = $request->input('post_edit');
                 $text = $request->input('text');
-        
+
                 $find_id = Orgchart::findById($res);
                 $find_id->title = $text;
                 $find_id->save();
-                
+
             }
             return redirect()->route('orgchart');
         }else{
@@ -3128,7 +3124,7 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-   
+
     function orgchart_update(Request $request,$orgchart_id){
         if(AuthFacade::useradmin()){
             $request->validate([
@@ -3146,7 +3142,7 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-    
+
     //
     function checklecture(){
         if(AuthFacade::useradmin()){
@@ -3202,9 +3198,9 @@ class AdminController extends Controller
                 $validator = Validator::make($request->all(), [
                     'usa_title' => 'required|string' // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                 ]);
-                
+
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -3216,8 +3212,8 @@ class AdminController extends Controller
 
                 $usa_update->save();
 
-                
-                
+
+
 
 
                 return redirect()->route('usability')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -3235,9 +3231,9 @@ class AdminController extends Controller
                 $validator = Validator::make($request->all(), [
                     'usa_title' => 'required|string' // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                 ]);
-                
+
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -3249,8 +3245,8 @@ class AdminController extends Controller
                 $usa_update->active ='y';
                 $usa_update->save();
 
-                
-                
+
+
 
 
                 return redirect()->route('usability')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -3282,7 +3278,7 @@ class AdminController extends Controller
 
         return redirect()->route('login.admin');
     }
-    
+
 
     function reportproblem(){
         if(AuthFacade::useradmin()){
@@ -3299,9 +3295,9 @@ class AdminController extends Controller
                 $validator = Validator::make($request->all(), [
                     'answer' => 'required|string' // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                 ]);
-                
+
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -3391,7 +3387,7 @@ class AdminController extends Controller
                 'faq_type_title_TH'=>$request->faq_type_title_TH,
                 'update_date'=>$date,
                 'update_by'=> Auth::user()->id
-            ]; 
+            ];
             $faq_type = Faq_type::where('faq_type_id',$id);
 
             $faq_type->update($faqtype_edit);
@@ -3436,13 +3432,13 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $faq_types = Faq_type::where('active', 'y')
             ->pluck('faq_type_title_TH', 'faq_type_id');
-        
+
             $faq_create = Faq::join('cms_faq_type', 'cms_faq.faq_type_id', '=', 'cms_faq_type.faq_type_id')
                 ->select('cms_faq.*', 'cms_faq_type.faq_type_title_TH')
                 ->get();
 
-            
-            
+
+
             return view("admin.faq.Faq_create", compact('faq_create', 'faq_types'));
         }else{
             return redirect()->route('login.admin');
@@ -3480,7 +3476,7 @@ class AdminController extends Controller
             $faq_edit_page = Faq::where('faq_nid_',$id)->first();
             $faq_types = Faq_type::where('active','y')->get();
             if ($request->isMethod('post')) { // ตรวจสอบว่าเป็นการร้องขอ POST หรือไม่
-                
+
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
                     'faq_THtopic' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
@@ -3489,7 +3485,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -3498,11 +3494,11 @@ class AdminController extends Controller
                 $faq_update->faq_THtopic = $request->input('faq_THtopic');
                 $faq_update->faq_THanswer = $request->input('faq_THanswer');
                 $faq_update->update_by = Auth::user()->id;
-                
+
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
-        
+
                 $faq_update->save();
-        
+
                 return redirect()->route('faq')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
             return view("admin.faq.Faq_edit_page",compact('faq_edit_page','faq_types'));
@@ -3523,9 +3519,9 @@ class AdminController extends Controller
                 'faq_THanswer'=>$request->faq_THanswer,
                 'faq_type_id'=>$request->faq_type_id,
                 'update_date'=>$date,
-                
+
                 'update_by'=>Auth::user()->id,
-            ]; 
+            ];
             DB::table('cms_faq')->where('faq_nid_',$id)->update($faq_edit);
             return redirect("/faq");
         }else{
@@ -3668,7 +3664,7 @@ class AdminController extends Controller
                         if (preg_match('/(\d)\1{7,}/', $value)) {
                             $fail('รหัสผ่านไม่สามารถเป็นตัวเลขเดียวกันซ้ำกันได้');
                         }
-            
+
                         // ตรวจสอบว่า password มีอักษรพิเศษอย่างน้อย 1 ตัว
                         if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
                             $fail('รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว');
@@ -3677,12 +3673,12 @@ class AdminController extends Controller
                 ],
                 'email' => 'required|max:39|email',
             ]);
-        
+
             // ถ้า validation ไม่ผ่าน กลับไปยังหน้า login form พร้อมแสดง errors
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput($request->only('username'));
             }
-        
+
             $date=new DateTime('Asia/Bangkok');
             $password = Hash::make($request->password);
             $adminuser_data=[
@@ -3714,12 +3710,12 @@ class AdminController extends Controller
                 'username' => 'required',
                 'password' => 'required | min:8 | confirmed | regex:/^(?=.*[^\w\d]).+$/ | regex:/^(?!(\d)\1{7,}).+$/'
             ]);
-           
+
             // ถ้า validation ไม่ผ่าน กลับไปยังหน้า login form พร้อมแสดง errors
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput($request->only('password'));
             }
-            
+
                 $date=new DateTime('Asia/Bangkok');
                 $password = Hash::make($request->password);
                 $adminuser_data=[
@@ -3763,10 +3759,10 @@ class AdminController extends Controller
 
     // new p
     function pgroup(){
-        
+
         if(AuthFacade::useradmin()){
             $p_group = Pgroup::where('active','y')->orderBy('id')->get();
-            
+
             return view("admin.pgroup.pgroup",compact('p_group'));
         }else{
             return redirect()->route('login.admin');
@@ -3800,10 +3796,10 @@ class AdminController extends Controller
             if($p_group->save()){
                 $group_id =  $p_group->id;
             }
-    
+
             // Retrieve the selected menu IDs from the form
             $selected_menus = $request->input('menu');
-        
+
             // Loop through the selected menu IDs and insert them into the tbl_permission table
             foreach ($selected_menus as $menu_id) {
                 //$menu = AdminMenu::find($menu_id); // ดึงข้อมูลเมนูโดยใช้ $menu_id
@@ -3812,7 +3808,7 @@ class AdminController extends Controller
                 $permission->group_parent_id = $menu_id; // เริ่มต้นให้ใช้ admin_menu_id เป็นเมนูย่อยที่เลือก
                 $permission->active = 1;
                 // $permission->group_parent_id = $menu->parent_id;
-        
+
                 $permission->save();
             }
             return redirect()->route('pgroup');
@@ -3916,7 +3912,7 @@ class AdminController extends Controller
     {
         // อัปเดตสถานะของผู้ใช้ทั้งหมดเป็น 0
         Users::query()->delete();
-    
+
         // อาจจะ redirect ไปยังหน้าอื่นพร้อมกับข้อความยืนยัน
         return redirect()->route('user_admin')->with('status', 'ข้อมูลผู้ใช้ทั้งหมดถูกลบแล้ว');
     }
@@ -3974,12 +3970,12 @@ class AdminController extends Controller
                             if (preg_match('/(\d)\1{7,}/', $value)) {
                                 $fail('รหัสผ่านไม่สามารถเป็นตัวเลขเดียวกันซ้ำกันได้');
                             }
-                            
+
                             // ตรวจสอบว่า password มีอักษรพิเศษอย่างน้อย 1 ตัว
                             if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
                                 $fail('รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว');
                             }
-                            
+
                             // ตรวจสอบว่า password มีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว
                             if (!preg_match('/[a-z]/', $value) || !preg_match('/[A-Z]/', $value)) {
                                 $fail('รหัสผ่านต้องมีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว');
@@ -4032,7 +4028,7 @@ class AdminController extends Controller
         $user->position_id = $request->position ?? null;
         $user->asc_id = $request->asc ?? null;
         $user->save();
-    
+
         $profile = Profiles::where('user_id', $request->id)->first();
         $profile->user_id = $user->id;
         $profile->title_id = $request->title ?? null;
@@ -4121,7 +4117,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
                 $asc_create = new ASC;
@@ -4144,7 +4140,7 @@ class AdminController extends Controller
     public function asc_del(Request $request){
         if(AuthFacade::useradmin()){
             $asc = ASC::where('active','y')->get();
-            
+
             return view("admin.user_admin.asc_del",compact('asc'));
         }else{
             return redirect()->route('login.admin');
@@ -4161,7 +4157,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
                 $company_create = new Company;
@@ -4185,7 +4181,7 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-    
+
 
     public function position(Request $request){
         if(AuthFacade::useradmin()){
@@ -4201,7 +4197,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
                 $position_create = new Position;
@@ -4220,7 +4216,7 @@ class AdminController extends Controller
     public function position_del(Request $request){
         if(AuthFacade::useradmin()){
             $position = Position::get();
-            
+
             return view("admin.user_admin.position_del",compact('position'));
         }else{
             return redirect()->route('login.admin');
@@ -4333,7 +4329,7 @@ class AdminController extends Controller
             ]);
             // dd( $request->file('import_excel'));
             Excel::import(new UsersImport, $request->file('import_excel'));
-            
+
             return redirect()->back()->with('success', 'Excel imported successfully!');
         }else{
             return redirect()->route('login.admin');
@@ -4380,8 +4376,8 @@ class AdminController extends Controller
                 if (!file_exists($idFolder)) {
                     mkdir($idFolder);
                 }
-                
-            $request->imgslide_picture->move($idFolder,$imageName); 
+
+            $request->imgslide_picture->move($idFolder,$imageName);
             return redirect()->route('imgslide');
         }else{
             return redirect()->route('login.admin');
@@ -4417,7 +4413,7 @@ class AdminController extends Controller
                 'imgslide_link'=>'required|url|max:76',
                 'imgslide_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
-            
+
             $imgslide_data=[
                 'imgslide_link'=>$request->imgslide_link,
                 'update_by'=>Auth::user()->id,               //default                  //default
@@ -4438,8 +4434,8 @@ class AdminController extends Controller
 
                 $imgslide_update->imgslide_picture = $imageName;
                 // dd($imageName);
-                
-            } 
+
+            }
             $imgslide_update->save();
             return redirect()->route('imgslide');
         }else{
@@ -4512,7 +4508,7 @@ class AdminController extends Controller
 
     function logusers(){
         if(AuthFacade::useradmin()){
-            
+
             return view("admin.logadmin.logadmin_user");
         }else{
             return redirect()->route('login.admin');
@@ -4592,7 +4588,7 @@ class AdminController extends Controller
     {
         // อัปเดตสถานะของผู้ใช้ทั้งหมดเป็น 0
         Learn::query()->delete();
-        
+
         Score::query()->delete();
         // อาจจะ redirect ไปยังหน้าอื่นพร้อมกับข้อความยืนยัน
         return redirect()->route('learnreset')->with('status', 'ข้อมูลผู้ใช้ทั้งหมดถูกลบแล้ว');
@@ -4653,7 +4649,7 @@ class AdminController extends Controller
                     $log_reset->reset_by = Auth::user()->id;
                     $log_reset->reset_date = now();
                     $log_reset->save();
-                    
+
                 }
                 return redirect()->route('learnreset.score',['id' => $id]);
             }
@@ -4670,43 +4666,43 @@ class AdminController extends Controller
                 if (!empty($checkboxValue)) {
                     foreach($checkboxValue as $re){
                         $score = Score::findById($re);
-        
+
                         $score->active = 'n';
                         $score->save();
                     }
                     return redirect()->route('learnreset');
                 }
-            } 
+            }
             if ($request->has('checkbox_name_course')) {
                 $checkboxValue = $request->input('checkbox_name_course');
                 // dd($checkboxValue);
                 if (!empty($checkboxValue)) {
                     foreach($checkboxValue as $re){
                         $score = Learn::findById($re);
-        
+
                         $score->lesson_active = 'n';
                         $score->save();
                     }
                     return redirect()->route('learnreset');
                 }
-            } 
+            }
             if ($request->has('checkbox_name_lesson')) {
                 $checkboxValue = $request->input('checkbox_name_lesson');
                 // dd($checkboxValue);
                 if (!empty($checkboxValue)) {
                     foreach($checkboxValue as $re){
                         $score = Learn::findById($re);
-        
+
                         $score->lesson_active = 'n';
                         $score->save();
                     }
                     return redirect()->route('learnreset');
                 }
-            } 
+            }
             return redirect()->route('learnreset');
         }else{
             return redirect()->route('login.admin');
-        }   
+        }
     }
     function learnreset_resetuser_insert(Request $request){
         if(AuthFacade::useradmin()){
@@ -4741,7 +4737,7 @@ class AdminController extends Controller
             return redirect('/learnreset_resetuser');
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
 //classroom
     function classroom(){
@@ -4750,7 +4746,7 @@ class AdminController extends Controller
             return view("admin.Classroom.Classroom",compact('zoom'));
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function classroom_create(Request $request){
         if(AuthFacade::useradmin()){
@@ -4763,7 +4759,7 @@ class AdminController extends Controller
                 ]);
                 // dd($validator);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
                 $zoom_create = new Zoom;
@@ -4781,7 +4777,7 @@ class AdminController extends Controller
             return view("admin.Classroom.classroom-create");
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function classroom_edit($id){
         if(AuthFacade::useradmin()){
@@ -4789,7 +4785,7 @@ class AdminController extends Controller
             return view("admin.Classroom.classroom-update",compact('zoom'));
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function classroom_delete($id) {
         if(AuthFacade::useradmin()){
@@ -4800,7 +4796,7 @@ class AdminController extends Controller
             return redirect()->route('classroom')->with('success', 'Classroom deleted successfully.');
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function classroom_update(Request $request){
         if(AuthFacade::useradmin()){
@@ -4818,7 +4814,7 @@ class AdminController extends Controller
             return redirect()->route('classroom');
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     //Captcha
     function captcha_create(){
@@ -4826,7 +4822,7 @@ class AdminController extends Controller
             return view("admin.captcha.captcha-create");
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function captcha(){
         if(AuthFacade::useradmin()){
@@ -4836,7 +4832,7 @@ class AdminController extends Controller
             return view("admin.captcha.captcha_2",compact('captcha','courseOnline'));
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     public function addCourse(Request $request)
     {
@@ -4875,7 +4871,7 @@ class AdminController extends Controller
 
                 $dataId = $request->input('data-id');
                 $checkedIds = $request->input('chk');
-                
+
                 if ($checkedIds !== null) {
                     // ดำเนินการกับ checkbox ที่ถูกติ๊กที่นี่
                     foreach ($checkedIds as $chkValue) {
@@ -4888,10 +4884,10 @@ class AdminController extends Controller
                 }
                 return redirect()->route('captcha');
             }
-            
+
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function captcha_edit(Request $request,$capid){
         if(AuthFacade::useradmin()){
@@ -4899,12 +4895,12 @@ class AdminController extends Controller
             if ($request->isMethod('post')){
                 $validator = Validator::make($request->all(), [
                     'capt_name'=>'required|string',
-                    
+
                     'capt_times' => 'required|string'
                 ]);
                 // dd($request);
                 if ($validator->fails()) {
-                    
+
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
                 $cap = Captcha::findById($capid);
@@ -4919,7 +4915,7 @@ class AdminController extends Controller
             return view("admin.captcha.captcha-edit",compact('captcha'));
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function captcha_detail($capid){
         if(AuthFacade::useradmin()){
@@ -4927,7 +4923,7 @@ class AdminController extends Controller
             return view("admin.captcha.captcha-detail",compact('captcha'));
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function captcha_update(Request $request,$capid){
         if(AuthFacade::useradmin()){
@@ -4945,7 +4941,7 @@ class AdminController extends Controller
             return redirect()->route('captcha');
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function captcha_insert(Request $request){
         if(AuthFacade::useradmin()){
@@ -4964,7 +4960,7 @@ class AdminController extends Controller
             return redirect()->route('captcha');
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function captcha_y($capid,$capt_active) {
         if(AuthFacade::useradmin()){
@@ -4977,7 +4973,7 @@ class AdminController extends Controller
             }
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function captcha_n($capid,$capt_active) {
         if(AuthFacade::useradmin()){
@@ -4985,12 +4981,12 @@ class AdminController extends Controller
             if($cap){
                 $cap->capt_active = $capt_active;
                 $cap->save();
-                
+
                 return redirect()->route('captcha');
             }
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function captcha_delete($capid) {
         if(AuthFacade::useradmin()){
@@ -4998,12 +4994,12 @@ class AdminController extends Controller
            if($cap){
             $cap->capt_hide = '1';
             $cap->save();
-            
+
             return redirect()->route('captcha');
         }
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function report_logallregister(Request $request) {
         if(AuthFacade::useradmin()){
@@ -5024,13 +5020,13 @@ class AdminController extends Controller
             return view("admin.report.report_logallregister", ['report' => $report]);
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function report_loguserstatus(Request $request) {
         if(AuthFacade::useradmin()){
             $query = $request->input('fname');
             $email = $request->input('email');
-            
+
             if($query && !empty($query)) {
                 $user = Users::join('profiles', 'profiles.user_id', '=', 'users.id')
                             ->where(function($q) use ($query) {
@@ -5057,11 +5053,11 @@ class AdminController extends Controller
                             ->orderBy('id','DESC')
                             ->paginate(10);
             }
-            
+
             return view("admin.report.report_loguserstatus", ['user' => $user]);
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function report_course(Request $request) {
         if(AuthFacade::useradmin()){
@@ -5072,7 +5068,7 @@ class AdminController extends Controller
             return view("admin.report.report_course", ['course' => $course]);
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function report_lesson($id) {
         if(AuthFacade::useradmin()){
@@ -5094,7 +5090,7 @@ class AdminController extends Controller
             return view("admin.report.report_lesson", ['lesson' => $lesson,'user' => $user,'id' => $id, 'course' => $course]);
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
 
     public function exportUsers($id)
@@ -5108,7 +5104,7 @@ class AdminController extends Controller
                          ->where('active', 'y')
                          ->orderBy('course_id', 'DESC')
                          ->get();
-    
+
         return Excel::download(
             new UsersExport($id, $users, $lessons),
             preg_replace('/[\/\\\\]/', '-', $course->course_title) . '.xlsx'
@@ -5134,7 +5130,7 @@ class AdminController extends Controller
             return view("admin.report.report_logreset", ['reset' => $reset]);
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     function report_byuser(Request $request) {
         if(AuthFacade::useradmin()){
@@ -5170,7 +5166,7 @@ class AdminController extends Controller
             return view("admin.report.report_byuser", ['user' => $user,'company' => $company,'division' => $division]);
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
     public function fetchCoursesAndLessons(Request $request){
         if(AuthFacade::useradmin()){
@@ -5217,9 +5213,9 @@ class AdminController extends Controller
             ]);
         }else{
             return redirect()->route('login.admin');
-        } 
+        }
     }
-    //dynamic dropdown company by chockker 
+    //dynamic dropdown company by chockker
     public function companySelector($id){
         if(AuthFacade::useradmin()){
             $position = Position::where('company_id', $id)->get();
@@ -5230,318 +5226,6 @@ class AdminController extends Controller
             ]);
         }else{
             return redirect()->route('login.admin');
-        } 
-    }
-
-    // public function uploadOCR(Request $request)
-    // {
-    //     $files = OcrFile::where('active','y')->get();
-    //     if ($request->isMethod('post')){
-    //             $request->validate([
-    //                 'files.*' => 'required|mimes:jpeg,png,jpg,pdf,PDF',
-    //             ]);
-
-    //             $results = [];
-
-    //             foreach ($request->file('files') as $file) {
-    //                 $folderName = Str::uuid()->toString();
-    //                 $path = public_path("images/uploads/ocr/{$folderName}/");
-    //                 if (!file_exists($path)) {
-    //                     mkdir($path, 0777, true);
-    //                 }
-
-    //                 $ext = $file->getClientOriginalExtension();
-    //                 $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
-    //                 $originalFile = $path . $baseName . '.' . $ext;
-    //                 $file->move($path, $baseName . '.' . $ext);
-
-    //                 $filesToProcess = [];
-
-    //                 if ($ext === 'pdf') {
-    //                     try {
-    //                         $imagick = new \Imagick();
-    //                         $imagick->setResolution(200, 200); // ลด DPI ลงหน่อย ถ้าไฟล์ใหญ่
-
-    //                         $imagick->readImage($originalFile);
-    //                         $pageCount = $imagick->getNumberImages();
-    //                         $imagick->clear();
-    //                         $imagick->destroy();
-
-    //                         for ($i = 0; $i < $pageCount; $i++) {
-    //                             $imagick = new \Imagick();
-    //                             $imagick->setResolution(200, 200);
-    //                             $imagick->readImage("{$originalFile}[{$i}]");
-    //                             $imagick->setImageFormat('png');
-
-    //                             $outputFile = $path . $baseName . "-".($i+1).".png";
-    //                             $imagick->writeImage($outputFile);
-
-    //                             $imagick->clear();
-    //                             $imagick->destroy();
-
-    //                             $filesToProcess[] = $outputFile;
-    //                         }
-    //                     } catch (\Exception $e) {
-    //                         // ❌ ถ้า Imagick fail → fallback ไปใช้ Spatie/pdf-to-image
-    //                         $pdf = new Pdf($originalFile);
-    //                         $pageCount = $pdf->getNumberOfPages();
-
-    //                         for ($i = 1; $i <= $pageCount; $i++) {
-    //                             $outputFile = $path . $baseName . "-{$i}.png";
-    //                             $pdf->setPage($i)
-    //                                 ->setResolution(200)
-    //                                 ->saveImage($outputFile);
-
-    //                             $filesToProcess[] = $outputFile;
-    //                         }
-    //                     }
-    //                 } else {
-    //                     // สำหรับไฟล์รูปอยู่แล้ว
-    //                     $imagick = new \Imagick();
-    //                     $imagick->readImage($originalFile);
-    //                     $imagick->setImageFormat('png');
-
-    //                     $outputFile = $path . $baseName . '.png';
-    //                     $imagick->writeImage($outputFile);
-
-    //                     $imagick->clear();
-    //                     $imagick->destroy();
-
-    //                     $filesToProcess[] = $outputFile;
-    //                 }
-
-    //                 // สร้าง record หลัก
-    //                 $ocrFile = OcrFile::create([
-    //                     'filename'    => $baseName . '.' . $ext,
-    //                     'folder_name' => $folderName,
-    //                     'active'        => 'y', // ไม่เก็บรวมที่นี่แล้ว
-    //                 ]);
-
-    //                 // Google DocAI
-    //                 putenv('GOOGLE_APPLICATION_CREDENTIALS=' . base_path(env('GOOGLE_APPLICATION_CREDENTIALS')));
-    //                 $projectId = env('GOOGLE_PROJECT_ID');
-    //                 $location = env('GOOGLE_LOCATION');
-    //                 $processorId = env('PROCESSOR_ID');
-
-    //                 $client = new DocumentProcessorServiceClient();
-    //                 $name = $client->processorName($projectId, $location, $processorId);
-
-    //                 $pageNum = 1;
-    //                 foreach ($filesToProcess as $filepath) {
-    //                     $rawDocument = new RawDocument([
-    //                         'content' => file_get_contents($filepath),
-    //                         'mime_type' => mime_content_type($filepath),
-    //                     ]);
-
-    //                     $requestObj = new ProcessRequest([
-    //                         'name' => $name,
-    //                         'raw_document' => $rawDocument
-    //                     ]);
-
-    //                     $response = $client->processDocument($requestObj);
-    //                     $pageText = trim($response->getDocument()->getText());
-
-    //                     // เก็บลง table ocr_file_pages
-    //                     OcrFilePage::create([
-    //                         'ocr_file_id' => $ocrFile->id,
-    //                         'page_number' => $pageNum,
-    //                         'text'        => $pageText,
-    //                     ]);
-
-    //                     $pageNum++;
-    //                 }
-    //                 foreach ($filesToProcess as $filepath) {
-    //                     if (file_exists($filepath)) {
-    //                         unlink($filepath);
-    //                     }
-    //                 }
-
-    //                 $results[] = $ocrFile->load('pages');
-    //             }
-    //             return redirect()->route('ocr.upload');
-    //     }
-    //     // 👇 return เข้า view
-    //     return view('admin.ocr.ocr',compact('files'));
-    // }
-
-    public function uploadOCR(Request $request)
-    {
-        $files = OcrFile::where('active','y')->get();
-
-        if ($request->isMethod('post')){
-            $request->validate([
-                'files.*' => 'required|mimes:jpeg,png,jpg,pdf,PDF',
-            ]);
-
-            foreach ($request->file('files') as $file) {
-                $folderName = Str::uuid()->toString();
-                $path = public_path("images/uploads/ocr/{$folderName}/");
-                if (!file_exists($path)) {
-                    mkdir($path, 0777, true);
-                    // สืบสิทธิ์ group ของ parent
-                    chmod($path, 02775);
-                }
-                $ext = $file->getClientOriginalExtension();
-                $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
-                $originalFile = $path . $baseName . '.' . $ext;
-                $file->move($path, $baseName . '.' . $ext);
-
-                $ocrFile = OcrFile::create([
-                    'filename' => $baseName . '.' . $ext,
-                    'folder_name' => $folderName,
-                    'active' => 'y',
-                ]);
-
-                if ($ext === 'pdf') {
-                    ProcessPdfJob::dispatch($originalFile, $ocrFile->id, $path);
-                } else {
-                    // ถ้าเป็นภาพตรง ๆ ก็ส่งเป็น page เดียว
-                    ProcessPdfPageJob::dispatch($originalFile, $ocrFile->id, 1);
-                }
-            }
-
-            return redirect()->route('ocr.upload');
-        }
-
-        return view('admin.ocr.ocr', compact('files'));
-    }
-
-    public function OCRpage(Request $request,$id)
-    {
-        $file_page = OcrFilePage::where('ocr_file_id',$id)->get();
-
-        return view('admin.ocr.page',compact('file_page'));
-    }
-
-    public function OCRedit(Request $request,$id,$page_number)
-    {
-        $page = OcrFilePage::where('id', $id)
-                        ->where('page_number', $page_number)
-                        ->first();
-
-        if (!$page) {
-            abort(404, 'Page not found');
-        }
-
-        return view('admin.ocr.edit',compact('page'));
-    }
-
-    public function OCRupdate(Request $request, $id, $page_number)
-    {
-        $page = OcrFilePage::where('id', $id)
-                            ->where('page_number', $page_number)
-                            ->first();
-
-        if (!$page) {
-            abort(404, 'Page not found');
-        }
-
-        if ($request->isMethod('post') || $request->isMethod('put')) {
-
-            $request->validate([
-                'text_content' => 'nullable|string',
-            ]);
-
-            
-            $page->text = $request->input('text_content');
-            $page->save();
-
-            $ocrFileId = $page->ocr_file_id;
-            $originalFile = $page->OcrFile->filename; 
-            $folderName = $page->OcrFile->folder_name;
-            $created_at = $page->OcrFile->created_at;
-            $pageNum = $page->page_number;
-            $pageText = $page->text;
-
-            $esClient = ClientBuilder::create()
-                        ->setHosts([env('ELASTICSEARCH_HOST', 'http://127.0.0.1:9200')])
-                        ->setBasicAuthentication(
-                            env('ELASTICSEARCH_USER', 'elastic'),
-                            env('ELASTICSEARCH_PASS', '')
-                        )
-                        // ->setCABundle(env('ELASTICSEARCH_SSL_VERIFICATION'))
-                        ->build();
-
-            $esClient->index([
-                'index' => 'ocr_pages',
-                'id'    => $ocrFileId . '_' . $pageNum,  // ใช้ค่าจาก $page
-                'body'  => [
-                    'ocr_file_id' => $ocrFileId,
-                    'filename'    => $originalFile,
-                    'folder_name' => $folderName,
-                    'page_number' => $pageNum,
-                    'text'        => $pageText,
-                    'created_at'  => $created_at,
-                    'active'      => 'y',
-                ]
-            ]);
-
-            return redirect()
-                ->route('ocr.page', ['id' => $page->ocr_file_id])
-                ->with('success', 'บันทึกข้อความเรียบร้อยแล้ว');
-        }
-
-        // ถ้าเป็น GET request แสดงหน้าฟอร์ม
-        return view('admin.ocr.edit', compact('page'));
-    }
-
-    function OCRdel($id){
-        if(AuthFacade::useradmin()){
-            $news_del=[
-                'active'=>'n'
-            ];
-            $news = OcrFile::findById($id);
-            $news->update($news_del);
-
-            $client = \Elastic\Elasticsearch\ClientBuilder::create()
-                        ->setHosts([env('ELASTICSEARCH_HOST', 'https://127.0.0.1:9200')])
-                        ->setBasicAuthentication(env('ELASTICSEARCH_USER'), env('ELASTICSEARCH_PASS'))
-                        ->setCABundle(env('ELASTICSEARCH_SSL_VERIFICATION'))
-                        ->build();
-            $pages = \App\Models\OcrFilePage::where('ocr_file_id', $id)->get();
-
-            foreach ($pages as $page) {
-                try {
-                    $client->index([
-                        'index' => 'ocr_pages',
-                        'id'    => $page->id,
-                        'body'  => [
-                            'ocr_file_id' => $page->ocr_file_id,
-                            'page_number' => $page->page_number,
-                            'text'        => $page->text,
-                            'filename'    => $news->filename,
-                            'folder_name' => $news->folder_name,
-                            'created_at'  => $page->created_at->toIso8601String(),
-                            'active'      => 'n', // เพิ่ม field นี้เข้าไปใน index ด้วย
-                        ]
-                    ]);
-                } catch (\Exception $e) {
-                    \Log::error("Failed to update Elasticsearch for page ID {$page->id}: " . $e->getMessage());
-                }
-            }
-
-            // dd($news->toArray());
-            return redirect()->route('ocr.upload');
-        }else{
-            return redirect()->route('login.admin');
         }
     }
-
-    // public function upload(Request $request)
-    // {
-    //     $file = $request->file('pdf');
-    //     $path = $file->store('uploads/ocr');
-
-    //     $outputDir = storage_path('app/processed');
-
-    //     ProcessPdfJob::dispatch(storage_path("app/{$path}"), $outputDir);
-
-    //     return response()->json([
-    //         'status' => 'processing',
-    //         'message' => 'ไฟล์กำลังประมวลผล',
-    //     ]);
-    // }
-    
 }

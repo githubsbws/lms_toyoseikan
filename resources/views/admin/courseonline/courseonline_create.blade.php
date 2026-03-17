@@ -64,12 +64,12 @@
                                 <textarea name="course_detail" id="summernote2" class="form-control"></textarea>
                             </div>
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="recommend">ปักหมุดหลักสูตรแนะนำ</label>
                                 <div>
                                     <input type="checkbox" name="recommend" value="y" data-toggle="toggle" data-on="แสดง" data-off="ไม่แสดง" data-onstyle="success" data-offstyle="danger" />
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <div class="form-group">
                                 <label for="course_note">หมายเหตุ</label>
@@ -81,7 +81,7 @@
                                 <div class="fileupload fileupload-new" data-provides="fileupload">
                                     <div class="input-append">
                                         <div class="uneditable-input span3">
-                                            <i class="icon-file fileupload-exists"></i> 
+                                            <i class="icon-file fileupload-exists"></i>
                                             <span class="fileupload-preview"></span>
                                         </div>
                                         <img id="previewImage" src="#" alt="Preview Image" style="display: none;">
@@ -99,11 +99,11 @@
                                         document.addEventListener('DOMContentLoaded', function() {
                                             var imageInput = document.getElementById('imageInput');
                                             var previewImage = document.getElementById('previewImage');
-                                
+
                                             imageInput.addEventListener('change', function() {
                                                 previewImageFile(this);
                                             });
-                                
+
                                             function previewImageFile(input) {
                                                 var file = input.files[0];
                                                 if (file) {
@@ -146,6 +146,6 @@
     $(document).ready(function() {
         $('#summernote2').summernote();
         });
-</script> 
+</script>
 </body>
 @endsection

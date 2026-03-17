@@ -229,11 +229,11 @@ use App\Helpers\PermissionHelper;
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{url('teacher_create')}}" class="nav-link {{ request()->is('teacher_create') ? 'active' : '' }}">
                                 <p>เพิ่มข้อมูลผู้สอน</p>
                             </a>
-                        </li>
+                        </li> --}}
                         <li class="nav-item">
                             <a href="{{url('courseonline_create')}}" class="nav-link {{ request()->is('courseonline_create') ? 'active' : '' }}">
                                 <p>เพิ่มหลักสูตร (ภาษา US)</p>
@@ -305,7 +305,7 @@ use App\Helpers\PermissionHelper;
                     </ul>
                 </li>
                 @endcanmenu
-                @canmenu(13)
+                {{-- @canmenu(13)
                 <li class="nav-item {{ request()->is('questionnaireout*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('questionnaireout*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-alt"></i>
@@ -328,7 +328,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
+                @endcanmenu --}}
                 @canmenu(14)
                 <li class="nav-item {{ request()->is('orgchart*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('orgchart*') ? 'active' : '' }}">
@@ -661,7 +661,7 @@ use App\Helpers\PermissionHelper;
                     @break
                 @default
                     หน้าหลัก
-            @endswitch 
+            @endswitch
         </h4>
     </div>
     <div class="ms-auto d-flex align-items-center">
