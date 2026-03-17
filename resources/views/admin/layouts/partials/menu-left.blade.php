@@ -631,16 +631,16 @@ use App\Helpers\PermissionHelper;
                             </a>
                         </li>
                     </ul>
-                    <li class="nav-item">
-                        <a href="{{ route('logout.admin')}}" class="nav-link">
-                            <i class="nav-icon fas fa-sign-out-alt"></i>
-                            <p>
-                                ออกจากระบบ
-                            </p>
-                        </a>
-                    </li>
                 </li>
                 @endcanmenu
+                <li class="nav-item">
+                    <a href="{{ route('logout.admin')}}" class="nav-link">
+                        <i class="nav-icon fas fa-sign-out-alt"></i>
+                        <p>
+                            ออกจากระบบ
+                        </p>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>
