@@ -1673,11 +1673,11 @@ class AdminController extends Controller
                 $lesson_update->time_test = $request->input('time_test');
                 $lesson_update->update_by = Auth::user()->id;
 
-                if ($request->has('view_all')) {
-                    $lesson_update->view_all = "y";
-                }else{
-                    $lesson_update->view_all = "n";
-                }
+                // if ($request->has('view_all')) {
+                //     $lesson_update->view_all = "y";
+                // }else{
+                //     $lesson_update->view_all = "n";
+                // }
 
                 if ($request->hasFile('filename')) {
                     foreach ($request->file('filename') as $file) {
@@ -1720,8 +1720,8 @@ class AdminController extends Controller
                         $doc_new->save();
 
                         $idFolder = public_path('images/uploads/filedoc/');
-                        if (!file_exists($idFolder)) {
-                            mkdir($idFolder);
+                        if (!FileStore::isDirectory($idFolder)) {
+                            FileStore::makeDirectory($idFolder, 0777, true,true);
                         }
                         $doc->move($idFolder, $doc_name);
                     }else{
@@ -1731,8 +1731,8 @@ class AdminController extends Controller
                         $doc_update->save();
 
                         $idFolder = public_path('images/uploads/filedoc/');
-                        if (!file_exists($idFolder)) {
-                            mkdir($idFolder);
+                        if (!FileStore::isDirectory($idFolder)) {
+                            FileStore::makeDirectory($idFolder, 0777, true,true);
                         }
                         $doc->move($idFolder, $doc_name);
                     }
@@ -1741,15 +1741,10 @@ class AdminController extends Controller
                 if($request->file('image')){
                     $image = $request->file('image');
 
-                    $idFolder = public_path('images/uploads/lesson/'.$id);
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder);
-
-                        $idFolder2 = public_path('images/uploads/lesson/'.$id.'/original/');
-                        if (!file_exists($idFolder2)) {
-                            mkdir($idFolder2);
+                    $idFolder2 = public_path('images/uploads/lesson/'.$id.'/original/');
+                    if (!FileStore::isDirectory($idFolder2)) {
+                            FileStore::makeDirectory($idFolder2, 0777, true,true);
                         }
-                    }
 
                     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
                     $imageName = $image->getClientOriginalName();
@@ -1877,6 +1872,10 @@ class AdminController extends Controller
                 $image = $request->file('image');
                 $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
                 $imageName = time() . "." . $image->getClientOriginalExtension();
+                if (!FileStore::isDirectory($Folder_pic)) {
+                    FileStore::makeDirectory($Folder_pic, 0777, true,true);
+                }
+
                 $image->move($Folder_pic, $imageName);
 
                 $lesson_create->image = $imageName;
