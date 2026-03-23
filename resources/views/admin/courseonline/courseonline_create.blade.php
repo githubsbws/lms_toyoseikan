@@ -125,6 +125,22 @@
                                     รูปภาพควรมีขนาด 250x180(แนวนอน) หรือ ขนาด 250x(xxx) (แนวยาว)
                                 </font>
                             </div>
+                            <div class="form-group">
+                                <label for="">เลือกสายที่ต้องการให้เห็นหลักสูตร <span class="text-danger">*</span> </label>
+                            </div>
+                            <div id="org_jstree">
+                                <ul>
+                                    <li>Root node 1
+                                        <ul>
+                                            <li id="child_node_1">Child node 1</li>
+                                            <li>Child node 2</li>
+                                        </ul>
+                                    </li>
+                                    <li>Root node 2</li>
+                                </ul>
+                            </div>
+                            <input type="hidden" name="org_ids" id="org_ids">
+
 
                             <div class="card-footer">
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
@@ -146,6 +162,34 @@
     $(document).ready(function() {
         $('#summernote2').summernote();
         });
+
+    $(document).ready(function () {
+        var OrgChartTree = @json($orgtree);
+        console.log(OrgChartTree);
+        $('#org_jstree').jstree({
+            'core': {
+            'data': OrgChartTree, // ใช้ข้อมูลที่เรา map มา
+            'themes': {
+                'dots': true, // มีเส้นประเชื่อมกิ่งเหมือน Registry Editor
+                'icons': true,
+                'responsive': true,
+            }
+        },
+        'plugins': ["checkbox"] // เพิ่ม wholerow ให้จิ้มง่าย และ search ให้ค้นหาได้
+        });
+
+        $('#org_jstree').on("changed.jstree", function (e, data) {
+            console.log("Selected IDs:", data.selected);
+            $('#org_ids').val(data.selected.join(','));
+        });
+
+        // $('button').on('click', function () {
+        //     $('#jstree').jstree(true).select_node('child_node_1');
+        //     $('#jstree').jstree('select_node', 'child_node_1');
+        //     $.jstree.reference('#jstree').select_node('child_node_1');
+        // });
+    });
+
 </script>
 </body>
 @endsection

@@ -1271,6 +1271,23 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
+
+            $orgtree = Orgchart::where('active', 'y')
+            ->where('level', '!=', '1')
+            ->get()->map(function ($item) {
+                return [
+                    'id'     => (string)$item->id,
+                    // Logic: ถ้าไอเทมนี้อยู่ Level 2 ให้มันเป็น "ตัวแม่สูงสุด" ของ Tree นี้
+                    // เราจึงต้องส่ง parent เป็น '#' ให้ jstree
+                    'parent' => ($item->level === '2') ? '#' : (string)$item->parent_id,
+                    'text'   => $item->title, // ชื่อแผนก/ไลน์/ตำแหน่ง
+                    'state'  => [
+                        'opened' => false // ให้พับไว้ก่อน ถ้าอยากให้กางหมดค่อยแก้เป็น true
+                    ],
+                    'icon' => 'fa fa-user text-success'
+                ];
+            });
+
             if ($request->isMethod('post')) {
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
@@ -1338,7 +1355,7 @@ class AdminController extends Controller
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-            return view("admin.courseonline.courseonline_create", compact('category','teacher'));
+            return view("admin.courseonline.courseonline_create", compact('category','teacher','orgtree'));
         }else{
             return redirect()->route('login.admin');
         }
@@ -1788,7 +1805,7 @@ class AdminController extends Controller
                 'doc.*' => 'nullable|mimes:pdf,docx,pptx',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
             ]);
-            
+
             if ($validator->fails()) {
                 Log::error('Validation failed: ', $validator->errors()->toArray());
                 return redirect()->back()->withErrors($validator)->withInput();
