@@ -82,8 +82,8 @@
                                                 for="UserLogin_username" class="required">องค์กร <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" name="orgchart_id" data-next="level-3" data-level="2">
-                                            <option value="">---เลือก---</option>
+                                        <select class="form-control org-select" id="level-2" name="orgchart_id" data-next="level-3" data-level="2">
+                                            <option value="" disabled selected>---เลือกรายการ---</option>
                                             @foreach ($orgchart as $org)
                                                 <option value="{{ $org->id }}">
                                                     {{ $org->title }}
@@ -93,61 +93,56 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
+                                    <div class="form-group org-group" id="group-level-3" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">แผนก <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" name="department_id" data-next="level-4" data-level="3" disabled>
-                                            <option value="">---เลือก---</option>
+                                        <select class="form-control org-select" id="level-3" name="department_id" data-next="level-4" data-level="3" disabled>
 
                                         </select>
                                         </div>
                                     </div>
 
-                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
+                                    <div class="form-group org-group" id="group-level-4" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ส่วนงาน <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" name="section_id" data-next="level-5" data-level="4" disabled>
-                                            <option value="">---เลือก---</option>
+                                        <select class="form-control org-select" id="level-4" name="section_id" data-next="level-5" data-level="4" disabled>
 
                                         </select>
                                         </div>
                                     </div>
 
-                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
+                                    <div class="form-group org-group" id="group-level-5" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">สายการผลิต <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" name="line_id" data-next="level-6" data-level="5" disabled>
-                                            <option value="">---เลือก---</option>
+                                        <select class="form-control org-select" id="level-5" name="line_id" data-next="level-6" data-level="5" disabled>
 
                                         </select>
                                         </div>
                                     </div>
 
-                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
+                                    {{-- <div class="form-group org-group" id="group-level-6" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ทีม <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" name="team_id" data-next="level-7" data-level="6" disabled>
-                                            <option value="">---เลือก---</option>
+                                        <select class="form-control org-select" id="level-6" name="team_id" data-next="level-7" data-level="6" disabled>
 
                                         </select>
                                         </div>
-                                    </div>
+                                    </div> --}}
 
-                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
+                                    <div class="form-group org-group" id="group-level-6" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ตำแหน่ง <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" name="position_id" data-level="7" disabled>
-                                            <option value="">---เลือก---</option>
+                                        <select class="form-control org-select" id="level-6" name="position_id" data-level="6" disabled>
 
                                         </select>
                                         </div>
@@ -174,7 +169,7 @@
     $(document).ready(function () {
         $('.org-select').on('change', function () {
             var currentSelect = $(this);
-            console.log(currentSelect);
+            // console.log(currentSelect);
             var parentId = currentSelect.val();
             var nextId = currentSelect.data('next');
             var currentLevel = currentSelect.data('level');
@@ -192,16 +187,16 @@
             $.get('/api/get-sub-org/' + parentId, function (res) {
                 var nextSelect = $('#' + nextId);
                 var nextGroup = $('#group-' + nextId);
-
                 if (res.has_child) {
                     // มีลูกต่อ: วาด Option และเปิดให้กด
-                    var options = '<option value="">-- เลือกรายการ --</option>';
+                    // console.log(nextId);
+                    var options = '<option value="" disabled selected>-- เลือกรายการ --</option>';
                     $.each(res.data, function (key, item) {
                         options += `<option value="${item.id}">${item.title}</option>`;
                     });
 
                     nextSelect.html(options).prop('disabled', false);
-                    nextGroup.fadeIn(); // แสดงฟิลด์ถัดไปแบบสวยๆ
+                    nextGroup.show();
                 } else {
                     // ไม่มีลูกแล้ว: จบสายงานที่ตรงนี้
                     nextSelect.prop('disabled', true);
