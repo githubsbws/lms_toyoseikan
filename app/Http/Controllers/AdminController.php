@@ -1676,7 +1676,7 @@ class AdminController extends Controller
                 ]);
 
                 if ($validator->fails()) {
-                    dd($validator->errors()->all());
+                    //dd($validator->errors()->all());
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
