@@ -24,7 +24,7 @@ use App\Http\Controllers\DetailController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\FaqController;
-use App\Http\Controllers\ForgotController; 
+use App\Http\Controllers\ForgotController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\LoginLController;
 use App\Http\Controllers\RegisterController;
@@ -676,10 +676,10 @@ Route::post('/captcha_course/{id?}',[AdminController::class,'captcha_course'])->
 
 Route::get('/path-to-check-selected-courses', function (Request $request) {
     $capid = $request->input('capid');
-    
+
     // ดึงข้อมูลหลักสูตรที่เลือกแล้วใน capid นี้
     $selectedCourses = Course::where('course_point', $capid)->pluck('course_id');
-    
+
     return response()->json([
         'courses' => $selectedCourses,
     ]);
@@ -689,7 +689,7 @@ Route::get('/path-to-check-all-selected-courses', function (Request $request) {
     $capid = $request->input('capid');
     // ดึงข้อมูลหลักสูตรที่เลือกไปแล้วจาก capid อื่นๆ
     $selectedCourses = Course::whereNotNull('course_point')->where('course_point','!=',$capid)->pluck('course_id');
-    
+
     return response()->json([
         'courses' => $selectedCourses,
     ]);

@@ -128,17 +128,7 @@
                             <div class="form-group">
                                 <label for="">เลือกสายที่ต้องการให้เห็นหลักสูตร <span class="text-danger">*</span> </label>
                             </div>
-                            <div id="org_jstree">
-                                <ul>
-                                    <li>Root node 1
-                                        <ul>
-                                            <li id="child_node_1">Child node 1</li>
-                                            <li>Child node 2</li>
-                                        </ul>
-                                    </li>
-                                    <li>Root node 2</li>
-                                </ul>
-                            </div>
+                            <div class="form-group" id="org_jstree"></div>
                             <input type="hidden" name="org_ids" id="org_ids">
 
 
@@ -165,7 +155,7 @@
 
     $(document).ready(function () {
         var OrgChartTree = @json($orgtree);
-        console.log(OrgChartTree);
+        // console.log(OrgChartTree);
         $('#org_jstree').jstree({
             'core': {
             'data': OrgChartTree, // ใช้ข้อมูลที่เรา map มา

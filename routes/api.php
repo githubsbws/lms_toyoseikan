@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OcrSearchController;
-
+use App\Http\Controllers\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,3 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/ocr-upload', [AdminController::class, 'uploadOCR']);
 Route::get('/ocr/search', [OcrSearchController::class, 'search']);
+
+Route::get('/get-sub-org/{parentId}', [RegisterController::class, 'getSubOrg']);

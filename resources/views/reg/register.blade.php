@@ -77,12 +77,12 @@
                                                 name="email" type="email">
                                         </div>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group org-group">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">องค์กร <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control" name="orgchart_id">
+                                        <select class="form-control org-select" name="orgchart_id" data-next="level-3" data-level="2">
                                             <option value="">---เลือก---</option>
                                             @foreach ($orgchart as $org)
                                                 <option value="{{ $org->id }}">
@@ -92,87 +92,69 @@
                                         </select>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="inputEmail3" class="col-sm-3 control-label"><label
-                                                for="UserLogin_username" class="required">สายการผลิต <span
-                                                    class="required">*</span></label></label>
-                                        <div class="col-sm-9">
-                                        <select class="form-control" name="line_id">
-                                            <option value="">---เลือก---</option>
-                                            @foreach ($line as $ln)
-                                                <option value="{{ $ln->id }}">
-                                                    {{ $ln->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        </div>
-                                    </div>
 
-                                    <div class="form-group">
+                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">แผนก <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control" name="department_id">
+                                        <select class="form-control org-select" name="department_id" data-next="level-4" data-level="3" disabled>
                                             <option value="">---เลือก---</option>
-                                            @foreach ($department as $depart)
-                                                <option value="{{ $depart->id }}">
-                                                    {{ $depart->name }}
-                                                </option>
-                                            @endforeach
+
                                         </select>
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
+                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ส่วนงาน <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control" name="section_id">
+                                        <select class="form-control org-select" name="section_id" data-next="level-5" data-level="4" disabled>
                                             <option value="">---เลือก---</option>
-                                            @foreach ($section as $sec)
-                                                <option value="{{ $sec->id }}">
-                                                    {{ $sec->name }}
-                                                </option>
-                                            @endforeach
+
                                         </select>
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
+                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
+                                        <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                                for="UserLogin_username" class="required">สายการผลิต <span
+                                                    class="required">*</span></label></label>
+                                        <div class="col-sm-9">
+                                        <select class="form-control org-select" name="line_id" data-next="level-6" data-level="5" disabled>
+                                            <option value="">---เลือก---</option>
+
+                                        </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ทีม <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control" name="team_id">
+                                        <select class="form-control org-select" name="team_id" data-next="level-7" data-level="6" disabled>
                                             <option value="">---เลือก---</option>
-                                            @foreach ($team as $te)
-                                                <option value="{{ $te->id }}">
-                                                    {{ $te->name }}
-                                                </option>
-                                            @endforeach
+
                                         </select>
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
+                                    <div class="form-group org-group" id="group-level-2" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ตำแหน่ง <span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control" name="position_id">
+                                        <select class="form-control org-select" name="position_id" data-level="7" disabled>
                                             <option value="">---เลือก---</option>
-                                            @foreach ($position as $pos)
-                                                <option value="{{ $pos->id }}">
-                                                    {{ $pos->position_title }}
-                                                </option>
-                                            @endforeach
+
                                         </select>
                                         </div>
                                     </div>
 
-                                    
+                                    <input type="hidden" name="org_id" id="final_org_id">
+
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
                                             <input class="btn btn-primary" type="submit" name="yt0"
@@ -188,4 +170,57 @@
         </div>
     </div>
 </body>
+<script>
+    $(document).ready(function () {
+        $('.org-select').on('change', function () {
+            var currentSelect = $(this);
+            console.log(currentSelect);
+            var parentId = currentSelect.val();
+            var nextId = currentSelect.data('next');
+            var currentLevel = currentSelect.data('level');
+
+            // 1. อัปเดต ID ล่าสุดลงใน Hidden Input เสมอ
+            $('#final_org_id').val(parentId);
+
+            // 2. ล้างค่าตัวลูกทั้งหมด (Chain Reset)
+            resetChildren(currentLevel);
+
+            // 3. ถ้าไม่ได้เลือกอะไร หรือเป็นตัวสุดท้ายแล้ว ให้หยุด
+            if (!parentId || !nextId) return;
+
+            // 4. ดึงข้อมูลตัวลูกผ่าน API
+            $.get('/api/get-sub-org/' + parentId, function (res) {
+                var nextSelect = $('#' + nextId);
+                var nextGroup = $('#group-' + nextId);
+
+                if (res.has_child) {
+                    // มีลูกต่อ: วาด Option และเปิดให้กด
+                    var options = '<option value="">-- เลือกรายการ --</option>';
+                    $.each(res.data, function (key, item) {
+                        options += `<option value="${item.id}">${item.title}</option>`;
+                    });
+
+                    nextSelect.html(options).prop('disabled', false);
+                    nextGroup.fadeIn(); // แสดงฟิลด์ถัดไปแบบสวยๆ
+                } else {
+                    // ไม่มีลูกแล้ว: จบสายงานที่ตรงนี้
+                    nextSelect.prop('disabled', true);
+                    nextGroup.hide();
+                }
+            });
+        });
+
+        // ฟังก์ชันล้างค่าตัวลูก (ล้างทุกตัวที่ Level สูงกว่าตัวปัจจุบัน)
+        function resetChildren(level) {
+            $('.org-select').each(function () {
+                var thisLevel = $(this).data('level');
+                if (thisLevel > level) {
+                    $(this).val('').prop('disabled', true);
+                    $(this).closest('.org-group').hide();
+                }
+            });
+        }
+    });
+</script>
 @endsection
+

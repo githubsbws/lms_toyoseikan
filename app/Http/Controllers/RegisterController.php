@@ -22,16 +22,11 @@ class RegisterController extends Controller
     //----- หน้า login
     function registers()
     {
-        $line = Line::all();
-        $department = Department::all();
-        $section = Section::all();
-        $position = Position::all();
-        $team = Team::all();
         $orgchart = Orgchart::where('active','y')
                     ->where('level',2)
                     ->get();
 
-        return view('reg.register',compact('line','department','section','position','orgchart','team'));
+        return view('reg.register',compact('orgchart'));
     }
 
     public function store(Request $request)
@@ -75,5 +70,17 @@ class RegisterController extends Controller
 
 
         return redirect()->back()->with('success','สมัครสมาชิกเรียบร้อย');
+    }
+
+    public function getSubOrg($parentId)
+    {
+        $subs = Orgchart::where('parent_id', $parentId)
+                        ->where('active', 'y')
+                        ->get(['id', 'title']);
+
+        return response()->json([
+            'data' => $subs,
+            'has_child' => $subs->isNotEmpty() // ส่งสถานะไปบอกว่ามีลูกต่อไหม
+        ]);
     }
 }
