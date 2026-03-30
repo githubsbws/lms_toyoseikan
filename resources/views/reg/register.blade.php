@@ -20,7 +20,7 @@
                             <div class="col-xs-12" align="center">
                                 <h1>สมัครสมาชิก</h1>
                             </div>
-                            @if ($errors->any())
+                            {{-- @if ($errors->any())
                                     <div>
                                         <ul>
                                             @foreach ($errors->all() as $error)
@@ -28,132 +28,156 @@
                                             @endforeach
                                         </ul>
                                     </div>
-                                @endif
+                                @endif --}}
                             <div class="form">
                                 <form class="form-horizontal" action="{{ route('register') }}" method="post">
                                     @csrf
                                     <div class="form-group">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">รหัสพนักงาน <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
                                         <div class="col-sm-9">
                                             <input class="form-control" placeholder="Staff ID"
                                                 name="username" type="text">
+                                            @error('username')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
-                                        @error('username')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
+
                                     </div>
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label"><label for="UserLogin_password"
                                                 class="required">รหัสผ่าน <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
 
                                         <div class="col-sm-9">
                                             <input class="form-control" placeholder="Password"
                                                 name="password" type="password">
+                                            @error('password')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
-                                    </div><br>
+                                    </div>
                                     <div class="form-group">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ชื่อ - นามสกุล <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
                                         <div class="col-sm-9">
                                             <input class="form-control" placeholder="firstname"
                                                 name="firstname" type="text">
+                                            @error('firstname')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                             <br>
                                             <input class="form-control" placeholder="lastname"
                                                 name="lastname" type="text">
+                                            @error('lastname')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
 
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label"><label for="UserLogin_password"
                                                 class="required">อีเมล <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
 
                                         <div class="col-sm-9">
                                             <input class="form-control" placeholder="Email"
                                                 name="email" type="email">
+                                            @error('email')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
                                     <div class="form-group org-group">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">องค์กร <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" id="level-2" name="orgchart_id" data-next="level-3" data-level="2">
-                                            <option value="" disabled selected>---เลือกรายการ---</option>
-                                            @foreach ($orgchart as $org)
-                                                <option value="{{ $org->id }}">
-                                                    {{ $org->title }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                            <select class="form-control org-select" id="level-2" name="orgchart_id" data-next="level-3" data-level="2">
+                                                <option value="" disabled selected>---เลือกรายการ---</option>
+                                                @foreach ($orgchart as $org)
+                                                    <option value="{{ $org->id }}">
+                                                        {{ $org->title }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('orgchart_id')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
 
                                     <div class="form-group org-group" id="group-level-3" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">แผนก <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" id="level-3" name="department_id" data-next="level-4" data-level="3" disabled>
+                                            <select class="form-control org-select" id="level-3" name="department_id" data-next="level-4" data-level="3" disabled>
 
-                                        </select>
+                                            </select>
                                         </div>
                                     </div>
 
                                     <div class="form-group org-group" id="group-level-4" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ส่วนงาน <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" id="level-4" name="section_id" data-next="level-5" data-level="4" disabled>
+                                            <select class="form-control org-select" id="level-4" name="section_id" data-next="level-5" data-level="4" disabled>
 
-                                        </select>
+                                            </select>
                                         </div>
                                     </div>
 
                                     <div class="form-group org-group" id="group-level-5" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">สายการผลิต <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" id="level-5" name="line_id" data-next="level-6" data-level="5" disabled>
+                                            <select class="form-control org-select" id="level-5" name="line_id" data-next="level-6" data-level="5" disabled>
 
-                                        </select>
+                                            </select>
                                         </div>
                                     </div>
-
-                                    {{-- <div class="form-group org-group" id="group-level-6" style="display:none;">
-                                        <label for="inputEmail3" class="col-sm-3 control-label"><label
-                                                for="UserLogin_username" class="required">ทีม <span
-                                                    class="required">*</span></label></label>
-                                        <div class="col-sm-9">
-                                        <select class="form-control org-select" id="level-6" name="team_id" data-next="level-7" data-level="6" disabled>
-
-                                        </select>
-                                        </div>
-                                    </div> --}}
 
                                     <div class="form-group org-group" id="group-level-6" style="display:none;">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">ตำแหน่ง <span
-                                                    class="required">*</span></label></label>
+                                                    class="text-danger">*</span></label></label>
                                         <div class="col-sm-9">
-                                        <select class="form-control org-select" id="level-6" name="position_id" data-level="6" disabled>
+                                            <select class="form-control org-select" id="level-6" name="position_id" data-level="6" disabled>
 
-                                        </select>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                                for="" class="required">ทีม <span
+                                                    class="text-danger">*</span></label></label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control"  name="team_id">
+                                                <option value="" disabled selected>---เลือกรายการ---</option>
+                                                @foreach ($team as $teams)
+                                                    <option value="{{ $teams->id }}">
+                                                        {{ $teams->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('team_id')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
 
                                     <input type="hidden" name="org_id" id="final_org_id">
 
                                     <div class="form-group">
-                                        <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
+                                        <div class="col-sm-6 col-sm-offset-5" style="padding: 0;">
                                             <input class="btn btn-primary" type="submit" name="yt0"
-                                                value="เข้าสู่ระบบ">
+                                                value="ลงทะเบียน">
                                         </div>
                                     </div>
                                 </form>

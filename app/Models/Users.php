@@ -22,8 +22,8 @@ class Users extends AuthenticatableUser implements Authenticatable
 
     protected $fillable = [
         'created_at', 'id', 'username', 'password', 'email',
-        'company_id', 'division_id', 'position_id', 'pic_user', 'department_id', 'activkey', 'create_at', 'lastvisit_at', 'superuser', 'status', 'online_status', 'online_user', 'last_ip', 'last_activity',
-        'avatar', '_token', 'group_id', 'del_status', 'asc_id','teacher_status'
+        'org_id', 'division_id', 'position_id', 'pic_user', 'department_id', 'activkey', 'create_at', 'lastvisit_at', 'superuser', 'status', 'online_status', 'online_user', 'last_ip', 'last_activity',
+        'avatar', '_token', 'group_id', 'del_status', 'asc_id','teacher_status','team_id'
     ];
     public static function findById($id)
     {
@@ -42,35 +42,30 @@ class Users extends AuthenticatableUser implements Authenticatable
         return $this->group_id;
     }
 
-    public function Company()
+    public function Orgchart()
     {
-
-        return $this->belongsTo(Company::class,'company_id');
-
+        return $this->belongsTo(Orgchart::class,'org_id','id');
     }
 
     public function Asc()
     {
-
         return $this->belongsTo(ASC::class,'asc_id','id');
-
     }
 
     public function Position()
     {
-
         return $this->belongsTo(Position::class,'position_id','id');
-
     }
+
     public function PermissionGroup()
     {
         return $this->hasOne(Pgroup::class,'id','group_id');
     }
 
     public function orgcharts()
-{
-    return $this->belongsToMany(OrgchartUser::class,'user_id', 'orgchart_id');
-}
+    {
+        return $this->belongsToMany(OrgchartUser::class,'user_id', 'orgchart_id');
+    }
     public function learns()
     {
         return $this->hasMany(Learn::class, 'user_id', 'id');
@@ -79,5 +74,10 @@ class Users extends AuthenticatableUser implements Authenticatable
     public function scores()
     {
         return $this->hasMany(Score::class, 'user_id', 'id');
+    }
+
+    public function Team()
+    {
+        return $this->belongsTo(Team::class, 'team_id', 'id');
     }
 }
