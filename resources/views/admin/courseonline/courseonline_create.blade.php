@@ -169,15 +169,14 @@
         });
 
         $('#org_jstree').on("changed.jstree", function (e, data) {
-            console.log("Selected IDs:", data.selected);
-            $('#org_ids').val(data.selected.join(','));
-        });
+            const tree = data.instance;
 
-        // $('button').on('click', function () {
-        //     $('#jstree').jstree(true).select_node('child_node_1');
-        //     $('#jstree').jstree('select_node', 'child_node_1');
-        //     $.jstree.reference('#jstree').select_node('child_node_1');
-        // });
+            const leafNodes = data.selected.filter(id => {
+                return tree.is_leaf(id);
+            })
+            // console.log(leafNodes);
+            $('#org_ids').val(leafNodes.join(','));
+        });
     });
 
 </script>
