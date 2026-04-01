@@ -8,7 +8,7 @@
                 <div class="container-fluid">
                     <div class="d-flex align-items-center">
                         <div class="">
-                            <h4 class="m-0">ระบบหลักสูตรนิสิต/นักศึกษา</h4>
+                            <h4 class="m-0">ระบบเพิ่มหลักสูตร</h4>
                         </div>
                         <div class="ml-3">
                             <a href="{{route('admin')}}">
@@ -24,7 +24,7 @@
             <div class="container mt-5">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        เพิ่มหลักสูตรนิสิต/นักศึกษา
+                        เพิ่มหลักสูตร
                     </div>
                     <div class="card-body">
                         <p>ค่าที่มี <span class="text-danger">*</span> จำเป็นต้องใส่ให้ครบ</p>
@@ -41,7 +41,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="teacher_name">ชื่อวิยากร <span class="text-danger">*</span></label>
+                                <label for="teacher_name">ชื่อวิทยากร <span class="text-danger">*</span></label>
                                 <select class="form-control" name="teacher_name" required>
                                     @foreach($teacher as $t)
                                     <option value="{{ $t->teacher_id }}">{{ $t->teacher_name}}</option>
@@ -64,12 +64,28 @@
                                 <textarea name="course_detail" id="summernote2" class="form-control"></textarea>
                             </div>
 
-                            {{-- <div class="form-group">
-                                <label for="recommend">ปักหมุดหลักสูตรแนะนำ</label>
-                                <div>
-                                    <input type="checkbox" name="recommend" value="y" data-toggle="toggle" data-on="แสดง" data-off="ไม่แสดง" data-onstyle="success" data-offstyle="danger" />
+                            <div class="form-group">
+                                <label for="">ผลกระทบต่อ License Person</label>
+                                <div class="col-4 ml-2">
+                                    <label for="">Operating Machine</label>
+                                    <select class="form-control" name="op_mac_id" id="">
+                                        <option value="1">silo</option>
+                                    </select>
                                 </div>
-                            </div> --}}
+
+                                <div class="col-4 m-2">
+                                    <label for="">Parameter Setting</label>
+                                    <select class="form-control" name="par_st_id" id="">
+                                        <option value="1">silo</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label for="">เลือกสายที่ต้องการให้เห็นหลักสูตร <span class="text-danger">*</span> </label>
+                            </div>
+                            <div class="form-group" id="org_jstree"></div>
 
                             <div class="form-group">
                                 <label for="course_note">หมายเหตุ</label>
@@ -125,10 +141,7 @@
                                     รูปภาพควรมีขนาด 250x180(แนวนอน) หรือ ขนาด 250x(xxx) (แนวยาว)
                                 </font>
                             </div>
-                            <div class="form-group">
-                                <label for="">เลือกสายที่ต้องการให้เห็นหลักสูตร <span class="text-danger">*</span> </label>
-                            </div>
-                            <div class="form-group" id="org_jstree"></div>
+
                             <input type="hidden" name="org_ids" id="org_ids">
 
 
@@ -174,7 +187,7 @@
             const leafNodes = data.selected.filter(id => {
                 return tree.is_leaf(id);
             })
-            // console.log(leafNodes);
+            console.log(leafNodes);
             $('#org_ids').val(leafNodes.join(','));
         });
     });

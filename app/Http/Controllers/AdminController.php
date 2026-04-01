@@ -1295,7 +1295,8 @@ class AdminController extends Controller
                     'course_title' =>'required|string',
                     'course_short_title'=>'required|string',
                     'course_detail'=>'required|string',
-                    'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+                    'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'org_ids' => 'required'
 
                 ]);
                 $teacher = Teacher::where('teacher_name',$request->input('teacher_name'))->first();
@@ -1317,13 +1318,13 @@ class AdminController extends Controller
                 $course_update->create_by = Auth::user()->id;
                 $course_update->active = 'y';
 
-                // if ($request->has('recommend')) {
-                //     $course_update->recommend = 'y';
-                // }else{
-                //     $course_update->recommend = 'n';
-                // }
+                if($request->has('op_mac_id')){
+                    $course_update->op_mac_id = $request->input('op_mac_id');
+                }
 
-                // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
+                if($request->has('par_st_id')){
+                    $course_update->par_st_id = $request->input('par_st_id');
+                }
 
                 $course_update->save();
 
@@ -1336,14 +1337,6 @@ class AdminController extends Controller
                     if (!FileStore::isDirectory($idFolder)) {
                         FileStore::makeDirectory($idFolder, 0775, true, true);
                     }
-                    // if (!file_exists($idFolder)) {
-                    //     mkdir($idFolder);
-
-                    //     $idFolder2 = public_path('images/uploads/courseonline/'.$course_update->course_id.'/original/');
-                    //     if (!file_exists($idFolder2)) {
-                    //         mkdir($idFolder2);
-                    //     }
-                    // }
 
                     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
 
@@ -1352,6 +1345,16 @@ class AdminController extends Controller
                 }
                 $course_update->sortOrder = $course_update->course_id;
                 $course_update->save();
+
+                if ($request->filled('org_ids')){
+                    $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
+                    ->mapWithKeys(fn($id, $index) => [
+                        $id => ['active' =>'y','order' => $index + 1]
+                        ])
+                    );
+                }
+
+
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }

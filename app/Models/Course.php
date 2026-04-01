@@ -24,7 +24,9 @@ class Course extends Model
         'random_choice',
         'average_time_pretest',
         'average_time_posttest',
-        'course_picture'
+        'course_picture',
+        'op_mac_id',
+        'par_st_id'
     ];
 
     const CREATED_AT = 'create_date'; // Custom created_at column
@@ -40,5 +42,10 @@ class Course extends Model
     public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'course_lecturer','teacher_id');
+    }
+
+    public function orgcourse()
+    {
+        return $this->belongsToMany(Orgchart::class,'org_course', 'course_id', 'orgchart_id');
     }
 }
