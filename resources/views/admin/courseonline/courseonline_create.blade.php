@@ -79,7 +79,6 @@
                                         <option value="1">silo</option>
                                     </select>
                                 </div>
-
                             </div>
 
                             <div class="form-group">
@@ -187,7 +186,7 @@
             const leafNodes = data.selected.filter(id => {
                 return tree.is_leaf(id);
             })
-            console.log(leafNodes);
+            // console.log(leafNodes);
             $('#org_ids').val(leafNodes.join(','));
         });
     });

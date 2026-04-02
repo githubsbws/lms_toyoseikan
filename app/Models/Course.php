@@ -48,4 +48,15 @@ class Course extends Model
     {
         return $this->belongsToMany(Orgchart::class,'org_course', 'course_id', 'orgchart_id');
     }
+
+    public function operation()
+    {
+        return $this->belongsTo(OperationMachine::class,'op_mac_id','id');
+    }
+
+    public function parameters()
+    {
+        return $this->belongsTo(ParameterSetting::class,'par_st_id','id');
+    }
+
 }

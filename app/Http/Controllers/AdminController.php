@@ -1201,12 +1201,32 @@ class AdminController extends Controller
             $course_detail = Course::where('course_id', $id)->first();
             $category = DB::table('category')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
+            $selectedIds = $course_detail->orgcourse->pluck('id')->map(fn($id) => (string)$id)->toArray();
+            $orgtree = Orgchart::where('active', 'y')
+            ->where('level', '!=', '1')
+            ->get()->map(function ($item) use ($selectedIds) {
+                return [
+                    'id'     => (string)$item->id,
+                    // Logic: ถ้าไอเทมนี้อยู่ Level 2 ให้มันเป็น "ตัวแม่สูงสุด" ของ Tree นี้
+                    // เราจึงต้องส่ง parent เป็น '#' ให้ jstree
+                    'parent' => ($item->level === '2') ? '#' : (string)$item->parent_id,
+                    'text'   => $item->title, // ชื่อแผนก/ไลน์/ตำแหน่ง
+                    'state'  => [
+                        'opened' => false, // ให้พับไว้ก่อน ถ้าอยากให้กางหมดค่อยแก้เป็น true
+                        'selected' => in_array((string)$item->id, $selectedIds)
+                    ],
+                    'icon' => 'fa fa-user text-success'
+                ];
+            });
             if ($request->isMethod('post')) {
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
                     'cate_id' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                     'course_title' =>'required|string',
                     'course_short_title'=>'required|string',
+                    'course_detail'=>'required|string',
+                    'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'org_ids' => 'required'
 
                 ]);
                 // dd($validator);
@@ -1224,11 +1244,13 @@ class AdminController extends Controller
                 $course_update->course_note = $request->input('course_note');
                 $course_update->update_by = Auth::user()->id;
 
-                // if ($request->has('recommend')) {
-                //     $course_update->recommend = 'y';
-                // }else{
-                //     $course_update->recommend = 'n';
-                // }
+                if($request->has('op_mac_id')){
+                    $course_update->op_mac_id = $request->input('op_mac_id');
+                }
+
+                if($request->has('par_st_id')){
+                    $course_update->par_st_id = $request->input('par_st_id');
+                }
 
                 if($request->file('image')){
                     $image = $request->file('image');
@@ -1259,9 +1281,17 @@ class AdminController extends Controller
 
                 $course_update->save();
 
+                if ($request->filled('org_ids')){
+                    $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
+                    ->mapWithKeys(fn($id, $index) => [
+                        $id => ['active' =>'y','order' => $index + 1]
+                        ])
+                    );
+                }
+
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-            return view("admin.courseonline.courseonline_edit", compact('course_detail', 'category','teacher'));
+            return view("admin.courseonline.courseonline_edit", compact('course_detail', 'category','teacher','orgtree'));
         }else{
             return redirect()->route('login.admin');
         }

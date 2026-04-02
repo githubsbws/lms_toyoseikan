@@ -20,7 +20,7 @@
                         </div>
                     </div>
                 </div>
-            </div>   
+            </div>
             <div class="container mt-5">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
@@ -66,14 +66,26 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="recommend">ปักหมุดหลักสูตรแนะนำ</label>
-                                <div>
-                                    @php
-                                        $checked = $course_detail->recommend == 'y' ? 'checked' : '';
-                                    @endphp
-                                    <input type="checkbox" name="recommend" value="y" data-toggle="toggle" data-on="แสดง" data-off="ไม่แสดง" data-onstyle="success" data-offstyle="danger" {{ $checked }} />
+                                <label for="">ผลกระทบต่อ License Person</label>
+                                <div class="col-4 ml-2">
+                                    <label for="">Operating Machine</label>
+                                    <select class="form-control" name="op_mac_id" id="">
+                                        <option value="1">silo</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-4 m-2">
+                                    <label for="">Parameter Setting</label>
+                                    <select class="form-control" name="par_st_id" id="">
+                                        <option value="1">silo</option>
+                                    </select>
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label for="">เลือกสายที่ต้องการให้เห็นหลักสูตร <span class="text-danger">*</span> </label>
+                            </div>
+                            <div class="form-group" id="org_jstree"></div>
 
                             <div class="form-group">
                                 <label for="course_note">หมายเหตุ</label>
@@ -92,7 +104,7 @@
                                 <div class="fileupload fileupload-new" data-provides="fileupload">
                                     <div class="input-append">
                                         <div class="uneditable-input span3">
-                                            <i class="icon-file fileupload-exists"></i> 
+                                            <i class="icon-file fileupload-exists"></i>
                                             <span class="fileupload-preview"></span>
                                         </div>
                                         <img id="previewImage" src="#" alt="Preview Image" style="display: none;">
@@ -110,11 +122,11 @@
                                         document.addEventListener('DOMContentLoaded', function() {
                                             var imageInput = document.getElementById('imageInput');
                                             var previewImage = document.getElementById('previewImage');
-                                
+
                                             imageInput.addEventListener('change', function() {
                                                 previewImageFile(this);
                                             });
-                                
+
                                             function previewImageFile(input) {
                                                 var file = input.files[0];
                                                 if (file) {
@@ -137,6 +149,8 @@
                                 </font>
                             </div>
 
+                            <input type="hidden" name="org_ids" id="org_ids">
+
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
                         </form>
                     </div>
@@ -155,6 +169,31 @@
     $(document).ready(function() {
         $('#summernote2').summernote();
         });
+    $(document).ready(function () {
+        var OrgChartTree = @json($orgtree);
+        // console.log(OrgChartTree);
+        $('#org_jstree').jstree({
+            'core': {
+            'data': OrgChartTree, // ใช้ข้อมูลที่เรา map มา
+            'themes': {
+                'dots': true, // มีเส้นประเชื่อมกิ่งเหมือน Registry Editor
+                'icons': true,
+                'responsive': true,
+            }
+        },
+        'plugins': ["checkbox"] // เพิ่ม wholerow ให้จิ้มง่าย และ search ให้ค้นหาได้
+        });
+
+        $('#org_jstree').on("changed.jstree", function (e, data) {
+            const tree = data.instance;
+
+            const leafNodes = data.selected.filter(id => {
+                return tree.is_leaf(id);
+            })
+            // console.log(leafNodes);
+            $('#org_ids').val(leafNodes.join(','));
+        });
+    });
 </script>
 </body>
 @endsection
