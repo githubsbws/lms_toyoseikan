@@ -9,10 +9,9 @@ class ASC extends Model
 {
     use HasFactory;
 
-    protected $connection = 'pgsql_noprefix';
     protected $table = 'asc';
     protected $primaryKey = 'id';
-    
+
     const CREATED_AT = 'created_date'; // Custom created_at column
     const UPDATED_AT = 'updated_date'; // Custom update_at column
 
