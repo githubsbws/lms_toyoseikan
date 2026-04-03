@@ -18,6 +18,17 @@ use App\Models\Orgchart;
 <script src="/Adminkit/orgchart/js/jquery.jOrgChart.js"></script>
 <script type="text/javascript" src="/Adminkit/orgchart/js/taffy.js"></script>
 <style type="text/css">
+	html, body {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+}
+
+#chart-container {
+    white-space: nowrap; /* ป้องกันตัดบรรทัด */
+}
 #getjson {
   width: 100px;
   height: 50px;
@@ -25,6 +36,7 @@ use App\Models\Orgchart;
   margin-left: 20px;
   margin-top: 20px;
 }
+
 /*
 #chart{
   height: 300px;

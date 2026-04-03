@@ -91,6 +91,7 @@ use App\Models\OrgchartUser;
 use App\Models\OcrFile;
 use App\Models\OcrFilePage;
 
+
 use App\Models\AdminMenu;
 // use App\Models\Company;
 // use App\Models\Division;
@@ -99,6 +100,8 @@ use App\Models\Position;
 use App\Models\Profiles;
 use App\Models\ProfilesTitle;
 // use App\Models\Users;
+
+use App\Services\RoadmapService;
 
 class AdminController extends Controller
 {
@@ -1346,6 +1349,14 @@ class AdminController extends Controller
                 $course_update->sortOrder = $course_update->course_id;
                 $course_update->save();
 
+                // === call auto roadmap generate ===
+                $roadmapService = new RoadmapService();
+                $roadmapService->generateForCourse(
+                    $course_update->course_id, 
+                    $request->input('op_mac_id'),
+                    $request->input('par_st_id')
+                );
+
                 if ($request->filled('org_ids')){
                     $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
                     ->mapWithKeys(fn($id, $index) => [
@@ -1363,6 +1374,8 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
+
+   
 
      function teacher_create(Request $request)
     {
