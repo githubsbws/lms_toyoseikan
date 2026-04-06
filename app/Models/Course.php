@@ -26,13 +26,15 @@ class Course extends Model
         'average_time_posttest',
         'course_picture',
         'op_mac_id',
-        'par_st_id'
+        'par_st_id',
+        'start_date',
+        'end_date',
+        'is_onboarding',
+        'department_org_id'
     ];
 
     const CREATED_AT = 'create_date'; // Custom created_at column
     const UPDATED_AT = 'update_date'; // Custom update_at column
-    const BOOK_AT = 'course_book_date'; // Custom created_at column
-    const RECTOR_AT = 'course_rector_date'; // Custom update_at column
 
     public static function findById($id)
     {

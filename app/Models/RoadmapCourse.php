@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +11,6 @@ class RoadmapCourse extends Model
 
     protected $fillable = [
         'roadmap_id', 'course_id', 'order',
-        'mandatory', 'active'
+        'milestone_days', 'active'
     ];
 }

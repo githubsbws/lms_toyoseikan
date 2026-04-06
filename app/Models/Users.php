@@ -23,7 +23,7 @@ class Users extends AuthenticatableUser implements Authenticatable
     protected $fillable = [
         'created_at', 'id', 'username', 'password', 'email',
         'org_id', 'division_id', 'position_id', 'pic_user', 'department_id', 'activkey', 'create_at', 'lastvisit_at', 'superuser', 'status', 'online_status', 'online_user', 'last_ip', 'last_activity',
-        'avatar', '_token', 'group_id', 'del_status', 'asc_id','teacher_status','team_id'
+        'avatar', '_token', 'group_id', 'del_status', 'asc_id','teacher_status','team_id','department_org_id'
     ];
     public static function findById($id)
     {
