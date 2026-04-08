@@ -12,6 +12,8 @@ class CourseScoreWeight extends Model
     protected $table = 'course_score_weight';
     protected $primaryKey = 'id';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'course_id',
         'q_a_weight',

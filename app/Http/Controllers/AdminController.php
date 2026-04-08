@@ -93,6 +93,7 @@ use App\Models\OcrFilePage;
 
 
 use App\Models\AdminMenu;
+use App\Models\CourseScoreWeight;
 // use App\Models\Company;
 // use App\Models\Division;
 use App\Models\Permission;
@@ -1350,6 +1351,8 @@ class AdminController extends Controller
                 $course_update->update_by = Auth::user()->id;
                 $course_update->create_by = Auth::user()->id;
                 $course_update->active = 'y';
+                $course_update->department_org_id = Auth::user()->department_org_id;
+                $course_update->is_onboarding = $request->boolean('onboarding');
 
                 if($request->has('op_mac_id')){
                     $course_update->op_mac_id = $request->input('op_mac_id');
@@ -1357,6 +1360,14 @@ class AdminController extends Controller
 
                 if($request->has('par_st_id')){
                     $course_update->par_st_id = $request->input('par_st_id');
+                }
+
+                if($request->has('start_date')){
+                    $course_update->start_date = $request->input('start_date');
+                }
+
+                if($request->has('end_date')){
+                    $course_update->end_date = $request->input('end_date');
                 }
 
                 $course_update->save();
@@ -1380,12 +1391,12 @@ class AdminController extends Controller
                 $course_update->save();
 
                 // === call auto roadmap generate ===
-                $roadmapService = new RoadmapService();
-                $roadmapService->generateForCourse(
-                    $course_update->course_id, 
-                    $request->input('op_mac_id'),
-                    $request->input('par_st_id')
-                );
+                // $roadmapService = new RoadmapService();
+                // $roadmapService->generateForCourse(
+                //     $course_update->course_id,
+                //     $request->input('op_mac_id'),
+                //     $request->input('par_st_id')
+                // );
 
                 if ($request->filled('org_ids')){
                     $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
@@ -1395,7 +1406,15 @@ class AdminController extends Controller
                     );
                 }
 
+                $scoreWeight = new CourseScoreWeight;
+                $scoreWeight->course_id = $course_update->course_id;
+                $scoreWeight->q_a_weight = $request->w_q_and_a;
+                $scoreWeight->operate_weight = $request->w_operate;
+                $scoreWeight->observe_weight = $request->w_observe;
+                $scoreWeight->exam_weight = $request->w_exam;
+                $scoreWeight->assign_weight = $request->w_assign;
 
+                $scoreWeight->save();
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
@@ -1405,7 +1424,7 @@ class AdminController extends Controller
         }
     }
 
-   
+
 
      function teacher_create(Request $request)
     {
