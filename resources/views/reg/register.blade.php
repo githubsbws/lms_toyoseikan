@@ -173,6 +173,7 @@
                                     </div>
 
                                     <input type="hidden" name="org_id" id="final_org_id">
+                                    <input type="hidden" name="department_id" id="department_id">
 
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-5" style="padding: 0;">
@@ -201,6 +202,9 @@
             // 1. อัปเดต ID ล่าสุดลงใน Hidden Input เสมอ
             $('#final_org_id').val(parentId);
 
+            if(currentLevel === 3){
+                $('#department_id').val(parentId); //เก็บ department เพื่อไว้กรองการมองเห็นหลังบ้าน
+            }
             // 2. ล้างค่าตัวลูกทั้งหมด (Chain Reset)
             resetChildren(currentLevel);
 

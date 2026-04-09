@@ -30,7 +30,7 @@
                         <form action="{{ route('courseonline.edit', ['id'=>$course_detail->course_id]) }}" enctype="multipart/form-data" method="post" id="question-form">
                             @csrf
                             <div class="form-group">
-                                <label for="cate_id">หมวดอบรมออนไลน์</label>
+                                <label for="cate_id"><u>หมวดอบรมออนไลน์</u></label>
                                 <select class="form-control" name="cate_id">
                                     <option value="">ทั้งหมด</option>
                                     @foreach ($category as $cate_id => $cate_title)
@@ -43,7 +43,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="teacher_name">ชื่อวิยากร</label>
+                                <label for="teacher_name"><u>ชื่อวิยากร</u></label>
                                 <select class="form-control" name="teacher_name">
                                     <option value="{{ $course_detail->teacher->teacher_id ?? '-' }}">{{ $course_detail->teacher->teacher_name ?? '-'}}</option>
                                     @foreach($teacher as $t)
@@ -52,21 +52,48 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="course_title">ชื่อหลักสูตรอบรมออนไลน์</label>
+                                <label for="course_title"><u>ชื่อหลักสูตรอบรมออนไลน์</u></label>
                                 <input type="text" name="course_title" class="form-control" value="{{ $course_detail->course_title }}">
                             </div>
                             <div class="form-group">
-                                <label for="course_short_title">รายละเอียดย่อ</label>
+                                <label for="course_short_title"><u>รายละเอียดย่อ</u></label>
                                 <textarea name="course_short_title" id="summernote" class="form-control">{!!  htmlspecialchars_decode($course_detail->course_short_title) !!}</textarea>
                             </div>
 
                             <div class="form-group">
-                                <label for="course_detail">รายละเอียด </label>
+                                <label for="course_detail"><u>รายละเอียด</u></label>
                                 <textarea name="course_detail" id="summernote2" class="form-control">{{ htmlspecialchars_decode(htmlspecialchars_decode($course_detail->course_detail)) }}</textarea>
                             </div>
 
+                            <hr class="my-4" style="border-top: 2px solid #eee;">
+
                             <div class="form-group">
-                                <label for="">ผลกระทบต่อ License Person</label>
+                                <label for=""><u>ระยะเวลาของหลักสูตร</u></label>
+                                <div class="col-12 mt-2">
+                                    <input type="checkbox" id="onboarding" name="onboarding" @checked($course_detail->is_onboarding ?? false)>
+                                    <label for="onboarding">เป็นหลักสูตรสำหรับพนักงานใหม่<span class="text-danger">(หลักสูตรถาวร-หากเลือกแล้วช่องวันที่จะหายไป)</span></label>
+                                </div>
+                                <div id="date-select">
+                                    <div class="my-2" >
+                                        <label for="start_date" class="col-12">วันที่เริ่มหลักสูตร</label>
+                                        <div class="col-4">
+                                            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ $course_detail->start_date ?? '' }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <label for="end_date" class="col-12">วันที่ปิดหลักสูตร</label>
+                                        <div class="col-4">
+                                            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ $course_detail->end_date ?? '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4" style="border-top: 2px solid #eee;">
+
+                            <div class="form-group">
+                                <label for=""><u>ผลกระทบต่อ License Person</u></label>
                                 <div class="col-4 ml-2">
                                     <label for="">Operating Machine</label>
                                     <select class="form-control" name="op_mac_id" id="">
@@ -83,12 +110,57 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="">เลือกสายที่ต้องการให้เห็นหลักสูตร <span class="text-danger">*</span> </label>
+                                <label for=""><u>เกณฑ์นํ้าหนักคะแนน<span class="text-danger">(ไม่จำเป็นต้องใส่หมดใส่เท่าที่หลักสูตรกำหนด)</span></u></label>
+                                <div class="row m-2">
+                                    <label class="col-1">ถาม-ตอบ:</label>
+                                        <div class="col-sm-2">
+                                            <input class="form-control form-control-sm" type="number" placeholder="0" name="w_q_and_a" value="{{ $course_detail->courseWeight->q_a_weight ?? '' }}">
+                                        </div>
+                                    <div class="col-sm-1 p-0">%</div>
+                                </div>
+
+                                <div class="row m-2">
+                                    <label class="col-1">ปฏิบัติจริง:</label>
+                                    <div class="col-sm-2">
+                                        <input class="form-control form-control-sm" type="number" placeholder="0" name="w_operate" value="{{ $course_detail->courseWeight->operate_weight ?? '' }}">
+                                    </div>
+                                    <div class="col-sm-1 p-0">%</div>
+                                </div>
+
+                                <div class="row m-2">
+                                    <label class="col-1">สังเกตุ:</label>
+                                    <div class="col-sm-2">
+                                        <input class="form-control form-control-sm" type="number" placeholder="0" name="w_observe" value="{{ $course_detail->courseWeight->observe_weight ?? '' }}">
+                                    </div>
+                                    <div class="col-sm-1 p-0">%</div>
+                                </div>
+
+                                <div class="row m-2">
+                                    <label class="col-1">ข้อสอบ:</label>
+                                    <div class="col-sm-2">
+                                        <input class="form-control form-control-sm" type="number" placeholder="0" name="w_exam" value="{{ $course_detail->courseWeight->exam_weight ?? '' }}">
+                                    </div>
+                                    <div class="col-sm-1 p-0">%</div>
+                                </div>
+
+                                <div class="row m-2">
+                                    <label class="col-1">ผลงาน:</label>
+                                    <div class="col-sm-2">
+                                        <input class="form-control form-control-sm" type="number" placeholder="0" name="w_assign" value="{{ $course_detail->courseWeight->assign_weight ?? '' }}">
+                                    </div>
+                                    <div class="col-sm-1 p-0">%</div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4" style="border-top: 2px solid #eee;">
+
+                            <div class="form-group">
+                                <label for=""><u>เลือกสายที่ต้องการให้เห็นหลักสูตร</u></label>
                             </div>
                             <div class="form-group" id="org_jstree"></div>
 
                             <div class="form-group">
-                                <label for="course_note">หมายเหตุ</label>
+                                <label for="course_note"><u>หมายเหตุ</u></label>
                                 <input type="text" name="course_note" class="form-control" value="{{ $course_detail->course_note }}">
                             </div>
 
@@ -100,7 +172,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="course_picture">รูปภาพ</label>
+                                <label for="course_picture"><u>รูปภาพ</u></label>
                                 <div class="fileupload fileupload-new" data-provides="fileupload">
                                     <div class="input-append">
                                         <div class="uneditable-input span3">
@@ -169,6 +241,19 @@
     $(document).ready(function() {
         $('#summernote2').summernote();
         });
+    $(document).ready(function() {
+        if($('#onboarding').is(':checked')){
+            $('#date-select').hide();
+        }
+
+        $('#onboarding').change(function(){
+            if($(this).is(':checked')){
+                $('#date-select').hide();
+            }else{
+                $('#date-select').show();
+            }
+        })
+    });
     $(document).ready(function () {
         var OrgChartTree = @json($orgtree);
         // console.log(OrgChartTree);

@@ -87,7 +87,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
 
                             <hr class="my-4" style="border-top: 2px solid #eee;">

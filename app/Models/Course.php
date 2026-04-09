@@ -61,4 +61,9 @@ class Course extends Model
         return $this->belongsTo(ParameterSetting::class,'par_st_id','id');
     }
 
+    public function courseWeight()
+    {
+        return $this->hasOne(CourseScoreWeight::class,'course_id');
+    }
+
 }

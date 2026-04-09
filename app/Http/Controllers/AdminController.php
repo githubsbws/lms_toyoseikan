@@ -1247,6 +1247,9 @@ class AdminController extends Controller
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
                 $course_update->course_note = $request->input('course_note');
                 $course_update->update_by = Auth::user()->id;
+                $course_update->active = 'y';
+                $course_update->department_org_id = Auth::user()->department_org_id;
+                $course_update->is_onboarding = $request->boolean('onboarding');
 
                 if($request->has('op_mac_id')){
                     $course_update->op_mac_id = $request->input('op_mac_id');
@@ -1254,6 +1257,14 @@ class AdminController extends Controller
 
                 if($request->has('par_st_id')){
                     $course_update->par_st_id = $request->input('par_st_id');
+                }
+
+                if($request->has('start_date')){
+                    $course_update->start_date = $request->input('start_date');
+                }
+
+                if($request->has('end_date')){
+                    $course_update->end_date = $request->input('end_date');
                 }
 
                 if($request->file('image')){
@@ -1292,6 +1303,15 @@ class AdminController extends Controller
                         ])
                     );
                 }
+
+                $scoreWeight = CourseScoreWeight::where('course_id',$course_update->course_id)->first();
+                $scoreWeight->q_a_weight = $request->w_q_and_a;
+                $scoreWeight->operate_weight = $request->w_operate;
+                $scoreWeight->observe_weight = $request->w_observe;
+                $scoreWeight->exam_weight = $request->w_exam;
+                $scoreWeight->assign_weight = $request->w_assign;
+
+                $scoreWeight->save();
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }

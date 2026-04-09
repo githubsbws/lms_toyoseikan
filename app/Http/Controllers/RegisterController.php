@@ -60,6 +60,7 @@ class RegisterController extends Controller
         $user->email = $request->email;
         $user->org_id = $request->org_id;
         $user->team_id = $request->team_id;
+        $user->department_org_id = $request->department_id;
 
 
         $user->save();
