@@ -13,4 +13,9 @@ class RoadmapCourse extends Model
         'roadmap_id', 'course_id', 'order',
         'milestone_days', 'active'
     ];
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class,'course_id','course_id');
+    }
 }

@@ -153,7 +153,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group" >
+                                    <div class="form-group">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="" class="required">ทีม <span
                                                     class="text-danger">*</span></label></label>
@@ -167,6 +167,18 @@
                                                 @endforeach
                                             </select>
                                             @error('team_id')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                                for="" class="required">วันที่เริ่มงาน<span
+                                                    class="text-danger">*</span></label></label>
+                                        <div class="col-sm-9">
+                                            <input class="form-control"
+                                                name="work_start_date" type="date">
+                                            @error('work_start_date')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>

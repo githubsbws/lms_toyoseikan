@@ -154,10 +154,10 @@
 
                             <hr class="my-4" style="border-top: 2px solid #eee;">
 
-                            <div class="form-group">
+                            <div class="form-group" id="org-select">
                                 <label for=""><u>เลือกสายที่ต้องการให้เห็นหลักสูตร</u></label>
+                                <div class="form-group" id="org_jstree"></div>
                             </div>
-                            <div class="form-group" id="org_jstree"></div>
 
                             <div class="form-group">
                                 <label for="course_note"><u>หมายเหตุ</u></label>
@@ -249,8 +249,10 @@
         $('#onboarding').change(function(){
             if($(this).is(':checked')){
                 $('#date-select').hide();
+                $('#org-select').hide();
             }else{
                 $('#date-select').show();
+                $('#org-select').show();
             }
         })
     });

@@ -40,7 +40,8 @@ use App\Http\Controllers\ConditionController;
 use App\Http\Controllers\ContactusController;
 //-------
 use App\Http\Controllers\AdminController;
-
+use App\Http\Controllers\LicensePersonController;
+use App\Http\Controllers\RoadmapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -768,4 +769,20 @@ Route::get('/ocr/page/{id}', [AdminController::class, 'OCRpage'])->name('ocr.pag
 Route::post('/ocr_del/{id}', [AdminController::class, 'OCRdel'])->name('ocr.del');
 Route::get('/ocr/edit/{id}/{page_number}', [AdminController::class, 'OCRedit'])->name('ocr.edit');
 Route::put('/ocr/update/{id}/{page_number}', [AdminController::class, 'OCRupdate'])->name('ocr.update');
+
+Route::get('/licenseperson/operate',[LicensePersonController::class, 'indexOperate'])->name('license.operate.index');
+
+Route::get('/licenseperson/parameter',[LicensePersonController::class, 'indexParameter'])->name('license.parameter.index');
+
+
+Route::middleware(['auth.admin'])->group(function(){
+    Route::get('/roadmap/new-emp',[RoadmapController::class, 'indexNewEmp'])->name('roadmap.newemp.index');
+    Route::get('/roadmap/new-emp/create',[RoadmapController::class, 'createNewEmp'])->name('roadmap.newemp.create');
+    Route::post('/roadmap/new-emp/create/',[RoadmapController::class, 'createNewEmp'])->name('roadmap.newemp.store');
+
+    Route::get('/roadmap/new-emp/edit/{id}',[RoadmapController::class, 'editNewEmp'])->name('roadmap.newemp.edit');
+    Route::post('/roadmap/new-emp/edit/{id}',[RoadmapController::class, 'editNewEmp'])->name('roadmap.newemp.update');
+    Route::get('/roadmap/general-emp',[RoadmapController::class, 'indexGeneralEmp'])->name('license.generalemp.index');
+});
+
 });

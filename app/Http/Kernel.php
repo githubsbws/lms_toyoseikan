@@ -58,6 +58,7 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
+        'auth.admin'  => \App\Http\Middleware\AdminAuth::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
@@ -68,11 +69,11 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\Admin::class,
     ];
-    
-    protected $routeMiddleware = [   
+
+    protected $routeMiddleware = [
         'optimizeImages' => \Spatie\LaravelImageOptimizer\Middlewares\OptimizeImages::class,
-        'recaptcha' => \App\Http\Middleware\VerifyRecaptcha::class, 
+        'recaptcha' => \App\Http\Middleware\VerifyRecaptcha::class,
         'checkIdleTimeout' => \App\Http\Middleware\CheckIdleTimeout::class,
         'single_login' => \App\Http\Middleware\CheckSingleLogin::class,
-      ]; 
+      ];
 }
