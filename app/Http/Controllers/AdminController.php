@@ -2444,7 +2444,7 @@ class AdminController extends Controller
         // สร้าง question
         $question = Question::create([
             'ques_type'   => $request->ques_type,
-            'ques_title'  => $request->ques_title,
+            'ques_title'  => htmlspecialchars($request->ques_title),
             'group_id'    => $id,
             'active'      => 'y',
             'create_date' => Carbon::now(),
@@ -2493,7 +2493,7 @@ class AdminController extends Controller
 
         $question->update([
             'ques_type' => $request->ques_type,
-            'ques_title' => $request->ques_title,
+            'ques_title' => htmlspecialchars($request->ques_title),
             'update_by' => auth()->id(),
         ]);
 

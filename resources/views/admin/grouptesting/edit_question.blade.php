@@ -11,7 +11,7 @@
                             <h4 class="m-0">ระบบชุดข้อสอบบทเรียนออนไลน์</h4>
                         </div>
                         <div class="ml-3">
-                            <a href="{{ url()->previous() }}">
+                            <a href="{{ route('grouptesting') }}">
                                 <button class="btn btn-warning d-flex align-items-center">
                                     <i class="fas fa-angle-left mr-2"></i>
                                     กลับหน้าหลัก
@@ -43,7 +43,7 @@
                                 <!-- คำถาม -->
                                 <div class="mb-3">
                                     <label>คำถาม</label>
-                                    <textarea name="ques_title" class="form-control">{{ $question->ques_title }}</textarea>
+                                    <textarea name="ques_title" id="summernote" class="form-control">{!! htmlspecialchars_decode($question->ques_title) !!}</textarea>
                                 </div>
 
                                 <!-- Choices -->
@@ -85,6 +85,9 @@
 	</div>
 	<div class="clearfix"></div>
 <script>
+    $(document).ready(function() {
+        $('#summernote').summernote();
+        });
 let index = Date.now();
 
 document.getElementById('add-choice').addEventListener('click', function() {
@@ -168,6 +171,14 @@ document.querySelector('form').addEventListener('submit', function(e) {
         }
     }
 });
+@if(session('success'))
+            Swal.fire({
+                title: "{{ session('alert') }}",
+                text:"บันทึกข้อมูลสำเร็จ",
+                icon: "success",
+                confirmButtonText: 'ตกลง' // เพิ่มปุ่มยืนยัน
+            });
+        @endif
 </script>
 </body>
 @endsection

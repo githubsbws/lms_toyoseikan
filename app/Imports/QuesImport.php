@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Facades\AuthFacade;
 
-class QuesImport implements ToModel, WithHeadingRow
+class QuesImport implements ToCollection
 {
     private $id;
 
@@ -26,58 +26,50 @@ class QuesImport implements ToModel, WithHeadingRow
         $this->id = $id;
     }
 
-    public function model(array $row)
+    public function collection(Collection $rows)
     {
-        // แปลงประเภทคำถาม
-        $typeMapping = [
-            'คำตอบแบบเลือกได้หลายคำตอบ' => '1',
-            'ตอบแบบเลือกคำตอบเดียว'    => '2',
-            'คำตอบแบบเลือกคำตอบเดียว'    => '2', // เผื่อ Excel เขียนไม่ตรงกัน
-            'คำตอบแบบหลายบรรทัด'        => '3',
-        ];
-
-        $ques_type = $typeMapping[$row['type']] ?? null;
         $userId = auth()->id();
 
-        if (!$ques_type || empty($row['question'])) {
-            return null; // ข้ามถ้าไม่มีประเภทหรือคำถาม
-        }
+        foreach ($rows as $row) {
 
-        // สร้างคำถาม
-        $question = Question::create([
-            'ques_type'   => $ques_type,
-            'ques_title'  => $row['question'],
-            'active'      => 'y',
-            'create_date' => Carbon::now(),
-            'update_date' => Carbon::now(),
-            'create_by'   => $userId,
-            'update_by'   => $userId,
-            'group_id'    => $this->id,
-        ]);
+            $text = $row[1] ?? null;
 
-        // กรณีที่เป็นแบบมีตัวเลือก (choice)
-        if (in_array($ques_type, ['1', '2'])) {
-            foreach ($row as $key => $value) {
-                if (Str::startsWith($key, 'choice_') && trim($value) !== '') {
-                    $isAnswer = Str::startsWith($value, '*');
-                    $choiceDetail = $isAnswer ? substr($value, 1) : $value;
+            $answer = $row[2] ?? null;
+
+            if (!$text || !$answer) continue;
+
+            $lines = explode("\n", $text);
+
+            $questionText = trim($lines[0]);
+
+            $question = Question::create([
+                'ques_type'   => '2', 
+                'ques_title'  => $questionText,
+                'group_id'    => $this->id,
+                'active'      => 'y',
+                'create_by'   => $userId,
+            ]);
+
+            foreach ($lines as $line) {
+
+                if (preg_match('/^[A-D]\./', trim($line))) {
+
+                    $choiceText = trim(substr($line, 2));
+
+                    // เช็คคำตอบ
+                    $isAnswer = str_contains($answer, substr($line, 0, 1));
 
                     Choice::create([
                         'ques_id'       => $question->ques_id,
-                        'choice_detail' => trim($choiceDetail),
+                        'choice_detail' => $choiceText,
                         'choice_answer' => $isAnswer ? '1' : '2',
-                        'choice_type'   => $row['type'],
+                        'choice_type'   => '2',
                         'active'        => 'y',
-                        'create_date'   => Carbon::now(),
-                        'update_date'   => Carbon::now(),
                         'create_by'     => $userId,
-                        'update_by'     => $userId,
                     ]);
                 }
             }
         }
-
-        // ถ้าเป็นแบบหลายบรรทัด จะไม่มี choice ก็ไม่มีปัญหา
     }
 }
     
