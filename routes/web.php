@@ -328,6 +328,11 @@ Route::post('/group_question_delete/{id?}',[AdminController::class,'group_questi
 Route::get('/group_question_excel/{id}',[AdminController::class,'group_question_excel'])->name('ques.excel')->middleware('checkIdleTimeout');
 Route::post('/group_question_excel/{id}',[AdminController::class,'group_question_excel'])->name('ques.excel')->middleware('checkIdleTimeout');
 
+Route::get('/create-question/{id}', [AdminController::class, 'questions_create'])->name('questions.create')->middleware('checkIdleTimeout');
+Route::post('/store-question/{id}', [AdminController::class, 'questions_store'])->name('questions.store')->middleware('checkIdleTimeout');
+
+Route::get('/edit_question/{id}', [AdminController::class, 'questions_edit'])->name('questions.edit');
+Route::post('/update_question/{id}', [AdminController::class, 'questions_update'])->name('questions.update');
 
 Route::get('/grouptesting_edit/{id}',[AdminController::class,'grouptesting_edit'])->name('grouptesting.edit')->middleware('checkIdleTimeout');
 Route::post('/grouptesting_edit/{id}',[AdminController::class,'grouptesting_edit'])->name('grouptesting.edit')->middleware('checkIdleTimeout');

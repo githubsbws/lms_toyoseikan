@@ -2221,7 +2221,9 @@ class AdminController extends Controller
     }
     function grouptesting_detail($id){
         if(AuthFacade::useradmin()){
-            $group = Grouptesting::join('lesson','lesson.id','=','grouptesting.lesson_id')->where('group_id',$id)->first();
+            $group = Grouptesting::with('lesson')
+                    ->where('group_id', $id)
+                    ->first();
 
             return view("admin.grouptesting.grouptesting_detail",['group' => $group ]);
         }else{
@@ -2414,6 +2416,109 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
+
+    public function questions_create($id)
+    {
+        $group = Grouptesting::where('group_id', $id)->first();
+
+        if (!$group) {
+            return redirect()->back()->with('error', 'ไม่พบข้อมูล group');
+        }
+
+        return view('admin.grouptesting.create_questions', [
+            'group_id' => $id,
+            'group' => $group
+        ]);
+    }
+
+    public function questions_store(Request $request, $id)
+    {
+        $request->validate([
+            'ques_type' => 'required',
+            'ques_title' => 'required',
+        ]);
+
+        $userId = auth()->id();
+
+        // สร้าง question
+        $question = Question::create([
+            'ques_type'   => $request->ques_type,
+            'ques_title'  => $request->ques_title,
+            'group_id'    => $id,
+            'active'      => 'y',
+            'create_date' => Carbon::now(),
+            'update_date' => Carbon::now(),
+            'create_by'   => $userId,
+            'update_by'   => $userId,
+        ]);
+
+        // ถ้ามี choices
+        if (in_array($request->ques_type, ['1','2']) && $request->choices) {
+            foreach ($request->choices as $choice) {
+                if (!empty($choice['choice_detail'])) {
+
+                    Choice::create([
+                        'ques_id'       => $question->ques_id,
+                        'choice_detail' => $choice['choice_detail'],
+                        'choice_answer' => isset($choice['is_answer']) ? '1' : '2',
+                        'choice_type'   => $request->ques_type,
+                        'active'        => 'y',
+                        'create_date'   => Carbon::now(),
+                        'update_date'   => Carbon::now(),
+                        'create_by'     => $userId,
+                        'update_by'     => $userId,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'บันทึกสำเร็จ');
+    }
+
+    public function questions_edit($id)
+    {
+        $question = Question::where('ques_id', $id)->first();
+        $choices = Choice::where('ques_id', $id)->get();
+
+        return view('admin.grouptesting.edit_question', [
+            'question' => $question,
+            'choices' => $choices
+        ]);
+    }
+
+    public function questions_update(Request $request, $id)
+    {
+        $question = Question::where('ques_id', $id)->first();
+
+        $question->update([
+            'ques_type' => $request->ques_type,
+            'ques_title' => $request->ques_title,
+            'update_by' => auth()->id(),
+        ]);
+
+        
+        Choice::where('ques_id', $id)->delete();
+
+        
+        if (in_array($request->ques_type, ['1','2'])) {
+            foreach ($request->choices as $choice) {
+                if (!empty($choice['choice_detail'])) {
+
+                    Choice::create([
+                        'ques_id'       => $id,
+                        'choice_detail' => $choice['choice_detail'],
+                        'choice_answer' => isset($choice['is_answer']) ? '1' : '2',
+                        'choice_type'   => $request->ques_type,
+                        'active'        => 'y',
+                        'create_by'     => auth()->id(),
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success','อัพเดทสำเร็จ');
+    }
+
     //new p
     function coursegrouptesting_create(Request $request){
         if(AuthFacade::useradmin()){
