@@ -41,6 +41,7 @@ class RegisterController extends Controller
             'email' => 'required|email',
             'orgchart_id' => 'required',
             'team_id' => 'required',
+            'work_start_date' => 'required',
 
         ],[
             'username.required' => 'กรุณาใส่เลขพนักงาน',
@@ -50,7 +51,8 @@ class RegisterController extends Controller
             'lastname.required'   => 'กรุณาใส่นามสกุล',
             'email.required'   => 'กรุณาใส่Email',
             'orgchart_id.required'   => 'กรุณาเลือกแผนกของท่าน',
-            'team_id.required'   => 'กรุณาเลือกทีม'
+            'team_id.required'   => 'กรุณาเลือกทีม',
+            'work_start_date' => 'กรุณาเลือกวันที่เริ่มงาน'
         ]);
 
         $user = new Users();
@@ -61,7 +63,7 @@ class RegisterController extends Controller
         $user->org_id = $request->org_id;
         $user->team_id = $request->team_id;
         $user->department_org_id = $request->department_id;
-
+        $user->work_start = $request->work_start_date;
 
         $user->save();
 

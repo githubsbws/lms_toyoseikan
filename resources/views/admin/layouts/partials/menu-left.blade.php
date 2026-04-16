@@ -354,6 +354,54 @@ use App\Helpers\PermissionHelper;
                         <p>จัดการใบประกาศนียบัตร</p>
                     </a>
                 </li> --}}
+                @canmenu(25)
+                    <li class="nav-item {{ request()->is('licenseperson*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('licenseperson*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-id-card"></i>
+                        <p>
+                            ระบบจัดการLicense Person
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ url('/licenseperson/operate') }}" class="nav-link {{ request()->is('licenseperson/operate*') ? 'active' : '' }}">
+                                <p>Operate Machine</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ url('/licenseperson/parameter') }}" class="nav-link {{ request()->is('licenseperson/parameter*') ? 'active' : '' }}">
+                                <p>Parameter Setting</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endcanmenu
+                @canmenu(26)
+                    <li class="nav-item {{ request()->is('roadmap*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('roadmap*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-route"></i>
+                        <p>
+                            ระบบจัดการRoadmap พนังงาน
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ url('/roadmap/new-emp') }}" class="nav-link {{ request()->is('roadmap/new-emp*') ? 'active' : '' }}">
+                                <p>Roadmap พนังงานใหม่</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ url('/roadmap/parameter') }}" class="nav-link {{ request()->is('roadmap/parameter*') ? 'active' : '' }}">
+                                <p>Roadmap พนังงานทั่วไป</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endcanmenu
                 @canmenu(15)
                 <li class="nav-item {{ request()->is('captcha*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('captcha*') ? 'active' : '' }}">

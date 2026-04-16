@@ -1350,7 +1350,6 @@ class AdminController extends Controller
                     'course_short_title'=>'required|string',
                     'course_detail'=>'required|string',
                     'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                    'org_ids' => 'required'
 
                 ]);
                 $teacher = Teacher::where('teacher_name',$request->input('teacher_name'))->first();

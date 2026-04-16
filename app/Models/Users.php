@@ -23,7 +23,7 @@ class Users extends AuthenticatableUser implements Authenticatable
     protected $fillable = [
         'created_at', 'id', 'username', 'password', 'email',
         'org_id', 'division_id', 'position_id', 'pic_user', 'department_id', 'activkey', 'create_at', 'lastvisit_at', 'superuser', 'status', 'online_status', 'online_user', 'last_ip', 'last_activity',
-        'avatar', '_token', 'group_id', 'del_status', 'asc_id','teacher_status','team_id','department_org_id'
+        'avatar', '_token', 'group_id', 'del_status', 'asc_id','teacher_status','team_id','department_org_id','work_start'
     ];
     public static function findById($id)
     {
@@ -45,6 +45,11 @@ class Users extends AuthenticatableUser implements Authenticatable
     public function Orgchart()
     {
         return $this->belongsTo(Orgchart::class,'org_id','id');
+    }
+
+    public function Department()
+    {
+        return $this->belongsTo(Orgchart::class,'department_org_id','id');
     }
 
     public function Asc()
