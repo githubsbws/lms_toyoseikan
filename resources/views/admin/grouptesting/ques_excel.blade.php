@@ -48,7 +48,7 @@
                             <form action="{{ route('ques.excel',['id' => $group->group_id]) }}" enctype="multipart/form-data" method="post" id="uploadForm">
                                 @csrf
                                 <div class="form-group">
-                                    <label for="cate_id">นำเข้าไฟล์ สำหรับข้อสอบ <label>(ไฟล์ excel เท่านั้น)</label></label>
+                                    <label for="cate_id">นำเข้าไฟล์ สำหรับข้อสอบ </label>
                                     <div class="fileupload fileupload-new" data-provides="fileupload">
                                         <div id="fileNameDisplay"></div>
                                         <span class="btn btn-default btn-file">
@@ -63,7 +63,7 @@
                                 </div>
     
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save mr-1"></i> นำเข้าไฟล์ excel
+                                    <i class="fas fa-save mr-1"></i> นำเข้าไฟล์ 
                                 </button>
                                 <br>
                                 <div class="form-group">
@@ -89,6 +89,13 @@
 				list.innerHTML += '<p>' + input.files[i].name + '</p>';
 			}
 		}
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                @foreach ($errors->all() as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
 </script>
 </body>
 @endsection

@@ -59,7 +59,7 @@ use App\Models\Question;
                                         </td>
 										<td class="text-center">
                                             <a class="btn btn-primary btn-icon" href="{{route('ques.excel',['id' => $item->group_id])}}">
-												Import Excel 
+												Import 
 											</a>
                                         </td>
 										<td class="text-center">
