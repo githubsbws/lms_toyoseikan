@@ -44,6 +44,7 @@ use App\Imports\QuestionnaireImport;
 use App\Exports\LessonsExport;
 use App\Exports\UsersExport;
 use App\Exports\UsersAdminExport;
+use App\Imports\ImportWord;
 
 use App\Models\ASC;
 use App\Models\About;
@@ -2389,32 +2390,51 @@ class AdminController extends Controller
         }
     }
     public function group_question_excel(Request $request,$id){
-        if(AuthFacade::useradmin()){
-            $group = Grouptesting::where('group_id',$id)->first();
-            if ($request->isMethod('post')) {
-                $request->validate([
-                    'import_excel' =>
-                    ['required','file','mimes:xlsx, xls'],
-                    [
-                        'import_excel.required' => 'คุณยังไม่ได้ Uploadfile',
-                        'import_excel.mimes' => 'กรุณาใช้ไฟล์สกุล xlsx xls'
-                    ]
-
-
-                ]);
-
-                $excel = Excel::import(new QuesImport($id), $request->file('import_excel'));
-
-                // dd($excel);
-
-                // return redirect()->back()->with('success', 'Excel imported successfully!');
-                return redirect()->route('grouptesting');
-            }
-
-            return view("admin.grouptesting.ques_excel",['group' => $group]);
-        }else{
+        if (!AuthFacade::useradmin()) {
             return redirect()->route('login.admin');
         }
+
+        $group = Grouptesting::where('group_id', $id)->first();
+
+
+        if ($request->isMethod('post')) {
+
+            $request->validate([
+                'import_excel' => 'required|file|mimes:xlsx,xls,docx'
+            ], [
+                'import_excel.required' => 'คุณยังไม่ได้ Upload file',
+                'import_excel.mimes'    => 'รองรับเฉพาะ xlsx, xls, docx'
+            ]);
+
+            $file = $request->file('import_excel');
+            $extension = $file->getClientOriginalExtension();
+
+            try {
+
+                // 🔥 Excel
+                if (in_array($extension, ['xlsx', 'xls'])) {
+
+                    Excel::import(new QuesImport($id), $file);
+
+                }
+
+                // 🔥 Word
+                elseif ($extension === 'docx') {
+
+                    $import = new ImportWord($id);
+                    $import->importWord($file, $id);
+
+                }
+
+                return redirect()->route('grouptesting')
+                    ->with('success', 'Import สำเร็จ');
+
+            } catch (\Exception $e) {
+                return back()->with('error', $e->getMessage());
+            }
+        }
+
+        return view("admin.grouptesting.ques_excel", ['group' => $group]);
     }
 
     public function questions_create($id)
@@ -2443,7 +2463,7 @@ class AdminController extends Controller
         // สร้าง question
         $question = Question::create([
             'ques_type'   => $request->ques_type,
-            'ques_title'  => $request->ques_title,
+            'ques_title'  => htmlspecialchars($request->ques_title),
             'group_id'    => $id,
             'active'      => 'y',
             'create_date' => Carbon::now(),
@@ -2492,7 +2512,7 @@ class AdminController extends Controller
 
         $question->update([
             'ques_type' => $request->ques_type,
-            'ques_title' => $request->ques_title,
+            'ques_title' => htmlspecialchars($request->ques_title),
             'update_by' => auth()->id(),
         ]);
 

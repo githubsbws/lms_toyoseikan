@@ -43,7 +43,7 @@
                                 <!-- คำถาม -->
                                 <div class="mb-3">
                                     <label>คำถาม</label>
-                                    <textarea name="ques_title" class="form-control"></textarea>
+                                    <textarea name="ques_title" id="summernote" class="form-control"></textarea>
                                 </div>
 
                                 <!-- Choices -->
@@ -76,6 +76,9 @@
 	</div>
 	<div class="clearfix"></div>
 <script>
+    $(document).ready(function() {
+        $('#summernote').summernote();
+        });
 let index = 1;
 
 document.getElementById('add-choice').addEventListener('click', function() {
@@ -131,6 +134,14 @@ document.addEventListener('change', function(e) {
         }
     }
 });
+@if(session('success'))
+            Swal.fire({
+                title: "{{ session('alert') }}",
+                text:"บันทึกข้อมูลสำเร็จ",
+                icon: "success",
+                confirmButtonText: 'ตกลง' // เพิ่มปุ่มยืนยัน
+            });
+        @endif
 </script>
 </body>
 @endsection
