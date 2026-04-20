@@ -44,6 +44,7 @@ use App\Imports\QuestionnaireImport;
 use App\Exports\LessonsExport;
 use App\Exports\UsersExport;
 use App\Exports\UsersAdminExport;
+use App\Imports\ImportWord;
 
 use App\Models\ASC;
 use App\Models\About;
@@ -91,7 +92,9 @@ use App\Models\OrgchartUser;
 use App\Models\OcrFile;
 use App\Models\OcrFilePage;
 
+
 use App\Models\AdminMenu;
+use App\Models\CourseScoreWeight;
 // use App\Models\Company;
 // use App\Models\Division;
 use App\Models\Permission;
@@ -99,6 +102,8 @@ use App\Models\Position;
 use App\Models\Profiles;
 use App\Models\ProfilesTitle;
 // use App\Models\Users;
+
+use App\Services\RoadmapService;
 
 class AdminController extends Controller
 {
@@ -1201,12 +1206,32 @@ class AdminController extends Controller
             $course_detail = Course::where('course_id', $id)->first();
             $category = DB::table('category')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
+            $selectedIds = $course_detail->orgcourse->pluck('id')->map(fn($id) => (string)$id)->toArray();
+            $orgtree = Orgchart::where('active', 'y')
+            ->where('level', '!=', '1')
+            ->get()->map(function ($item) use ($selectedIds) {
+                return [
+                    'id'     => (string)$item->id,
+                    // Logic: ถ้าไอเทมนี้อยู่ Level 2 ให้มันเป็น "ตัวแม่สูงสุด" ของ Tree นี้
+                    // เราจึงต้องส่ง parent เป็น '#' ให้ jstree
+                    'parent' => ($item->level === '2') ? '#' : (string)$item->parent_id,
+                    'text'   => $item->title, // ชื่อแผนก/ไลน์/ตำแหน่ง
+                    'state'  => [
+                        'opened' => false, // ให้พับไว้ก่อน ถ้าอยากให้กางหมดค่อยแก้เป็น true
+                        'selected' => in_array((string)$item->id, $selectedIds)
+                    ],
+                    'icon' => 'fa fa-user text-success'
+                ];
+            });
             if ($request->isMethod('post')) {
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
                     'cate_id' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                     'course_title' =>'required|string',
                     'course_short_title'=>'required|string',
+                    'course_detail'=>'required|string',
+                    'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'org_ids' => 'required'
 
                 ]);
                 // dd($validator);
@@ -1223,12 +1248,25 @@ class AdminController extends Controller
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
                 $course_update->course_note = $request->input('course_note');
                 $course_update->update_by = Auth::user()->id;
+                $course_update->active = 'y';
+                $course_update->department_org_id = Auth::user()->department_org_id;
+                $course_update->is_onboarding = $request->boolean('onboarding');
 
-                // if ($request->has('recommend')) {
-                //     $course_update->recommend = 'y';
-                // }else{
-                //     $course_update->recommend = 'n';
-                // }
+                if($request->has('op_mac_id')){
+                    $course_update->op_mac_id = $request->input('op_mac_id');
+                }
+
+                if($request->has('par_st_id')){
+                    $course_update->par_st_id = $request->input('par_st_id');
+                }
+
+                if($request->has('start_date')){
+                    $course_update->start_date = $request->input('start_date');
+                }
+
+                if($request->has('end_date')){
+                    $course_update->end_date = $request->input('end_date');
+                }
 
                 if($request->file('image')){
                     $image = $request->file('image');
@@ -1259,9 +1297,26 @@ class AdminController extends Controller
 
                 $course_update->save();
 
+                if ($request->filled('org_ids')){
+                    $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
+                    ->mapWithKeys(fn($id, $index) => [
+                        $id => ['active' =>'y','order' => $index + 1]
+                        ])
+                    );
+                }
+
+                $scoreWeight = CourseScoreWeight::where('course_id',$course_update->course_id)->first();
+                $scoreWeight->q_a_weight = $request->w_q_and_a;
+                $scoreWeight->operate_weight = $request->w_operate;
+                $scoreWeight->observe_weight = $request->w_observe;
+                $scoreWeight->exam_weight = $request->w_exam;
+                $scoreWeight->assign_weight = $request->w_assign;
+
+                $scoreWeight->save();
+
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-            return view("admin.courseonline.courseonline_edit", compact('course_detail', 'category','teacher'));
+            return view("admin.courseonline.courseonline_edit", compact('course_detail', 'category','teacher','orgtree'));
         }else{
             return redirect()->route('login.admin');
         }
@@ -1271,6 +1326,23 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
+
+            $orgtree = Orgchart::where('active', 'y')
+            ->where('level', '!=', '1')
+            ->get()->map(function ($item) {
+                return [
+                    'id'     => (string)$item->id,
+                    // Logic: ถ้าไอเทมนี้อยู่ Level 2 ให้มันเป็น "ตัวแม่สูงสุด" ของ Tree นี้
+                    // เราจึงต้องส่ง parent เป็น '#' ให้ jstree
+                    'parent' => ($item->level === '2') ? '#' : (string)$item->parent_id,
+                    'text'   => $item->title, // ชื่อแผนก/ไลน์/ตำแหน่ง
+                    'state'  => [
+                        'opened' => false // ให้พับไว้ก่อน ถ้าอยากให้กางหมดค่อยแก้เป็น true
+                    ],
+                    'icon' => 'fa fa-user text-success'
+                ];
+            });
+
             if ($request->isMethod('post')) {
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
@@ -1278,7 +1350,7 @@ class AdminController extends Controller
                     'course_title' =>'required|string',
                     'course_short_title'=>'required|string',
                     'course_detail'=>'required|string',
-                    'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+                    'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
 
                 ]);
                 $teacher = Teacher::where('teacher_name',$request->input('teacher_name'))->first();
@@ -1299,14 +1371,24 @@ class AdminController extends Controller
                 $course_update->update_by = Auth::user()->id;
                 $course_update->create_by = Auth::user()->id;
                 $course_update->active = 'y';
+                $course_update->department_org_id = Auth::user()->department_org_id;
+                $course_update->is_onboarding = $request->boolean('onboarding');
 
-                // if ($request->has('recommend')) {
-                //     $course_update->recommend = 'y';
-                // }else{
-                //     $course_update->recommend = 'n';
-                // }
+                if($request->has('op_mac_id')){
+                    $course_update->op_mac_id = $request->input('op_mac_id');
+                }
 
-                // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
+                if($request->has('par_st_id')){
+                    $course_update->par_st_id = $request->input('par_st_id');
+                }
+
+                if($request->has('start_date')){
+                    $course_update->start_date = $request->input('start_date');
+                }
+
+                if($request->has('end_date')){
+                    $course_update->end_date = $request->input('end_date');
+                }
 
                 $course_update->save();
 
@@ -1319,14 +1401,6 @@ class AdminController extends Controller
                     if (!FileStore::isDirectory($idFolder)) {
                         FileStore::makeDirectory($idFolder, 0775, true, true);
                     }
-                    // if (!file_exists($idFolder)) {
-                    //     mkdir($idFolder);
-
-                    //     $idFolder2 = public_path('images/uploads/courseonline/'.$course_update->course_id.'/original/');
-                    //     if (!file_exists($idFolder2)) {
-                    //         mkdir($idFolder2);
-                    //     }
-                    // }
 
                     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
 
@@ -1336,13 +1410,41 @@ class AdminController extends Controller
                 $course_update->sortOrder = $course_update->course_id;
                 $course_update->save();
 
+                // === call auto roadmap generate ===
+                // $roadmapService = new RoadmapService();
+                // $roadmapService->generateForCourse(
+                //     $course_update->course_id,
+                //     $request->input('op_mac_id'),
+                //     $request->input('par_st_id')
+                // );
+
+                if ($request->filled('org_ids')){
+                    $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
+                    ->mapWithKeys(fn($id, $index) => [
+                        $id => ['active' =>'y','order' => $index + 1]
+                        ])
+                    );
+                }
+
+                $scoreWeight = new CourseScoreWeight;
+                $scoreWeight->course_id = $course_update->course_id;
+                $scoreWeight->q_a_weight = $request->w_q_and_a;
+                $scoreWeight->operate_weight = $request->w_operate;
+                $scoreWeight->observe_weight = $request->w_observe;
+                $scoreWeight->exam_weight = $request->w_exam;
+                $scoreWeight->assign_weight = $request->w_assign;
+
+                $scoreWeight->save();
+
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-            return view("admin.courseonline.courseonline_create", compact('category','teacher'));
+            return view("admin.courseonline.courseonline_create", compact('category','teacher','orgtree'));
         }else{
             return redirect()->route('login.admin');
         }
     }
+
+
 
      function teacher_create(Request $request)
     {
@@ -1659,7 +1761,7 @@ class AdminController extends Controller
                 ]);
 
                 if ($validator->fails()) {
-                    dd($validator->errors()->all());
+                    //dd($validator->errors()->all());
                     return redirect()->back()->withErrors($validator)->withInput(); // ส่งกลับไปยังหน้าก่อนหน้าพร้อมกับข้อมูลที่ผู้ใช้ป้อนเพื่อแสดงข้อผิดพลาด
                 }
 
@@ -1788,7 +1890,7 @@ class AdminController extends Controller
                 'doc.*' => 'nullable|mimes:pdf,docx,pptx',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
             ]);
-            
+
             if ($validator->fails()) {
                 Log::error('Validation failed: ', $validator->errors()->toArray());
                 return redirect()->back()->withErrors($validator)->withInput();
@@ -2120,7 +2222,9 @@ class AdminController extends Controller
     }
     function grouptesting_detail($id){
         if(AuthFacade::useradmin()){
-            $group = Grouptesting::join('lesson','lesson.id','=','grouptesting.lesson_id')->where('group_id',$id)->first();
+            $group = Grouptesting::with('lesson')
+                    ->where('group_id', $id)
+                    ->first();
 
             return view("admin.grouptesting.grouptesting_detail",['group' => $group ]);
         }else{
@@ -2286,33 +2390,155 @@ class AdminController extends Controller
         }
     }
     public function group_question_excel(Request $request,$id){
-        if(AuthFacade::useradmin()){
-            $group = Grouptesting::where('group_id',$id)->first();
-            if ($request->isMethod('post')) {
-                $request->validate([
-                    'import_excel' =>
-                    ['required','file','mimes:xlsx, xls'],
-                    [
-                        'import_excel.required' => 'คุณยังไม่ได้ Uploadfile',
-                        'import_excel.mimes' => 'กรุณาใช้ไฟล์สกุล xlsx xls'
-                    ]
-
-
-                ]);
-
-                $excel = Excel::import(new QuesImport($id), $request->file('import_excel'));
-
-                // dd($excel);
-
-                // return redirect()->back()->with('success', 'Excel imported successfully!');
-                return redirect()->route('grouptesting');
-            }
-
-            return view("admin.grouptesting.ques_excel",['group' => $group]);
-        }else{
+        if (!AuthFacade::useradmin()) {
             return redirect()->route('login.admin');
         }
+
+        $group = Grouptesting::where('group_id', $id)->first();
+
+
+        if ($request->isMethod('post')) {
+
+            $request->validate([
+                'import_excel' => 'required|file|mimes:xlsx,xls,docx'
+            ], [
+                'import_excel.required' => 'คุณยังไม่ได้ Upload file',
+                'import_excel.mimes'    => 'รองรับเฉพาะ xlsx, xls, docx'
+            ]);
+
+            $file = $request->file('import_excel');
+            $extension = $file->getClientOriginalExtension();
+
+            try {
+
+                // 🔥 Excel
+                if (in_array($extension, ['xlsx', 'xls'])) {
+
+                    Excel::import(new QuesImport($id), $file);
+
+                }
+
+                // 🔥 Word
+                elseif ($extension === 'docx') {
+
+                    $import = new ImportWord($id);
+                    $import->importWord($file, $id);
+
+                }
+
+                return redirect()->route('grouptesting')
+                    ->with('success', 'Import สำเร็จ');
+
+            } catch (\Exception $e) {
+                return back()->with('error', $e->getMessage());
+            }
+        }
+
+        return view("admin.grouptesting.ques_excel", ['group' => $group]);
     }
+
+    public function questions_create($id)
+    {
+        $group = Grouptesting::where('group_id', $id)->first();
+
+        if (!$group) {
+            return redirect()->back()->with('error', 'ไม่พบข้อมูล group');
+        }
+
+        return view('admin.grouptesting.create_questions', [
+            'group_id' => $id,
+            'group' => $group
+        ]);
+    }
+
+    public function questions_store(Request $request, $id)
+    {
+        $request->validate([
+            'ques_type' => 'required',
+            'ques_title' => 'required',
+        ]);
+
+        $userId = auth()->id();
+
+        // สร้าง question
+        $question = Question::create([
+            'ques_type'   => $request->ques_type,
+            'ques_title'  => htmlspecialchars($request->ques_title),
+            'group_id'    => $id,
+            'active'      => 'y',
+            'create_date' => Carbon::now(),
+            'update_date' => Carbon::now(),
+            'create_by'   => $userId,
+            'update_by'   => $userId,
+        ]);
+
+        // ถ้ามี choices
+        if (in_array($request->ques_type, ['1','2']) && $request->choices) {
+            foreach ($request->choices as $choice) {
+                if (!empty($choice['choice_detail'])) {
+
+                    Choice::create([
+                        'ques_id'       => $question->ques_id,
+                        'choice_detail' => $choice['choice_detail'],
+                        'choice_answer' => isset($choice['is_answer']) ? '1' : '2',
+                        'choice_type'   => $request->ques_type,
+                        'active'        => 'y',
+                        'create_date'   => Carbon::now(),
+                        'update_date'   => Carbon::now(),
+                        'create_by'     => $userId,
+                        'update_by'     => $userId,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'บันทึกสำเร็จ');
+    }
+
+    public function questions_edit($id)
+    {
+        $question = Question::where('ques_id', $id)->first();
+        $choices = Choice::where('ques_id', $id)->get();
+
+        return view('admin.grouptesting.edit_question', [
+            'question' => $question,
+            'choices' => $choices
+        ]);
+    }
+
+    public function questions_update(Request $request, $id)
+    {
+        $question = Question::where('ques_id', $id)->first();
+
+        $question->update([
+            'ques_type' => $request->ques_type,
+            'ques_title' => htmlspecialchars($request->ques_title),
+            'update_by' => auth()->id(),
+        ]);
+
+        
+        Choice::where('ques_id', $id)->delete();
+
+        
+        if (in_array($request->ques_type, ['1','2'])) {
+            foreach ($request->choices as $choice) {
+                if (!empty($choice['choice_detail'])) {
+
+                    Choice::create([
+                        'ques_id'       => $id,
+                        'choice_detail' => $choice['choice_detail'],
+                        'choice_answer' => isset($choice['is_answer']) ? '1' : '2',
+                        'choice_type'   => $request->ques_type,
+                        'active'        => 'y',
+                        'create_by'     => auth()->id(),
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success','อัพเดทสำเร็จ');
+    }
+
     //new p
     function coursegrouptesting_create(Request $request){
         if(AuthFacade::useradmin()){

@@ -47,14 +47,14 @@
     <!-- Chosen -->
     <link href="{{asset('asset_admin/plugins/bootstrap4c-chosen/dist/css/component-chosen.css')}}" rel="stylesheet">
 
-    <!-- 
-    
-    ตรงนี้มันทำให้ใช้ DataTables jquery ไม่ได้ เดี่ยวต้องหาวิธีเเก้ 
+    <!--
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> 
-    
+    ตรงนี้มันทำให้ใช้ DataTables jquery ไม่ได้ เดี่ยวต้องหาวิธีเเก้
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
     -->
-    
+
     <!-- sweetalert2 -->
     <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.js')}}"></script>
     <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.min.js')}}"></script>
@@ -62,4 +62,7 @@
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.6/chosen.jquery.min.js"></script>
+
+    <link rel="stylesheet" href="{{asset('jstree/dist/themes/default/style.css')}}">
+    <script src="{{asset('jstree/dist/jstree.js')}}"></script>
 </head>

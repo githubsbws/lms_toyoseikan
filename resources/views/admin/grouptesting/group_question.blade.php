@@ -61,7 +61,7 @@ use App\Models\Choice;
 										</td>
                                         <td>
                                             <a href="{{route('ques.detail',['id' => $item->ques_id])}}" class="btn btn-warning btn-sm"><i class="fas fa-search"></i></a>
-                                            <a href="{{route('ques.edit',['id' => $item->ques_id])}}" class="btn btn-warning btn-sm"><i class="fas fa-pen"></i></a>
+                                            <a href="{{route('questions.edit',['id' => $item->ques_id])}}" class="btn btn-warning btn-sm"><i class="fas fa-pen"></i></a>
                                             <button type="button" class="btn btn-danger btn-sm delete-button" data-id="{{ $item->ques_id }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>

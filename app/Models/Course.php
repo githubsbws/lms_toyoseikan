@@ -24,13 +24,17 @@ class Course extends Model
         'random_choice',
         'average_time_pretest',
         'average_time_posttest',
-        'course_picture'
+        'course_picture',
+        'op_mac_id',
+        'par_st_id',
+        'start_date',
+        'end_date',
+        'is_onboarding',
+        'department_org_id'
     ];
 
     const CREATED_AT = 'create_date'; // Custom created_at column
     const UPDATED_AT = 'update_date'; // Custom update_at column
-    const BOOK_AT = 'course_book_date'; // Custom created_at column
-    const RECTOR_AT = 'course_rector_date'; // Custom update_at column
 
     public static function findById($id)
     {
@@ -41,4 +45,25 @@ class Course extends Model
     {
         return $this->belongsTo(Teacher::class, 'course_lecturer','teacher_id');
     }
+
+    public function orgcourse()
+    {
+        return $this->belongsToMany(Orgchart::class,'org_course', 'course_id', 'orgchart_id');
+    }
+
+    public function operation()
+    {
+        return $this->belongsTo(OperationMachine::class,'op_mac_id','id');
+    }
+
+    public function parameters()
+    {
+        return $this->belongsTo(ParameterSetting::class,'par_st_id','id');
+    }
+
+    public function courseWeight()
+    {
+        return $this->hasOne(CourseScoreWeight::class,'course_id');
+    }
+
 }

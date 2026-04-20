@@ -41,7 +41,7 @@
 				</style>
 				<div class="content">
 					<div class="container-fluid">
-						<iframe src="{{ route('orgchart.ifram') }}"></iframe>
+						<iframe src="{{ route('orgchart.ifram') }}" scrolling="yes"></iframe>
 					</div>
 				</div>
 				<div id="sidebar">

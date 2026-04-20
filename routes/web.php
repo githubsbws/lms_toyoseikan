@@ -24,7 +24,7 @@ use App\Http\Controllers\DetailController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\FaqController;
-use App\Http\Controllers\ForgotController; 
+use App\Http\Controllers\ForgotController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\LoginLController;
 use App\Http\Controllers\RegisterController;
@@ -40,7 +40,8 @@ use App\Http\Controllers\ConditionController;
 use App\Http\Controllers\ContactusController;
 //-------
 use App\Http\Controllers\AdminController;
-
+use App\Http\Controllers\LicensePersonController;
+use App\Http\Controllers\RoadmapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -327,6 +328,11 @@ Route::post('/group_question_delete/{id?}',[AdminController::class,'group_questi
 Route::get('/group_question_excel/{id}',[AdminController::class,'group_question_excel'])->name('ques.excel')->middleware('checkIdleTimeout');
 Route::post('/group_question_excel/{id}',[AdminController::class,'group_question_excel'])->name('ques.excel')->middleware('checkIdleTimeout');
 
+Route::get('/create-question/{id}', [AdminController::class, 'questions_create'])->name('questions.create')->middleware('checkIdleTimeout');
+Route::post('/store-question/{id}', [AdminController::class, 'questions_store'])->name('questions.store')->middleware('checkIdleTimeout');
+
+Route::get('/edit_question/{id}', [AdminController::class, 'questions_edit'])->name('questions.edit');
+Route::post('/update_question/{id}', [AdminController::class, 'questions_update'])->name('questions.update');
 
 Route::get('/grouptesting_edit/{id}',[AdminController::class,'grouptesting_edit'])->name('grouptesting.edit')->middleware('checkIdleTimeout');
 Route::post('/grouptesting_edit/{id}',[AdminController::class,'grouptesting_edit'])->name('grouptesting.edit')->middleware('checkIdleTimeout');
@@ -676,10 +682,10 @@ Route::post('/captcha_course/{id?}',[AdminController::class,'captcha_course'])->
 
 Route::get('/path-to-check-selected-courses', function (Request $request) {
     $capid = $request->input('capid');
-    
+
     // ดึงข้อมูลหลักสูตรที่เลือกแล้วใน capid นี้
     $selectedCourses = Course::where('course_point', $capid)->pluck('course_id');
-    
+
     return response()->json([
         'courses' => $selectedCourses,
     ]);
@@ -689,7 +695,7 @@ Route::get('/path-to-check-all-selected-courses', function (Request $request) {
     $capid = $request->input('capid');
     // ดึงข้อมูลหลักสูตรที่เลือกไปแล้วจาก capid อื่นๆ
     $selectedCourses = Course::whereNotNull('course_point')->where('course_point','!=',$capid)->pluck('course_id');
-    
+
     return response()->json([
         'courses' => $selectedCourses,
     ]);
@@ -768,4 +774,20 @@ Route::get('/ocr/page/{id}', [AdminController::class, 'OCRpage'])->name('ocr.pag
 Route::post('/ocr_del/{id}', [AdminController::class, 'OCRdel'])->name('ocr.del');
 Route::get('/ocr/edit/{id}/{page_number}', [AdminController::class, 'OCRedit'])->name('ocr.edit');
 Route::put('/ocr/update/{id}/{page_number}', [AdminController::class, 'OCRupdate'])->name('ocr.update');
+
+Route::get('/licenseperson/operate',[LicensePersonController::class, 'indexOperate'])->name('license.operate.index');
+
+Route::get('/licenseperson/parameter',[LicensePersonController::class, 'indexParameter'])->name('license.parameter.index');
+
+
+Route::middleware(['auth.admin'])->group(function(){
+    Route::get('/roadmap/new-emp',[RoadmapController::class, 'indexNewEmp'])->name('roadmap.newemp.index');
+    Route::get('/roadmap/new-emp/create',[RoadmapController::class, 'createNewEmp'])->name('roadmap.newemp.create');
+    Route::post('/roadmap/new-emp/create/',[RoadmapController::class, 'createNewEmp'])->name('roadmap.newemp.store');
+
+    Route::get('/roadmap/new-emp/edit/{id}',[RoadmapController::class, 'editNewEmp'])->name('roadmap.newemp.edit');
+    Route::post('/roadmap/new-emp/edit/{id}',[RoadmapController::class, 'editNewEmp'])->name('roadmap.newemp.update');
+    Route::get('/roadmap/general-emp',[RoadmapController::class, 'indexGeneralEmp'])->name('license.generalemp.index');
+});
+
 });

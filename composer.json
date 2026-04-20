@@ -16,6 +16,7 @@
         "laravel/ui": "^4.2",
         "laravelcollective/html": "^6.4",
         "maatwebsite/excel": "^3.1",
+        "phpoffice/phpword": "^1.4",
         "spatie/laravel-image-optimizer": "^1.7",
         "spatie/pdf-to-image": "^1.2",
         "yajra/laravel-datatables-oracle": "^10.11"
