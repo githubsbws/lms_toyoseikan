@@ -101,6 +101,8 @@ use App\Models\Permission;
 use App\Models\Position;
 use App\Models\Profiles;
 use App\Models\ProfilesTitle;
+use App\Models\Roadmap;
+use App\Models\RoadmapCourse;
 // use App\Models\Users;
 
 use App\Services\RoadmapService;
@@ -1327,9 +1329,20 @@ class AdminController extends Controller
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
 
-            $orgtree = Orgchart::where('active', 'y')
-            ->where('level', '!=', '1')
-            ->get()->map(function ($item) {
+            $myDeptId = (string)auth()->user()->department_org_id;
+            $myDept   = Orgchart::find($myDeptId);
+            $myBranchId = (string)$myDept->parent_id;
+
+            // 2. เรียกใช้ฟังก์ชันหาลูกหลานทั้งหมด (จะลึกถึงเลเวล 10 ก็เก็บหมด)
+            $allDescendantIds = $this->getAllChildIds($myDeptId);
+
+            // 3. รวม ID ทั้งหมด (สาขา + แผนก + ลูกหลานทุกชั้น)
+            $targetIds = array_unique(array_merge([$myBranchId, $myDeptId], $allDescendantIds));
+
+            // 4. Query ครั้งเดียวจบ
+            $orgtree = Orgchart::whereIn('id', $targetIds)
+            ->where('active', 'y')
+            ->get()->map(function ($item){
                 return [
                     'id'     => (string)$item->id,
                     // Logic: ถ้าไอเทมนี้อยู่ Level 2 ให้มันเป็น "ตัวแม่สูงสุด" ของ Tree นี้
@@ -1417,14 +1430,52 @@ class AdminController extends Controller
                 //     $request->input('op_mac_id'),
                 //     $request->input('par_st_id')
                 // );
+                if($request->boolean('onboarding')){
+                    $firstLeafId = collect(explode(',', $request->input('org_ids')))->first();
 
-                if ($request->filled('org_ids')){
-                    $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
-                    ->mapWithKeys(fn($id, $index) => [
-                        $id => ['active' =>'y','order' => $index + 1]
-                        ])
-                    );
+                    $lineId = DB::table('orgchart')
+                        ->where('id', $firstLeafId)
+                        ->value('parent_id');
+
+                    if ($lineId) {
+                    // 3. หาหรือสร้าง Roadmap (ท่า save() แบบที่ต้องการ)
+                    $roadmap = Roadmap::where('org_id', $lineId)
+                                    ->where('is_onboarding', true)
+                                    ->first();
+
+                    if (!$roadmap) {
+                        $roadmap = new Roadmap();
+                        $roadmap->org_id = $lineId;
+                        $roadmap->is_onboarding = true;
+                        $roadmap->active = 'y';
+                        $roadmap->save();
+                    }
+
+                    // 4. บันทึกลง roadmap_course (เช็คซ้ำก่อนเซฟ)
+                    $exists = DB::table('roadmap_courses')
+                                ->where('roadmap_id', $roadmap->id)
+                                ->where('course_id', $course_update->id)
+                                ->exists();
+
+                    if (!$exists) {
+                        $roadmapCourse = new RoadmapCourse();
+                        $roadmapCourse->roadmap_id = $roadmap->id;
+                        $roadmapCourse->course_id = $course_update->id;
+                        $roadmapCourse->active = 'y';
+                        $roadmapCourse->save();
+                    }
                 }
+
+                }else{
+                    if ($request->filled('org_ids')){
+                        $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
+                        ->mapWithKeys(fn($id, $index) => [
+                            $id => ['active' =>'y','order' => $index + 1]
+                            ])
+                        );
+                    }
+                }
+
 
                 $scoreWeight = new CourseScoreWeight;
                 $scoreWeight->course_id = $course_update->course_id;
@@ -1444,6 +1495,17 @@ class AdminController extends Controller
         }
     }
 
+    private function getAllChildIds($parentId) {
+        $ids = [];
+        $children = Orgchart::where('parent_id', $parentId)->pluck('id')->toArray();
+
+        foreach ($children as $childId) {
+            $ids[] = (string)$childId;
+            // เรียกตัวเองซ้ำเพื่อไปหา "ลูกของลูก" (หลาน/เหลน/โหลน)
+            $ids = array_merge($ids, $this->getAllChildIds($childId));
+        }
+        return $ids;
+    }
 
 
      function teacher_create(Request $request)
@@ -2516,10 +2578,10 @@ class AdminController extends Controller
             'update_by' => auth()->id(),
         ]);
 
-        
+
         Choice::where('ques_id', $id)->delete();
 
-        
+
         if (in_array($request->ques_type, ['1','2'])) {
             foreach ($request->choices as $choice) {
                 if (!empty($choice['choice_detail'])) {
