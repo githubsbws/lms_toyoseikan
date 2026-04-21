@@ -218,7 +218,7 @@
                                 </font>
                             </div>
 
-                            <input type="text" name="org_ids" id="org_ids">
+                            <input type="hidden" name="org_ids" id="org_ids">
 
 
                             <div class="card-footer">
