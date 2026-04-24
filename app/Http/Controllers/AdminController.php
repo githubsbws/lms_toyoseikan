@@ -24,6 +24,8 @@ use App\Jobs\ProcessPdfPageJob;
 use Illuminate\Support\Facades\Cache;
 use Elastic\Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\File as FileStore;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Storage;
 
 // use Intervention\Image\Facades\Image;
 use App\Models\Questionnaireout;
@@ -44,7 +46,7 @@ use App\Imports\QuestionnaireImport;
 use App\Exports\LessonsExport;
 use App\Exports\UsersExport;
 use App\Exports\UsersAdminExport;
-use App\Imports\ImportWord;
+use App\Imports\QuesImportEssay;
 
 use App\Models\ASC;
 use App\Models\About;
@@ -2479,7 +2481,7 @@ class AdminController extends Controller
     }
     function group_question_detail($id){
         if(AuthFacade::useradmin()){
-            $group = Question::where('ques_id',$id)->first();
+            $group = Question::with(['images'])->where('ques_id',$id)->first();
 
             return view("admin.grouptesting.ques_detail",['group' => $group ]);
         }else{
@@ -2488,7 +2490,7 @@ class AdminController extends Controller
     }
     function group_question_edit(Request $request,$id){
         if(AuthFacade::useradmin()){
-            $group = Question::where('ques_id',$id)->first();
+            $group = Question::with(['images'])->where('ques_id',$id)->first();
             if($request->isMethod('post')){
                 $validator = Validator::make($request->all(), [
                     'ques_title' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
@@ -2533,28 +2535,88 @@ class AdminController extends Controller
                 'import_excel' => 'required|file|mimes:xlsx,xls,docx'
             ], [
                 'import_excel.required' => 'คุณยังไม่ได้ Upload file',
-                'import_excel.mimes'    => 'รองรับเฉพาะ xlsx, xls, docx'
+                'import_excel.mimes'    => 'รองรับเฉพาะ xlsx, xls, docx',
+                'import_type'  => 'required'
             ]);
 
             $file = $request->file('import_excel');
             $extension = $file->getClientOriginalExtension();
+            $type = $request->input('import_type');
+
+            $spreadsheet = IOFactory::load($file->getRealPath());
+            $sheet = $spreadsheet->getActiveSheet();
+            $drawings = $sheet->getDrawingCollection();
+
+            \Log::info('STEP 1: DRAWINGS COUNT', [
+                'count' => count($drawings)
+            ]);
+
+            $imagesByRow = [];
+
+            $fileExt = $file->getClientOriginalExtension();
+
+            foreach ($drawings as $drawing) {
+
+                $coordinates = $drawing->getCoordinates();
+
+                if (!preg_match('/([A-Z]+)(\d+)/', $coordinates, $matches)) {
+                    continue;
+                }
+
+                $excelRow = (int)$matches[2];
+
+                if ($drawing instanceof \PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing) {
+
+                    ob_start();
+                    call_user_func(
+                        $drawing->getRenderingFunction(),
+                        $drawing->getImageResource()
+                    );
+                    $imageContents = ob_get_clean();
+
+                } elseif ($drawing instanceof \PhpOffice\PhpSpreadsheet\Worksheet\Drawing) {
+
+                    $path = $drawing->getPath();
+
+                    $imageContents = @file_get_contents($path);
+
+                    if (!$imageContents) continue;
+
+                } else {
+                    continue;
+                }
+
+                $imageExt = 'png';
+
+                $fileName = 'images/uploads/' . uniqid('q_') . '.' . $imageExt;
+
+                Storage::disk('public')->put($fileName, $imageContents);
+
+                \Log::info('STEP 2: IMAGE MAP', [
+                    'row' => $excelRow,
+                    'file' => $fileName
+                ]);
+
+                $imagesByRow[$excelRow][] = $fileName;
+            }
+
 
             try {
 
                 // 🔥 Excel
                 if (in_array($extension, ['xlsx', 'xls'])) {
 
+                 if ($type === 'essay') {
+                    Excel::import(new QuesImportEssay($id, $imagesByRow), $file);
+                }
+
+                if ($type === 'choice') {
                     Excel::import(new QuesImport($id), $file);
+                }
+
 
                 }
 
-                // 🔥 Word
-                elseif ($extension === 'docx') {
-
-                    $import = new ImportWord($id);
-                    $import->importWord($file, $id);
-
-                }
 
                 return redirect()->route('grouptesting')
                     ->with('success', 'Import สำเร็จ');
