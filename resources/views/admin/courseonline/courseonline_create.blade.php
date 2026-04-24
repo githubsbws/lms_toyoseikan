@@ -70,7 +70,7 @@
                                 <label for=""><u>ระยะเวลาของหลักสูตร</u></label>
                                 <div class="col-12 mt-2">
                                     <input type="checkbox" id="onboarding" name="onboarding">
-                                    <label for="onboarding">เป็นหลักสูตรสำหรับพนักงานใหม่<span class="text-danger">(หากเลือกแล้วช่องวันที่และช่องเลือกสายงานจะหายไป)</span></label>
+                                    <label for="onboarding">เป็นหลักสูตรสำหรับพนักงานใหม่<span class="text-danger">(หากเลือกแล้วช่องวันที่จะหายไป)</span></label>
                                 </div>
                                 <div id="date-select">
                                     <div class="my-2" >
@@ -246,10 +246,8 @@
         $('#onboarding').change(function(){
             if($(this).is(':checked')){
                 $('#date-select').hide();
-                $('#org-select').hide();
             }else{
                 $('#date-select').show();
-                $('#org-select').show();
             }
         })
     });

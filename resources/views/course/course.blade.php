@@ -188,7 +188,7 @@
                                     </div>
                                 </div>
                             </form><br>
-                            <h4 style="font-weight: bold;">หลักสูตรแนะนำ</h4>
+                            {{-- <h4 style="font-weight: bold;">หลักสูตรแนะนำ</h4>
 
                             <div class="slick-basic slick-slider slick-initialized" data-items="1" data-items-lg="1"
                                 data-items-md="1" data-items-sm="1" data-items-xs="1">
@@ -241,7 +241,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                </div>
+                                </div> --}}
                                 {{-- <button type="button" data-role="none" class="slick-prev"
                                     style="display: block;">Previous</button><button type="button" data-role="none"
                                     class="slick-next" style="display: block;">Next</button>
