@@ -1174,7 +1174,7 @@ class AdminController extends Controller
 
     function courseonline(){
         if(AuthFacade::useradmin()){
-            $course_online = Course::join('category', 'category.cate_id', '=', 'course_online.cate_id')->where('course_online.active', 'y')->orderBy('sortOrder', 'desc')->get();
+            $course_online = Course::with('category')->where('active','y')->orderBy('sortOrder', 'desc')->get();
             return view("admin.courseonline.courseonline", compact('course_online'));
         }else{
             return redirect()->route('login.admin');
@@ -1208,9 +1208,24 @@ class AdminController extends Controller
             $course_detail = Course::where('course_id', $id)->first();
             $category = DB::table('category')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
-            $selectedIds = $course_detail->orgcourse->pluck('id')->map(fn($id) => (string)$id)->toArray();
-            $orgtree = Orgchart::where('active', 'y')
-            ->where('level', '!=', '1')
+            // 2. แยก Logic การหา Selected IDs
+            if ($course_detail->is_onboarding) {
+                // --- กรณีเป็นพนักงานใหม่ (Onboarding) ---
+                // ไปดึง line_id จากตาราง roadmaps มาเป็นตัว Selected
+                $selectedIds = DB::table('roadmap_course')
+                    ->join('roadmap', 'roadmap_course.roadmap_id', '=', 'roadmap.id')
+                    ->where('roadmap_course.course_id', $course_detail->course_id)
+                    ->pluck('roadmap.line_id')
+                    ->map(fn($id) => (string)$id)
+                    ->toArray();
+            } else {
+                // --- กรณีพนักงานทั่วไป (Normal) ---
+                // ใช้ท่าเดิมที่น้องเคยใช้ ดึงจาก orgcourse
+                $selectedIds = $course_detail->orgcourse->pluck('id')->map(fn($id) => (string)$id)->toArray();
+            }
+            $targetIds = $this->getMergeOrg();
+            $orgtree = Orgchart::whereIn('id', $targetIds)
+            ->where('active', 'y')
             ->get()->map(function ($item) use ($selectedIds) {
                 return [
                     'id'     => (string)$item->id,
@@ -1299,12 +1314,56 @@ class AdminController extends Controller
 
                 $course_update->save();
 
-                if ($request->filled('org_ids')){
-                    $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
-                    ->mapWithKeys(fn($id, $index) => [
-                        $id => ['active' =>'y','order' => $index + 1]
-                        ])
-                    );
+                if($request->boolean('onboarding') && $request->has('milestone')){
+                    $firstLeafId = collect(explode(',', $request->input('org_ids')))->first();
+
+                    $lineId = Orgchart::with('line')->find($firstLeafId);
+
+                    if ($lineId) {
+                    // 3. หาหรือสร้าง Roadmap (ท่า save() แบบที่ต้องการ)
+                    $roadmap = Roadmap::where('line_id', $lineId->parent_id)
+                                    ->first();
+
+                    DB::beginTransaction();
+                    try{
+                        if (!$roadmap) {
+                        $roadmap = new Roadmap();
+                        $roadmap->name = $lineId->line->title . ' Roadmap';
+                        $roadmap->org_id = Auth::user()->org_id;
+                        $roadmap->line_id = $lineId->parent_id;
+                        $roadmap->active = 'y';
+                        $roadmap->created_by = Auth::user()->id;
+                        $roadmap->updated_by = Auth::user()->id;
+                        $roadmap->department_org_id = Auth::user()->department_org_id;
+                        $roadmap->save();
+                        }
+
+                        DB::table('roadmap_course')->updateOrInsert(
+                            [
+                                'roadmap_id' => $roadmap->id,
+                                'course_id'  => $course_update->course_id,
+                            ],
+                            [
+                                'active'         => 'y',
+                                'milestone_days' => $request->input('milestone'),
+                            ]
+                        );
+                        DB::commit();
+                    }catch (\Exception $e) {
+                        DB::rollBack();
+                        return back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+                    }
+
+                }
+
+                }else{
+                    if ($request->filled('org_ids')){
+                        $course_update->orgcourse()->sync(collect(explode(',',$request->input('org_ids')))
+                        ->mapWithKeys(fn($id, $index) => [
+                            $id => ['active' =>'y','order' => $index + 1]
+                            ])
+                        );
+                    }
                 }
 
                 $scoreWeight = CourseScoreWeight::where('course_id',$course_update->course_id)->first();
@@ -1328,16 +1387,8 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
-
-            $myDeptId = (string)auth()->user()->department_org_id;
-            $myDept   = Orgchart::find($myDeptId);
-            $myBranchId = (string)$myDept->parent_id;
-
-            // 2. เรียกใช้ฟังก์ชันหาลูกหลานทั้งหมด (จะลึกถึงเลเวล 10 ก็เก็บหมด)
-            $allDescendantIds = $this->getAllChildIds($myDeptId);
-
             // 3. รวม ID ทั้งหมด (สาขา + แผนก + ลูกหลานทุกชั้น)
-            $targetIds = array_unique(array_merge([$myBranchId, $myDeptId], $allDescendantIds));
+            $targetIds = $this->getMergeOrg();
 
             // 4. Query ครั้งเดียวจบ
             $orgtree = Orgchart::whereIn('id', $targetIds)
@@ -1423,47 +1474,52 @@ class AdminController extends Controller
                 $course_update->sortOrder = $course_update->course_id;
                 $course_update->save();
 
-                // === call auto roadmap generate ===
-                // $roadmapService = new RoadmapService();
-                // $roadmapService->generateForCourse(
-                //     $course_update->course_id,
-                //     $request->input('op_mac_id'),
-                //     $request->input('par_st_id')
-                // );
-                if($request->boolean('onboarding')){
+                if($request->boolean('onboarding') && $request->has('milestone')){
                     $firstLeafId = collect(explode(',', $request->input('org_ids')))->first();
 
-                    $lineId = DB::table('orgchart')
-                        ->where('id', $firstLeafId)
-                        ->value('parent_id');
+                    $lineId = Orgchart::with('line')->find($firstLeafId);
 
                     if ($lineId) {
                     // 3. หาหรือสร้าง Roadmap (ท่า save() แบบที่ต้องการ)
-                    $roadmap = Roadmap::where('org_id', $lineId)
-                                    ->where('is_onboarding', true)
+                    $roadmap = Roadmap::where('line_id', $lineId->parent_id)
                                     ->first();
 
-                    if (!$roadmap) {
+                    DB::beginTransaction();
+                    try{
+                        if (!$roadmap) {
                         $roadmap = new Roadmap();
-                        $roadmap->org_id = $lineId;
-                        $roadmap->is_onboarding = true;
+                        $roadmap->name = $lineId->line->title . ' Roadmap';
+                        $roadmap->org_id = Auth::user()->org_id;
+                        $roadmap->line_id = $lineId->parent_id;
                         $roadmap->active = 'y';
+                        $roadmap->created_by = Auth::user()->id;
+                        $roadmap->updated_by = Auth::user()->id;
+                        $roadmap->department_org_id = Auth::user()->department_org_id;
                         $roadmap->save();
+                        }
+
+                        // 4. บันทึกลง roadmap_course (เช็คซ้ำก่อนเซฟ)
+                        $exists = DB::table('roadmap_course')
+                                    ->where('roadmap_id', $roadmap->id)
+                                    ->where('course_id', $course_update->course_id)
+                                    ->exists();
+
+                        if (!$exists) {
+                            $lastOrder = RoadmapCourse::where('roadmap_id', $roadmap->id)->max('order');
+                            $roadmapCourse = new RoadmapCourse();
+                            $roadmapCourse->roadmap_id = $roadmap->id;
+                            $roadmapCourse->course_id = $course_update->course_id;
+                            $roadmapCourse->active = 'y';
+                            $roadmapCourse->milestone_days = $request->input('milestone');
+                            $roadmapCourse->order = $lastOrder ? $lastOrder + 1 : 1;
+                            $roadmapCourse->save();
+                        }
+                        DB::commit();
+                    }catch (\Exception $e) {
+                        DB::rollBack();
+                        return back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
                     }
 
-                    // 4. บันทึกลง roadmap_course (เช็คซ้ำก่อนเซฟ)
-                    $exists = DB::table('roadmap_courses')
-                                ->where('roadmap_id', $roadmap->id)
-                                ->where('course_id', $course_update->id)
-                                ->exists();
-
-                    if (!$exists) {
-                        $roadmapCourse = new RoadmapCourse();
-                        $roadmapCourse->roadmap_id = $roadmap->id;
-                        $roadmapCourse->course_id = $course_update->id;
-                        $roadmapCourse->active = 'y';
-                        $roadmapCourse->save();
-                    }
                 }
 
                 }else{
@@ -1505,6 +1561,18 @@ class AdminController extends Controller
             $ids = array_merge($ids, $this->getAllChildIds($childId));
         }
         return $ids;
+    }
+
+    private function getMergeOrg() {
+        $myDeptId = (string)auth()->user()->department_org_id;
+        $myDept   = Orgchart::find($myDeptId);
+        $myBranchId = (string)$myDept->parent_id;
+
+        // 2. เรียกใช้ฟังก์ชันหาลูกหลานทั้งหมด (จะลึกถึงเลเวล 10 ก็เก็บหมด)
+        $allDescendantIds = $this->getAllChildIds($myDeptId);
+        $allMerge = array_unique(array_merge([$myBranchId, $myDeptId], $allDescendantIds));
+
+        return $allMerge;
     }
 
 

@@ -782,12 +782,8 @@ Route::get('/licenseperson/parameter',[LicensePersonController::class, 'indexPar
 
 Route::middleware(['auth.admin'])->group(function(){
     Route::get('/roadmap/new-emp',[RoadmapController::class, 'indexNewEmp'])->name('roadmap.newemp.index');
-    Route::get('/roadmap/new-emp/create',[RoadmapController::class, 'createNewEmp'])->name('roadmap.newemp.create');
-    Route::post('/roadmap/new-emp/create/',[RoadmapController::class, 'createNewEmp'])->name('roadmap.newemp.store');
-
-    Route::get('/roadmap/new-emp/edit/{id}',[RoadmapController::class, 'editNewEmp'])->name('roadmap.newemp.edit');
-    Route::post('/roadmap/new-emp/edit/{id}',[RoadmapController::class, 'editNewEmp'])->name('roadmap.newemp.update');
-    Route::get('/roadmap/general-emp',[RoadmapController::class, 'indexGeneralEmp'])->name('license.generalemp.index');
+    Route::get('/roadmap/new-emp/course/{id}',[RoadmapController::class, 'newEmpDetail'])->name('roadmap.newemp.detail');
+    Route::post('/roadmap/new-emp/course/order',[RoadmapController::class, 'updateOrder'])->name('admin.roadmap.updateOrder');
 });
 
 });

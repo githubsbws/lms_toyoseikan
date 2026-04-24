@@ -26,6 +26,12 @@
                     <div class="card-header bg-primary text-white">
                         เพิ่มหลักสูตร
                     </div>
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>บันทึกไม่สำเร็จ!</strong> กรุณาติดต่อ IT
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <div class="card-body">
                         <p>ค่าที่มี <span class="text-danger">*</span> จำเป็นต้องใส่ให้ครบ</p>
 
@@ -85,6 +91,17 @@
                                         <div class="col-4">
                                             <input type="date" class="form-control" id="end_date" name="end_date">
                                         </div>
+                                    </div>
+                                </div>
+                                <div id="milestone-select" style="display: none;">
+                                    <label for="">เลือกช่วงเดือนของหลักสูตรนี้</label>
+                                    <div class="col-4">
+                                        <select class="form-control" name="milestone" id="milestone">
+                                            <option value="30">เดือนที่ 1</option>
+                                            <option value="60">เดือนที่ 2</option>
+                                            <option value="90">เดือนที่ 3</option>
+                                            <option value="119">เดือนที่ 4</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -157,6 +174,10 @@
 
                             <div class="form-group" id="org-select">
                                 <label for=""><u>เลือกสายที่ต้องการให้เห็นหลักสูตร</u></label>
+                                <div class="alert alert-info mt-2" id="onboarding-note" style="display: none">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    <strong>หมายเหตุ:</strong> สำหรับหลักสูตรพนักงานใหม่ ให้เลือก <strong>"ไลน์ผลิต"</strong> หรือ <strong>"ไลน์ของ Section"</strong> เพียง1ไลน์เท่านั้น กรณีเลือกมากกว่า1 ระบบจะยึดไลน์แรกเสมอ
+                                </div>
                                 <div class="form-group" id="org_jstree"></div>
                             </div>
 
@@ -246,8 +267,12 @@
         $('#onboarding').change(function(){
             if($(this).is(':checked')){
                 $('#date-select').hide();
+                $('#milestone-select').show();
+                $('#onboarding-note').show();
             }else{
                 $('#date-select').show();
+                $('#milestone-select').hide();
+                $('#onboarding-note').hide();
             }
         })
     });

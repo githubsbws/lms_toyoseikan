@@ -40,7 +40,10 @@ class Course extends Model
     {
         return static::where('course_id', $id)->first();
     }
-
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'cate_id','cate_id');
+    }
     public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'course_lecturer','teacher_id');
@@ -64,6 +67,10 @@ class Course extends Model
     public function courseWeight()
     {
         return $this->hasOne(CourseScoreWeight::class,'course_id');
+    }
+    public function roadmapCourse()
+    {
+        return $this->hasOne(RoadmapCourse::class,'course_id');
     }
 
 }

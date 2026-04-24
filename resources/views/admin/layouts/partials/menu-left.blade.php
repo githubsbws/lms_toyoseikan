@@ -393,12 +393,6 @@ use App\Helpers\PermissionHelper;
                                 <p>Roadmap พนังงานใหม่</p>
                             </a>
                         </li>
-
-                        <li class="nav-item">
-                            <a href="{{ url('/roadmap/parameter') }}" class="nav-link {{ request()->is('roadmap/parameter*') ? 'active' : '' }}">
-                                <p>Roadmap พนังงานทั่วไป</p>
-                            </a>
-                        </li>
                     </ul>
                 </li>
                 @endcanmenu
