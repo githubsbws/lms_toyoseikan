@@ -35,8 +35,22 @@ class RoadmapController extends Controller
     }
 
     public function updateOrder(Request $request) {
-        foreach ($request->orders as $data) {
-            RoadmapCourse::where('id', $data['id'])->update(['order' => $data['order']]);
+        DB::beginTransaction();
+        try {
+            foreach ($request->orders as $data) {
+                RoadmapCourse::where('id', $data['id'])
+                    ->update(['order' => $data['order']]);
+            }
+            DB::commit();
+            return response()->json(['status' => 'success', 'message' => 'บันทึกลำดับเรียบร้อย']);
+
+        } catch (\Exception $e) {
+            // 3. ถ้ามีอะไรพังแม้แต่นิดเดียว ให้ยกเลิกทั้งหมดที่ทำมา (Rollback)
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()
+            ], 500);
         }
         return response()->json(['status' => 'success']);
     }
