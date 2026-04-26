@@ -19,6 +19,9 @@ use App\Models\File;
 use App\Models\Grouptesting;
 use App\Models\Images;
 use App\Models\OrgchartUser;
+use App\Models\Roadmap;
+use App\Models\RoadmapCourse;
+use App\Models\Users;
 use Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +35,7 @@ class CourseController extends Controller
     function courseDetail($id)
     {
     if(Auth::check()){
+        $users = Users::with('organization.parent')->get();
         $course_detail = Course::findById($id);
         $course_lesson = Lesson::where(['course_id' => $course_detail->course_id,'active' => 'y'])->first();
         if($course_lesson != null){
@@ -123,7 +127,13 @@ class CourseController extends Controller
     function course(Request $request)
     {
         if(Auth::check()){
-            $orgCourseIds = Orgcourse::where('orgchart_id',Auth::user()->org_id)->pluck('course_id');;
+            if(Auth::user()->team_id == 7){
+                $orgCourseIds = Roadmap::with(['roadmapCourse' => fn($q) => $q->orderBy('order', 'asc')])->where('line_id',Auth::user()->Orgchart->line->id)->get();
+
+            }else{
+                $orgCourseIds = Orgcourse::where('orgchart_id',Auth::user()->org_id)->pluck('course_id');;
+            }
+
 
             $course_detail = Course::whereIn('course_id', $orgCourseIds)
                 ->where('active', 'y') // เผื่ออยากดึงเฉพาะที่เปิดใช้งานอยู่
