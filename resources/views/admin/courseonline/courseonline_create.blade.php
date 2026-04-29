@@ -1,9 +1,6 @@
 @extends('admin/layouts/mainlayout')
 @section('title', 'Admin')
 @section('content')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <body>
     <div id="wrapper">
         <div class="content-wrapper">
@@ -249,7 +246,6 @@
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
                             </div>
                         </form>
-                        <div id="jstree"></div>
                     </div>
                 </div>
             </div>
