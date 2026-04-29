@@ -139,7 +139,20 @@ class CourseController extends Controller
                 // $orgCourseIds = Course::pluck('course_id');
             }
 
-            $query = Course::whereIn('course_id', $orgCourseIds)
+            $query = Course::with([
+                'lesson' => function($q) {
+                    $q->where('active', 'y') // กรองเฉพาะบทเรียนที่เปิดใช้งาน
+                    ->with([
+                        'file' => function($q_file) {
+                            $q_file->where('active', 'y'); // กรองเฉพาะไฟล์วิดีโอที่เปิดใช้งาน
+                        },
+                        'filedoc' => function($q_doc) {
+                            $q_doc->where('active', 'y'); // กรองเฉพาะเอกสารที่เปิดใช้งาน
+                        }
+                    ]);
+                }
+            ])
+                ->whereIn('course_id', $orgCourseIds)
                 ->where('active', 'y'); // เผื่ออยากดึงเฉพาะที่เปิดใช้งานอยู่
 
             if(Auth::user()->team_id == 6 && !empty($orgCourseIds)){

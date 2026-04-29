@@ -57,17 +57,17 @@
                             <div class="nav flex-column me-3" id="v-pills-tab" role="tablist">
                                 @if ($course_detail->count() > 0)
                                     @foreach ($course_detail as $key => $item)
-                                        @php $isActive = $key == 0 ? 'active' : ''; @endphp
-                                        <div class="road-item" style="margin-bottom: 10px;">
-                                            <button class="nav-link {{ $isActive }}"
+                                        {{-- @php $isActive = $key == 0 ? 'active' : ''; @endphp --}}
+                                        <div class="road-item" style="margin-bottom: 15px;">
+                                            <button class="nav-link btn-success"
                                                     id="v-pills-tab-{{ $item->course_id }}"
                                                     data-toggle="tab" {{-- ใช้ data-toggle เฉยๆ ถ้า Theme เป็น BS4 --}}
                                                     href="#v-pills-content-{{ $item->course_id }}"
-                                                    style="display: flex; align-items: center; text-align: left; border: 1px solid #ddd; padding: 10px; width: 100%;">
+                                                    style="display: flex; align-items: center; text-align: left; border: 1px; width: 100%;padding:20px;border-radius:15px">
 
                                                 <div class="wrap" style="flex-grow: 1;">
                                                     <div class="couurse-name-rd">
-                                                        <strong style="display: block;">{{ $item->course_title }}</strong>
+                                                        <strong style="display: block;font-size:24px">{{ $item->course_title }}</strong>
                                                         <small>{!! strip_tags(html_entity_decode($item->course_short_title), '<b><strong><i><em><u>') !!}</small>
                                                     </div>
                                                 </div>
@@ -143,6 +143,80 @@
                                                         <p class="mx-0">4 บทเรียน</p>
                                                     </div>
                                                 </div>
+                                                <div class="col-lg-6">
+                                                    <h5 class="mb-0">สถานะการประเมิน</h5>
+                                                    <div class="col-6 m-5">
+                                                        <i class="fa fa-certificate fa-5x m-3" style="color: #428bca;"></i>
+                                                        <p class="mx-0">กรุณาเรียนให้จบก่อน</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-head">
+                                            <h3>รายการบทเรียน</h3>
+                                    </div>
+                                   <div class="panel panel-default paper-shadow mb-5" data-z="0.5"
+                                        style="border-radius: 12px; background-color: #dbeafe !important; overflow: hidden; border: none;">
+
+                                        <div class="panel-body" style="padding: 20px;">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    @foreach ($item->lesson as $index => $lessons)
+                                                        {{-- แถบหัวข้อบทเรียน --}}
+                                                        <div style="background-color: #1F7BCC; color: white; padding: 15px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                                            <span style="font-size:28px">บทที่ {{ $index + 1 }} {{ $lessons->title }}</span>
+                                                        </div>
+
+                                                        {{-- รายการย่อย (ทำเป็นโครงไว้ก่อน) --}}
+                                                        <div style="padding: 5px 15px 20px 15px;">
+                                                            @if($lessons->file->count() > 0)
+                                                                @foreach($lessons->file as $vdo)
+                                                                    {{-- ย้าย d-flex และ justify-between มาไว้ที่นี่ เพื่อคุม "ชื่อ" กับ "ปุ่ม" ในแต่ละแถว --}}
+                                                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; width: 100%;">
+
+                                                                        {{-- ฝั่งซ้าย: ไอคอน + ชื่อวิดีโอ --}}
+                                                                        <div style="display: flex; align-items: center;">
+                                                                            <i class="fa fa-play-circle text-primary" style="font-size: 1.2rem;padding-right:10px"></i>
+                                                                            <span style="font-size:24px ">วิดีโอ: {{ $vdo->file_name ?? 'วิดีโอไม่มีชื่อ' }}</span>
+                                                                        </div>
+
+                                                                        {{-- ฝั่งขวา: เวลา (ถ้ามี) + ปุ่ม --}}
+                                                                        <div style="display: flex; align-items: center;">
+                                                                            {{-- ถ้าใน DB มีเก็บเวลา (Duration) ก็เอามาโชว์ตรงนี้ได้ครับ --}}
+                                                                            {{-- <span class="text-muted me-3">
+                                                                                <i class="fa fa-clock-o"></i> 30 นาที
+                                                                            </span> --}}
+                                                                            <button class="btn btn-primary" style="border-radius: 6px;font-size:24px; padding: 5px 40px;">ดูวิดีโอ</button>
+                                                                        </div>
+
+                                                                    </div>
+                                                                @endforeach
+                                                            @endif
+                                                            @if($lessons->filedoc->count() > 0)
+                                                                @foreach($lessons->filedoc as $doc)
+                                                                    <div class="lesson-item d-flex justify-content-between align-items-center mb-2" style="padding: 10px; background: rgba(255,255,255,0.3); border-radius: 8px;">
+                                                                        <span>
+                                                                            <i class="fa fa-file-pdf-o text-danger me-2"></i>
+                                                                            {{ $doc->file_name_display ?? 'เอกสารประกอบ' }}
+                                                                        </span>
+                                                                        <a href="{{ asset($doc->file_path) }}" target="_blank" class="btn btn-secondary btn-sm">
+                                                                            <i class="fa fa-download"></i> ดาวน์โหลด
+                                                                        </a>
+                                                                    </div>
+                                                                @endforeach
+                                                            @endif
+                                                        </div>
+                                                        @if($loop->last)
+                                                            <div style="background-color: #1F7BCC; color: white; padding: 15px 15px; border-radius: 8px; margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                                                <span style="font-size:28px">แบบทดสอบ Final Exam</span>
+                                                                <button class="btn btn-light" style="font-size: 20px; font-weight: bold; color: #1F7BCC; border-radius: 6px; padding: 5px 30px;">
+                                                                    เริ่มทำข้อสอบ
+                                                                </button>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -155,4 +229,9 @@
         </div>
     </div>
 </body>
+{{-- เก็บไว้ตอนทำคะแนน --}}
+{{-- <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+    <span><i class="fa fa-check-circle text-primary"></i> ทำข้อสอบก่อนเรียน</span>
+    <span>คะแนนที่ได้ <b style="background: white; padding: 2px 10px; border-radius: 5px; margin-left: 5px;">15/15</b></span>
+</div> --}}
 @endsection

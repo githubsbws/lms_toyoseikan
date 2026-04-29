@@ -101,13 +101,14 @@
                                             <option value="60">เดือนที่ 2</option>
                                             <option value="90">เดือนที่ 3</option>
                                             <option value="119">เดือนที่ 4</option>
+                                            <option value="999">หลังเดือนที่ 4(ก่อนขึ้นเป็นพนังงานทั่วไป)</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
                             <hr class="my-4" style="border-top: 2px solid #eee;">
-
+                            {{-- รอทำหน้าเพิ่มข้อมูล --}}
                             <div class="form-group">
                                 <label for=""><u>ผลกระทบต่อ License Person</u></label>
                                 <div class="col-4 ml-2">
@@ -124,7 +125,7 @@
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- รอทำหน้าเพิ่มข้อมูล --}}
                             <hr class="my-4" style="border-top: 2px solid #eee;">
 
                             <div class="form-group">
