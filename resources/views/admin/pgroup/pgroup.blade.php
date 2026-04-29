@@ -40,14 +40,20 @@
                                     <tr>
 										<td>{{ $index + 1 }}</td>
 										<td>{{ $item->group_name }}</td>
-                                        <td>
-											<a href="{{ route('pgroup_edit',['pgroup_id' => $item->id]) }}" class="btn btn-warning btn-sm"><i class="fas fa-pen"></i></a>
-										</td>
-										<td>
-                                            <button type="button" class="btn btn-danger btn-sm delete-button" data-id="{{ $item->id }}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
+                                        @if($item->id == 1)
+                                            <td>ไม่สามรถแก้ไขได้</td>
+                                            <td>ไม่สามรถลบได้</td>
+                                        @else
+                                            <td>
+
+                                                <a href="{{ route('pgroup_edit',['pgroup_id' => $item->id]) }}" class="btn btn-warning btn-sm"><i class="fas fa-pen"></i></a>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm delete-button" data-id="{{ $item->id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        @endif
                                     </tr>
                                     @endforeach
                                 </tbody>

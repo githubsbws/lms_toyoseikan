@@ -16,7 +16,7 @@ class Orgchart extends Model
     protected $fillable = ['title','level','active'];
 
     public $timestamps = false;
-    
+
     public static function findById($id)
     {
         return static::where('id', $id)->first();
@@ -24,6 +24,11 @@ class Orgchart extends Model
 
     public function users()
     {
-        return $this->belongsToMany(Users::class, 'orgchart_id', 'user_id');
+        return $this->belongsTo(Users::class, 'orgchart_id', 'user_id');
+    }
+
+    public function line()
+    {
+        return $this->belongsTo(Orgchart::class, 'parent_id', 'id');
     }
 }

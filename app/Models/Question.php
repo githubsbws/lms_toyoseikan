@@ -21,7 +21,8 @@ class Question extends Model
         'ques_explain',
         'group_id',
         'create_by',
-        'update_by'
+        'update_by',
+        'answer'
     ];
 
 
@@ -44,5 +45,9 @@ class Question extends Model
         return $this->hasMany(Choice::class, 'ques_id', 'ques_id')
                     ->where('active','y')
                     ->where('choice_answer', '1');
+    }
+    public function images()
+    {
+        return $this->hasMany(QuestionImage::class, 'ques_id', 'ques_id');
     }
 }

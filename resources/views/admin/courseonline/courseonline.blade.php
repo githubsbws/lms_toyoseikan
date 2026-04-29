@@ -45,7 +45,7 @@
                                             {{ $item->course_title }}
                                         </td>
                                         <td class="text-center">
-                                            {{ $item->cate_title }}
+                                            {{ $item->category->cate_title }}
                                         </td>
                                         <td class="text-center">{{ $item->teacher->teacher_name ?? '-'}}</td>
                                         <td>

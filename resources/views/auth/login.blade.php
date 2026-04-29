@@ -15,6 +15,13 @@
     <div class="container">
         <div class="page-section login-page">
             <div class="row">
+
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible" role="alert" style="display: block !important;">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 <div class="col-md-6 col-lg-6 col-md-offset-3 col-lg-offset-3">
                     <div class="panel panel-default">
                         <div class="panel-body">
@@ -26,10 +33,10 @@
                                     @csrf
                                     <div class="form-group">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
-                                                for="UserLogin_username" class="required">username / email <span
+                                                for="UserLogin_username" class="required">Staff ID<span
                                                     class="required">*</span></label></label>
                                         <div class="col-sm-9">
-                                            <input class="form-control" placeholder="Username"
+                                            <input class="form-control" placeholder="Staff ID"
                                                 name="username" id="username" type="text" value="{{ old('username') }}">
                                         </div>
                                     </div>
@@ -44,7 +51,7 @@
                                         </div>
                                     </div><br>
                                     {{-- เพิ่ม --}}
-                                   
+
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
                                             <p class="hint">
@@ -63,17 +70,17 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group">
+                                    {{-- <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
                                             <span class="input-error">กรุณาเปลี่ยนรหัสผ่านก่อนเข้าใช้งาน 1 ครั้ง</span>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
                                             <div class="g-recaptcha" data-sitekey="6Le3zv8pAAAAACNf85umY6OIKbJYQOJMzoLjR8ZK" data-action="LOGIN"></div>
                                         </div>
                                     </div>
-                                   
+
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
                                             <input class="btn btn-primary" type="submit" name="yt0"
@@ -88,7 +95,7 @@
                                         </div>
                                     @enderror
                                 </form>
-                               
+
                             </div><!-- form -->
                         </div>
                     </div>

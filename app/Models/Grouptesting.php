@@ -29,7 +29,7 @@ class Grouptesting extends Model
 
     public function lesson()
     {
-        return $this->hasMany(Lesson::class, 'lesson_id', 'id');
+        return $this->belongsTo(Lesson::class, 'lesson_id', 'id');
     }
 
     public function manages()

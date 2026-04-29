@@ -37,6 +37,7 @@ use App\Models\Question;
                                         <th>จำนวนข้อ</th>
                                         <th>&nbsp;</th>
 										<th>&nbsp;</th>
+										<th>&nbsp;</th>
                                         <th>จัดการ</th>
                                     </tr>
                                 </thead>
@@ -58,7 +59,12 @@ use App\Models\Question;
                                         </td>
 										<td class="text-center">
                                             <a class="btn btn-primary btn-icon" href="{{route('ques.excel',['id' => $item->group_id])}}">
-												Import Excel 
+												Import 
+											</a>
+                                        </td>
+										<td class="text-center">
+                                            <a class="btn btn-primary btn-icon" href="{{route('questions.create',['id' => $item->group_id])}}">
+												เพิ่มคำถาม 
 											</a>
                                         </td>
 										<td class="text-center">

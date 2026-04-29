@@ -37,15 +37,17 @@
             </div>
             <div class="col-xs-12 col-md-5">
                 <h4 class="text-headline text-light" style="font-size: 24px;">ติดต่อเรา</h4>
-                <p>บริษัท บราเดอร์ คอมเมอร์เชี่ยล (ประเทศไทย) จำกัด (สำนักงานใหญ่)</p>
-                <p>ชั้น 21 รสาทาวเวอร์ 2, 555 ถนนพหลโยธิน
-                    แขวงจตุจักร เขตจตุจักร กรุงเทพ 10900
+                <p>บริษัท โตโย ไซกัน (ประเทศไทย) จำกัด (สำนักงานใหญ่)</p>
+                <p>95 หมู่ 3, สวนอุตสาหกรรมโรจนะ 2,
+                    ตำบล บ้านช้าง, อำเภอ อุทัย,
+                    จังหวัด พระนครศรีอยุธยา. 13210 ประเทศไทย
 
                 </p>
-                <p>โทรศัพท์:(66) 2665-7700 || โทรสาร:(66) 2665-7799</p>
+                <p>โทรศัพท์:(66) 35-746-655</p>
+                <p>อีเมล์: info@toyoseikan.co.th</p>
             </div>
             <div class="col-md-12 text-center" style="margin-top: 10px;margin-bottom: 0;">
-                <p style="margin-bottom: 0;">Brother E-learning System © Copyright 2016</p>
+                <p style="margin-bottom: 0;">Toyoseikan E-learning System © Copyright 2026</p>
             </div>
         </div>
     </div>
