@@ -22,6 +22,7 @@ use App\Models\OrgchartUser;
 use App\Models\Roadmap;
 use App\Models\RoadmapCourse;
 use App\Models\Users;
+use App\Services\CourseService;
 use Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,14 @@ use Illuminate\Support\Facades\Session;
 class CourseController extends Controller
 {
     // Detail
+    protected $courseService;
+
+    // ฉีด Service เข้ามาทาง Constructor
+    public function __construct(CourseService $courseService)
+    {
+        $this->courseService = $courseService;
+    }
+
     function courseDetail($id)
     {
     if(Auth::check()){
@@ -127,42 +136,8 @@ class CourseController extends Controller
     function course(Request $request)
     {
         if(Auth::check()){
-            if(Auth::user()->team_id == 6){
-                $orgCourseIds = RoadmapCourse::whereHas('roadmap', fn($q) => $q->where('line_id', Auth::user()->Orgchart->line->id))
-            ->orderBy('order', 'asc')
-            ->pluck('course_id') // ได้เป็น Array ของ ID ที่เรียงลำดับมาแล้ว
-            ->toArray();
 
-            }else{
-                $orgCourseIds = Orgcourse::where('orgchart_id',Auth::user()->org_id)->pluck('course_id');
-
-                // $orgCourseIds = Course::pluck('course_id');
-            }
-
-            $query = Course::with([
-                'lesson' => function($q) {
-                    $q->where('active', 'y') // กรองเฉพาะบทเรียนที่เปิดใช้งาน
-                    ->with([
-                        'file' => function($q_file) {
-                            $q_file->where('active', 'y'); // กรองเฉพาะไฟล์วิดีโอที่เปิดใช้งาน
-                        },
-                        'filedoc' => function($q_doc) {
-                            $q_doc->where('active', 'y'); // กรองเฉพาะเอกสารที่เปิดใช้งาน
-                        }
-                    ]);
-                }
-            ])
-                ->whereIn('course_id', $orgCourseIds)
-                ->where('active', 'y'); // เผื่ออยากดึงเฉพาะที่เปิดใช้งานอยู่
-
-            if(Auth::user()->team_id == 6 && !empty($orgCourseIds)){
-                $safeIds = collect($orgCourseIds)->map(fn($id) => (int)$id)->implode(',');
-                // ใช้ array_position เพื่อบังคับลำดับตามที่จดมาในกระดาษ ($orgCourseIds)
-                $query->orderByRaw("array_position(ARRAY[$safeIds]::integer[], course_id)");
-            }
-
-            $course_detail = $query->paginate(5);
-
+            $course_detail = $this->courseService->getCoursesForUser(Auth::user());
 
             return view("course.course",['course_detail' =>$course_detail]);
         }else{
