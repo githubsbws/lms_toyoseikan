@@ -30,6 +30,7 @@ use App\Models\Questionnaireout;
 use Carbon\Carbon;
 use App\Models\Image;
 use App\Models\Course;
+use App\Models\Passcourse;
 use App\Models\Lesson;
 use App\Models\Learn;
 use App\Models\News;
@@ -1272,6 +1273,7 @@ class AdminController extends Controller
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
             if ($request->isMethod('post')) {
+                
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
                     'cate_id' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
@@ -2425,6 +2427,35 @@ class AdminController extends Controller
         }
     }
     //new p
+
+    public function questionnaireout_result(Request $request){
+        if(AuthFacade::useradmin()){
+            // $course_online = Course::join('category', 'category.cate_id', '=', 'course_online.cate_id')->where('course_online.active', 'y')->orderBy('sortOrder', 'desc')->get();
+            $course_online = Passcourse::join('course_online', 'course_online.course_id', '=', 'passcours.passcours_cours')
+            ->join('category', 'category.cate_id', '=', 'course_online.cate_id')
+            // เพิ่มการ Join กับตาราง tbl_profiles
+            ->join('profiles', 'profiles.user_id', '=', 'passcours.passcours_user') 
+            ->where(function($query) {
+                $query->where('passcours.passcours_status', '!=', 'pass')
+                    ->orWhereNull('passcours.passcours_status');
+            })
+            ->select(
+                'passcours.*', 
+                'course_online.course_title', 
+                'category.cate_title',
+                // เพิ่มการ Select ชื่อและนามสกุล
+                'profiles.firstname', 
+                'profiles.lastname'
+            )
+            ->get();
+            return view("admin.questionnaireout.questionnaireout_result", compact('course_online'));
+        }else{
+            return redirect()->route('login.admin');
+        }
+    }
+
+
+
     function questionnaireout_plan(Request $request, $id){
         if(AuthFacade::useradmin()){
             $lesson_id = Lesson::findById($id);
