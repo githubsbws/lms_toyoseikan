@@ -57,11 +57,6 @@ class Users extends AuthenticatableUser implements Authenticatable
         return $this->belongsTo(ASC::class,'asc_id','id');
     }
 
-    public function Position()
-    {
-        return $this->belongsTo(Position::class,'position_id','id');
-    }
-
     public function PermissionGroup()
     {
         return $this->hasOne(Pgroup::class,'id','group_id');

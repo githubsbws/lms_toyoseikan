@@ -127,17 +127,29 @@ class CourseController extends Controller
     function course(Request $request)
     {
         if(Auth::check()){
-            if(Auth::user()->team_id == 7){
-                $orgCourseIds = Roadmap::with(['roadmapCourse' => fn($q) => $q->orderBy('order', 'asc')])->where('line_id',Auth::user()->Orgchart->line->id)->get();
+            if(Auth::user()->team_id == 6){
+                $orgCourseIds = RoadmapCourse::whereHas('roadmap', fn($q) => $q->where('line_id', Auth::user()->Orgchart->line->id))
+            ->orderBy('order', 'asc')
+            ->pluck('course_id') // ได้เป็น Array ของ ID ที่เรียงลำดับมาแล้ว
+            ->toArray();
 
             }else{
-                $orgCourseIds = Orgcourse::where('orgchart_id',Auth::user()->org_id)->pluck('course_id');;
+                $orgCourseIds = Orgcourse::where('orgchart_id',Auth::user()->org_id)->pluck('course_id');
+
+                // $orgCourseIds = Course::pluck('course_id');
             }
 
+            $query = Course::whereIn('course_id', $orgCourseIds)
+                ->where('active', 'y'); // เผื่ออยากดึงเฉพาะที่เปิดใช้งานอยู่
 
-            $course_detail = Course::whereIn('course_id', $orgCourseIds)
-                ->where('active', 'y') // เผื่ออยากดึงเฉพาะที่เปิดใช้งานอยู่
-                ->paginate(10);
+            if(Auth::user()->team_id == 6 && !empty($orgCourseIds)){
+                $safeIds = collect($orgCourseIds)->map(fn($id) => (int)$id)->implode(',');
+                // ใช้ array_position เพื่อบังคับลำดับตามที่จดมาในกระดาษ ($orgCourseIds)
+                $query->orderByRaw("array_position(ARRAY[$safeIds]::integer[], course_id)");
+            }
+
+            $course_detail = $query->paginate(5);
+
 
             return view("course.course",['course_detail' =>$course_detail]);
         }else{

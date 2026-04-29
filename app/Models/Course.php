@@ -73,4 +73,8 @@ class Course extends Model
         return $this->hasOne(RoadmapCourse::class,'course_id');
     }
 
+    public function lesson()
+    {
+        return $this->hasMany(Lesson::class,'course_id','course_id');
+    }
 }

@@ -21,6 +21,16 @@
                     </div>
                 </div>
             </div>
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        กรุณาติดต่อแผนกIT
+                        {{-- @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach --}}
+                    </ul>
+                </div>
+            @endif
             <div class="container mt-5">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
