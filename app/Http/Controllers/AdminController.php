@@ -5506,6 +5506,62 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
+    function report_user(Request $request) {
+        if(AuthFacade::useradmin()){
+
+            $users = Users::join('profiles','profiles.user_id','=','users.id')
+                        ->where('users.status', '1')
+                        ->select('users.*','profiles.firstname','profiles.lastname')
+                        ->orderBy('users.id', 'DESC')
+                        ->get();
+
+            $courses = Course::join('category','category.cate_id','=','course_online.cate_id')
+                    ->where('course_online.active','y')
+                    ->select(
+                        'course_online.course_id',
+                        'course_online.course_title',
+                        'course_online.cate_id',
+                        'category.cate_title as cate_name'
+                    )
+                    ->orderBy('course_online.cate_id')
+                    ->get();
+
+            $groupedCourses = $courses->groupBy('cate_name');
+            
+            $learns = Learn::whereIn('course_id', $courses->pluck('course_id'))
+                            ->whereIn('user_id', $users->pluck('id'))
+                            ->get()
+                            ->groupBy('user_id');
+
+            return view("admin.report.report_user", [
+                'users' => $users,
+                'courses' => $courses,
+                'groupedCourses' => $groupedCourses,
+                'learns' => $learns
+            ]);
+
+        }else{
+            return redirect()->route('login.admin');
+        }
+    }
+    function report_user_skill($user_id) {
+        if(AuthFacade::useradmin()){
+
+            $lessons = Lesson::where('active', 'y')->get();
+
+            $learns = Learn::where('user_id', $user_id)->get()
+                        ->keyBy('lesson_id');
+
+            return view("admin.report.report_user_skill", [
+                'lessons' => $lessons,
+                'learns' => $learns,
+                'user_id' => $user_id
+            ]);
+
+        }else{
+            return redirect()->route('login.admin');
+        }
+    }
     function report_course(Request $request) {
         if(AuthFacade::useradmin()){
             $course = Course::where('active', 'y')

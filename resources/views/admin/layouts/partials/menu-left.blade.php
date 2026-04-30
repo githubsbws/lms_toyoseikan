@@ -645,8 +645,8 @@ use App\Helpers\PermissionHelper;
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{url('report_course')}}" class="nav-link {{ request()->is('report_course') ? 'active' : '' }}">
-                                <p>รายงานภาพรวมของหลักสูตร</p>
+                            <a href="{{url('report_user')}}" class="nav-link {{ request()->is('report_user') ? 'active' : '' }}">
+                                <p>Skill Matrix Visual Report</p>
                             </a>
                         </li>
                         <li class="nav-item">
