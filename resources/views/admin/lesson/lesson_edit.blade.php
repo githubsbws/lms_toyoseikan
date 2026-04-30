@@ -5,17 +5,17 @@
     .video-js {
             max-width: 100%
         }
-    
+
         /* the usual RWD shebang */
-    
+
         .video-js {
             width: 350px !important; /* override the plugin's inline dims to let vids scale fluidly */
             height: 200px !important;
         }
-    
+
         .video-js video {
             position: relative !important;
-        } 
+        }
 </style>
 <body class="">
     <div id="wrapper">
@@ -68,7 +68,7 @@
                                 <textarea name="course_short_title" id="summernote" class="form-control">{!!  htmlspecialchars_decode($lesson->description) !!}</textarea>
                             </div>
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="view_all">สิทธิ์การดูบทเรียนนี้</label>
                                 <div>
                                     @php
@@ -86,7 +86,7 @@
                             <div class="form-group">
                                 <label for="time_test">เวลาในการทำข้อสอบ</label>
                                 <input type="text" name="time_test" class="form-control" value="{{ $lesson->time_test }}">
-                            </div>
+                            </div> --}}
 
                             <div class="form-group">
                                 <label for="content">เนื้อหา </label>
@@ -96,7 +96,7 @@
                             <div class="form-group">
                                 <label for="File_filename">ไฟล์บทเรียน (mp3,mp4)</label>
                                 @if($file != null)
-                                
+
                                             <div class="col-md-6">
                                                 <video id="example_video_1" class="video-js vjs-default-skin" controls="" preload="none" data-setup="{}" controlsList="nodownload">
                                                     {{-- <source src="/../images/storage/uploads/lesson/{{$lesson->filename}}" type="video/mp4"> --}}
@@ -117,10 +117,10 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
-                                        
+
                                             @else
                                             <h5>ไม่มีวิดีโอ</h5>
-                                
+
                                         @endif
                                 <div id="queue"></div>
                                 <div class="form-group">
@@ -136,14 +136,14 @@
                                     </div>
                                     <div id="fileList"></div>
 								</div>
-                                
+
                             </div>
 
                             <div class="form-group">
                                 <label for="FileDoc_doc">ไฟล์ประกอบบทเรียน (pdf,docx,pptx)</label>
                                 @if($filedoc !== null)
                                 <h5>{{ $filedoc->file_name}}</h5>
-                    
+
                                 @else
                                 <h5>ไม่มีไฟล์</h5>
                                 @endif

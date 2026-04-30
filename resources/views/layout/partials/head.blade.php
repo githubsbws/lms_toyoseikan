@@ -35,13 +35,15 @@ use App\Models\Usability;
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brother E-learning System</title>
+    <title>Toyoseikan E-learning System</title>
     <link href="{{asset('themes/bws/js/vender/video-js/video-js.css')}}" rel="stylesheet">
     <link href="{{asset('themes/bws/js/vender/video-js/video-js.min.css')}}" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.min.css')}}">
     <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.js')}}"></script>
     <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.min.js')}}"></script>
+    {{-- <link rel="stylesheet" href="{{asset('assets/bootstrap5.0.2/css/bootstrap.min.css')}}">
+    <script src="{{asset('assets/bootstrap5.0.2/js/bootstrap.min.js')}}"></script> --}}
     {{-- <link href="themes/bws/css/vendor.min.css" rel="stylesheet">
     <link href="themes/bws/css/theme-core.css" rel="stylesheet">
     <link href="themes/bws/css/module-essentials.min.css" rel="stylesheet" />
@@ -101,7 +103,7 @@ use App\Models\Usability;
                 </button>
                 <div class="navbar-brand navbar-brand-logo">
                     <a href="{{url('index')}}">
-                        <img src="{{ asset('themes/bws/images/brotherlogo.png') }}">
+                        <img src="{{ asset('themes/bws/images/toyologo.jpg') }}"class="logonav" style="width: 80px !important; height: auto !important;">
                     </a>
                 </div>
             </div>
@@ -126,7 +128,7 @@ use App\Models\Usability;
                     <li class="dropdown">
                         <a href="{{ url('course') }}">หลักสูตร</a>
                     </li>
-                    
+
                     @endif
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">วิธีการใช้งาน <span class="caret"></span></a>
@@ -184,11 +186,11 @@ use App\Models\Usability;
                                 <li><a href="{{ url('course') }}"><i class="fa fa-mortar-board"></i> หลักสูตรของฉัน</a></li>
                                 <li><a href="{{ url('profile') }}"><i class="fa fa-user"></i>
                                         โปรไฟล์</a></li>
-                                
+
                                 <li>
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                         @csrf
-                                        
+
                                     </form>
                                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" ><i class="fa fa-sign-out"></i>
                                         ออกจากระบบ
@@ -203,11 +205,11 @@ use App\Models\Usability;
                 <!-- No login -->
                 <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
                     <a href="{{ url('logins') }}" class="navbar-btn btn btn-primary"><i class="fa fa-fw fa-user"></i> เข้าสู่ระบบ</a>
-                </div> 
+                </div>
 
                 <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
                     <a href="{{ url('registers') }}" class="navbar-btn btn btn-primary"><i class="fa fa-fw fa-user"></i> สมัครสมาชิก</a>
-                </div> 
+                </div>
                 @endif
             </div>
 

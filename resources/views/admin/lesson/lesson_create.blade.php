@@ -58,7 +58,7 @@
                                 </div>
                             </div> --}}
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="cate_amount">จำนวนครั้งที่สามารถทำข้อสอบได้ <span class="required" style="color:red">*</span></label>
                                 <input type="text" name="cate_amount" class="form-control">
                             </div>
@@ -66,7 +66,7 @@
                             <div class="form-group">
                                 <label for="time_test">เวลาในการทำข้อสอบ <span class="required" style="color:red">*</span></label>
                                 <input type="text" name="time_test" class="form-control">
-                            </div>
+                            </div> --}}
 
                             <div class="form-group">
                                 <label for="content">เนื้อหา <span class="required" style="color:red">*</span></label>

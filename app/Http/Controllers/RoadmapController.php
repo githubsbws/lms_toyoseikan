@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Roadmap;
+use App\Models\RoadmapCourse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,87 +12,46 @@ use Illuminate\Support\Facades\DB;
 
 class RoadmapController extends Controller
 {
-    public function indexNewEmp() {
+    public function indexNewEmp(Request $request) {
         $newEmpRoadmap = Roadmap::with('roadmapCourse')
                                 ->where('department_org_id',Auth::user()->department_org_id)
                                 ->where('active','y')
-                                ->first();
+                                ->when($request->search, function($query, $search) {
+                                    return $query->where('name', 'LIKE', "%{$search}%");
+                                })->get();
+
+        if ($request->ajax()) {
+            // ส่งกลับเฉพาะส่วนที่อยู่ใน fragment 'roadmap-cards' ของหน้าเดิม
+            return view('admin.roadmap.newemp', compact('newEmpRoadmap'))->fragment('roadmap-cards'); //แดงเฉยๆ intelephense มันอัพเดตไม่ถึง fragment
+        }
         return view('admin.roadmap.newemp',compact('newEmpRoadmap'));
     }
 
-    public function createNewEmp(Request $request) {
-        $newEmpCourse = Course::where('is_onboarding',true)
-                        ->where('active','y')
-                        ->where('department_org_id',Auth::user()->department_org_id)
-                        ->get();
-        if($request->isMethod('post')){
-            $roadmapItems = json_decode($request->roadmap_items, true);
-            // dd($roadmapItems);
-            DB::beginTransaction();
-            try {
-                // 2. สร้างหัวข้อ Roadmap หลักก่อน
-                $roadmap = new Roadmap();
-                $roadmap->name = Auth::user()->Department->title . ' Roadmap';
-                $roadmap->active = 'y';
-                $roadmap->created_by = Auth::user()->id;
-                $roadmap->updated_by = Auth::user()->id;
-                $roadmap->department_org_id =  Auth::user()->department_org_id;
-                $roadmap->save();
-                // 3. วนลูปบันทึกแต่ละวิชาลงในตาราง tbl_roadmap_course
-                foreach ($roadmapItems as $item) {
-                    DB::table('roadmap_course')->insert([
-                        'roadmap_id'     => $roadmap->id,
-                        'course_id'      => $item['course_id'],
-                        // ถ้าใน JSON เป็น null ตัว DB จะบันทึกเป็น NULL ให้ตามที่น้องต้องการเป๊ะ
-                        'milestone_days' => $item['milestone_days'],
-                        'order'          => $item['order'],
-                        'active'         => 'y',
-                    ]);
-                }
-                DB::commit();
-                return redirect()->route('roadmap.newemp.index')->with('success', 'สร้าง Roadmap สำเร็จ!');
-            }catch (\Exception $e) {
-                DB::rollBack();
-                return back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
-            }
-        }
-        return view('admin.roadmap.newemp_create',compact('newEmpCourse'));
+    public function newEmpDetail(Request $request) {
+        $roadmapCourse = Roadmap::with(['roadmapCourse'=> function($q) {
+                                $q->orderBy('order', 'asc');
+                                }])->findOrFail($request->id);
+        return view('admin.roadmap.newemp_detail',compact('roadmapCourse'));
     }
 
-    public function editNewEmp(Request $request,$id) {
-        $newEmpCourseEdit = Roadmap::findOrFail($id);
-        if($request->isMethod('post')){
-            $roadmapItems = json_decode($request->roadmap_items, true);
-            $now = Carbon::now();
-            // dd($roadmapItems);
-            DB::beginTransaction();
-            try {
-                // 3. วนลูปบันทึกแต่ละวิชาลงในตาราง tbl_roadmap_course
-                foreach ($roadmapItems as $item) {
-                    DB::table('roadmap_course')
-                    ->where('roadmap_id',$id)
-                    ->where('course_id',$item['course_id'])
-                    ->update([
-                        'milestone_days' => $item['milestone_days'],
-                        'order'          => $item['order'],
-                    ]);
-                }
-                DB::table('roadmap')
-                    ->where('id', $id)
-                    ->update([
-                        'updated_at' => $now,
-                        // 'updated_by' => auth()->id(), // (แถม) ถ้ามีคอลัมน์คนแก้ก็ใส่ไปด้วยเลยครับ
-                    ]);
-                DB::commit();
-                return redirect()->route('roadmap.newemp.index')->with('success', 'สร้าง Roadmap สำเร็จ!');
-            }catch (\Exception $e) {
-                DB::rollBack();
-                return back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+    public function updateOrder(Request $request) {
+        DB::beginTransaction();
+        try {
+            foreach ($request->orders as $data) {
+                RoadmapCourse::where('id', $data['id'])
+                    ->update(['order' => $data['order']]);
             }
-        }
-        return view('admin.roadmap.newemp_edit',compact('newEmpCourseEdit'));
-    }
-    public function indexGeneralEmp() {
+            DB::commit();
+            return response()->json(['status' => 'success', 'message' => 'บันทึกลำดับเรียบร้อย']);
 
+        } catch (\Exception $e) {
+            // 3. ถ้ามีอะไรพังแม้แต่นิดเดียว ให้ยกเลิกทั้งหมดที่ทำมา (Rollback)
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()
+            ], 500);
+        }
+        return response()->json(['status' => 'success']);
     }
 }

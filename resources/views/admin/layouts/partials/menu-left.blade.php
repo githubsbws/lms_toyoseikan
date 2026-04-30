@@ -305,12 +305,12 @@ use App\Helpers\PermissionHelper;
                     </ul>
                 </li>
                 @endcanmenu
-                {{-- @canmenu(13)
+                @canmenu(13)
                 <li class="nav-item {{ request()->is('questionnaireout*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('questionnaireout*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-alt"></i>
                         <p>
-                            แบบประเมินผลการฝึกอบรม
+                            ระบบประเมินภาคปฏิบัติ
                             <i class="right fas fa-angle-left"></i>
                             <span class="badge badge-info right">5</span>
                         </p>
@@ -318,17 +318,22 @@ use App\Helpers\PermissionHelper;
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
                             <a href="{{ url('/questionnaireout_excel') }}" class="nav-link {{ request()->is('questionnaireout_excel') ? 'active' : '' }}">
-                                <p>เพิ่มแบบสอบถาม</p>
+                                <p>การประเมินภาคปฏิบัติ</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{ url('/questionnaireout') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
-                                <p>จัดการแบบสอบถาม</p>
+                                <p>การสอบซ่อม</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('/questionnaireout_result') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
+                                <p>ผลการเรียน</p>
                             </a>
                         </li>
                     </ul>
                 </li>
-                @endcanmenu --}}
+                @endcanmenu
                 @canmenu(14)
                 <li class="nav-item {{ request()->is('orgchart*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('orgchart*') ? 'active' : '' }}">
@@ -391,12 +396,6 @@ use App\Helpers\PermissionHelper;
                         <li class="nav-item">
                             <a href="{{ url('/roadmap/new-emp') }}" class="nav-link {{ request()->is('roadmap/new-emp*') ? 'active' : '' }}">
                                 <p>Roadmap พนังงานใหม่</p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{{ url('/roadmap/parameter') }}" class="nav-link {{ request()->is('roadmap/parameter*') ? 'active' : '' }}">
-                                <p>Roadmap พนังงานทั่วไป</p>
                             </a>
                         </li>
                     </ul>

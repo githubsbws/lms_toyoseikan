@@ -10,7 +10,7 @@ class Roadmap extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'name', 'org_id','active', 'created_by', 'updated_by','department_org_id'
+        'name', 'org_id','active', 'created_by', 'updated_by','department_org_id','line_id'
     ];
 
     public static function getMilestones()

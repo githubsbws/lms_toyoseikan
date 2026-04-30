@@ -74,13 +74,35 @@
                                     <i class="fas fa-save mr-1"></i> นำเข้าไฟล์ 
                                 </button>
                                 <br>
+                                <br>
                                 <div class="form-group">
                                     <label for="File_filename">แบบฟอร์มรูปแบบนำเข้าข้อสอบ</label>
-                                        <a id="templateLink"
-                                            href="#"
-                                            style="color: red">
-                                            Download Excel 
-                                        </a>
+                                        <table class="table table-striped table-bordered nowrap" style="width:100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>ข้อสอบอัตนัย</th>
+                                                    <th>ข้อสอบปรนัย</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <a id="templateLink"
+                                                            href="{{ asset('images/uploads/template_import_essay.xlsx') }}"
+                                                            style="color: red">
+                                                            Download Excel 
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <a id="templateLink"
+                                                            href="{{ asset('images/uploads/template_import_choice.xlsx') }}"
+                                                            style="color: red">
+                                                            Download Excel 
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                 </div>
                             </form>
                         </div>

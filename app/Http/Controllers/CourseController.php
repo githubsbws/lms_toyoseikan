@@ -19,6 +19,10 @@ use App\Models\File;
 use App\Models\Grouptesting;
 use App\Models\Images;
 use App\Models\OrgchartUser;
+use App\Models\Roadmap;
+use App\Models\RoadmapCourse;
+use App\Models\Users;
+use App\Services\CourseService;
 use Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -29,9 +33,18 @@ use Illuminate\Support\Facades\Session;
 class CourseController extends Controller
 {
     // Detail
+    protected $courseService;
+
+    // ฉีด Service เข้ามาทาง Constructor
+    public function __construct(CourseService $courseService)
+    {
+        $this->courseService = $courseService;
+    }
+
     function courseDetail($id)
     {
     if(Auth::check()){
+        $users = Users::with('organization.parent')->get();
         $course_detail = Course::findById($id);
         $course_lesson = Lesson::where(['course_id' => $course_detail->course_id,'active' => 'y'])->first();
         if($course_lesson != null){
@@ -123,11 +136,8 @@ class CourseController extends Controller
     function course(Request $request)
     {
         if(Auth::check()){
-            $orgCourseIds = Orgcourse::where('orgchart_id',Auth::user()->org_id)->pluck('course_id');;
 
-            $course_detail = Course::whereIn('course_id', $orgCourseIds)
-                ->where('active', 'y') // เผื่ออยากดึงเฉพาะที่เปิดใช้งานอยู่
-                ->paginate(10);
+            $course_detail = $this->courseService->getCoursesForUser(Auth::user());
 
             return view("course.course",['course_detail' =>$course_detail]);
         }else{

@@ -21,6 +21,16 @@
                     </div>
                 </div>
             </div>
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        กรุณาติดต่อแผนกIT
+                        {{-- @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach --}}
+                    </ul>
+                </div>
+            @endif
             <div class="container mt-5">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
@@ -86,6 +96,22 @@
                                         <div class="col-4">
                                             <input type="date" class="form-control" id="end_date" name="end_date" value="{{ $course_detail->end_date ?? '' }}">
                                         </div>
+                                    </div>
+                                </div>
+                                <div id="milestone-select" style="display: none;">
+                                    <label for="">เลือกช่วงเดือนของหลักสูตรนี้</label>
+                                    <div class="col-4">
+                                        <select class="form-control" name="milestone" id="milestone">
+                                            @php
+                                                // ดึงค่า Milestone ออกมาพักไว้ก่อน เพื่อความสะอาดของโค้ด
+                                                $currentMilestone = $course_detail->roadmapCourse?->milestone_days;
+
+                                            @endphp
+                                            <option value="30" {{ $currentMilestone == 30 ? 'selected' : '' }}>เดือนที่ 1</option>
+                                            <option value="60" {{ $currentMilestone == 60 ? 'selected' : '' }}>เดือนที่ 2</option>
+                                            <option value="90" {{ $currentMilestone == 90 ? 'selected' : '' }}>เดือนที่ 3</option>
+                                            <option value="119" {{ $currentMilestone == 119 ? 'selected' : '' }}>เดือนที่ 4</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -249,12 +275,14 @@
         $('#onboarding').change(function(){
             if($(this).is(':checked')){
                 $('#date-select').hide();
-                $('#org-select').hide();
+                $('#milestone-select').show();
+                $('#onboarding-note').show();
             }else{
                 $('#date-select').show();
-                $('#org-select').show();
+                $('#milestone-select').hide();
+                $('#onboarding-note').hide();
             }
-        })
+        }).trigger('change');
     });
     $(document).ready(function () {
         var OrgChartTree = @json($orgtree);

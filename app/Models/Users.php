@@ -19,7 +19,7 @@ class Users extends AuthenticatableUser implements Authenticatable
 
     protected $primaryKey = 'id';
     public $timestamps = false;
-
+    const TEAM_NEWEMP = 6;
     protected $fillable = [
         'created_at', 'id', 'username', 'password', 'email',
         'org_id', 'division_id', 'position_id', 'pic_user', 'department_id', 'activkey', 'create_at', 'lastvisit_at', 'superuser', 'status', 'online_status', 'online_user', 'last_ip', 'last_activity',
@@ -55,11 +55,6 @@ class Users extends AuthenticatableUser implements Authenticatable
     public function Asc()
     {
         return $this->belongsTo(ASC::class,'asc_id','id');
-    }
-
-    public function Position()
-    {
-        return $this->belongsTo(Position::class,'position_id','id');
     }
 
     public function PermissionGroup()

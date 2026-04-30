@@ -354,6 +354,9 @@ Route::get('/questionnaireout',[AdminController::class,'questionnaireout'])->nam
 Route::get('/questionnaireout_excel',[AdminController::class,'questionnaireout_excel'])->name('questionnaireout.excel')->middleware('checkIdleTimeout');
 Route::post('/questionnaireout_excel',[AdminController::class,'questionnaireout_excel'])->name('questionnaireout.excel')->middleware('checkIdleTimeout');
 
+Route::get('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
+Route::post('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
+
 Route::get('/questionnaireout_exam/{id}',[AdminController::class,'questionnaireout_exam'])->name('questionnaireout.exam')->middleware('checkIdleTimeout');
 Route::post('/questionnaireout_exam/{id}',[AdminController::class,'questionnaireout_exam'])->name('questionnaireout.Answer')->middleware('checkIdleTimeout');
 
@@ -785,12 +788,8 @@ Route::get('/licenseperson/parameter',[LicensePersonController::class, 'indexPar
 
 Route::middleware(['auth.admin'])->group(function(){
     Route::get('/roadmap/new-emp',[RoadmapController::class, 'indexNewEmp'])->name('roadmap.newemp.index');
-    Route::get('/roadmap/new-emp/create',[RoadmapController::class, 'createNewEmp'])->name('roadmap.newemp.create');
-    Route::post('/roadmap/new-emp/create/',[RoadmapController::class, 'createNewEmp'])->name('roadmap.newemp.store');
-
-    Route::get('/roadmap/new-emp/edit/{id}',[RoadmapController::class, 'editNewEmp'])->name('roadmap.newemp.edit');
-    Route::post('/roadmap/new-emp/edit/{id}',[RoadmapController::class, 'editNewEmp'])->name('roadmap.newemp.update');
-    Route::get('/roadmap/general-emp',[RoadmapController::class, 'indexGeneralEmp'])->name('license.generalemp.index');
+    Route::get('/roadmap/new-emp/course/{id}',[RoadmapController::class, 'newEmpDetail'])->name('roadmap.newemp.detail');
+    Route::post('/roadmap/new-emp/course/order',[RoadmapController::class, 'updateOrder'])->name('admin.roadmap.updateOrder');
 });
 
 });
