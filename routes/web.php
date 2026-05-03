@@ -131,15 +131,29 @@ Route::post('/lms_brother_docker/lms/app/index/user/recovery',[ForgotController:
 // ----- course
 Route::get('course',[CourseController::class,'course'])->name('course')->middleware('checkIdleTimeout');
 Route::get('search', [CourseController::class, 'course'])->middleware('checkIdleTimeout');
-// Route::get('detail',[CourseController::class,'courseDetail'])->name('course.detail');
-Route::get('course/detail/{id}',[CourseController::class,'courseDetail'])->name('course.detail')->middleware('checkIdleTimeout');
-Route::get('course/detail/{course_id}/lesson/{id}/{files?}',[CourseController::class,'courseLesson'])->name('course.lesson')->middleware('checkIdleTimeout');
-Route::get('course/LearnVdo/{id}/{learn_id}/{counter}',[CourseController::class,'LearnVdo'])->name('course.LearnVdo')->middleware('checkIdleTimeout');
+
 Route::get('course/question/{course_id}/{id}',[CourseController::class,'coursequestion'])->name('course.coursequestion')->middleware('checkIdleTimeout');
+
+Route::prefix('course/learning')
+    ->middleware(['checkIdleTimeout']) // รวม Middleware ไว้ที่ Group
+    ->group(function () {
+
+        // 1. Specific Path (ต้องอยู่บนสุดเสมอ)
+        Route::get('video-stream/{file_id}', [CourseController::class, 'streamVideo'])
+            ->name('course.videostream')
+            ->whereNumber('file_id'); // Defensive: บังคับให้เป็นตัวเลขเท่านั้น
+
+        // 2. Generic Path (Wildcards)
+        Route::get('{id}/{file_id}', [CourseController::class, 'lessonLearn'])
+            ->name('course.lessonLearn')
+            ->whereNumber(['id', 'file_id']); // Defensive: ป้องกันการรับ String เข้ามาปน
+});
+
 Route::get('course/question/{group}',[CourseController::class,'coursequestion'])->name('course.question')->middleware('checkIdleTimeout');
 Route::get('download/{id}',[CourseController::class,'downloadfile'])->name('course.downloadfile')->middleware('checkIdleTimeout');
 Route::get('course/images', [CourseController::class, 'store'])->name('images.store')->middleware('checkIdleTimeout');
 Route::post('course/images', [CourseController::class, 'store'])->name('images.store')->middleware('checkIdleTimeout');
+
 // choice
 Route::post('/choiceAnswer/{id}',[ChoiceController::class,'choiceAnswer'])->name('choice.Answer')->middleware('checkIdleTimeout');
 // ----- dashboard

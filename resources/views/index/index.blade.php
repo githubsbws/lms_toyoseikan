@@ -138,53 +138,62 @@ use App\Models\DownloadFile;
     </div>
 </body>
 <script>
-document.getElementById('search').addEventListener('keyup', async function() {
-    const query = this.value.trim();
+    document.addEventListener('DOMContentLoaded', () => {
+    // ดึงค่าจาก Session ที่ Controller ส่งมาผ่าน Blade
+        const receivedToken = "{{ session('api_token') }}";
 
-    // ถ้า query ว่าง ให้ล้างผลลัพธ์
-    if (query.length === 0) {
-        document.getElementById('results').innerHTML = '';
-        document.getElementById('result-count').innerHTML = '';
-        return;
-    }
+        if (receivedToken) {
+            // เก็บลง LocalStorage เพื่อใช้ในหน้าอื่นๆ
+            localStorage.setItem('api_access_token', receivedToken);
+        }
+    });
+    document.getElementById('search').addEventListener('keyup', async function() {
+        const query = this.value.trim();
 
-    try {
-        const res = await fetch(`/ocr/search?q=${encodeURIComponent(query)}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        // ถ้า query ว่าง ให้ล้างผลลัพธ์
+        if (query.length === 0) {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('result-count').innerHTML = '';
+            return;
+        }
 
-        const data = await res.json();
-        const hits = data.data || []; // ดึง array ของผลลัพธ์จาก data.data
+        try {
+            const res = await fetch(`/ocr/search?q=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        // แสดงจำนวนผลลัพธ์
-        document.getElementById('result-count').innerHTML = `<h5 class="title-layout">พบ ${hits.length} ผลลัพธ์ที่ตรงกับ <span style="color:red">"${query}"</span></h5>`;
+            const data = await res.json();
+            const hits = data.data || []; // ดึง array ของผลลัพธ์จาก data.data
 
-        let html = '';
+            // แสดงจำนวนผลลัพธ์
+            document.getElementById('result-count').innerHTML = `<h5 class="title-layout">พบ ${hits.length} ผลลัพธ์ที่ตรงกับ <span style="color:red">"${query}"</span></h5>`;
 
-        hits.forEach(hit => {
-            let text = hit.highlight_text ?? hit.text; // ใช้ highlight_text ถ้ามี
+            let html = '';
 
-            const pdfBaseUrl = '/images/uploads/ocr';
-            const pdfUrl = `${pdfBaseUrl}/${hit.folder_name}/${hit.filename}#page=${hit.page_number}`;
-            const filename = hit.highlight_filename ?? hit.filename ?? '-';
+            hits.forEach(hit => {
+                let text = hit.highlight_text ?? hit.text; // ใช้ highlight_text ถ้ามี
 
-            html += `<div style="padding:5px; border-bottom:1px solid #ccc;">
-                        <strong>ชื่อเอกสาร:</strong> ${filename}<br>
-                        <strong>หน้าที่:</strong> ${hit.page_number || '-'}<br>
-                        <strong>บรรทัด:</strong> ${text}<br>
-                        <a href="${pdfUrl}" class="btn btn-primary btn-lg paper-shadow relative" target="_blank" style="color: white !important; text-decoration: underline !important;">
-                            เปิดเอกสาร หน้า ${hit.page_number}
-                        </a>
-                    </div>`;
-        });
+                const pdfBaseUrl = '/images/uploads/ocr';
+                const pdfUrl = `${pdfBaseUrl}/${hit.folder_name}/${hit.filename}#page=${hit.page_number}`;
+                const filename = hit.highlight_filename ?? hit.filename ?? '-';
 
-        document.getElementById('results').innerHTML = html;
+                html += `<div style="padding:5px; border-bottom:1px solid #ccc;">
+                            <strong>ชื่อเอกสาร:</strong> ${filename}<br>
+                            <strong>หน้าที่:</strong> ${hit.page_number || '-'}<br>
+                            <strong>บรรทัด:</strong> ${text}<br>
+                            <a href="${pdfUrl}" class="btn btn-primary btn-lg paper-shadow relative" target="_blank" style="color: white !important; text-decoration: underline !important;">
+                                เปิดเอกสาร หน้า ${hit.page_number}
+                            </a>
+                        </div>`;
+            });
 
-    } catch (err) {
-        console.error('Search failed', err);
-        document.getElementById('results').innerHTML = '<div style="color:red;">Search failed</div>';
-        document.getElementById('result-count').innerHTML = '';
-    }
-});
+            document.getElementById('results').innerHTML = html;
+
+        } catch (err) {
+            console.error('Search failed', err);
+            document.getElementById('results').innerHTML = '<div style="color:red;">Search failed</div>';
+            document.getElementById('result-count').innerHTML = '';
+        }
+    });
 </script>
 
 @endsection

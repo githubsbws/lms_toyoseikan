@@ -113,7 +113,7 @@
                                                         style="width: 100%;border-radius:12px" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 </div>
-                                                <h5 class="card-title">100 % สำเร็จ</h5> {{-- progressbar --}}
+                                                <h5 class="card-title">0 %</h5> {{-- progressbar --}}
 
                                                 <hr style="margin: 15px 0;">
 
@@ -127,7 +127,7 @@
                                                 {{-- ส่วนคำอธิบายแบบย่อ (Short Title) --}}
                                                 ลายละเอียดหลักสูตร
                                                 <div class="margin-t-15" style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
-                                                    {!! htmlspecialchars_decode($item->course_short_title) !!}
+                                                    {!! strip_tags(html_entity_decode($item->course_short_title)) !!}
                                                 </div>
                                             </div>
                                         </div>
@@ -140,7 +140,7 @@
                                                     <h5 class="mb-0">จำนวนบทเรียน</h5>
                                                     <div class="col-6 m-5">
                                                         <i class="fa fa-book fa-5x" style="color: #428bca;"></i>
-                                                        <p class="mx-0">4 บทเรียน</p>
+                                                        <p class="mx-0">{{ $item->lesson()->count() }} บทเรียน</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-6">
@@ -164,8 +164,29 @@
                                                 <div class="col-12">
                                                     @foreach ($item->lesson as $index => $lessons)
                                                         {{-- แถบหัวข้อบทเรียน --}}
-                                                        <div style="background-color: #1F7BCC; color: white; padding: 15px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                                        <div style="background-color: #1F7BCC; color: white; padding: 15px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; gap: 20px; align-items: center;">
                                                             <span style="font-size:28px">บทที่ {{ $index + 1 }} {{ $lessons->title }}</span>
+                                                            @php
+                                                                // ดึงสถานะ
+                                                                $status = $lessons->learn->first()->lesson_status ?? 'notLearning';
+
+                                                                // กำหนดสีและข้อความของ Badge
+                                                                $badgeStyle = 'padding: 4px 12px; border-radius: 50px; font-size: 18px; font-weight: bold; color: white;';
+
+                                                                if ($status === 'pass') {
+                                                                    $bg = 'background-color: #28a745;'; // เขียว
+                                                                    $label = 'Pass';
+                                                                } elseif ($status === 'learning') {
+                                                                    $bg = 'background-color: #ffc107; color: #212529;'; // เหลือง (ตัวหนังสือดำเพื่อให้อ่านง่าย)
+                                                                    $label = 'Learning';
+                                                                } else {
+                                                                    $bg = 'background-color: #dc3545;'; // แดง
+                                                                    $label = 'Not-Learning';
+                                                                }
+                                                            @endphp
+                                                            <span style="{{ $badgeStyle }} {{ $bg }}">
+                                                                {{ $label }}
+                                                            </span>
                                                         </div>
 
                                                         {{-- รายการย่อย (ทำเป็นโครงไว้ก่อน) --}}
@@ -176,9 +197,30 @@
                                                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; width: 100%;">
 
                                                                         {{-- ฝั่งซ้าย: ไอคอน + ชื่อวิดีโอ --}}
-                                                                        <div style="display: flex; align-items: center;">
+                                                                        <div style="display: flex; align-items: center; gap: 20px;">
                                                                             <i class="fa fa-play-circle text-primary" style="font-size: 1.2rem;padding-right:10px"></i>
                                                                             <span style="font-size:24px ">วิดีโอ: {{ $vdo->file_name ?? 'วิดีโอไม่มีชื่อ' }}</span>
+                                                                            @php
+                                                                                // ดึงสถานะ
+                                                                                $status = $vdo->learnFile->first()->learn_file_status ?? 'notLearning';
+
+                                                                                // กำหนดสีและข้อความของ Badge
+                                                                                $badgeStyle = 'padding: 4px 12px; border-radius: 50px; font-size: 18px; font-weight: bold; color: white;';
+
+                                                                                if ($status === 'pass') {
+                                                                                    $bg = 'background-color: #28a745;'; // เขียว
+                                                                                    $label = 'Pass';
+                                                                                } elseif ($status === 'learning') {
+                                                                                    $bg = 'background-color: #ffc107; color: #212529;'; // เหลือง (ตัวหนังสือดำเพื่อให้อ่านง่าย)
+                                                                                    $label = 'Learning';
+                                                                                } else {
+                                                                                    $bg = 'background-color: #dc3545;'; // แดง
+                                                                                    $label = 'Not-Learning';
+                                                                                }
+                                                                            @endphp
+                                                                            <span style="{{ $badgeStyle }} {{ $bg }}">
+                                                                                {{ $label }}
+                                                                            </span>
                                                                         </div>
 
                                                                         {{-- ฝั่งขวา: เวลา (ถ้ามี) + ปุ่ม --}}
@@ -187,9 +229,8 @@
                                                                             {{-- <span class="text-muted me-3">
                                                                                 <i class="fa fa-clock-o"></i> 30 นาที
                                                                             </span> --}}
-                                                                            <button class="btn btn-primary" style="border-radius: 6px;font-size:24px; padding: 5px 40px;">ดูวิดีโอ</button>
+                                                                            <a href="{{ route('course.lessonLearn',[$lessons->id,$vdo->id,$item->id]) }}"><button class="btn btn-primary" style="border-radius: 6px;font-size:24px; padding: 5px 40px;">ดูวิดีโอ</button></a>
                                                                         </div>
-
                                                                     </div>
                                                                 @endforeach
                                                             @endif
@@ -200,7 +241,12 @@
                                                                             <i class="fa fa-file-pdf-o text-danger me-2"></i>
                                                                             {{ $doc->file_name_display ?? 'เอกสารประกอบ' }}
                                                                         </span>
-                                                                        <a href="{{ asset($doc->file_path) }}" target="_blank" class="btn btn-secondary btn-sm">
+                                                                        <a href="{{ route('course.downloadfile', [
+                                                                                'file_doc_id' => $doc->id,
+                                                                                'lesson_id'   => $lessons->lesson_id,
+                                                                                'course_id'   => $lessons->course_id
+                                                                        ]) }}"
+                                                                        class="btn btn-secondary btn-sm">
                                                                             <i class="fa fa-download"></i> ดาวน์โหลด
                                                                         </a>
                                                                     </div>

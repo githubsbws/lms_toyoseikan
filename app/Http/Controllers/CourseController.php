@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\LessonStatus;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -18,206 +19,149 @@ use App\Models\Orgcourse;
 use App\Models\File;
 use App\Models\Grouptesting;
 use App\Models\Images;
+use App\Models\LearnFileDoc;
 use App\Models\OrgchartUser;
 use App\Models\Roadmap;
 use App\Models\RoadmapCourse;
 use App\Models\Users;
 use App\Services\CourseService;
-use Log;
+use App\Services\LessonProgressService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Facades\Session;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CourseController extends Controller
 {
-    // Detail
-    protected $courseService;
+
 
     // ฉีด Service เข้ามาทาง Constructor
-    public function __construct(CourseService $courseService)
-    {
-        $this->courseService = $courseService;
-    }
+    public function __construct(
+        protected CourseService $courseService,
+        protected LessonProgressService $progressService,
+    ) {}
 
-    function courseDetail($id)
-    {
-    if(Auth::check()){
-        $users = Users::with('organization.parent')->get();
-        $course_detail = Course::findById($id);
-        $course_lesson = Lesson::where(['course_id' => $course_detail->course_id,'active' => 'y'])->first();
-        if($course_lesson != null){
-            return view("course.course-detail",['course_detail' =>$course_detail],['course_lesson' =>$course_lesson]);
-        }else{
-            session()->flash('error', 'บทเรียนยังไม่เปิดให้เรียนตอนนี้');
-            return redirect()->route('course');
-        }
-    }else{
-        return redirect()->route('index');
-    }
-    //    dd($course_detail);
-    }
-
-    // Lession
-    function courseLesson($course_id,$id, Request $request,$files = null){
-        $domain = '15';
-        if(Auth::check()){
-        $ptest = Manage::where(['type' => 'pre','id' => $id,'active' =>'y'])->first();
-
-        $chk_score = Score::where(['lesson_id'=>$id,'user_id'=>Auth::user()->id,'active'=>'y','course_id'=>$course_id])->orderBy('update_date','DESC')->first();
-        // dd($chk_score->toArray());
-        if($chk_score == null){
-            if($ptest){
-                return redirect()->route("course.coursequestion",['course_id' =>$course_id,'id'=>$id]);
-            }
-        }
-        $learnModel = Learn::where(['lesson_id' => $id,'user_id' => Auth::user()->id])->first();
-        if(!$learnModel){
-            $learnLog = new Learn;
-            $learnLog->user_id = Auth::user()->id;
-            $learnLog->gen_id = '0';
-            $learnLog->lesson_id = $id;
-            $learnLog->course_id = $course_id;
-            $learnLog->learn_date = now();
-            $learnLog->create_date = now();
-            $learnLog->domain_id = $domain;
-            $learnLog->save();
-            $learn_id = $learnLog->learn_id;
-
-        }
-        else
-        {
-            // $learnModel->update([
-            //     'learn_date' => now()
-            // ]);
-            $learn = Learn::findById($learnModel->learn_id);
-            $learn->fill([
-                'learn_date' => now()
-            ]);
-            $learn->save();
-            $learn_id = $learnModel->learn_id;
-        }
-        $course_detail = Course::findById($course_id);
-        $lesson_list = Lesson::where(['course_id' => $course_id,'active' =>'y'])->get();
-        $file = FileDoc::where(['lesson_id' => $id,'active' =>'y'])->get();
-
-        if(!$lesson_list || $lesson_list == null){
-            session()->flash('error', 'บทเรียนยังไม่เปิดให้เรียนตอนนี้');
-            return redirect()->route('course');
-        }
-        if(!$file || $file == null){
-            session()->flash('error', 'บทเรียนยังไม่เปิดให้เรียนตอนนี้');
-            return redirect()->route('course');
-        }
-        if(isset($id)){
-            $course_lesson = Lesson::join('course_online','course_online.course_id','=','lesson.course_id')->where('lesson.id',$id)->get();
-            $track = File::where('lesson_id',$id)->first();
-
-            if($files != null){
-                $file_id = File::where('id',$files)->where('active','y')->first();
-                // dd($file_id->toArray());
-            }else{
-                $file_id = File::where('lesson_id',$id)->where('active','y')->first();
-                if(!$file_id){
-                    session()->flash('error', 'บทเรียนยังไม่เปิดให้เรียนตอนนี้');
-                    return redirect()->route('course');
-                }
-            }
-            // dd($file_id->id);
-        }
-        return view("course.course-lesson",['course_lesson' =>$course_lesson,'course_detail' =>$course_detail,'lesson_list' =>$lesson_list,'file' =>$file,'course_id' =>$course_id,'lesson_id' =>$id,'learn_id' =>$learn_id,'file_id' =>$file_id,'track' => $track]);
-    }else{
-        return redirect()->route('index');
-    }
-}
-
-    // course
     function course(Request $request)
     {
         if(Auth::check()){
-
             $course_detail = $this->courseService->getCoursesForUser(Auth::user());
 
-            return view("course.course",['course_detail' =>$course_detail]);
+            return view("course.course",compact('course_detail'));
         }else{
             return redirect()->route('index');
         }
     }
-    function LearnVdo($id,$learn_id,$counter, Request $request)
+    // Lession
+
+    public function lessonLearn(int $lessonId, int $fileId,)
     {
-        $learnVdoModel = LearnFile::where(['learn_id'=>$learn_id,'file_id'=>$id])->first();
+        // โหลด Lesson พร้อม Course และไฟล์ที่ระบุ รวมถึงสถานะการเรียนล่าสุด
+        $lesson = Lesson::with('course')->findOrFail($lessonId);
+        $file = File::findOrFail($fileId);
 
-        if($learnVdoModel){
-            if($counter == 'success' || $learnVdoModel->learn_file_status == 's')
-                {
-                    $learnVdoModel->fill([
-                        'learn_file_status' => 's'
-                    ]);
-                    $learnVdoModel->save();
+        $this->authorize('view', $lesson);
 
-                    $chk_learn = Learn::findById($learn_id);
-                    if($chk_learn->lesson_status !== "pass"){
-                        $chk_learn->fill([
-                            'lesson_status' => 'pass'
-                        ]);
-
-                        $chk_learn->save();
-                    }
-                    $att['no']      = $id;
-                    $att['image']   = '<img src="' . asset('images/icon_checkpast.png') . '" alt="ผ่าน" title="ผ่าน" style="margin-bottom: 8px;">';
-
-                    echo json_encode($att);
-                }
-            elseif($counter == 'counter' || $learnVdoModel->learn_file_status == 'l'){
-                $view = File::findById($id);
-                $views = $view->views+1;
-                $view->fill([
-                    'views' => $views
-                ]);
-                $view->save();
-            }
-        }else{
-            $learnLog = new LearnFile;
-            $learnLog->learn_id = $learn_id;
-            $learnLog->user_id_file = Auth::user()->id;
-            $learnLog->file_id = $id;
-            $learnLog->learn_file_date = now();
-            $learnLog->learn_file_status = "l";
-            $learnLog->save();
-
-            $chk_learn = Learn::findById($learn_id);
-            $chk_learn->fill([
-                'lesson_status' => 'learning'
-            ]);
-
-            $chk_learn->save();
-
-            $att['no']      = $id;
-            $att['image']   = '<img src="' . asset('images/icon_checklost.png') . '" alt="เรียนยังไม่ผ่าน" title="เรียนยังไม่ผ่าน" style="margin-bottom: 8px;">';
-
-            echo json_encode($att);
-        }
+        // ดึงสถานะการเรียนปัจจุบัน (ถ้ามี)
+        $learnFile = LearnFile::whereHas('learn', function($q) use ($lessonId) {
+                $q->where('user_id', auth()->id())->where('lesson_id', $lessonId);
+            })
+            ->where('file_id', $fileId)
+            ->first();
+        $hasLearnComplete = $learnFile && $learnFile->learn_file_status === LessonStatus::Success->value;
+        return view('course.course-lesson', compact('lesson', 'file', 'learnFile','hasLearnComplete'));
     }
 
-    public function downloadfile($id,  Request $request)
-{
-     // Retrieve the file information from the database
-     $file = FileDoc::where('id',$id)->first();
-     // Check if the file exists
+    public function streamVideo(int $fileId): BinaryFileResponse
+    {
+        try{
+            $file = File::findOrFail($fileId);
 
-     // Construct the full file path
-     $file_path = public_path('images/uploads/filedoc'.DIRECTORY_SEPARATOR. $file->filename);
+        // Security: เช็คสิทธิ์ก่อนส่งไฟล์
+        // $this->authorize('view', $file->lesson);
 
+        $path = public_path('images/uploads/' . $file->filename);
+        if (!file_exists($path)) {
+            abort(404);
+        }
 
-     // Check if the file actually exists on the server
-     if (!file_exists($file_path)) {
-         return response()->json(['error' => 'File not found on the server'], 404);
-     }
+        // BinaryFileResponse รองรับ HTTP 206 Partial Content อัตโนมัติ
+        return response()->file($path, [
+            'Content-Type' => 'video/mp4',
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
+        }catch (\Exception $e){
+            Log::error("Video Stream Failed: " . $e->getMessage(), [
+                'user_id' => auth()->id(),
+                'file_id' => $file_id ?? 'N/A',
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                // ไม่ต้องเก็บ Trace ทั้งหมดลง Log ปกติ เพราะมันเปลืองเนื้อที่
+                // ยกเว้นจะเป็นเคสที่หาสาเหตุยากจริงๆ
+            ]);
 
-     // Generate the response for downloading the file
-     return response()->download($file_path, $file->original_filename);
-}
+            // 2. Return Response (External Visibility)
+            // ส่ง HTTP 500 หรือ 400 พร้อมข้อความที่ User อ่านแล้วเข้าใจแต่ไม่รู้ไส้ในระบบ
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'ไม่สามารถเล่นวิดีโอได้ในขณะนี้ กรุณาลองใหม่อีกครั้งหรือติดต่อเจ้าหน้าที่',
+            ], 500);
+                }
+
+    }
+
+    public function updateProgress(Request $request): JsonResponse
+    {
+
+        if (!auth()->check()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthenticated. Please log in again.'
+            ], 401); // Return 401 แทนที่จะปล่อยให้ 500
+        }
+
+        $data = $request->only(['course_id', 'lesson_id', 'file_id', 'seconds', 'status']);
+        // 2. เรียก Service โดยส่ง ID และ Array ข้อมูล
+        $result = $this->progressService->updateVideoProgress(
+            auth()->id(),
+            $data
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $result
+        ]);
+    }
+
+    public function downloadfile(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthenticated. Please log in again.'
+            ], 401); // Return 401 แทนที่จะปล่อยให้ 500
+        }
+        $file = FileDoc::where('id',$request->file_doc_id)->first();
+
+        if (!$file) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+
+        $file_path = public_path('images/uploads/filedoc'.DIRECTORY_SEPARATOR. $file->filename);
+
+        if (!file_exists($file_path)) {
+            return response()->json(['error' => 'File not found on the server'], 404);
+        }
+
+        $data = $request->only(['course_id', 'lesson_id', 'file_doc_id']);
+        $this->progressService->updateDocProgress(auth()->id(),$data);
+
+        return response()->download($file_path, $file->original_filename);
+    }
+
     public function coursequestion($course_id,$id,  Request $request){
         if(Auth::check()){
             $post_test = Manage::where(['id' => $id, 'active' =>'y'])->first();

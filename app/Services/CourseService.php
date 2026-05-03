@@ -5,23 +5,33 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\Orgcourse;
 use App\Models\Users;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CourseService
 {
+    const STATUS_ACTIVE = 'y';
     // app/Services/CourseService.php
     public function getCoursesForUser(Users $user)
     {
         // 1. Base Query พร้อม Eager Loading ที่สะอาดขึ้น
         $query = Course::with([
-            'lesson' => function($q) {
+            'lesson' => function($q) use ($user) {
                 $q->where('active', 'y')
                 ->with([
-                    'file' => fn($q) => $q->where('active', 'y'),
-                    'filedoc' => fn($q) => $q->where('active', 'y'),
+                    'file' => fn($q) => $q->where('active', self::STATUS_ACTIVE)
+                        ->with([
+                            // ← eager load learn_file ของ user นี้
+                            'learnFile' => fn($q) => $q->whereHas('learn',
+                                fn($q) => $q->where('user_id', $user->id)
+                            )
+                        ]),
+                    'filedoc' => fn($q) => $q->where('active', self::STATUS_ACTIVE),
+                    // ← eager load learn ของ user นี้
+                    'learn' => fn($q) => $q->where('user_id', $user->id),
                 ]);
             }
         ])
-        ->where('course_online.active', 'y');
+        ->where('course_online.active', self::STATUS_ACTIVE);
 
         // 2. Branching Logic
         if ($user->team_id === Users::TEAM_NEWEMP) {
@@ -31,9 +41,9 @@ class CourseService
         return $this->applyOrgCriteria($query, $user);
     }
 
-    private function applyRoadmapCriteria($query, $user)
+    private function applyRoadmapCriteria($query, $user) : LengthAwarePaginator|iterable
     {
-        $lineId = $user->Orgchart->line->id ?? null;
+        $lineId = $user->Orgchart?->line?->id ?? null;
 
         if (!$lineId) return collect(); // Defensive: ไม่มี Line ID ไม่ให้เห็นคอร์ส
 

@@ -62,10 +62,6 @@ class Users extends AuthenticatableUser implements Authenticatable
         return $this->hasOne(Pgroup::class,'id','group_id');
     }
 
-    public function orgcharts()
-    {
-        return $this->belongsToMany(OrgchartUser::class,'user_id', 'orgchart_id');
-    }
     public function learns()
     {
         return $this->hasMany(Learn::class, 'user_id', 'id');

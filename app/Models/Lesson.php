@@ -23,7 +23,7 @@ class Lesson extends Model
         'image',
         'active'
     ];
-    
+
     const CREATED_AT = 'create_date'; // Custom created_at column
     const UPDATED_AT = 'update_date'; // Custom update_at column
 
@@ -47,12 +47,17 @@ class Lesson extends Model
 
     public function course()
     {
-        return $this->belongsTo(Course::class, 'course_id');
+        return $this->belongsTo(Course::class, 'course_id','course_id');
     }
 
     public function Qheader()
     {
         return $this->belongsTo(QHeader::class, 'header_id','survey_header_id');
+    }
+
+    public function learn()
+    {
+        return $this->hasMany(Learn::class, 'lesson_id','id');
     }
 
 }

@@ -83,12 +83,18 @@ class LoginController extends Controller
             // Authentication passed
             $user = Auth::user();
             $user->_token = $request->session()->get('_token'); // หรือดึงจาก $request->_token ตามที่ถูกต้อง
+            $user->tokens()->delete();
+
+        // [Standards] ออกกุญแจใหม่ใบเดียว
+        // plainTextToken คือสิ่งที่จะส่งไปให้หน้าบ้าน ส่วนใน DB จะเก็บเป็น Hash SHA-256
+            $token = $user->createToken('web_access_token')->plainTextToken;
+
             $ipAddress = request()->ip();
             $user->last_ip = $ipAddress;
             $user->last_activity = now();
             $user->save();
 
-            return redirect()->intended('/index');
+            return redirect()->intended('/index')->with('api_token', $token);
         } else {
             // Authentication failed
             return back()->withErrors(['username' => 'username or password is incorrect']);
