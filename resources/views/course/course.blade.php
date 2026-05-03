@@ -60,11 +60,7 @@
                                         @php
                                             $isLocked = $item->is_locked ?? false;
 
-                                            $isPassed = $item->passcourse
-                                                            ->where('passcours_user', auth()->id())
-                                                            ->where('academic_year', now()->year)
-                                                            ->where('passcours_status', 'pass')
-                                                            ->isNotEmpty();
+                                            $isPassed = $item->passcourse->isNotEmpty();
 
                                             $isLearning = !$isLocked && !$isPassed;
 
