@@ -150,9 +150,9 @@ Route::prefix('course/learning')
 });
 
 Route::get('course/question/{group}',[CourseController::class,'coursequestion'])->name('course.question')->middleware('checkIdleTimeout');
-Route::get('download/{id}',[CourseController::class,'downloadfile'])->name('course.downloadfile')->middleware('checkIdleTimeout');
 Route::get('course/images', [CourseController::class, 'store'])->name('images.store')->middleware('checkIdleTimeout');
 Route::post('course/images', [CourseController::class, 'store'])->name('images.store')->middleware('checkIdleTimeout');
+Route::get('download/learn-file-doc',[CourseController::class,'downloadfile'])->name('course.downloadfile')->middleware('checkIdleTimeout');
 
 // choice
 Route::post('/choiceAnswer/{id}',[ChoiceController::class,'choiceAnswer'])->name('choice.Answer')->middleware('checkIdleTimeout');

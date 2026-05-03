@@ -57,26 +57,75 @@
                             <div class="nav flex-column me-3" id="v-pills-tab" role="tablist">
                                 @if ($course_detail->count() > 0)
                                     @foreach ($course_detail as $key => $item)
-                                        {{-- @php $isActive = $key == 0 ? 'active' : ''; @endphp --}}
+                                        @php
+                                            $isLocked = $item->is_locked ?? false;
+
+                                            $isPassed = $item->passcourse
+                                                            ->where('passcours_user', auth()->id())
+                                                            ->where('academic_year', now()->year)
+                                                            ->where('passcours_status', 'pass')
+                                                            ->isNotEmpty();
+
+                                            $isLearning = !$isLocked && !$isPassed;
+
+                                            if ($isLocked) {
+                                                $btnClass = 'btn-danger';
+                                                $label    = 'ล็อค';
+                                                $icon     = 'fa fa-lock';
+                                            } elseif ($isPassed) {
+                                                $btnClass = 'btn-success';
+                                                $label    = 'ผ่านแล้ว';
+                                                $icon     = 'fa fa-check-circle';
+                                            } else {
+                                                $btnClass = 'btn-warning';
+                                                $label    = 'กำลังเรียน';
+                                                $icon     = 'fa fa-play-circle';
+                                            }
+                                        @endphp
+
                                         <div class="road-item" style="margin-bottom: 15px;">
-                                            <button class="nav-link btn-success"
+                                            <button class="nav-link btn {{ $btnClass }}"
                                                     id="v-pills-tab-{{ $item->course_id }}"
-                                                    data-toggle="tab" {{-- ใช้ data-toggle เฉยๆ ถ้า Theme เป็น BS4 --}}
+                                                    data-toggle="tab"
                                                     href="#v-pills-content-{{ $item->course_id }}"
-                                                    style="display: flex; align-items: center; text-align: left; border: 1px; width: 100%;padding:20px;border-radius:15px">
+                                                    @if($isLocked) disabled @endif
+                                                    style="display: flex; align-items: center; text-align: left;
+                                                        width: 100%; padding: 20px; border-radius: 15px;
+                                                        {{ $isLocked ? 'pointer-events: none; opacity: 0.6;' : '' }}">
 
                                                 <div class="wrap" style="flex-grow: 1;">
                                                     <div class="couurse-name-rd">
-                                                        <strong style="display: block;font-size:24px">{{ $item->course_title }}</strong>
-                                                        <small>{!! strip_tags(html_entity_decode($item->course_short_title), '<b><strong><i><em><u>') !!}</small>
+                                                        @php
+                                                            $milestoneLabel = [
+                                                                30  => 'เดือนที่ 1',
+                                                                60  => 'เดือนที่ 2',
+                                                                90  => 'เดือนที่ 3',
+                                                                119 => 'เดือนที่ 4',
+                                                                999 => 'หลัง 4 เดือน',
+                                                            ];
+                                                        @endphp
+                                                        <strong style="display: block; font-size: 24px;">
+                                                            {{ $item->course_title }}
+                                                        </strong>
+                                                        <small style="display: block; color: white; opacity: 0.8;">
+                                                            {{ $milestoneLabel[$item->milestone_days] ?? '-' }}
+                                                        </small>
+                                                        <small>
+                                                            {!! strip_tags(html_entity_decode($item->course_short_title), '<b><strong><i><em><u>') !!}
+                                                        </small>
                                                     </div>
                                                 </div>
-                                                <div class="icon" style="margin-left: 10px;">
-                                                    <i class="fa-regular fa-pen-to-square"></i>
+
+                                                <div style="margin-left: 10px;">
+                                                    <i class="{{ $icon }} fa-lg"></i>
                                                 </div>
+
                                             </button>
                                         </div>
                                     @endforeach
+                                    @if(method_exists($course_detail, 'links'))
+                                        {{ $course_detail->links() }}
+                                    @endif
                                 @else
                                     <div><p>ยังไม่มีหลักสูตรการเรียนการสอน</p></div>
                                 @endif
@@ -243,7 +292,7 @@
                                                                         </span>
                                                                         <a href="{{ route('course.downloadfile', [
                                                                                 'file_doc_id' => $doc->id,
-                                                                                'lesson_id'   => $lessons->lesson_id,
+                                                                                'lesson_id'   => $lessons->id,
                                                                                 'course_id'   => $lessons->course_id
                                                                         ]) }}"
                                                                         class="btn btn-secondary btn-sm">

@@ -77,4 +77,8 @@ class Course extends Model
     {
         return $this->hasMany(Lesson::class,'course_id','course_id');
     }
+    public function passcourse()
+    {
+        return $this->hasMany(Passcourse::class,'passcours_cours','course_id');
+    }
 }

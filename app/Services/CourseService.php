@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Enums\LessonStatus;
 use App\Models\Course;
 use App\Models\Orgcourse;
+use App\Models\Passcourse;
 use App\Models\Users;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class CourseService
 {
@@ -23,13 +26,23 @@ class CourseService
                             // ← eager load learn_file ของ user นี้
                             'learnFile' => fn($q) => $q->whereHas('learn',
                                 fn($q) => $q->where('user_id', $user->id)
+                                            ->where('pass_year', now()->year),
                             )
                         ]),
-                    'filedoc' => fn($q) => $q->where('active', self::STATUS_ACTIVE),
+                    'filedoc' => fn($q) => $q->where('active', self::STATUS_ACTIVE)
+                        ->with([
+                            'learnFileDoc' =>fn($q) => $q->whereHas('learn',
+                                fn($q) => $q->where('user_id', $user->id)
+                                            ->where('pass_year', now()->year)
+                            ),
+                        ]),
                     // ← eager load learn ของ user นี้
-                    'learn' => fn($q) => $q->where('user_id', $user->id),
+                    'learn' => fn($q) => $q->where('user_id', $user->id)
+                                            ->where('pass_year', now()->year),
                 ]);
-            }
+            },
+            'passcourse' => fn($q) => $q->where('passcours_user', $user->id)
+                                ->where('academic_year', now()->year),
         ])
         ->where('course_online.active', self::STATUS_ACTIVE);
 
@@ -47,12 +60,72 @@ class CourseService
 
         if (!$lineId) return collect(); // Defensive: ไม่มี Line ID ไม่ให้เห็นคอร์ส
 
-        return $query->join('roadmap_course', 'course_online.course_id', '=', 'roadmap_course.course_id')
+        $allRoadmapCourses = DB::table('roadmap_course')
+        ->join('roadmap', 'roadmap_course.roadmap_id', '=', 'roadmap.id')
+        ->where('roadmap.line_id', $lineId)
+        ->where('roadmap_course.active', self::STATUS_ACTIVE)
+        ->orderBy('roadmap_course.order')
+        ->select(
+            'roadmap_course.course_id',
+            'roadmap_course.order',
+            'roadmap_course.milestone_days'
+        )
+        ->get();
+
+        // 2. ดึง course ที่ผ่านแล้วของ user ปีนี้
+        $passedCourseIds = Passcourse::where('passcours_user', $user->id)
+            ->where('academic_year', now()->year)
+            ->where('passcours_status',LessonStatus::Success->value)
+            ->pluck('passcours_cours');
+
+        // 3. คำนวณวันที่ทำงานมาแล้ว
+        $daysWorked = (int) now()->diffInDays($user->work_start);
+
+        // 4. คำนวณ is_locked แต่ละ course
+        $lockedMap = $allRoadmapCourses->mapWithKeys(function ($rc) use (
+            $allRoadmapCourses, $passedCourseIds, $daysWorked
+        ) {
+            return [
+                $rc->course_id => !$this->isCourseUnlocked(
+                    $rc,
+                    $allRoadmapCourses,
+                    $passedCourseIds,
+                    $daysWorked
+                )
+            ];
+        });
+
+        $courses = $query
+            ->join('roadmap_course', 'course_online.course_id', '=', 'roadmap_course.course_id')
             ->join('roadmap', 'roadmap_course.roadmap_id', '=', 'roadmap.id')
             ->where('roadmap.line_id', $lineId)
+            ->where(function($q) use ($daysWorked, $passedCourseIds, $allRoadmapCourses) {
+                // แสดง milestone ปกติเสมอ
+                $q->where('roadmap_course.milestone_days', '!=', 999);
+
+                // แสดง 999 เมื่อครบเงื่อนไขเท่านั้น
+                $requiredCourseIds = $allRoadmapCourses
+                    ->where('milestone_days', '!=', 999)
+                    ->pluck('course_id');
+
+                $allPassed = $requiredCourseIds->every(
+                    fn($id) => $passedCourseIds->contains($id)
+                );
+
+                if ($daysWorked >= 120 && $allPassed) {
+                    $q->orWhere('roadmap_course.milestone_days', 999);
+                }
+            })
             ->orderBy('roadmap_course.order', 'asc')
-            ->select('course_online.*')
+            ->select('course_online.*', 'roadmap_course.order', 'roadmap_course.milestone_days')
             ->paginate(5);
+
+        $courses->each(function ($course) use ($lockedMap) {
+            $course->is_locked = $lockedMap[$course->course_id] ?? false;
+        });
+
+        return $courses;
+
     }
 
     private function applyOrgCriteria($query, $user)
@@ -63,6 +136,53 @@ class CourseService
             return collect();
         }
 
-        return $query->whereIn('course_online.course_id', $orgCourseIds)->paginate(5);
+        $courses = $query
+        ->whereIn('course_online.course_id', $orgCourseIds)
+        ->where('course_online.start_date', '<=', now())  // เริ่มแล้ว
+        ->where('course_online.end_date', '>=', now())    // ยังไม่หมด
+        ->paginate(5);
+
+        $courses->each(function ($course) {
+            $course->is_locked = false;
+        });
+
+        return $courses;
+    }
+
+    private function isCourseUnlocked(
+        $roadmapCourse,
+        $allRoadmapCourses,
+        $passedCourseIds,
+        int $daysWorked
+    ): bool {
+
+        if($roadmapCourse->milestone_days === 999) {
+            return true;
+        }
+        // milestone → จำนวนวันขั้นต่ำที่ต้องทำงานมาแล้ว
+        $milestoneMap = [
+            30  => 0,   // วันที่ 1-30
+            60  => 31,  // วันที่ 31-60
+            90  => 61,  // วันที่ 61-90
+            119 => 91,  // วันที่ 91-119
+        ];
+        // เช็ค 1: milestone
+        $requiredDays = $milestoneMap[$roadmapCourse->milestone_days] ?? 0;
+        if ($daysWorked < $requiredDays) {
+            return false;
+        }
+
+        // เช็ค 2: order — course ก่อนหน้าต้องผ่านแล้ว
+        if ($roadmapCourse->order > 1) {
+            $prevCourse = $allRoadmapCourses->where('milestone_days', '!=', 999)
+                                            ->filter(fn($rc) => $rc->order < $roadmapCourse->order)
+                                            ->sortByDesc('order')
+                                            ->first();
+            if ($prevCourse && !$passedCourseIds->contains($prevCourse->course_id)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

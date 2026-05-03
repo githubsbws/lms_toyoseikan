@@ -144,7 +144,7 @@ class CourseController extends Controller
                 'message' => 'Unauthenticated. Please log in again.'
             ], 401); // Return 401 แทนที่จะปล่อยให้ 500
         }
-        $file = FileDoc::where('id',$request->file_doc_id)->first();
+        $file = FileDoc::where('id',$request->query('file_doc_id'))->first();
 
         if (!$file) {
             return response()->json(['error' => 'File not found'], 404);
