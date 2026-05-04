@@ -106,6 +106,8 @@ use App\Models\Profiles;
 use App\Models\ProfilesTitle;
 use App\Models\Roadmap;
 use App\Models\RoadmapCourse;
+
+use getID3;
 // use App\Models\Users;
 
 use App\Services\RoadmapService;
@@ -1920,9 +1922,13 @@ class AdminController extends Controller
                 // }
 
                 if ($request->hasFile('filename')) {
+                    $getID3 = new getID3;
                     foreach ($request->file('filename') as $file) {
                         $Folder_file = public_path("images/uploads/lesson/");
                         $fileName = time() . "_" . $file->getClientOriginalName();
+
+                        $fileInfo = $getID3->analyze($file->getRealPath());
+                        $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
                         $file->move($Folder_file, $fileName);
 
                         // 🔹 บันทึกลง Database
@@ -1934,7 +1940,8 @@ class AdminController extends Controller
                             'create_by' => Auth::id(),
                             'update_by' => Auth::id(),
                             'active' => 'y',
-                            'views' => 0
+                            'views' => 0,
+                            'duration' => $duration
                         ]);
                     }
                 }
@@ -2068,9 +2075,14 @@ class AdminController extends Controller
 
             // 📌 **อัปโหลดไฟล์ mp3/mp4**
             if ($request->hasFile('filename')) {
+
+                $getID3 = new getID3;
                 foreach ($request->file('filename') as $file) {
                     $Folder_file = public_path("images/uploads/lesson/");
                     $fileName = time() . "_" . $file->getClientOriginalName();
+
+                    $fileInfo = $getID3->analyze($file->getRealPath());
+                    $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
                     $file->move($Folder_file, $fileName);
 
                     // 🔹 บันทึกลง Database
@@ -2082,7 +2094,8 @@ class AdminController extends Controller
                         'create_by' => Auth::id(),
                         'update_by' => Auth::id(),
                         'active' => 'y',
-                        'views' => 0
+                        'views' => 0,
+                        'duration' => $duration
                     ]);
                 }
             }

@@ -18,6 +18,22 @@ class LessonProgressService
     public function updateVideoProgress(int $userId, array $data)
     {
         return DB::transaction(function () use ($userId, $data) {
+            $file = File::where('id', $data['file_id'])
+                    ->where('lesson_id', $data['lesson_id'])
+                    ->first();
+            if (!$file) throw new \Exception('Invalid file', 403);
+
+            // server คำนวณ status เองจาก seconds และ length จริง
+            // ไม่เชื่อ status จาก client เลย
+            if ($file->duration > 0) {
+                $status = ($data['seconds'] >= $file->duration * 0.9) ? 'pass' : 'learning';
+            } else {
+                // ถ้าไม่มี length ค่อยเชื่อ client แต่ whitelist ไว้
+                $status = in_array($data['status'], ['learning', 'pass'])
+                        ? $data['status']
+                        : 'learning';
+            }
+
             $currentYear = now()->year;
             $learn = Learn::firstOrCreate(
                 ['user_id' => $userId, 'lesson_id' => $data['lesson_id'],'pass_year' => now()->year],
@@ -29,7 +45,7 @@ class LessonProgressService
                     'learn_id'            => $learn->learn_id,
                     'file_id'             => $data['file_id'],
                     'last_watched_second' => $data['seconds'],
-                    'learn_file_status'   => $data['status'],
+                    'learn_file_status'   => $status,
                     'learn_file_date'     => now(),
                 ]
             ],

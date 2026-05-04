@@ -18,7 +18,8 @@ class File extends Model
         'lesson_id',
         'filename' ,
         'file_name',
-        'active'
+        'active',
+        'duration'
     ];
 
     const CREATED_AT = 'create_date'; // Custom created_at column
