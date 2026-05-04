@@ -1251,7 +1251,8 @@ class AdminController extends Controller
                     'course_short_title'=>'required|string',
                     'course_detail'=>'required|string',
                     'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                    'org_ids' => 'required'
+                    'org_ids' => 'required',
+                    'retest_amount' => 'required|integer',
 
                 ]);
                 // dd($validator);
@@ -1266,6 +1267,7 @@ class AdminController extends Controller
                 $course_update->course_title = $request->input('course_title');
                 $course_update->course_short_title = htmlspecialchars($request->input('course_short_title'));
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
+                $course_update->course_retest_amount = $request->input('retest_amount');
                 $course_update->course_note = $request->input('course_note');
                 $course_update->update_by = Auth::user()->id;
                 $course_update->active = 'y';
@@ -1411,7 +1413,7 @@ class AdminController extends Controller
             });
 
             if ($request->isMethod('post')) {
-                
+
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
                     'cate_id' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
@@ -1419,6 +1421,7 @@ class AdminController extends Controller
                     'course_short_title'=>'required|string',
                     'course_detail'=>'required|string',
                     'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'retest_amount' => 'required|integer',
 
                 ]);
                 $teacher = Teacher::where('teacher_name',$request->input('teacher_name'))->first();
@@ -1436,6 +1439,7 @@ class AdminController extends Controller
                 $course_update->course_short_title = htmlspecialchars($request->input('course_short_title'));
                 $course_update->course_note = $request->input('course_note');
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
+                $course_update->course_retest_amount = $request->input('retest_amount');
                 $course_update->update_by = Auth::user()->id;
                 $course_update->create_by = Auth::user()->id;
                 $course_update->active = 'y';
@@ -2852,17 +2856,17 @@ class AdminController extends Controller
             $course_online = Passcourse::join('course_online', 'course_online.course_id', '=', 'passcours.passcours_cours')
             ->join('category', 'category.cate_id', '=', 'course_online.cate_id')
             // เพิ่มการ Join กับตาราง tbl_profiles
-            ->join('profiles', 'profiles.user_id', '=', 'passcours.passcours_user') 
+            ->join('profiles', 'profiles.user_id', '=', 'passcours.passcours_user')
             ->where(function($query) {
                 $query->where('passcours.passcours_status', '!=', 'pass')
                     ->orWhereNull('passcours.passcours_status');
             })
             ->select(
-                'passcours.*', 
-                'course_online.course_title', 
+                'passcours.*',
+                'course_online.course_title',
                 'category.cate_title',
                 // เพิ่มการ Select ชื่อและนามสกุล
-                'profiles.firstname', 
+                'profiles.firstname',
                 'profiles.lastname'
             )
             ->get();
@@ -5527,7 +5531,7 @@ class AdminController extends Controller
                     ->get();
 
             $groupedCourses = $courses->groupBy('cate_name');
-            
+
             $learns = Learn::whereIn('course_id', $courses->pluck('course_id'))
                             ->whereIn('user_id', $users->pluck('id'))
                             ->get()

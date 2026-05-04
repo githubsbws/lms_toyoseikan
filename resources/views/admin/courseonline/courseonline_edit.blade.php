@@ -75,6 +75,13 @@
                                 <textarea name="course_detail" id="summernote2" class="form-control">{{ htmlspecialchars_decode(htmlspecialchars_decode($course_detail->course_detail)) }}</textarea>
                             </div>
 
+                            <div class="form-group">
+                                <div class="col-4">
+                                    <label for="retest_amount"><u>จำนวนครั้งที่สามารถสอบซ่อมได้</u><span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="retest_amount" value="{{ $course_detail->course_retest_amount }}">
+                                </div>
+                            </div>
+
                             <hr class="my-4" style="border-top: 2px solid #eee;">
 
                             <div class="form-group">
@@ -111,6 +118,7 @@
                                             <option value="60" {{ $currentMilestone == 60 ? 'selected' : '' }}>เดือนที่ 2</option>
                                             <option value="90" {{ $currentMilestone == 90 ? 'selected' : '' }}>เดือนที่ 3</option>
                                             <option value="119" {{ $currentMilestone == 119 ? 'selected' : '' }}>เดือนที่ 4</option>
+                                            <option value="999" {{ $currentMilestone == 999 ? 'selected' : '' }}>หลังเดือนที่ 4(ก่อนขึ้นเป็นพนังงานทั่วไป)</option>
                                         </select>
                                     </div>
                                 </div>

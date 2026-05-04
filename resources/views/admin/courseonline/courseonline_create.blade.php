@@ -56,7 +56,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="course_title"><u>ชื่อหลักสูตรอบรมออนไลน์</u> <span class="text-danger">*</span></label>
+                                <label for="course_title"><u>ชื่อหลักสูตรอบรมออนไลน์</u><span class="text-danger">*</span></label>
                                 <input type="text" name="course_title" class="form-control" required>
                             </div>
 
@@ -68,6 +68,13 @@
                             <div class="form-group">
                                 <label for="summernote2"><u>รายละเอียด</u></label>
                                 <textarea name="course_detail" id="summernote2" class="form-control"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-4">
+                                    <label for="retest_amount"><u>จำนวนครั้งที่สามารถสอบซ่อมได้</u><span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="retest_amount">
+                                </div>
                             </div>
 
                             <hr class="my-4" style="border-top: 2px solid #eee;">

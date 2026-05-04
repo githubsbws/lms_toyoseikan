@@ -17,7 +17,7 @@ class Course extends Model
         'course_lecturer',
         'active',
         'recommend',
-        'status',
+        'course_retest_amount',
         'cate_amount',
         'time_test',
         'lang_id',
