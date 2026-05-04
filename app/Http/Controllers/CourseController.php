@@ -83,7 +83,7 @@ class CourseController extends Controller
         // Security: เช็คสิทธิ์ก่อนส่งไฟล์
         // $this->authorize('view', $file->lesson);
 
-        $path = public_path('images/uploads/' . $file->filename);
+        $path = public_path('images/uploads/lesson/' . $file->filename);
         if (!file_exists($path)) {
             abort(404);
         }
