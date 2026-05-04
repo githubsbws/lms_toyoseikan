@@ -2012,6 +2012,7 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
+
     public function lesson_create(Request $request)
     {
         if (!Auth::check() || !AuthFacade::useradmin()) {
@@ -2027,9 +2028,6 @@ class AdminController extends Controller
                 'course_id' => 'required',
                 'title' => 'required|string',
                 'description' => 'required|string',
-                'cate_amount' => 'required',
-                'view_all' => 'nullable',
-                'time_test' => 'required',
                 'content' => 'required',
                 'filename.*' => 'nullable|mimes:mp3,mp4',
                 'doc.*' => 'nullable|mimes:pdf,docx,pptx',
@@ -2040,108 +2038,117 @@ class AdminController extends Controller
                 Log::error('Validation failed: ', $validator->errors()->toArray());
                 return redirect()->back()->withErrors($validator)->withInput();
             }
-            // ✅ บันทึกข้อมูลลงใน `lesson`
-            $lesson_create = new Lesson();
-            $lesson_create->course_id = $request->course_id;
-            $lesson_create->title = $request->title;
-            $lesson_create->content = htmlspecialchars($request->content);
-            $lesson_create->description = $request->description;
-            // if ($request->has('view_all')) {
-            //     $lesson_create->view_all = "y";
-            // }else{
-            //     $lesson_create->view_all = "n";
-            // }
-            $lesson_create->view_all = $request->view_all;
-            $lesson_create->cate_amount = $request->cate_amount;
-            $lesson_create->time_test = $request->time_test;
-            $lesson_create->update_by = Auth::id();
-            $lesson_create->active = 'y';
-            $lesson_create->save();
-
-            // 📂 **จัดการการสร้างโฟลเดอร์**
-            $lessonFolder = public_path("images/uploads/lesson/".$lesson_create->id);
-            if (!FileStore::isDirectory($lessonFolder)) {
-                FileStore::makeDirectory($lessonFolder, 0777, true,true);
-            }
-            $Folder = public_path("images/uploads/lesson/{$lesson_create->id}");
-            $originalFolder = "{$Folder}/original";
-            $filedocFolder = public_path("images/uploads/filedoc/");
-
-            foreach ([$originalFolder, $filedocFolder] as $folder) {
-                if (!FileStore::isDirectory($folder)) {
-                    FileStore::makeDirectory($folder, 0777, true,true);
-                }
-            }
-
-            // 📌 **อัปโหลดไฟล์ mp3/mp4**
-            if ($request->hasFile('filename')) {
-
-                $getID3 = new getID3;
-                foreach ($request->file('filename') as $file) {
-                    $Folder_file = public_path("images/uploads/lesson/");
-                    $fileName = time() . "_" . $file->getClientOriginalName();
-
-                    $fileInfo = $getID3->analyze($file->getRealPath());
-                    $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
-                    $file->move($Folder_file, $fileName);
-
-                    // 🔹 บันทึกลง Database
-                    File::create([
-                        'lesson_id' => $lesson_create->id,
-                        'file_name' => $lesson_create->title,
-                        'filename' => $fileName,
-                        'length' => '2.00',
-                        'create_by' => Auth::id(),
-                        'update_by' => Auth::id(),
-                        'active' => 'y',
-                        'views' => 0,
-                        'duration' => $duration
-                    ]);
-                }
-            }
-
-            // 📌 **อัปโหลดไฟล์เอกสาร**
-            if ($request->hasFile('doc')) {
-                foreach ($request->file('doc') as $doc) {
-                    $Folder_doc = public_path("images/uploads/filedoc/");
-                    $docName = time() . "_" . $doc->getClientOriginalName();
-                    $doc->move($Folder_doc, $docName);
-
-                    // 🔹 บันทึกลง Database
-                    FileDoc::create([
-                        'lesson_id' => $lesson_create->id,
-                        'file_name' => $lesson_create->title,
-                        'filename' => $docName,
-                        'length' => '2.00',
-                        'create_by' => Auth::id(),
-                        'update_by' => Auth::id(),
-                        'active' => 'y'
-                    ]);
-                }
-            }
-
-            // 📌 **อัปโหลดภาพประกอบ**
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
-                $imageName = time() . "." . $image->getClientOriginalExtension();
-                if (!FileStore::isDirectory($Folder_pic)) {
-                    FileStore::makeDirectory($Folder_pic, 0777, true,true);
-                }
-
-                $image->move($Folder_pic, $imageName);
-
-                $lesson_create->image = $imageName;
+            DB::beginTransaction();
+            try{
+                $lesson_create = new Lesson();
+                $lesson_create->course_id = $request->course_id;
+                $lesson_create->title = $request->title;
+                $lesson_create->content = htmlspecialchars($request->content);
+                $lesson_create->description = $request->description;
+                // if ($request->has('view_all')) {
+                //     $lesson_create->view_all = "y";
+                // }else{
+                //     $lesson_create->view_all = "n";
+                // }
+                $lesson_create->view_all = $request->view_all;
+                $lesson_create->cate_amount = $request->cate_amount;
+                $lesson_create->time_test = $request->time_test;
+                $lesson_create->update_by = Auth::id();
+                $lesson_create->active = 'y';
                 $lesson_create->save();
+
+                // 📂 **จัดการการสร้างโฟลเดอร์**
+                $lessonFolder = public_path("images/uploads/lesson/".$lesson_create->id);
+                if (!FileStore::isDirectory($lessonFolder)) {
+                    FileStore::makeDirectory($lessonFolder, 0777, true,true);
+                }
+                $Folder = public_path("images/uploads/lesson/{$lesson_create->id}");
+                $originalFolder = "{$Folder}/original";
+                $filedocFolder = public_path("images/uploads/filedoc/");
+
+                foreach ([$originalFolder, $filedocFolder] as $folder) {
+                    if (!FileStore::isDirectory($folder)) {
+                        FileStore::makeDirectory($folder, 0777, true,true);
+                    }
+                }
+
+                // 📌 **อัปโหลดไฟล์ mp3/mp4**
+                if ($request->hasFile('filename')) {
+
+                    $getID3 = new getID3;
+                    foreach ($request->file('filename') as $file) {
+                        $Folder_file = public_path("images/uploads/lesson/");
+                        $fileName = time() . "_" . $file->getClientOriginalName();
+
+                        $fileInfo = $getID3->analyze($file->getRealPath());
+                        $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
+                        $file->move($Folder_file, $fileName);
+
+                        // 🔹 บันทึกลง Database
+                        File::create([
+                            'lesson_id' => $lesson_create->id,
+                            'file_name' => $lesson_create->title,
+                            'filename' => $fileName,
+                            'length' => '2.00',
+                            'create_by' => Auth::id(),
+                            'update_by' => Auth::id(),
+                            'active' => 'y',
+                            'views' => 0,
+                            'duration' => $duration,
+                        ]);
+                    }
+                }
+
+                // 📌 **อัปโหลดไฟล์เอกสาร**
+                if ($request->hasFile('doc')) {
+                    foreach ($request->file('doc') as $doc) {
+                        $Folder_doc = public_path("images/uploads/filedoc/");
+                        $docName = time() . "_" . $doc->getClientOriginalName();
+                        $doc->move($Folder_doc, $docName);
+
+                        // 🔹 บันทึกลง Database
+                        FileDoc::create([
+                            'lesson_id' => $lesson_create->id,
+                            'file_name' => $lesson_create->title,
+                            'filename' => $docName,
+                            'length' => '2.00',
+                            'create_by' => Auth::id(),
+                            'update_by' => Auth::id(),
+                            'active' => 'y'
+                        ]);
+                    }
+                }
+
+                // 📌 **อัปโหลดภาพประกอบ**
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
+                    $imageName = time() . "." . $image->getClientOriginalExtension();
+                    if (!FileStore::isDirectory($Folder_pic)) {
+                        FileStore::makeDirectory($Folder_pic, 0777, true,true);
+                    }
+
+                    $image->move($Folder_pic, $imageName);
+
+                    $lesson_create->image = $imageName;
+                    $lesson_create->save();
+                }
+
+                // 🔥 **ตั้งค่าการเรียงลำดับ**s
+                $lesson_create->sort_lesson = $lesson_create->id;
+                $lesson_create->save();
+
+                DB::commit();
+            }catch (\Exception $e){
+                DB::rollBack();
+
+                Log::error($e->getMessage());
+                return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
             }
 
-            // 🔥 **ตั้งค่าการเรียงลำดับ**
-            $lesson_create->sort_lesson = $lesson_create->id;
-            $lesson_create->save();
 
             return redirect()->route('lesson')->with('success', 'อัปโหลดข้อมูลเรียบร้อยแล้ว!');
         }
-
         return view("admin.lesson.lesson_create", compact('course_online'));
     }
 
