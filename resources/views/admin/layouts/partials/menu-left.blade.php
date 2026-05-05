@@ -317,7 +317,7 @@ use App\Helpers\PermissionHelper;
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ url('/questionnaireout_excel') }}" class="nav-link {{ request()->is('questionnaireout_excel') ? 'active' : '' }}">
+                            <a href="{{ url('/questionnaireout_assessment') }}" class="nav-link {{ request()->is('questionnaireout_assessment') ? 'active' : '' }}">
                                 <p>การประเมินภาคปฏิบัติ</p>
                             </a>
                         </li>
