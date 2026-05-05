@@ -796,8 +796,10 @@ Route::get('/ocr/edit/{id}/{page_number}', [AdminController::class, 'OCRedit'])-
 Route::put('/ocr/update/{id}/{page_number}', [AdminController::class, 'OCRupdate'])->name('ocr.update');
 
 Route::get('/licenseperson/operate',[LicensePersonController::class, 'indexOperate'])->name('license.operate.index');
+Route::post('/licenseperson/operate/import',[LicensePersonController::class, 'operateImportExcel'])->name('license.operate.excel');
 
 Route::get('/licenseperson/parameter',[LicensePersonController::class, 'indexParameter'])->name('license.parameter.index');
+Route::post('/licenseperson/parameter/import',[LicensePersonController::class, 'parameterImportExcel'])->name('license.parameter.excel');
 
 
 Route::middleware(['auth.admin'])->group(function(){

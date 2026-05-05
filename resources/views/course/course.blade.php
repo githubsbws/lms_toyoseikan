@@ -101,11 +101,9 @@
                                                             ];
                                                         @endphp
                                                         <strong style="display: block; font-size: 24px;">
-                                                            {{ $item->course_title }}
+                                                            {{ $milestoneLabel[$item->milestone_days] ?? '-' }} : {{ $item->course_title }}
                                                         </strong>
-                                                        <small style="display: block; color: white; opacity: 0.8;">
-                                                            {{ $milestoneLabel[$item->milestone_days] ?? '-' }}
-                                                        </small>
+
                                                         <small>
                                                             {!! strip_tags(html_entity_decode($item->course_short_title), '<b><strong><i><em><u>') !!}
                                                         </small>
@@ -154,11 +152,15 @@
 
                                                 {{-- Progress Bar (100% สำเร็จ ตามรูป) --}}
                                                 <div class="progress">
-                                                    <div class="progress-bar progress-bar-primary" role="progressbar"
-                                                        style="width: 100%;border-radius:12px" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                                    <div class="progress-bar progress-bar-primary"
+                                                        role="progressbar"
+                                                        style="width: {{ $item->progress }}%; border-radius: 12px"
+                                                        aria-valuenow="{{ $item->progress }}"
+                                                        aria-valuemin="0"
+                                                        aria-valuemax="100">
                                                     </div>
                                                 </div>
-                                                <h5 class="card-title">0 %</h5> {{-- progressbar --}}
+                                                <h5 class="card-title">{{ $item->progress }}%</h5> {{-- progressbar --}}
 
                                                 <hr style="margin: 15px 0;">
 

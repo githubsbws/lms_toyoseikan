@@ -43,6 +43,10 @@ class CourseService
             },
             'passcourse' => fn($q) => $q->where('passcours_user', $user->id)
                                 ->where('academic_year', now()->year),
+
+            'courseScore' => fn($q) => $q->where('user_id', $user->id)
+                              ->where('pass_year', now()->year)
+                              ->where('score_status', 'pass'),
         ])
         ->where('course_online.active', self::STATUS_ACTIVE);
 
@@ -122,9 +126,27 @@ class CourseService
 
         $courses->each(function ($course) use ($lockedMap) {
             $course->is_locked = $lockedMap[$course->course_id] ?? false;
-        });
 
-        return $courses;
+            // นับ lesson ทั้งหมด
+            $totalLessons = $course->lesson->count();
+            $totalSteps   = $totalLessons + 1; // +1 ข้อสอบ
+
+            // นับ lesson ที่ผ่านแล้ว
+            $passedLessons = $course->lesson
+                ->filter(fn($lesson) => $lesson->learn->first()?->lesson_status === 'pass')
+                ->count();
+
+            // เช็คข้อสอบผ่านไหม
+            $examPassed = $course->courseScore
+                ->where('score_status', 'pass')
+                ->isNotEmpty() ? 1 : 0;
+
+            $course->progress = $totalSteps > 0
+                ? (int) round(($passedLessons + $examPassed) / $totalSteps * 100)
+                : 0;
+                });
+
+                return $courses;
 
     }
 

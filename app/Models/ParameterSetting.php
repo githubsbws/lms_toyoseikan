@@ -12,9 +12,11 @@ class ParameterSetting extends Model
     protected $table = 'parameter_setting';
 
     protected $primaryKey = 'id';
+    public $timestamps = false;
 
     protected $fillable = [
         'parameter_name',
-        'active'
+        'active',
+        'parameter_code',
     ];
 }

@@ -114,36 +114,4 @@ class LessonProgressService
             ]);
         }
     }
-
-    // private function checkAndMarkCoursePassed(int $userId, int $course_id)
-    // {
-    //     $currentYear = now()->year;
-
-    //     // 1. หาจำนวนบทเรียน (Lesson) ทั้งหมดในคอร์สนี้
-    //     $totalLessons = Lesson::where('course_id', $course_id)->where('active', 'y')->count();
-
-    //     // 2. หาจำนวนบทเรียนที่ User เรียนผ่านแล้ว "ในปีปัจจุบัน"
-    //     $completedLessons = Learn::where('user_id', $userId)
-    //         ->where('course_id', $course_id)
-    //         ->where('academic_year', $currentYear) // สำคัญ: ต้องเป็น Record ของปีนี้
-    //         ->where('lesson_status', LessonStatus::Success->value)
-    //         ->count();
-
-    //     // 3. ถ้าครบทุกบทเรียน ให้บันทึกในตาราง Passcourse (หรือตารางสรุปผลของน้อง)
-    //     if ($totalLessons > 0 && $completedLessons >= $totalLessons) {
-    //         // ใช้ updateOrCreate เพื่อป้องกันการสร้าง Record ซ้ำในปีเดียวกัน
-    //         Passcourse::updateOrCreate(
-    //             [
-    //                 'passcours_user' => $userId,
-    //                 'passcours_cours' => $course_id,
-    //                 'academic_year'  => $currentYear
-    //             ],
-    //             [
-    //                 'passcours_status' => LessonStatus::Success->value,
-    //                 'passcours_date'   => now(),
-    //                 'pass_year'        => $currentYear // Snapshot ปีที่จบหลักสูตร
-    //             ]
-    //         );
-    //     }
-    // }
 }

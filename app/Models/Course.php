@@ -68,6 +68,7 @@ class Course extends Model
     {
         return $this->hasOne(CourseScoreWeight::class,'course_id');
     }
+
     public function roadmapCourse()
     {
         return $this->hasOne(RoadmapCourse::class,'course_id');
@@ -80,5 +81,10 @@ class Course extends Model
     public function passcourse()
     {
         return $this->hasMany(Passcourse::class,'passcours_cours','course_id');
+    }
+
+    public function courseScore()
+    {
+        return $this->hasMany(CourseScore::class,'course_id','course_id');
     }
 }

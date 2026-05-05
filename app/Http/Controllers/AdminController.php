@@ -98,6 +98,8 @@ use App\Models\OcrFilePage;
 
 use App\Models\AdminMenu;
 use App\Models\CourseScoreWeight;
+use App\Models\OperationMachine;
+use App\Models\ParameterSetting;
 // use App\Models\Company;
 // use App\Models\Division;
 use App\Models\Permission;
@@ -111,6 +113,7 @@ use getID3;
 // use App\Models\Users;
 
 use App\Services\RoadmapService;
+use Google\LongRunning\Operation;
 
 class AdminController extends Controller
 {
@@ -1213,6 +1216,8 @@ class AdminController extends Controller
             $course_detail = Course::where('course_id', $id)->first();
             $category = DB::table('category')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
+            $licenseOperation = OperationMachine::where('active','y')->get();
+            $licenseParameter = ParameterSetting::where('active','y')->get();
             // 2. แยก Logic การหา Selected IDs
             if ($course_detail->is_onboarding) {
                 // --- กรณีเป็นพนักงานใหม่ (Onboarding) ---
@@ -1384,7 +1389,7 @@ class AdminController extends Controller
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-            return view("admin.courseonline.courseonline_edit", compact('course_detail', 'category','teacher','orgtree'));
+            return view("admin.courseonline.courseonline_edit", compact('course_detail', 'category','teacher','orgtree','licenseOperation','licenseParameter'));
         }else{
             return redirect()->route('login.admin');
         }
@@ -1394,6 +1399,8 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
+            $licenseOperation = OperationMachine::where('active','y')->get();
+            $licenseParameter = ParameterSetting::where('active','y')->get();
             // 3. รวม ID ทั้งหมด (สาขา + แผนก + ลูกหลานทุกชั้น)
             $targetIds = $this->getMergeOrg();
 
@@ -1555,7 +1562,7 @@ class AdminController extends Controller
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-            return view("admin.courseonline.courseonline_create", compact('category','teacher','orgtree'));
+            return view("admin.courseonline.courseonline_create", compact('category','teacher','orgtree','licenseOperation','licenseParameter'));
         }else{
             return redirect()->route('login.admin');
         }

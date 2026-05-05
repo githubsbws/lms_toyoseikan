@@ -12,10 +12,13 @@ class OperationMachine extends Model
     protected $table = 'operation_machine';
 
     protected $primaryKey = 'id';
+    public $timestamps = false;
+
 
     protected $fillable = [
         'operation_name',
-        'active'
+        'active',
+        'operation_code'
     ];
 
 }
