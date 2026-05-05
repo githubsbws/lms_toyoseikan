@@ -354,6 +354,11 @@ Route::get('/questionnaireout',[AdminController::class,'questionnaireout'])->nam
 Route::get('/questionnaireout_excel',[AdminController::class,'questionnaireout_excel'])->name('questionnaireout.excel')->middleware('checkIdleTimeout');
 Route::post('/questionnaireout_excel',[AdminController::class,'questionnaireout_excel'])->name('questionnaireout.excel')->middleware('checkIdleTimeout');
 
+Route::get('/questionnaireout_assessment',[AdminController::class,'questionnaireout_assessment'])->name('questionnaireout.assessment')->middleware('checkIdleTimeout');
+Route::get('/questionnaireout_assessment/ajax',[AdminController::class,'questionnaireout_assessment_ajax'])->name('questionnaireout.assessment.ajax')->middleware('checkIdleTimeout');
+Route::get('/questionnaireout_detail/{id}', [AdminController::class, 'questionnaireout_detail'])->name('questionnaireout.detail')->middleware('checkIdleTimeout');
+Route::post('/questionnaireout_save', [AdminController::class, 'questionnaireout_save'])->name('questionnaireout_save')->middleware('checkIdleTimeout');
+
 Route::get('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
 Route::post('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
 
