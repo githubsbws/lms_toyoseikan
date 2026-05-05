@@ -2875,35 +2875,6 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-    //new p
-
-    public function questionnaireout_result(Request $request){
-        if(AuthFacade::useradmin()){
-            // $course_online = Course::join('category', 'category.cate_id', '=', 'course_online.cate_id')->where('course_online.active', 'y')->orderBy('sortOrder', 'desc')->get();
-            $course_online = Passcourse::join('course_online', 'course_online.course_id', '=', 'passcours.passcours_cours')
-            ->join('category', 'category.cate_id', '=', 'course_online.cate_id')
-            // เพิ่มการ Join กับตาราง tbl_profiles
-            ->join('profiles', 'profiles.user_id', '=', 'passcours.passcours_user')
-            ->where(function($query) {
-                $query->where('passcours.passcours_status', '!=', 'pass')
-                    ->orWhereNull('passcours.passcours_status');
-            })
-            ->select(
-                'passcours.*',
-                'course_online.course_title',
-                'category.cate_title',
-                // เพิ่มการ Select ชื่อและนามสกุล
-                'profiles.firstname',
-                'profiles.lastname'
-            )
-            ->get();
-            return view("admin.questionnaireout.questionnaireout_result", compact('course_online'));
-        }else{
-            return redirect()->route('login.admin');
-        }
-    }
-
-
 
     function questionnaireout_plan(Request $request, $id){
         if(AuthFacade::useradmin()){
