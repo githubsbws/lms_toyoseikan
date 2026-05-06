@@ -303,9 +303,15 @@
                                                         @if($loop->last)
                                                             <div style="background-color: #1F7BCC; color: white; padding: 15px 15px; border-radius: 8px; margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                                                                 <span style="font-size:28px">แบบทดสอบ Final Exam</span>
-                                                                <button class="btn btn-light" style="font-size: 20px; font-weight: bold; color: #1F7BCC; border-radius: 6px; padding: 5px 30px;">
-                                                                    เริ่มทำข้อสอบ
-                                                                </button>
+                                                                @if($item->canExam)
+                                                                    <a href="{{ rotue('course.coursequestion') }}" class="btn btn-success" style="font-size: 20px; font-weight: bold; color: #1F7BCC; border-radius: 6px; padding: 5px 30px;">
+                                                                        เริ่มทำข้อสอบ
+                                                                    </a>
+                                                                @else
+                                                                    <button href="#" class="btn btn-danger" style="font-size: 20px; font-weight: bold; border-radius: 6px; padding: 5px 30px;" disabled>
+                                                                        ต้องเรียบให้ครบก่อน
+                                                                    </button>
+                                                                @endif
                                                             </div>
                                                         @endif
                                                     @endforeach

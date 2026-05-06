@@ -161,67 +161,9 @@ class CourseController extends Controller
 
         return response()->download($file_path, $file->original_filename);
     }
-
-    public function coursequestion($course_id,$id,  Request $request){
-        if(Auth::check()){
-            $post_test = Manage::where(['id' => $id, 'active' =>'y'])->first();
-
-            if($post_test == null){
-                Session::flash('sweetAlert', [
-                    'title' => 'ไม่มีแบบทดสอบ',
-                    'text' => 'ไม่มีแบบทดสอบจากบทเรียน',
-                    'icon' => 'warning'
-                ]);
-                return redirect()->route('course.lesson',['course_id' => $course_id,'id' =>$id]);
-            }
-            $group = Grouptesting::where(['group_id' => $post_test->group_id,'active' =>'y'])->get();
-            $lesson = Lesson::where('id',$id)->first();
-            $course = Course::where('course_id',$course_id)->first();
-            $cate = Category::where('cate_id',$course->cate_id)->first();
-            $model = Question::where(['group_id'=> $post_test->group_id,'active' =>'y'])->get();
-            if($post_test->type == 'pre'){
-                $breadcrumbs = [
-                    ['name' => 'หลักสูตร', 'url' => url('/cateOnline/index')],
-                    ['name' => $cate->cate_title, 'url' => url('//courseOnline/index/' . $cate->id)],
-                    ['name' => $lesson->title, 'url' => url('//courseOnline/learn/' . $lesson->id)],
-                    ['name' => 'แบบทดสอบก่อนเรียน', 'url' => null], // You can set the URL to null for the current page
-                ];
-            }else{
-                $breadcrumbs = [
-                    ['name' => 'หลักสูตร', 'url' => url('/cateOnline/index')],
-                    ['name' => $cate->cate_title, 'url' => url('//courseOnline/index/' . $cate->id)],
-                    ['name' => $lesson->title, 'url' => url('//courseOnline/learn/' . $lesson->id)],
-                    ['name' => 'แบบทดสอบหลังเรียน', 'url' => null], // You can set the URL to null for the current page
-                ];
-            }
-
-            return view("course.question",['group'=> $group,'lesson'=>$lesson,'course'=>$course,'cate'=>$cate,'breadcrumbs'=>$breadcrumbs,'model'=>$model]);
-        }else{
-            return redirect()->route('index');
-        }
-
-    }
-    // course create to
-    public function store(Request $request)
+    public function courseQuestion()
     {
-        $chk = Images::where(['user_id' => Auth::user()->id,'image_time' => $request->input('time') ,'lesson_id' => $request->input('lesson'),'file_id' =>$request->input('file_id')])->first();
-        if($chk != null){
-            return response()->json(['message' => 'Image have been save'], 200);
-        }else{
-            // บันทึกข้อมูลลงในฐานข้อมูล
-            $image = new Images();
-            $image->image_time = $request->input('time'); // เปลี่ยนจาก 'image' เป็น 'time'
-            $image->image_picture = $request->input('image');
-            $image->user_id = Auth::user()->id;
-            $image->lesson_id = $request->input('lesson');
-            $image->file_id =  $request->input('file_id');
-            $image->active =  'y';
-            $image->save();
-
-
-
-            return response()->json(['message' => 'Image saved successfully'], 200);
-        }
+        return view('course.course-question');
     }
 
 }

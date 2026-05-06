@@ -126,27 +126,9 @@ class CourseService
 
         $courses->each(function ($course) use ($lockedMap) {
             $course->is_locked = $lockedMap[$course->course_id] ?? false;
-
-            // นับ lesson ทั้งหมด
-            $totalLessons = $course->lesson->count();
-            $totalSteps   = $totalLessons + 1; // +1 ข้อสอบ
-
-            // นับ lesson ที่ผ่านแล้ว
-            $passedLessons = $course->lesson
-                ->filter(fn($lesson) => $lesson->learn->first()?->lesson_status === 'pass')
-                ->count();
-
-            // เช็คข้อสอบผ่านไหม
-            $examPassed = $course->courseScore
-                ->where('score_status', 'pass')
-                ->isNotEmpty() ? 1 : 0;
-
-            $course->progress = $totalSteps > 0
-                ? (int) round(($passedLessons + $examPassed) / $totalSteps * 100)
-                : 0;
-                });
-
-                return $courses;
+            });
+            $this->attachCourseProgress($courses);
+            return $courses;
 
     }
 
@@ -167,6 +149,7 @@ class CourseService
         $courses->each(function ($course) {
             $course->is_locked = false;
         });
+        $this->attachCourseProgress($courses);
 
         return $courses;
     }
@@ -206,5 +189,26 @@ class CourseService
         }
 
         return true;
+    }
+
+    private function attachCourseProgress($courses): void
+    {
+        $courses->each(function ($course) {
+            $totalLessons  = $course->lesson->count();
+            $totalSteps    = $totalLessons + 1; // +1 ข้อสอบ
+
+            $passedLessons = $course->lesson
+                ->filter(fn($lesson) => $lesson->learn->first()?->lesson_status === 'pass')
+                ->count();
+
+            $examPassed = $course->courseScore
+                ->where('score_status', 'pass')
+                ->isNotEmpty() ? 1 : 0;
+
+            $course->progress = $totalSteps > 0
+                ? (int) round(($passedLessons + $examPassed) / $totalSteps * 100)
+                : 0;
+            $course->can_exam = $totalLessons > 0 && $passedLessons >= $totalLessons;
+        });
     }
 }

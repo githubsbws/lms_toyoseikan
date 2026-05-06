@@ -132,7 +132,7 @@ Route::post('/lms_brother_docker/lms/app/index/user/recovery',[ForgotController:
 Route::get('course',[CourseController::class,'course'])->name('course')->middleware('checkIdleTimeout');
 Route::get('search', [CourseController::class, 'course'])->middleware('checkIdleTimeout');
 
-Route::get('course/question/{course_id}/{id}',[CourseController::class,'coursequestion'])->name('course.coursequestion')->middleware('checkIdleTimeout');
+Route::get('course/question',[CourseController::class,'courseQuestion'])->name('course.coursequestion')->middleware('checkIdleTimeout');
 
 Route::prefix('course/learning')
     ->middleware(['checkIdleTimeout']) // รวม Middleware ไว้ที่ Group
