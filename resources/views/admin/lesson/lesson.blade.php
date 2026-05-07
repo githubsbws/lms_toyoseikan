@@ -32,8 +32,8 @@
                                         <th>ชื่อบทเรียน</th>
                                         <th>แบบสอบถาม</th>
                                         <th>จัดการวิดีโอ</th>
-										<th>ก่อนเรียน</th>
-										<th>หลังเรียน</th>
+										{{-- <th>ก่อนเรียน</th>
+										<th>หลังเรียน</th> --}}
                                         <th>จัดการ</th>
                                     </tr>
                                 </thead>
@@ -54,7 +54,7 @@
 												จัดการวิดีโอ ({{ $item->file->where('active', 'y')->isEmpty() ? 0 : count($item->file) }})
 											</a>
                                         </td>
-										<td class="text-center">
+										{{-- <td class="text-center">
                                             <a class="btn btn-primary btn-icon" href="{{ route('grouptesting.plan', ['id' => $item->id, 'type' => 'pre']) }}">
 												เลือกข้อสอบ ({{ $item->manage->where('type', 'pre')->where('active', 'y')->count() }})
 											</a>
@@ -63,7 +63,7 @@
 											<a class="btn btn-primary btn-icon" href="{{ route('grouptesting.plan', ['id' => $item->id, 'type' => 'post']) }}">
 												เลือกข้อสอบ ({{ $item->manage->where('type', 'post')->where('active', 'y')->count() }})
 											</a>
-                                        </td>
+                                        </td> --}}
                                         <td>
                                             <a href="{{ route('lesson.detail', ['id' =>$item->id]) }}" class="btn btn-warning btn-sm"><i class="fas fa-search"></i></a>
                                             <a href="{{ route('lesson.edit',['id' =>$item->id]) }}" class="btn btn-warning btn-sm"><i class="fas fa-pen"></i></a>

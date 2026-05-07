@@ -2198,7 +2198,13 @@ class AdminController extends Controller
     //new p
     function grouptesting_create(Request $request){
         if(AuthFacade::useradmin()){
-            $lesson = Lesson::where('active','y')->get();
+             $usedCourseIds = Grouptesting::where('active', 'y')
+                ->pluck('course_id')
+                ->toArray();
+
+            $lesson = Course::where('active', 'y')
+                ->whereNotIn('course_id', $usedCourseIds)
+                ->get();
 
             if ($request->isMethod('post')) {
                 // dd($request->toArray());
@@ -2214,12 +2220,12 @@ class AdminController extends Controller
                 }
 
                 $grouptesting_create = new Grouptesting;
-                $grouptesting_create->lesson_id = $request->input('lesson_id');
+                $grouptesting_create->course_id = $request->input('lesson_id');
                 $grouptesting_create->group_title = $request->input('group_title');
                 $grouptesting_create->step_id = '1';
                 $grouptesting_create->create_by = Auth::user()->id;
                 $grouptesting_create->update_by = Auth::user()->id;
-                $grouptesting_create->active = 'w';
+                $grouptesting_create->active = 'y';
                 $grouptesting_create->save();
 
                 return redirect()->route('grouptesting')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -2239,7 +2245,7 @@ class AdminController extends Controller
                 $manage = Manage::where('id', $id)->where('type', $type)->first();
                 // ตรวจสอบว่า $manage ไม่เป็น null ก่อนที่จะดำเนินการต่อ
                 if($manage !== null){
-                    $grouptesting = Grouptesting::where('lesson_id', $manage->id)->whereIn('active', ['y', 'w'])->orderBy('create_date','DESC')->get();
+                    $grouptesting = Grouptesting::where('course_id', $manage->id)->whereIn('active', ['y', 'w'])->orderBy('create_date','DESC')->get();
                 } else {
                     $grouptesting = Grouptesting::whereIn('active', ['y', 'w'])->orderBy('create_date','DESC')->get();
                 }
@@ -2325,7 +2331,7 @@ class AdminController extends Controller
     function grouptesting_edit(Request $request, $id){
         if(AuthFacade::useradmin()){
             $group = Grouptesting::where('group_id',$id)->first();
-            $lesson = Lesson::where('active','y')->get();
+            $lesson = Course::where('active','y')->get();
             if ($request->isMethod('post')) {
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
@@ -2339,7 +2345,7 @@ class AdminController extends Controller
 
                 $group_update = Grouptesting::findById($id);
                 $group_update->group_title = $request->input('group_title');
-                $group_update->lesson_id = $request->input('lesson_id');
+                $group_update->course_id = $request->input('lesson_id');
                 $group_update->update_by = Auth::user()->id;
 
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
@@ -2356,7 +2362,7 @@ class AdminController extends Controller
     }
     function grouptesting_detail($id){
         if(AuthFacade::useradmin()){
-            $group = Grouptesting::with('lesson')
+            $group = Grouptesting::with('course')
                     ->where('group_id', $id)
                     ->first();
 

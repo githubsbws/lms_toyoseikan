@@ -2,7 +2,7 @@
 @section('title', 'Admin')
 @section('content')
 @php
-use App\Models\Lesson;
+use App\Models\Course;
 use App\Models\Question;
 @endphp
 <body>
@@ -32,7 +32,7 @@ use App\Models\Question;
                             <table id="settingTable" class="table table-striped table-bordered nowrap" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>ชื่อบทเรียนออนไลน์</th>
+                                        <th>ชื่อหลักสูตรออนไลน์</th>
                                         <th>ชื่อชุด</th>
                                         <th>จำนวนข้อ</th>
                                         <th>&nbsp;</th>
@@ -44,12 +44,12 @@ use App\Models\Question;
                                 <tbody id="sortable">
                                     @foreach ($grouptesting as $item)
 										@php
-										$lesson = Lesson::where('id',$item->lesson_id)->first();
+										$lesson = Course::where('course_id',$item->course_id)->first();
 										$question = Question::where('group_id',$item->group_id)->where('active','y')->get();
 										@endphp
                                     <tr>
                                         <td>
-                                            {{$lesson->title ?? "-"}}
+                                            {{$lesson->course_title ?? "-"}}
                                         </td>
                                         <td class="text-center">
                                             {{$item->group_title}}

@@ -27,6 +27,11 @@ class Grouptesting extends Model
         return static::where('group_id', $id)->first();
     }
 
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id', 'course_id');
+    }
+
     public function lesson()
     {
         return $this->belongsTo(Lesson::class, 'lesson_id', 'id');

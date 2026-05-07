@@ -29,7 +29,7 @@
                     <div class="card-body">
                             <div class="form-group">
                                 <label for="course_title">ชื่อบทเรียนออนไลน์</label>
-                                <h4>{{ $group->lesson->title ?? '-'}}</h4>
+                                <h4>{{ $group->course->course_title ?? '-'}}</h4>
                             </div>
 
                             <div class="form-group">

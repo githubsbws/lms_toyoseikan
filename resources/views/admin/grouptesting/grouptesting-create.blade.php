@@ -32,11 +32,11 @@
                         <form action="{{route('grouptesting_create')}}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="form-group">
-                                <label for="cate_id">ชื่อบทเรียนออนไลน์ <span class="text-danger">*</span></label>
+                                <label for="cate_id">ชื่อหลักสูตรออนไลน์ <span class="text-danger">*</span></label>
                                 <select  class="form-control" name="lesson_id">
-									<option value="">--- กรุณาเลือกบทเรียน ---</option>
+									<option value="">--- กรุณาเลือกหลักสูตร ---</option>
 									@foreach ($lesson as $item)
-									<option value="{{ $item->id}}">{{$item->title}}</option>
+									<option value="{{ $item->course_id}}">{{$item->course_title}}</option>
 									@endforeach
 								</select>
                             </div>
