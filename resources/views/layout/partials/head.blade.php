@@ -87,8 +87,6 @@ use App\Models\Usability;
     <!--    jquery   --->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js" integrity="sha512-ju6u+4bPX50JQmgU97YOGAXmRMrD9as4LE05PdC3qycsGQmjGlfm041azyB1VfCXpkpt1i9gqXCT6XuxhBJtKg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!--    jquery   --->
-
-
 </head>
 
 <section class="nav-header">

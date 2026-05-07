@@ -17,7 +17,7 @@ class Course extends Model
         'course_lecturer',
         'active',
         'recommend',
-        'status',
+        'course_retest_amount',
         'cate_amount',
         'time_test',
         'lang_id',
@@ -68,6 +68,7 @@ class Course extends Model
     {
         return $this->hasOne(CourseScoreWeight::class,'course_id');
     }
+
     public function roadmapCourse()
     {
         return $this->hasOne(RoadmapCourse::class,'course_id');
@@ -76,5 +77,19 @@ class Course extends Model
     public function lesson()
     {
         return $this->hasMany(Lesson::class,'course_id','course_id');
+    }
+    public function passcourse()
+    {
+        return $this->hasMany(Passcourse::class,'passcours_cours','course_id');
+    }
+
+    public function courseScore()
+    {
+        return $this->hasMany(CourseScore::class,'course_id','course_id');
+    }
+
+    public function groupTesting()
+    {
+        return $this->hasOne(GroupTesting::class, 'course_id', 'course_id');
     }
 }

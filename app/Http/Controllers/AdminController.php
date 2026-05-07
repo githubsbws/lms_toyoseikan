@@ -98,6 +98,8 @@ use App\Models\OcrFilePage;
 
 use App\Models\AdminMenu;
 use App\Models\CourseScoreWeight;
+use App\Models\OperationMachine;
+use App\Models\ParameterSetting;
 // use App\Models\Company;
 // use App\Models\Division;
 use App\Models\Permission;
@@ -106,9 +108,12 @@ use App\Models\Profiles;
 use App\Models\ProfilesTitle;
 use App\Models\Roadmap;
 use App\Models\RoadmapCourse;
+
+use getID3;
 // use App\Models\Users;
 
 use App\Services\RoadmapService;
+use Google\LongRunning\Operation;
 
 class AdminController extends Controller
 {
@@ -1211,6 +1216,8 @@ class AdminController extends Controller
             $course_detail = Course::where('course_id', $id)->first();
             $category = DB::table('category')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
+            $licenseOperation = OperationMachine::where('active','y')->get();
+            $licenseParameter = ParameterSetting::where('active','y')->get();
             // 2. แยก Logic การหา Selected IDs
             if ($course_detail->is_onboarding) {
                 // --- กรณีเป็นพนักงานใหม่ (Onboarding) ---
@@ -1251,7 +1258,8 @@ class AdminController extends Controller
                     'course_short_title'=>'required|string',
                     'course_detail'=>'required|string',
                     'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                    'org_ids' => 'required'
+                    'org_ids' => 'required',
+                    'retest_amount' => 'required|integer',
 
                 ]);
                 // dd($validator);
@@ -1266,6 +1274,7 @@ class AdminController extends Controller
                 $course_update->course_title = $request->input('course_title');
                 $course_update->course_short_title = htmlspecialchars($request->input('course_short_title'));
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
+                $course_update->course_retest_amount = $request->input('retest_amount');
                 $course_update->course_note = $request->input('course_note');
                 $course_update->update_by = Auth::user()->id;
                 $course_update->active = 'y';
@@ -1380,7 +1389,7 @@ class AdminController extends Controller
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-            return view("admin.courseonline.courseonline_edit", compact('course_detail', 'category','teacher','orgtree'));
+            return view("admin.courseonline.courseonline_edit", compact('course_detail', 'category','teacher','orgtree','licenseOperation','licenseParameter'));
         }else{
             return redirect()->route('login.admin');
         }
@@ -1390,6 +1399,8 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
+            $licenseOperation = OperationMachine::where('active','y')->get();
+            $licenseParameter = ParameterSetting::where('active','y')->get();
             // 3. รวม ID ทั้งหมด (สาขา + แผนก + ลูกหลานทุกชั้น)
             $targetIds = $this->getMergeOrg();
 
@@ -1411,7 +1422,7 @@ class AdminController extends Controller
             });
 
             if ($request->isMethod('post')) {
-                
+
                 // dd($request->toArray());
                 $validator = Validator::make($request->all(), [
                     'cate_id' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
@@ -1419,6 +1430,7 @@ class AdminController extends Controller
                     'course_short_title'=>'required|string',
                     'course_detail'=>'required|string',
                     'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'retest_amount' => 'required|integer',
 
                 ]);
                 $teacher = Teacher::where('teacher_name',$request->input('teacher_name'))->first();
@@ -1436,6 +1448,7 @@ class AdminController extends Controller
                 $course_update->course_short_title = htmlspecialchars($request->input('course_short_title'));
                 $course_update->course_note = $request->input('course_note');
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
+                $course_update->course_retest_amount = $request->input('retest_amount');
                 $course_update->update_by = Auth::user()->id;
                 $course_update->create_by = Auth::user()->id;
                 $course_update->active = 'y';
@@ -1549,7 +1562,7 @@ class AdminController extends Controller
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
             }
-            return view("admin.courseonline.courseonline_create", compact('category','teacher','orgtree'));
+            return view("admin.courseonline.courseonline_create", compact('category','teacher','orgtree','licenseOperation','licenseParameter'));
         }else{
             return redirect()->route('login.admin');
         }
@@ -1916,9 +1929,13 @@ class AdminController extends Controller
                 // }
 
                 if ($request->hasFile('filename')) {
+                    $getID3 = new getID3;
                     foreach ($request->file('filename') as $file) {
                         $Folder_file = public_path("images/uploads/lesson/");
                         $fileName = time() . "_" . $file->getClientOriginalName();
+
+                        $fileInfo = $getID3->analyze($file->getRealPath());
+                        $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
                         $file->move($Folder_file, $fileName);
 
                         // 🔹 บันทึกลง Database
@@ -1930,7 +1947,8 @@ class AdminController extends Controller
                             'create_by' => Auth::id(),
                             'update_by' => Auth::id(),
                             'active' => 'y',
-                            'views' => 0
+                            'views' => 0,
+                            'duration' => $duration
                         ]);
                     }
                 }
@@ -2001,6 +2019,7 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
+
     public function lesson_create(Request $request)
     {
         if (!Auth::check() || !AuthFacade::useradmin()) {
@@ -2016,9 +2035,6 @@ class AdminController extends Controller
                 'course_id' => 'required',
                 'title' => 'required|string',
                 'description' => 'required|string',
-                'cate_amount' => 'required',
-                'view_all' => 'nullable',
-                'time_test' => 'required',
                 'content' => 'required',
                 'filename.*' => 'nullable|mimes:mp3,mp4',
                 'doc.*' => 'nullable|mimes:pdf,docx,pptx',
@@ -2029,102 +2045,117 @@ class AdminController extends Controller
                 Log::error('Validation failed: ', $validator->errors()->toArray());
                 return redirect()->back()->withErrors($validator)->withInput();
             }
-            // ✅ บันทึกข้อมูลลงใน `lesson`
-            $lesson_create = new Lesson();
-            $lesson_create->course_id = $request->course_id;
-            $lesson_create->title = $request->title;
-            $lesson_create->content = htmlspecialchars($request->content);
-            $lesson_create->description = $request->description;
-            // if ($request->has('view_all')) {
-            //     $lesson_create->view_all = "y";
-            // }else{
-            //     $lesson_create->view_all = "n";
-            // }
-            $lesson_create->view_all = $request->view_all;
-            $lesson_create->cate_amount = $request->cate_amount;
-            $lesson_create->time_test = $request->time_test;
-            $lesson_create->update_by = Auth::id();
-            $lesson_create->active = 'y';
-            $lesson_create->save();
-
-            // 📂 **จัดการการสร้างโฟลเดอร์**
-            $lessonFolder = public_path("images/uploads/lesson/".$lesson_create->id);
-            if (!FileStore::isDirectory($lessonFolder)) {
-                FileStore::makeDirectory($lessonFolder, 0777, true,true);
-            }
-            $Folder = public_path("images/uploads/lesson/{$lesson_create->id}");
-            $originalFolder = "{$Folder}/original";
-            $filedocFolder = public_path("images/uploads/filedoc/");
-
-            foreach ([$originalFolder, $filedocFolder] as $folder) {
-                if (!FileStore::isDirectory($folder)) {
-                    FileStore::makeDirectory($folder, 0777, true,true);
-                }
-            }
-
-            // 📌 **อัปโหลดไฟล์ mp3/mp4**
-            if ($request->hasFile('filename')) {
-                foreach ($request->file('filename') as $file) {
-                    $Folder_file = public_path("images/uploads/lesson/");
-                    $fileName = time() . "_" . $file->getClientOriginalName();
-                    $file->move($Folder_file, $fileName);
-
-                    // 🔹 บันทึกลง Database
-                    File::create([
-                        'lesson_id' => $lesson_create->id,
-                        'file_name' => $lesson_create->title,
-                        'filename' => $fileName,
-                        'length' => '2.00',
-                        'create_by' => Auth::id(),
-                        'update_by' => Auth::id(),
-                        'active' => 'y',
-                        'views' => 0
-                    ]);
-                }
-            }
-
-            // 📌 **อัปโหลดไฟล์เอกสาร**
-            if ($request->hasFile('doc')) {
-                foreach ($request->file('doc') as $doc) {
-                    $Folder_doc = public_path("images/uploads/filedoc/");
-                    $docName = time() . "_" . $doc->getClientOriginalName();
-                    $doc->move($Folder_doc, $docName);
-
-                    // 🔹 บันทึกลง Database
-                    FileDoc::create([
-                        'lesson_id' => $lesson_create->id,
-                        'file_name' => $lesson_create->title,
-                        'filename' => $docName,
-                        'length' => '2.00',
-                        'create_by' => Auth::id(),
-                        'update_by' => Auth::id(),
-                        'active' => 'y'
-                    ]);
-                }
-            }
-
-            // 📌 **อัปโหลดภาพประกอบ**
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
-                $imageName = time() . "." . $image->getClientOriginalExtension();
-                if (!FileStore::isDirectory($Folder_pic)) {
-                    FileStore::makeDirectory($Folder_pic, 0777, true,true);
-                }
-
-                $image->move($Folder_pic, $imageName);
-
-                $lesson_create->image = $imageName;
+            DB::beginTransaction();
+            try{
+                $lesson_create = new Lesson();
+                $lesson_create->course_id = $request->course_id;
+                $lesson_create->title = $request->title;
+                $lesson_create->content = htmlspecialchars($request->content);
+                $lesson_create->description = $request->description;
+                // if ($request->has('view_all')) {
+                //     $lesson_create->view_all = "y";
+                // }else{
+                //     $lesson_create->view_all = "n";
+                // }
+                $lesson_create->view_all = $request->view_all;
+                $lesson_create->cate_amount = $request->cate_amount;
+                $lesson_create->time_test = $request->time_test;
+                $lesson_create->update_by = Auth::id();
+                $lesson_create->active = 'y';
                 $lesson_create->save();
+
+                // 📂 **จัดการการสร้างโฟลเดอร์**
+                $lessonFolder = public_path("images/uploads/lesson/".$lesson_create->id);
+                if (!FileStore::isDirectory($lessonFolder)) {
+                    FileStore::makeDirectory($lessonFolder, 0777, true,true);
+                }
+                $Folder = public_path("images/uploads/lesson/{$lesson_create->id}");
+                $originalFolder = "{$Folder}/original";
+                $filedocFolder = public_path("images/uploads/filedoc/");
+
+                foreach ([$originalFolder, $filedocFolder] as $folder) {
+                    if (!FileStore::isDirectory($folder)) {
+                        FileStore::makeDirectory($folder, 0777, true,true);
+                    }
+                }
+
+                // 📌 **อัปโหลดไฟล์ mp3/mp4**
+                if ($request->hasFile('filename')) {
+
+                    $getID3 = new getID3;
+                    foreach ($request->file('filename') as $file) {
+                        $Folder_file = public_path("images/uploads/lesson/");
+                        $fileName = time() . "_" . $file->getClientOriginalName();
+
+                        $fileInfo = $getID3->analyze($file->getRealPath());
+                        $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
+                        $file->move($Folder_file, $fileName);
+
+                        // 🔹 บันทึกลง Database
+                        File::create([
+                            'lesson_id' => $lesson_create->id,
+                            'file_name' => $lesson_create->title,
+                            'filename' => $fileName,
+                            'length' => '2.00',
+                            'create_by' => Auth::id(),
+                            'update_by' => Auth::id(),
+                            'active' => 'y',
+                            'views' => 0,
+                            'duration' => $duration,
+                        ]);
+                    }
+                }
+
+                // 📌 **อัปโหลดไฟล์เอกสาร**
+                if ($request->hasFile('doc')) {
+                    foreach ($request->file('doc') as $doc) {
+                        $Folder_doc = public_path("images/uploads/filedoc/");
+                        $docName = time() . "_" . $doc->getClientOriginalName();
+                        $doc->move($Folder_doc, $docName);
+
+                        // 🔹 บันทึกลง Database
+                        FileDoc::create([
+                            'lesson_id' => $lesson_create->id,
+                            'file_name' => $lesson_create->title,
+                            'filename' => $docName,
+                            'length' => '2.00',
+                            'create_by' => Auth::id(),
+                            'update_by' => Auth::id(),
+                            'active' => 'y'
+                        ]);
+                    }
+                }
+
+                // 📌 **อัปโหลดภาพประกอบ**
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
+                    $imageName = time() . "." . $image->getClientOriginalExtension();
+                    if (!FileStore::isDirectory($Folder_pic)) {
+                        FileStore::makeDirectory($Folder_pic, 0777, true,true);
+                    }
+
+                    $image->move($Folder_pic, $imageName);
+
+                    $lesson_create->image = $imageName;
+                    $lesson_create->save();
+                }
+
+                // 🔥 **ตั้งค่าการเรียงลำดับ**s
+                $lesson_create->sort_lesson = $lesson_create->id;
+                $lesson_create->save();
+
+                DB::commit();
+            }catch (\Exception $e){
+                DB::rollBack();
+
+                Log::error($e->getMessage());
+                return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
             }
 
-            // 🔥 **ตั้งค่าการเรียงลำดับ**
-            $lesson_create->sort_lesson = $lesson_create->id;
-            $lesson_create->save();
 
             return redirect()->route('lesson')->with('success', 'อัปโหลดข้อมูลเรียบร้อยแล้ว!');
         }
-
         return view("admin.lesson.lesson_create", compact('course_online'));
     }
 
@@ -2850,35 +2881,6 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-    //new p
-
-    public function questionnaireout_result(Request $request){
-        if(AuthFacade::useradmin()){
-            // $course_online = Course::join('category', 'category.cate_id', '=', 'course_online.cate_id')->where('course_online.active', 'y')->orderBy('sortOrder', 'desc')->get();
-            $course_online = Passcourse::join('course_online', 'course_online.course_id', '=', 'passcours.passcours_cours')
-            ->join('category', 'category.cate_id', '=', 'course_online.cate_id')
-            // เพิ่มการ Join กับตาราง tbl_profiles
-            ->join('profiles', 'profiles.user_id', '=', 'passcours.passcours_user') 
-            ->where(function($query) {
-                $query->where('passcours.passcours_status', '!=', 'pass')
-                    ->orWhereNull('passcours.passcours_status');
-            })
-            ->select(
-                'passcours.*', 
-                'course_online.course_title', 
-                'category.cate_title',
-                // เพิ่มการ Select ชื่อและนามสกุล
-                'profiles.firstname', 
-                'profiles.lastname'
-            )
-            ->get();
-            return view("admin.questionnaireout.questionnaireout_result", compact('course_online'));
-        }else{
-            return redirect()->route('login.admin');
-        }
-    }
-
-
 
     function questionnaireout_plan(Request $request, $id){
         if(AuthFacade::useradmin()){
@@ -5533,7 +5535,7 @@ class AdminController extends Controller
                     ->get();
 
             $groupedCourses = $courses->groupBy('cate_name');
-            
+
             $learns = Learn::whereIn('course_id', $courses->pluck('course_id'))
                             ->whereIn('user_id', $users->pluck('id'))
                             ->get()
@@ -5737,4 +5739,239 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
+
+        public function questionnaireout_assessment(Request $request){
+        if (AuthFacade::useradmin()) {
+
+            $courses = DB::table('course_online')->get(); // 👈 สำคัญ
+            $results = []; // กัน error หน้าแรก
+
+            return view(
+                "admin.questionnaireout.questionnaireout_assessment",
+                compact('courses', 'results')
+            );
+
+        } else {
+            return redirect()->route('login.admin');
+        }
+    }
+        public function questionnaireout_result(Request $request){
+        if(AuthFacade::useradmin()){
+            // $course_online = Course::join('category', 'category.cate_id', '=', 'course_online.cate_id')->where('course_online.active', 'y')->orderBy('sortOrder', 'desc')->get();
+            $course_online = Passcourse::join('course_online', 'course_online.course_id', '=', 'passcours.passcours_cours')
+            ->join('category', 'category.cate_id', '=', 'course_online.cate_id')
+            // เพิ่มการ Join กับตาราง tbl_profiles
+            ->join('profiles', 'profiles.user_id', '=', 'passcours.passcours_user')
+            ->where(function($query) {
+                $query->where('passcours.passcours_status', '!=', 'pass')
+                    ->orWhereNull('passcours.passcours_status');
+            })
+            ->select(
+                'passcours.*',
+                'course_online.course_title',
+                'category.cate_title',
+                // เพิ่มการ Select ชื่อและนามสกุล
+                'profiles.firstname',
+                'profiles.lastname'
+            )
+            ->get();
+            return view("admin.questionnaireout.questionnaireout_result", compact('course_online'));
+        }else{
+            return redirect()->route('login.admin');
+        }
+    }
+
+    public function questionnaireout_assessment_ajax(Request $request)
+{
+    if (AuthFacade::useradmin()) {
+
+       $query = DB::table('passcours')
+    ->join('course_online', 'passcours.passcours_cours', '=', 'course_online.course_id')
+    ->leftJoin('users', 'passcours.passcours_user', '=', 'users.id')
+    ->leftJoin('profiles', 'users.id', '=', 'profiles.user_id')
+    ->select(
+        'passcours.passcours_id as passcours_id',
+        'course_online.course_id',
+        'course_online.course_title',
+        'profiles.firstname',
+        'profiles.lastname'
+    );
+
+if (!empty($request->course_id)) {
+    $query->where('course_online.course_id', $request->course_id);
+}
+
+if (!empty($request->firstname)) {
+    $query->where('profiles.firstname', 'like', '%' . $request->firstname . '%');
+}
+
+if (!empty($request->lastname)) {
+    $query->where('profiles.lastname', 'like', '%' . $request->lastname . '%');
+}
+
+        $results = $query->get();
+
+        // ✅ ใช้ partial เท่านั้น (ห้ามใช้ view หลัก)
+        $html = view(
+            "admin.questionnaireout.partials.table",
+            compact('results')
+        )->render();
+
+        return response()->json(['html' => $html]);
+
+    } else {
+        return response()->json(['html' => 'Unauthorized'], 403);
+    }
+}
+
+public function questionnaireout_detail($id)
+{
+    try {
+
+        $data = DB::table('passcours')
+        ->join('course_online', 'passcours.passcours_cours', '=', 'course_online.course_id')
+        ->leftJoin('users', 'passcours.passcours_user', '=', 'users.id')
+        ->leftJoin('profiles', 'users.id', '=', 'profiles.user_id')
+        ->leftJoin('course_score_weight', 'course_online.course_id', '=', 'course_score_weight.course_id')
+        ->where('passcours.passcours_id', $id)
+        ->select(
+            'passcours.passcours_id',
+            'course_online.course_title',
+            'profiles.firstname',
+            'profiles.lastname',
+            'course_score_weight.q_a_weight',
+            'course_score_weight.operate_weight',
+            'course_score_weight.assign_weight',
+            'course_score_weight.observe_weight'
+        )
+        ->first();
+
+    // return view('admin.questionnaireout.partials.detail_form', compact('data'));
+
+        return view('admin.questionnaireout.questionnaireout_detail', compact('data'));
+
+    } catch (\Exception $e) {
+        return $e->getMessage(); // 👈 จะเห็น error จริง
+    }
+}
+
+public function questionnaireout_save(Request $request)
+{
+    $request->validate([
+        'q_a_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
+        'operate_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
+        'assign_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
+        'observe_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
+    ],[
+        '*.mimes' => 'อนุญาตเฉพาะไฟล์ JPEG, PNG, PDF, Word, Excel เท่านั้น',
+        '*.max'   => 'ขนาดไฟล์ต้องไม่เกิน 5MB',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+
+        $passcours_id = $request->passcours_id;
+
+        // 🔹 ดึง course_score_weight id
+        $weight = DB::table('course_score_weight')
+            ->join('passcours', 'passcours.passcours_cours', '=', 'course_score_weight.course_id')
+            ->where('passcours.passcours_id', $passcours_id)
+            ->select('course_score_weight.id')
+            ->first();
+
+        if (!$weight) {
+            throw new \Exception('ไม่พบ course_score_weight');
+        }
+
+        $weight_id = $weight->id;
+
+        // 🔥 1. update status
+        DB::table('passcours')
+            ->where('passcours_id', $passcours_id)
+            ->update([
+                'passcours_status' => 'pass',
+                'updated_at' => now()
+            ]);
+
+        // 🔥 mapping type
+        $types = [
+            1 => 'q_a',
+            2 => 'operate',
+            3 => 'assign',
+            4 => 'observe'
+        ];
+
+        // 🔥 path upload
+        $destinationPath = public_path('images/uploads/assessment_files');
+
+        // 👉 สร้าง folder ถ้ายังไม่มี
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0775, true);
+        }
+
+        foreach ($types as $type => $prefix) {
+
+            $score = $request->input($prefix . '_score');
+            $file  = $request->file($prefix . '_file');
+            $remark = $request->input($prefix . '_remark');
+
+            // ======================
+            // 🔹 บันทึกคะแนน
+            // ======================
+            if ((!is_null($score) && $score !== '') || (!empty($remark))) {
+
+                DB::table('score_assessment')->insert([
+                    'passcours_id' => $passcours_id,
+                    'id_course_score_weight' => $weight_id,
+                    'score' => $score,
+                    'detail' => $remark,
+                    'type_course_score_weight' => $type,
+                    'active' => 'y',
+                    'created_at' => now()
+                ]);
+            }
+
+            // ======================
+            // 🔹 บันทึกไฟล์
+            // ======================
+            if ($file) {
+
+                $ext = $file->getClientOriginalExtension();
+
+                // 🔥 ชื่อไฟล์ unique
+                $filename = Str::uuid() . '.' . $ext;
+
+                // 🔥 move file
+                $file->move($destinationPath, $filename);
+
+                DB::table('file_assessment')->insert([
+                    'passcours_id' => $passcours_id,
+                    'id_course_score_weight' => $weight_id,
+                    'file_name' => $filename,
+                    'type_course_score_weight' => $type,
+                    'active' => 'y',
+                    'created_at' => now()
+                ]);
+            }
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'บันทึกสำเร็จ'
+        ]);
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 }

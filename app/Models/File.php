@@ -18,9 +18,10 @@ class File extends Model
         'lesson_id',
         'filename' ,
         'file_name',
-        'active'
+        'active',
+        'duration'
     ];
-    
+
     const CREATED_AT = 'create_date'; // Custom created_at column
     const UPDATED_AT = 'update_date'; // Custom update_at column
 
@@ -31,5 +32,9 @@ class File extends Model
     public function lesson()
     {
         return $this->belongsTo(Lesson::class, 'lesson_id', 'id');
+    }
+    public function learnFile()
+    {
+        return $this->hasMany(LearnFile::class, 'file_id', 'id');
     }
 }

@@ -40,6 +40,7 @@ use App\Http\Controllers\ConditionController;
 use App\Http\Controllers\ContactusController;
 //-------
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CourseExamController;
 use App\Http\Controllers\LicensePersonController;
 use App\Http\Controllers\RoadmapController;
 
@@ -131,15 +132,33 @@ Route::post('/lms_brother_docker/lms/app/index/user/recovery',[ForgotController:
 // ----- course
 Route::get('course',[CourseController::class,'course'])->name('course')->middleware('checkIdleTimeout');
 Route::get('search', [CourseController::class, 'course'])->middleware('checkIdleTimeout');
-// Route::get('detail',[CourseController::class,'courseDetail'])->name('course.detail');
-Route::get('course/detail/{id}',[CourseController::class,'courseDetail'])->name('course.detail')->middleware('checkIdleTimeout');
-Route::get('course/detail/{course_id}/lesson/{id}/{files?}',[CourseController::class,'courseLesson'])->name('course.lesson')->middleware('checkIdleTimeout');
-Route::get('course/LearnVdo/{id}/{learn_id}/{counter}',[CourseController::class,'LearnVdo'])->name('course.LearnVdo')->middleware('checkIdleTimeout');
-Route::get('course/question/{course_id}/{id}',[CourseController::class,'coursequestion'])->name('course.coursequestion')->middleware('checkIdleTimeout');
+
+Route::get('course/exam/multiple/{course_id}', [CourseExamController::class, 'multipleExam'])->name('course.exam.multiple')->middleware('checkIdleTimeout');
+Route::get('course/exam/essay/{course_id}', [CourseExamController::class, 'essayExam'])->name('course.exam.essay')->middleware('checkIdleTimeout');
+
+Route::get('course/exam/essay/submit/{course_id}', [CourseExamController::class, 'essayExam'])->name('course.exam.essay')->middleware('checkIdleTimeout');
+
+
+Route::prefix('course/learning')
+    ->middleware(['checkIdleTimeout']) // รวม Middleware ไว้ที่ Group
+    ->group(function () {
+
+        // 1. Specific Path (ต้องอยู่บนสุดเสมอ)
+        Route::get('video-stream/{file_id}', [CourseController::class, 'streamVideo'])
+            ->name('course.videostream')
+            ->whereNumber('file_id'); // Defensive: บังคับให้เป็นตัวเลขเท่านั้น
+
+        // 2. Generic Path (Wildcards)
+        Route::get('{id}/{file_id}', [CourseController::class, 'lessonLearn'])
+            ->name('course.lessonLearn')
+            ->whereNumber(['id', 'file_id']); // Defensive: ป้องกันการรับ String เข้ามาปน
+});
+
 Route::get('course/question/{group}',[CourseController::class,'coursequestion'])->name('course.question')->middleware('checkIdleTimeout');
-Route::get('download/{id}',[CourseController::class,'downloadfile'])->name('course.downloadfile')->middleware('checkIdleTimeout');
 Route::get('course/images', [CourseController::class, 'store'])->name('images.store')->middleware('checkIdleTimeout');
 Route::post('course/images', [CourseController::class, 'store'])->name('images.store')->middleware('checkIdleTimeout');
+Route::get('download/learn-file-doc',[CourseController::class,'downloadfile'])->name('course.downloadfile')->middleware('checkIdleTimeout');
+
 // choice
 Route::post('/choiceAnswer/{id}',[ChoiceController::class,'choiceAnswer'])->name('choice.Answer')->middleware('checkIdleTimeout');
 // ----- dashboard
@@ -353,6 +372,11 @@ Route::get('/questionnaireout',[AdminController::class,'questionnaireout'])->nam
 
 Route::get('/questionnaireout_excel',[AdminController::class,'questionnaireout_excel'])->name('questionnaireout.excel')->middleware('checkIdleTimeout');
 Route::post('/questionnaireout_excel',[AdminController::class,'questionnaireout_excel'])->name('questionnaireout.excel')->middleware('checkIdleTimeout');
+
+Route::get('/questionnaireout_assessment',[AdminController::class,'questionnaireout_assessment'])->name('questionnaireout.assessment')->middleware('checkIdleTimeout');
+Route::get('/questionnaireout_assessment/ajax',[AdminController::class,'questionnaireout_assessment_ajax'])->name('questionnaireout.assessment.ajax')->middleware('checkIdleTimeout');
+Route::get('/questionnaireout_detail/{id}', [AdminController::class, 'questionnaireout_detail'])->name('questionnaireout.detail')->middleware('checkIdleTimeout');
+Route::post('/questionnaireout_save', [AdminController::class, 'questionnaireout_save'])->name('questionnaireout_save')->middleware('checkIdleTimeout');
 
 Route::get('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
 Route::post('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
@@ -782,8 +806,10 @@ Route::get('/ocr/edit/{id}/{page_number}', [AdminController::class, 'OCRedit'])-
 Route::put('/ocr/update/{id}/{page_number}', [AdminController::class, 'OCRupdate'])->name('ocr.update');
 
 Route::get('/licenseperson/operate',[LicensePersonController::class, 'indexOperate'])->name('license.operate.index');
+Route::post('/licenseperson/operate/import',[LicensePersonController::class, 'operateImportExcel'])->name('license.operate.excel');
 
 Route::get('/licenseperson/parameter',[LicensePersonController::class, 'indexParameter'])->name('license.parameter.index');
+Route::post('/licenseperson/parameter/import',[LicensePersonController::class, 'parameterImportExcel'])->name('license.parameter.excel');
 
 
 Route::middleware(['auth.admin'])->group(function(){

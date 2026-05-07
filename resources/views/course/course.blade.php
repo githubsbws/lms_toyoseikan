@@ -1,10 +1,6 @@
 @extends('layout/mainlayout')
 @section('title', 'Course')
 @section('content')
-    @php
-        use App\Models\Teacher;
-    @endphp
-
     <style>
         .img-admin-course img {
             width: 80px !important;
@@ -57,26 +53,69 @@
                             <div class="nav flex-column me-3" id="v-pills-tab" role="tablist">
                                 @if ($course_detail->count() > 0)
                                     @foreach ($course_detail as $key => $item)
-                                        {{-- @php $isActive = $key == 0 ? 'active' : ''; @endphp --}}
+                                        @php
+                                            $isLocked = $item->is_locked ?? false;
+
+                                            $isPassed = $item->passcourse->isNotEmpty();
+
+                                            $isLearning = !$isLocked && !$isPassed;
+
+                                            if ($isLocked) {
+                                                $btnClass = 'btn-danger';
+                                                $label    = 'ล็อค';
+                                                $icon     = 'fa fa-lock';
+                                            } elseif ($isPassed) {
+                                                $btnClass = 'btn-success';
+                                                $label    = 'ผ่านแล้ว';
+                                                $icon     = 'fa fa-check-circle';
+                                            } else {
+                                                $btnClass = 'btn-warning';
+                                                $label    = 'กำลังเรียน';
+                                                $icon     = 'fa fa-play-circle';
+                                            }
+                                        @endphp
+
                                         <div class="road-item" style="margin-bottom: 15px;">
-                                            <button class="nav-link btn-success"
+                                            <button class="nav-link btn {{ $btnClass }}"
                                                     id="v-pills-tab-{{ $item->course_id }}"
-                                                    data-toggle="tab" {{-- ใช้ data-toggle เฉยๆ ถ้า Theme เป็น BS4 --}}
+                                                    data-toggle="tab"
                                                     href="#v-pills-content-{{ $item->course_id }}"
-                                                    style="display: flex; align-items: center; text-align: left; border: 1px; width: 100%;padding:20px;border-radius:15px">
+                                                    @if($isLocked) disabled @endif
+                                                    style="display: flex; align-items: center; text-align: left;
+                                                        width: 100%; padding: 20px; border-radius: 15px;
+                                                        {{ $isLocked ? 'pointer-events: none; opacity: 0.6;' : '' }}">
 
                                                 <div class="wrap" style="flex-grow: 1;">
                                                     <div class="couurse-name-rd">
-                                                        <strong style="display: block;font-size:24px">{{ $item->course_title }}</strong>
-                                                        <small>{!! strip_tags(html_entity_decode($item->course_short_title), '<b><strong><i><em><u>') !!}</small>
+                                                        @php
+                                                            $milestoneLabel = [
+                                                                30  => 'เดือนที่ 1',
+                                                                60  => 'เดือนที่ 2',
+                                                                90  => 'เดือนที่ 3',
+                                                                119 => 'เดือนที่ 4',
+                                                                999 => 'หลัง 4 เดือน',
+                                                            ];
+                                                        @endphp
+                                                        <strong style="display: block; font-size: 24px;">
+                                                            {{ $milestoneLabel[$item->milestone_days] ?? '-' }} : {{ $item->course_title }}
+                                                        </strong>
+
+                                                        <small>
+                                                            {!! strip_tags(html_entity_decode($item->course_short_title), '<b><strong><i><em><u>') !!}
+                                                        </small>
                                                     </div>
                                                 </div>
-                                                <div class="icon" style="margin-left: 10px;">
-                                                    <i class="fa-regular fa-pen-to-square"></i>
+
+                                                <div style="margin-left: 10px;">
+                                                    <i class="{{ $icon }} fa-lg"></i>
                                                 </div>
+
                                             </button>
                                         </div>
                                     @endforeach
+                                    @if(method_exists($course_detail, 'links'))
+                                        {{ $course_detail->links("pagination::bootstrap-4") }}
+                                    @endif
                                 @else
                                     <div><p>ยังไม่มีหลักสูตรการเรียนการสอน</p></div>
                                 @endif
@@ -88,7 +127,11 @@
                     <div class="col-lg-7 col-md-7">
                         <div class="tab-content">
                             @foreach ($course_detail as $key => $item)
-                                <div class="tab-pane fade in {{ $key == 0 ? 'active' : '' }}"
+                                @php
+                                    // เช็คอีกรอบเพื่อความชัวร์ หรือจะดึงจากข้างบนมาก็ได้
+                                    $isLockedInContent = $item->is_locked ?? false;
+                                @endphp
+                                <div class="tab-pane fade in {{ ($loop->first && !$isLockedInContent) ? 'active' : '' }}"
                                     id="v-pills-content-{{ $item->course_id }}" style="border-radius: 12px;background: transparent">
 
                                     {{-- Card หลักตามดีไซน์ในรูป --}}
@@ -109,17 +152,21 @@
 
                                                 {{-- Progress Bar (100% สำเร็จ ตามรูป) --}}
                                                 <div class="progress">
-                                                    <div class="progress-bar progress-bar-primary" role="progressbar"
-                                                        style="width: 100%;border-radius:12px" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                                    <div class="progress-bar progress-bar-primary"
+                                                        role="progressbar"
+                                                        style="width: {{ $item->progress }}%; border-radius: 12px"
+                                                        aria-valuenow="{{ $item->progress }}"
+                                                        aria-valuemin="0"
+                                                        aria-valuemax="100">
                                                     </div>
                                                 </div>
-                                                <h5 class="card-title">100 % สำเร็จ</h5> {{-- progressbar --}}
+                                                <h5 class="card-title">{{ $item->progress }}%</h5> {{-- progressbar --}}
 
                                                 <hr style="margin: 15px 0;">
 
                                                 {{-- รายละเอียดวิทยากรและวันที่ --}}
                                                 <div class="course-meta" style="font-size: 20px; color: #666;">
-                                                    <p><i class="fa fa-user fa-fw"></i> <strong>เจ้าของหลักสูตร :</strong>
+                                                    <p><i class="fa fa-user fa-fw"></i> <strong>ผู้สอน :</strong>
                                                     {{ $item->teacher ? $item->teacher->teacher_name : '-' }}
                                                     </p>
                                                 </div>
@@ -127,7 +174,7 @@
                                                 {{-- ส่วนคำอธิบายแบบย่อ (Short Title) --}}
                                                 ลายละเอียดหลักสูตร
                                                 <div class="margin-t-15" style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
-                                                    {!! htmlspecialchars_decode($item->course_short_title) !!}
+                                                    {!! strip_tags(html_entity_decode($item->course_short_title)) !!}
                                                 </div>
                                             </div>
                                         </div>
@@ -140,7 +187,7 @@
                                                     <h5 class="mb-0">จำนวนบทเรียน</h5>
                                                     <div class="col-6 m-5">
                                                         <i class="fa fa-book fa-5x" style="color: #428bca;"></i>
-                                                        <p class="mx-0">4 บทเรียน</p>
+                                                        <p class="mx-0">{{ $item->lesson()->count() }} บทเรียน</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-6">
@@ -164,8 +211,29 @@
                                                 <div class="col-12">
                                                     @foreach ($item->lesson as $index => $lessons)
                                                         {{-- แถบหัวข้อบทเรียน --}}
-                                                        <div style="background-color: #1F7BCC; color: white; padding: 15px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                                        <div style="background-color: #1F7BCC; color: white; padding: 15px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; gap: 20px; align-items: center;">
                                                             <span style="font-size:28px">บทที่ {{ $index + 1 }} {{ $lessons->title }}</span>
+                                                            @php
+                                                                // ดึงสถานะ
+                                                                $status = $lessons->learn->first()->lesson_status ?? 'notLearning';
+
+                                                                // กำหนดสีและข้อความของ Badge
+                                                                $badgeStyle = 'padding: 4px 12px; border-radius: 50px; font-size: 18px; font-weight: bold; color: white;';
+
+                                                                if ($status === 'pass') {
+                                                                    $bg = 'background-color: #28a745;'; // เขียว
+                                                                    $label = 'Pass';
+                                                                } elseif ($status === 'learning') {
+                                                                    $bg = 'background-color: #ffc107; color: #212529;'; // เหลือง (ตัวหนังสือดำเพื่อให้อ่านง่าย)
+                                                                    $label = 'Learning';
+                                                                } else {
+                                                                    $bg = 'background-color: #dc3545;'; // แดง
+                                                                    $label = 'Not-Learning';
+                                                                }
+                                                            @endphp
+                                                            <span style="{{ $badgeStyle }} {{ $bg }}">
+                                                                {{ $label }}
+                                                            </span>
                                                         </div>
 
                                                         {{-- รายการย่อย (ทำเป็นโครงไว้ก่อน) --}}
@@ -176,9 +244,30 @@
                                                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; width: 100%;">
 
                                                                         {{-- ฝั่งซ้าย: ไอคอน + ชื่อวิดีโอ --}}
-                                                                        <div style="display: flex; align-items: center;">
+                                                                        <div style="display: flex; align-items: center; gap: 20px;">
                                                                             <i class="fa fa-play-circle text-primary" style="font-size: 1.2rem;padding-right:10px"></i>
                                                                             <span style="font-size:24px ">วิดีโอ: {{ $vdo->file_name ?? 'วิดีโอไม่มีชื่อ' }}</span>
+                                                                            @php
+                                                                                // ดึงสถานะ
+                                                                                $status = $vdo->learnFile->first()->learn_file_status ?? 'notLearning';
+
+                                                                                // กำหนดสีและข้อความของ Badge
+                                                                                $badgeStyle = 'padding: 4px 12px; border-radius: 50px; font-size: 18px; font-weight: bold; color: white;';
+
+                                                                                if ($status === 'pass') {
+                                                                                    $bg = 'background-color: #28a745;'; // เขียว
+                                                                                    $label = 'Pass';
+                                                                                } elseif ($status === 'learning') {
+                                                                                    $bg = 'background-color: #ffc107; color: #212529;'; // เหลือง (ตัวหนังสือดำเพื่อให้อ่านง่าย)
+                                                                                    $label = 'Learning';
+                                                                                } else {
+                                                                                    $bg = 'background-color: #dc3545;'; // แดง
+                                                                                    $label = 'Not-Learning';
+                                                                                }
+                                                                            @endphp
+                                                                            <span style="{{ $badgeStyle }} {{ $bg }}">
+                                                                                {{ $label }}
+                                                                            </span>
                                                                         </div>
 
                                                                         {{-- ฝั่งขวา: เวลา (ถ้ามี) + ปุ่ม --}}
@@ -187,9 +276,8 @@
                                                                             {{-- <span class="text-muted me-3">
                                                                                 <i class="fa fa-clock-o"></i> 30 นาที
                                                                             </span> --}}
-                                                                            <button class="btn btn-primary" style="border-radius: 6px;font-size:24px; padding: 5px 40px;">ดูวิดีโอ</button>
+                                                                            <a href="{{ route('course.lessonLearn',[$lessons->id,$vdo->id,$item->id]) }}"><button class="btn btn-primary" style="border-radius: 6px;font-size:24px; padding: 5px 40px;">ดูวิดีโอ</button></a>
                                                                         </div>
-
                                                                     </div>
                                                                 @endforeach
                                                             @endif
@@ -200,7 +288,12 @@
                                                                             <i class="fa fa-file-pdf-o text-danger me-2"></i>
                                                                             {{ $doc->file_name_display ?? 'เอกสารประกอบ' }}
                                                                         </span>
-                                                                        <a href="{{ asset($doc->file_path) }}" target="_blank" class="btn btn-secondary btn-sm">
+                                                                        <a href="{{ route('course.downloadfile', [
+                                                                                'file_doc_id' => $doc->id,
+                                                                                'lesson_id'   => $lessons->id,
+                                                                                'course_id'   => $lessons->course_id
+                                                                        ]) }}"
+                                                                        class="btn btn-secondary btn-sm">
                                                                             <i class="fa fa-download"></i> ดาวน์โหลด
                                                                         </a>
                                                                     </div>
@@ -208,11 +301,84 @@
                                                             @endif
                                                         </div>
                                                         @if($loop->last)
-                                                            <div style="background-color: #1F7BCC; color: white; padding: 15px 15px; border-radius: 8px; margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                                                                <span style="font-size:28px">แบบทดสอบ Final Exam</span>
-                                                                <button class="btn btn-light" style="font-size: 20px; font-weight: bold; color: #1F7BCC; border-radius: 6px; padding: 5px 30px;">
-                                                                    เริ่มทำข้อสอบ
-                                                                </button>
+                                                            {{-- Container หลัก --}}
+                                                            <div style="margin-top: 30px; margin-bottom: 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+
+                                                                {{-- ส่วนหัว (Header) - สีน้ำเงิน ตัวอักษรขาว --}}
+                                                                <div style="background-color: #1F7BCC; color: white; padding: 18px 25px; display: flex; justify-content: space-between; align-items: center;">
+                                                                    <div>
+                                                                        <h3 style="font-size: 26px; font-weight: bold; margin: 0; color: white !important; line-height: 1;">
+                                                                            แบบทดสอบ Final Exam
+                                                                        </h3>
+                                                                        <p style="margin: 8px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">
+                                                                            สิทธิ์การสอบทั้งหมด: {{ $item->exam_attempts }}/{{ $item->exam_max_attempts }} ครั้ง
+                                                                        </p>
+                                                                    </div>
+
+                                                                    {{-- ปุ่มสถานะ/เข้าสอบ (วางตำแหน่งเดียวกับปุ่มบทเรียน) --}}
+                                                                    <div>
+                                                                        @if($item->exam_has_passed)
+                                                                            <button class="btn btn-success" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; background-color: #28a745 !important; border: none; color: white !important; cursor: default;" disabled>
+                                                                                สอบผ่านแล้ว
+                                                                            </button>
+                                                                        @elseif($item->can_exam)
+                                                                            @php
+                                                                                $examRoute = $item->exam_type == 1
+                                                                                    ? route('course.exam.multiple', $item->course_id)
+                                                                                    : route('course.exam.essay', $item->course_id);
+                                                                                $btnClass = $item->exam_attempts > 0 ? 'btn-warning' : 'btn-light';
+                                                                            @endphp
+                                                                            <a href="{{ $examRoute }}" class="btn {{ $btnClass }}" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 35px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                                                                {{ $item->exam_attempts > 0 ? 'สอบซ่อมครั้งที่ ' . $item->exam_attempts : 'เริ่มทำข้อสอบ' }}
+                                                                            </a>
+                                                                        @else
+                                                                            <button class="btn btn-danger" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;" disabled>
+                                                                                {{ $item->exam_attempts >= $item->exam_max_attempts ? 'หมดสิทธิ์สอบ' : 'ต้องเรียนให้ครบก่อน' }}
+                                                                            </button>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+
+                                                                {{-- ส่วนเนื้อหาข้างล่าง (Body) - สีขาว/ฟ้าอ่อน แสดงประวัติคะแนนแบบรายการย่อย --}}
+                                                                <div style="background-color: #f0f7ff; padding: 20px; border: 1px solid #1F7BCC; border-top: none; border-radius: 0 0 12px 12px;">
+
+                                                                    @if($item->all_exam_scores && $item->all_exam_scores->isNotEmpty())
+                                                                        <p style="font-size: 16px; font-weight: bold; color: #1F7BCC; margin-bottom: 15px;">
+                                                                            ประวัติการทำข้อสอบ:
+                                                                        </p>
+
+                                                                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                                                                            @foreach($item->all_exam_scores as $index => $score)
+                                                                                @php
+                                                                                    $isPass = $score->score_status === 'pass';
+                                                                                    $statusBg = $isPass ? '#28a745' : '#dc3545';
+                                                                                @endphp
+                                                                                {{-- แถบรายการคะแนน เลียนแบบสไตล์บทเรียนย่อย --}}
+                                                                                <div style="background-color: white; border-radius: 10px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d1e6f9;">
+                                                                                    <div style="display: flex; align-items: center;">
+                                                                                        <div style="width: 35px; height: 35px; background-color: #1F7BCC; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">
+                                                                                            {{ $index + 1 }}
+                                                                                        </div>
+                                                                                        <span style="font-size: 17px; font-weight: 600; color: #333;">รอบที่ {{ $index + 1 }}</span>
+                                                                                    </div>
+
+                                                                                    <div style="display: flex; align-items: center; gap: 20px;">
+                                                                                        <span style="font-size: 18px; font-weight: bold; color: #1F7BCC;">
+                                                                                            {{ $score->score_number }} / {{ $score->score_total }} <small>คะแนน</small>
+                                                                                        </span>
+                                                                                        <span style="background-color: {{ $statusBg }}; color: white; padding: 4px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; text-transform: uppercase; min-width: 70px; text-align: center;">
+                                                                                            {{ $score->score_status }}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            @endforeach
+                                                                        </div>
+                                                                    @else
+                                                                        <div style="text-align: center; padding: 20px; color: #6c757d; font-style: italic;">
+                                                                            ยังไม่มีประวัติการทำข้อสอบในหลักสูตรนี้
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
                                                             </div>
                                                         @endif
                                                     @endforeach

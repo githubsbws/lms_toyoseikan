@@ -10,6 +10,7 @@
         "elasticsearch/elasticsearch": "^8.10",
         "google/cloud-document-ai": "^2.3",
         "guzzlehttp/guzzle": "^7.2",
+        "james-heinrich/getid3": "^1.9",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",

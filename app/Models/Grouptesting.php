@@ -41,4 +41,8 @@ class Grouptesting extends Model
     {
         return $this->hasMany(Manage::class, 'group_id', 'group_id');
     }
+    public function questions()
+    {
+        return $this->hasMany(Question::class, 'group_id', 'group_id');
+    }
 }

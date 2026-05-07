@@ -26,5 +26,12 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, $request) {
+            if ($request->is('course/*') || $request->is('learning/*')) {
+                return redirect()->route('course')
+                    ->with('error', 'เข้าถึงไม่ได้: บทเรียนนี้ไม่ได้อยู่ใน Roadmap หรือสิทธิ์ของ Org คุณ');
+            }
+        });
     }
 }

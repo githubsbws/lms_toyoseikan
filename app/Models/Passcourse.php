@@ -13,13 +13,14 @@ class Passcourse extends Model
 
     protected $primaryKey = 'passcours_id';
     // public $timestamps = false;
-    
+
     protected $fillable = [
         'passcours_cates',
         'passcours_course',
         'passcours_user',
         'passcours_date',
-        'passcours_status'
+        'passcours_status',
+        'academic_year'
     ];
 
     public function user()
@@ -30,5 +31,5 @@ class Passcourse extends Model
     {
         return $this->hasOne(Course::class,'course_id','passcours_course');
     }
-    
+
 }
