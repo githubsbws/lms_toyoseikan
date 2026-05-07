@@ -2521,8 +2521,11 @@ class AdminController extends Controller
     function group_question_detail($id){
         if(AuthFacade::useradmin()){
             $group = Question::with(['images'])->where('ques_id',$id)->first();
-
-            return view("admin.grouptesting.ques_detail",['group' => $group ]);
+            $choice = Choice::where('ques_id',$group->ques_id)
+                        ->where('active','y')
+                        ->get();
+                        
+            return view("admin.grouptesting.ques_detail",['group' => $group,'choice' => $choice ]);
         }else{
             return redirect()->route('login.admin');
         }

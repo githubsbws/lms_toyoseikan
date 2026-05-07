@@ -34,7 +34,7 @@
                                 <div class="mb-3">
                                     <label>ประเภทคำถาม</label>
                                     <select name="ques_type" id="ques_type" class="form-control">
-                                        <option value="1">หลายคำตอบ</option>
+                                        {{-- <option value="1">หลายคำตอบ</option> --}}
                                         <option value="2">คำตอบเดียว</option>
                                         <option value="3">อธิบาย</option>
                                     </select>

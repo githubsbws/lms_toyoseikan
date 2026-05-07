@@ -1,9 +1,7 @@
 @extends('admin/layouts/mainlayout')
 @section('title', 'Admin')
 @section('content')
-@php
-use App\Models\Choice;
-@endphp
+
 <body class="">
 	<div id="wrapper">
 		<div class="content-wrapper">
@@ -51,22 +49,19 @@ use App\Models\Choice;
                                 <div class="form-group">
                                     <label>ตัวเลือกคำตอบ</label>
 
-                                    @php
-                                        $choice = Choice::where('ques_id',$group->ques_id)
-                                                    ->where('active','y')
-                                                    ->get();
-                                    @endphp
-
                                     @foreach($choice as $c)
-                                        @if($c->choice_answer == '1')
-                                            <h5 style="color: red">
-                                                ✔ {!! htmlspecialchars_decode($c->choice_detail) !!}
-                                            </h5>
-                                        @else
-                                            <h5>
-                                                {!! htmlspecialchars_decode($c->choice_detail) !!}
-                                            </h5>
-                                        @endif
+                                    
+                                        <div style="margin-bottom:10px;">
+                                            @if($c->choice_answer == '1')
+                                                <span style="color:red;">
+                                                    ✔ {!! htmlspecialchars_decode($c->choice_detail) !!}
+                                                </span>
+                                            @else
+                                                <span>
+                                                    {!! htmlspecialchars_decode($c->choice_detail) !!}
+                                                </span>
+                                            @endif
+                                        </div>
                                     @endforeach
                                 </div>
 
