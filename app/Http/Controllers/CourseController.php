@@ -160,10 +160,6 @@ class CourseController extends Controller
         $this->progressService->updateDocProgress(auth()->id(),$data);
 
         return response()->download($file_path, $file->original_filename);
-    }
-    public function courseQuestion()
-    {
-        return view('course.course-question');
-    }
+    }w
 
 }

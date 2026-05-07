@@ -87,4 +87,9 @@ class Course extends Model
     {
         return $this->hasMany(CourseScore::class,'course_id','course_id');
     }
+
+    public function groupTesting()
+    {
+        return $this->hasOne(GroupTesting::class, 'course_id', 'course_id');
+    }
 }

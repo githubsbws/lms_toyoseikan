@@ -44,9 +44,11 @@ class CourseService
             'passcourse' => fn($q) => $q->where('passcours_user', $user->id)
                                 ->where('academic_year', now()->year),
 
-            'courseScore' => fn($q) => $q->where('user_id', $user->id)
-                              ->where('pass_year', now()->year)
-                              ->where('score_status', 'pass'),
+            'courseScore' => fn($q) => $q->where('user_id', $user->id)->where('active',self::STATUS_ACTIVE)->where('pass_year',now()->year),
+
+            'groupTesting' => fn($q) => $q->with([
+                            'questions' => fn($subQ) => $subQ->select('ques_id', 'group_id', 'ques_type','ques_title','active') // เลือกเฉพาะฟิลด์ที่ใช้ประหยัด RAM
+        ]),
         ])
         ->where('course_online.active', self::STATUS_ACTIVE);
 
@@ -201,14 +203,33 @@ class CourseService
                 ->filter(fn($lesson) => $lesson->learn->first()?->lesson_status === 'pass')
                 ->count();
 
-            $examPassed = $course->courseScore
-                ->where('score_status', 'pass')
-                ->isNotEmpty() ? 1 : 0;
+            $userScores = $course->courseScore->sortBy('score_id');;
 
+            // 2. เช็คว่ามีประวัติการสอบที่สถานะเป็น 'pass' ไหม
+            $hasPassed = $userScores->where('score_status', 'pass')->isNotEmpty();
+            $examPassed = $hasPassed ? 1 : 0;
+
+            $attemptedCount = $userScores->count();
+            $maxAttempts = 1 + (int)($course->course_retest_amount ?? 0);
+
+            $hasQuestions = $course->groupTesting?->questions?->isNotEmpty() ?? false;
             $course->progress = $totalSteps > 0
                 ? (int) round(($passedLessons + $examPassed) / $totalSteps * 100)
                 : 0;
-            $course->can_exam = $totalLessons > 0 && $passedLessons >= $totalLessons;
+            // 5. บันทึกสถานะการสอบลงตัวแปร Object เพื่อส่งให้ Blade ใช้ง่ายๆ
+            $course->all_exam_scores = $userScores;
+            $course->exam_has_passed = $hasPassed; // ผ่านแล้วหรือยัง
+            $course->exam_attempts   = $attemptedCount; // สอบไปแล้วกี่ครั้ง
+            $course->exam_max_attempts = $maxAttempts; // สอบได้สูงสุดกี่ครั้ง
+
+            // 6. เงื่อนไขการเข้าสอบ: ต้องเรียนครบ AND ยังไม่เคยสอบผ่าน AND จำนวนครั้งที่สอบยังไม่เกินสิทธิ์
+            $course->can_exam = ($totalLessons > 0 && $passedLessons >= $totalLessons)
+                                && !$hasPassed
+                                && ($attemptedCount < $maxAttempts)
+                                && $hasQuestions;
+
+            $examType = $course->groupTesting?->questions->first()?->ques_type;
+            $course->exam_type = $examType; // 1=ปรนัย, 3=อัตนัย
         });
     }
 }

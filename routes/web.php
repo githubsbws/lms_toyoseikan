@@ -40,6 +40,7 @@ use App\Http\Controllers\ConditionController;
 use App\Http\Controllers\ContactusController;
 //-------
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CourseExamController;
 use App\Http\Controllers\LicensePersonController;
 use App\Http\Controllers\RoadmapController;
 
@@ -132,7 +133,11 @@ Route::post('/lms_brother_docker/lms/app/index/user/recovery',[ForgotController:
 Route::get('course',[CourseController::class,'course'])->name('course')->middleware('checkIdleTimeout');
 Route::get('search', [CourseController::class, 'course'])->middleware('checkIdleTimeout');
 
-Route::get('course/question',[CourseController::class,'courseQuestion'])->name('course.coursequestion')->middleware('checkIdleTimeout');
+Route::get('course/exam/multiple/{course_id}', [CourseExamController::class, 'multipleExam'])->name('course.exam.multiple')->middleware('checkIdleTimeout');
+Route::get('course/exam/essay/{course_id}', [CourseExamController::class, 'essayExam'])->name('course.exam.essay')->middleware('checkIdleTimeout');
+
+Route::get('course/exam/essay/submit/{course_id}', [CourseExamController::class, 'essayExam'])->name('course.exam.essay')->middleware('checkIdleTimeout');
+
 
 Route::prefix('course/learning')
     ->middleware(['checkIdleTimeout']) // รวม Middleware ไว้ที่ Group
