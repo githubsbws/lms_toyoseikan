@@ -18,7 +18,8 @@
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
             text: '{{ session('error') }}',
-            confirmButtonText: 'ตกลง'
+            confirmButtonText: 'ตกลง',
+            backdrop: false
         });
     @endif
 </script>
@@ -56,7 +57,7 @@
                                         @php
                                             $isLocked = $item->is_locked ?? false;
 
-                                            $isPassed = $item->passcourse->isNotEmpty();
+                                            $isPassed = $item->passcourse->where('passcours_status', 'pass')->isNotEmpty();
 
                                             $isLearning = !$isLocked && !$isPassed;
 
@@ -75,7 +76,7 @@
                                             }
                                         @endphp
 
-                                        <div class="road-item" style="margin-bottom: 15px;">
+                                        <div class="road-item" style="margin-bottom: 15px;" id="course-{{ $item->course_id }}">
                                             <button class="nav-link btn {{ $btnClass }}"
                                                     id="v-pills-tab-{{ $item->course_id }}"
                                                     data-toggle="tab"
@@ -183,18 +184,22 @@
                                     <div class="panel panel-default paper-shadow mb-5" data-z="0.5" style="border-radius: 12px">
                                         <div class="panel-body p-5">
                                             <div class="row">
-                                                <div class="col-lg-6">
+                                                {{-- <div class="col-lg-6">
                                                     <h5 class="mb-0">จำนวนบทเรียน</h5>
                                                     <div class="col-6 m-5">
                                                         <i class="fa fa-book fa-5x" style="color: #428bca;"></i>
                                                         <p class="mx-0">{{ $item->lesson()->count() }} บทเรียน</p>
                                                     </div>
-                                                </div>
+                                                </div> --}}
                                                 <div class="col-lg-6">
                                                     <h5 class="mb-0">สถานะการประเมิน</h5>
                                                     <div class="col-6 m-5">
                                                         <i class="fa fa-certificate fa-5x m-3" style="color: #428bca;"></i>
+                                                        @if ($isLearning)
                                                         <p class="mx-0">กรุณาเรียนให้จบก่อน</p>
+                                                        @elseif(!$isLearning && !$isPassed)
+                                                        <p class="mx-0">รอคะแนนในส่วนอื่นๆจากแอดมิน</p>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -321,16 +326,20 @@
                                                                             <button class="btn btn-success" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; background-color: #28a745 !important; border: none; color: white !important; cursor: default;" disabled>
                                                                                 สอบผ่านแล้ว
                                                                             </button>
-                                                                        @elseif($item->can_exam)
+                                                                        @elseif($item->can_exam && !$item->score_has_wait)
                                                                             @php
-                                                                                $examRoute = $item->exam_type == 1
-                                                                                    ? route('course.exam.multiple', $item->course_id)
-                                                                                    : route('course.exam.essay', $item->course_id);
-                                                                                $btnClass = $item->exam_attempts > 0 ? 'btn-warning' : 'btn-light';
+                                                                                $examRoute = $item->exam_type == 2
+                                                                                    ? route('course.exam.multiple',[$item->course_id,'from_page' => request()->query('page', 1)])
+                                                                                    : route('course.exam.essay', [$item->course_id,'from_page' => request()->query('page', 1)]);
+                                                                                $btnClass = $item->exam_attempts > 0 ? 'btn-warning' : 'btn-info';
                                                                             @endphp
                                                                             <a href="{{ $examRoute }}" class="btn {{ $btnClass }}" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 35px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                                                                                 {{ $item->exam_attempts > 0 ? 'สอบซ่อมครั้งที่ ' . $item->exam_attempts : 'เริ่มทำข้อสอบ' }}
                                                                             </a>
+                                                                        @elseif($item->score_has_wait)
+                                                                            <button class="btn btn-warning" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;" disabled>
+                                                                                รอแอดมินตรวจข้อสอบ
+                                                                            </button>
                                                                         @else
                                                                             <button class="btn btn-danger" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;" disabled>
                                                                                 {{ $item->exam_attempts >= $item->exam_max_attempts ? 'หมดสิทธิ์สอบ' : 'ต้องเรียนให้ครบก่อน' }}
@@ -350,8 +359,13 @@
                                                                         <div style="display: flex; flex-direction: column; gap: 10px;">
                                                                             @foreach($item->all_exam_scores as $index => $score)
                                                                                 @php
-                                                                                    $isPass = $score->score_status === 'pass';
-                                                                                    $statusBg = $isPass ? '#28a745' : '#dc3545';
+                                                                                    if ($score->score_status === 'pass') {
+                                                                                        $statusBg = '#28a745'; // สีเขียว
+                                                                                    } elseif ($score->score_status === 'fail') {
+                                                                                        $statusBg = '#dc3545'; // สีแดง
+                                                                                    } elseif ($score->score_status === 'wait') {
+                                                                                        $statusBg = '#ffc107'; // สีเหลือง (Warning)
+                                                                                    }
                                                                                 @endphp
                                                                                 {{-- แถบรายการคะแนน เลียนแบบสไตล์บทเรียนย่อย --}}
                                                                                 <div style="background-color: white; border-radius: 10px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d1e6f9;">

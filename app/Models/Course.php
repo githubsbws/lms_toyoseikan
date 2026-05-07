@@ -92,4 +92,5 @@ class Course extends Model
     {
         return $this->hasOne(GroupTesting::class, 'course_id', 'course_id');
     }
+
 }

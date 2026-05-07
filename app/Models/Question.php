@@ -50,4 +50,10 @@ class Question extends Model
     {
         return $this->hasMany(QuestionImage::class, 'ques_id', 'ques_id');
     }
+
+    public function groupTesting()
+    {
+        return $this->belongsTo(Grouptesting::class, 'group_id', 'group_id');
+    }
+
 }

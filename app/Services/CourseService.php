@@ -46,7 +46,8 @@ class CourseService
 
             'courseScore' => fn($q) => $q->where('user_id', $user->id)->where('active',self::STATUS_ACTIVE)->where('pass_year',now()->year),
 
-            'groupTesting' => fn($q) => $q->with([
+            'groupTesting' => fn($q) => $q->where('active',self::STATUS_ACTIVE)
+                            ->with([
                             'questions' => fn($subQ) => $subQ->select('ques_id', 'group_id', 'ques_type','ques_title','active') // เลือกเฉพาะฟิลด์ที่ใช้ประหยัด RAM
         ]),
         ])
@@ -203,10 +204,11 @@ class CourseService
                 ->filter(fn($lesson) => $lesson->learn->first()?->lesson_status === 'pass')
                 ->count();
 
-            $userScores = $course->courseScore->sortBy('score_id');;
+            $userScores = $course->courseScore->sortBy('score_id');
 
             // 2. เช็คว่ามีประวัติการสอบที่สถานะเป็น 'pass' ไหม
             $hasPassed = $userScores->where('score_status', 'pass')->isNotEmpty();
+            $hasWait = $userScores->where('score_status', 'wait')->isNotEmpty();
             $examPassed = $hasPassed ? 1 : 0;
 
             $attemptedCount = $userScores->count();
@@ -219,6 +221,7 @@ class CourseService
             // 5. บันทึกสถานะการสอบลงตัวแปร Object เพื่อส่งให้ Blade ใช้ง่ายๆ
             $course->all_exam_scores = $userScores;
             $course->exam_has_passed = $hasPassed; // ผ่านแล้วหรือยัง
+            $course->score_has_wait  = $hasWait; //รอคะแนนสอบ
             $course->exam_attempts   = $attemptedCount; // สอบไปแล้วกี่ครั้ง
             $course->exam_max_attempts = $maxAttempts; // สอบได้สูงสุดกี่ครั้ง
 
@@ -229,7 +232,7 @@ class CourseService
                                 && $hasQuestions;
 
             $examType = $course->groupTesting?->questions->first()?->ques_type;
-            $course->exam_type = $examType; // 1=ปรนัย, 3=อัตนัย
+            $course->exam_type = $examType; // 2=ปรนัย, 3=อัตนัย
         });
     }
 }

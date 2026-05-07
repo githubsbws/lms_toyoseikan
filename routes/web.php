@@ -131,12 +131,12 @@ Route::get('index/my',[IndexController::class,'index'])->name('index');
 Route::post('/lms_brother_docker/lms/app/index/user/recovery',[ForgotController::class,'forgotRecovery'])->name('forgot.recovery');
 // ----- course
 Route::get('course',[CourseController::class,'course'])->name('course')->middleware('checkIdleTimeout');
-Route::get('search', [CourseController::class, 'course'])->middleware('checkIdleTimeout');
 
 Route::get('course/exam/multiple/{course_id}', [CourseExamController::class, 'multipleExam'])->name('course.exam.multiple')->middleware('checkIdleTimeout');
 Route::get('course/exam/essay/{course_id}', [CourseExamController::class, 'essayExam'])->name('course.exam.essay')->middleware('checkIdleTimeout');
 
-Route::get('course/exam/essay/submit/{course_id}', [CourseExamController::class, 'essayExam'])->name('course.exam.essay')->middleware('checkIdleTimeout');
+Route::post('course/exam/multiple/submit/{course_id}', [CourseExamController::class, 'multipleExamSubmit'])->name('course.exam.submit-multiple')->middleware('checkIdleTimeout');
+Route::post('course/exam/essay/submit/{course_id}', [CourseExamController::class, 'essayExamSubmit'])->name('course.exam.submit-essay')->middleware('checkIdleTimeout');
 
 
 Route::prefix('course/learning')

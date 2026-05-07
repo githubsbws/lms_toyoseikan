@@ -16,7 +16,7 @@ class Passcourse extends Model
 
     protected $fillable = [
         'passcours_cates',
-        'passcours_course',
+        'passcours_cours',
         'passcours_user',
         'passcours_date',
         'passcours_status',

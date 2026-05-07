@@ -13,12 +13,17 @@ class CourseScore extends Model
 
     protected $primaryKey = 'score_id';
 
+    public $timestamps = false;
+
     protected $fillable = [
        'course_id',
        'user_id',
+       'type',
        'score_number',
        'score_total',
        'score_status',
+       'active',
+       'create_date',
        'pass_year'
     ];
 

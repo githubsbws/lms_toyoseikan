@@ -11,7 +11,7 @@ use Illuminate\Session\Store;
 class CheckIdleTimeout
 {
     protected $session;
-    protected $timeout = 30; // หน่วยเป็นนาที
+    protected $timeout = 70; // หน่วยเป็นนาที
 
     public function __construct(Store $session)
     {
