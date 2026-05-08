@@ -45,28 +45,42 @@
                     <div class="form-group">
                         <label>คะแนน</label>
                         <input type="number"
-                               name="q_a_score"
-                               class="form-control score-input"
-                               data-max="{{ $data->q_a_weight }}"
-                               placeholder="กรอกคะแนน"
-                               max="{{ $data->q_a_weight }}"
-                               min="0">
+                            name="q_a_score"
+                            class="form-control score-input"
+                            data-max="{{ $data->q_a_weight }}"
+                            placeholder="กรอกคะแนน"
+                            value="{{ $scores[1]->score ?? '' }}"
+                            max="{{ $data->q_a_weight }}"
+                            min="0">
                                <small class="text-danger error-msg" style="display:none;"></small>
                     </div>
 
                     {{-- 📎 Upload --}}
                     <div class="form-group">
                         <label>แนบไฟล์</label>
-                        <input type="file" name="q_a_file" class="form-control">
-                    </div>
 
+                        <input type="file"
+                            name="q_a_file"
+                            class="form-control"
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+
+                        {{-- @if(isset($files[1]) && !empty($files[1]->file_name))
+                            <div class="mt-2">
+                                <a href="{{ asset('images/uploads/assessment_files/'.$files[1]->file_name) }}"
+                                target="_blank"
+                                class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file"></i> ดูไฟล์เดิม
+                                </a>
+                            </div>
+                        @endif --}}
+                    </div>
                     {{-- 📝 หมายเหตุ --}}
                     <div class="form-group">
                         <label>หมายเหตุ</label>
                         <textarea name="q_a_remark"
-                                class="form-control"
-                                rows="2"
-                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+                            class="form-control"
+                            rows="2"
+                            placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)">{{ $scores[1]->detail ?? '' }}</textarea>
                     </div>
 
                 </div>
@@ -91,6 +105,7 @@
                                class="form-control score-input"
                                data-max="{{ $data->operate_weight }}"
                                placeholder="กรอกคะแนน"
+                               value="{{ $scores[2]->score ?? '' }}"
                                max="{{ $data->operate_weight }}"
                                min="0">
                                <small class="text-danger error-msg" style="display:none;"></small>
@@ -98,7 +113,21 @@
 
                     <div class="form-group">
                         <label>แนบไฟล์</label>
-                        <input type="file" name="operate_file" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+
+                        <input type="file"
+                            name="operate_file"
+                            class="form-control"
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+
+                        {{-- @if(isset($files[2]) && !empty($files[2]->file_name))
+                            <div class="mt-2">
+                                <a href="{{ asset('images/uploads/assessment_files/'.$files[2]->file_name) }}"
+                                target="_blank"
+                                class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file"></i> ดูไฟล์เดิม
+                                </a>
+                            </div>
+                        @endif --}}
                     </div>
 
                     {{-- 📝 หมายเหตุ --}}
@@ -107,7 +136,7 @@
                         <textarea name="operate_remark"
                                 class="form-control"
                                 rows="2"
-                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)">{{ $scores[2]->detail ?? '' }}</textarea>
                     </div>
 
                 </div>
@@ -132,6 +161,7 @@
                                class="form-control score-input"
                                data-max="{{ $data->assign_weight }}"
                                placeholder="กรอกคะแนน"
+                               value="{{ $scores[3]->score ?? '' }}"
                                max="{{ $data->assign_weight }}"
                                min="0">
                         <small class="text-danger error-msg" style="display:none;"></small>
@@ -139,7 +169,21 @@
 
                     <div class="form-group">
                         <label>แนบไฟล์</label>
-                        <input type="file" name="assign_file" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+
+                        <input type="file"
+                            name="assign_file"
+                            class="form-control"
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+
+                        {{-- @if(isset($files[3]) && !empty($files[3]->file_name))
+                            <div class="mt-2">
+                                <a href="{{ asset('images/uploads/assessment_files/'.$files[3]->file_name) }}"
+                                target="_blank"
+                                class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file"></i> ดูไฟล์เดิม
+                                </a>
+                            </div>
+                        @endif --}}
                     </div>
 
                     {{-- 📝 หมายเหตุ --}}
@@ -148,7 +192,7 @@
                         <textarea name="assign_remark"
                                 class="form-control"
                                 rows="2"
-                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)">{{ $scores[3]->detail ?? '' }}</textarea>
                     </div>
 
                 </div>
@@ -173,6 +217,7 @@
                                class="form-control score-input"
                                data-max="{{ $data->observe_weight }}"
                                placeholder="กรอกคะแนน"
+                               value="{{ $scores[4]->score ?? '' }}"
                                max="{{ $data->observe_weight }}"
                                min="0">
                         <small class="text-danger error-msg" style="display:none;"></small>
@@ -180,7 +225,21 @@
 
                     <div class="form-group">
                         <label>แนบไฟล์</label>
-                        <input type="file" name="observe_file" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+
+                        <input type="file"
+                            name="observe_file"
+                            class="form-control"
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+
+                        {{-- @if(isset($files[4]) && !empty($files[4]->file_name))
+                            <div class="mt-2">
+                                <a href="{{ asset('images/uploads/assessment_files/'.$files[4]->file_name) }}"
+                                target="_blank"
+                                class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file"></i> ดูไฟล์เดิม
+                                </a>
+                            </div>
+                        @endif --}}
                     </div>
 
                     {{-- 📝 หมายเหตุ --}}
@@ -189,7 +248,7 @@
                         <textarea name="observe_remark"
                                 class="form-control"
                                 rows="2"
-                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)">{{ $scores[4]->detail ?? '' }}</textarea>
                     </div>
 
                 </div>

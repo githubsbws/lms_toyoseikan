@@ -378,8 +378,11 @@ Route::get('/questionnaireout_assessment/ajax',[AdminController::class,'question
 Route::get('/questionnaireout_detail/{id}', [AdminController::class, 'questionnaireout_detail'])->name('questionnaireout.detail')->middleware('checkIdleTimeout');
 Route::post('/questionnaireout_save', [AdminController::class, 'questionnaireout_save'])->name('questionnaireout_save')->middleware('checkIdleTimeout');
 
-Route::get('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
-Route::post('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
+// Route::get('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
+// Route::post('/questionnaireout_result',[AdminController::class,'questionnaireout_result'])->name('questionnaireout.result')->middleware('checkIdleTimeout');
+Route::get('/questionnaireout_retest',[AdminController::class,'questionnaireout_retest'])->name('questionnaireout.retest')->middleware('checkIdleTimeout');
+Route::get('/questionnaireout_assessment/ajax_test',[AdminController::class,'questionnaireout_assessment_ajax_test'])->name('questionnaireout.assessment.ajax_test')->middleware('checkIdleTimeout');
+Route::post('/questionnaireout_reset_action',[AdminController::class, 'questionnaireout_reset_action'])->name('questionnaireout.reset.action');
 
 Route::get('/questionnaireout_exam/{id}',[AdminController::class,'questionnaireout_exam'])->name('questionnaireout.exam')->middleware('checkIdleTimeout');
 Route::post('/questionnaireout_exam/{id}',[AdminController::class,'questionnaireout_exam'])->name('questionnaireout.Answer')->middleware('checkIdleTimeout');

@@ -5758,7 +5758,7 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-        public function questionnaireout_result(Request $request){
+    public function questionnaireout_result(Request $request){
         if(AuthFacade::useradmin()){
             // $course_online = Course::join('category', 'category.cate_id', '=', 'course_online.cate_id')->where('course_online.active', 'y')->orderBy('sortOrder', 'desc')->get();
             $course_online = Passcourse::join('course_online', 'course_online.course_id', '=', 'passcours.passcours_cours')
@@ -5766,8 +5766,9 @@ class AdminController extends Controller
             // เพิ่มการ Join กับตาราง tbl_profiles
             ->join('profiles', 'profiles.user_id', '=', 'passcours.passcours_user')
             ->where(function($query) {
-                $query->where('passcours.passcours_status', '!=', 'pass')
-                    ->orWhereNull('passcours.passcours_status');
+                // $query->where('passcours.passcours_status', '!=', 'pass')
+                //     ->orWhereNull('passcours.passcours_status');
+                $query->orWhereNull('passcours.passcours_status');
             })
             ->select(
                 'passcours.*',
@@ -5831,43 +5832,59 @@ public function questionnaireout_detail($id)
 {
     try {
 
+        // 🔹 ข้อมูลหลัก
         $data = DB::table('passcours')
-        ->join('course_online', 'passcours.passcours_cours', '=', 'course_online.course_id')
-        ->leftJoin('users', 'passcours.passcours_user', '=', 'users.id')
-        ->leftJoin('profiles', 'users.id', '=', 'profiles.user_id')
-        ->leftJoin('course_score_weight', 'course_online.course_id', '=', 'course_score_weight.course_id')
-        ->where('passcours.passcours_id', $id)
-        ->select(
-            'passcours.passcours_id',
-            'course_online.course_title',
-            'profiles.firstname',
-            'profiles.lastname',
-            'course_score_weight.q_a_weight',
-            'course_score_weight.operate_weight',
-            'course_score_weight.assign_weight',
-            'course_score_weight.observe_weight'
-        )
-        ->first();
+            ->join('course_online', 'passcours.passcours_cours', '=', 'course_online.course_id')
+            ->leftJoin('users', 'passcours.passcours_user', '=', 'users.id')
+            ->leftJoin('profiles', 'users.id', '=', 'profiles.user_id')
+            ->leftJoin('course_score_weight', 'course_online.course_id', '=', 'course_score_weight.course_id')
+            ->where('passcours.passcours_id', $id)
+            ->select(
+                'passcours.passcours_id',
+                'course_online.course_title',
+                'profiles.firstname',
+                'profiles.lastname',
+                'course_score_weight.id as weight_id',
+                'course_score_weight.q_a_weight',
+                'course_score_weight.operate_weight',
+                'course_score_weight.assign_weight',
+                'course_score_weight.observe_weight'
+            )
+            ->first();
 
-    // return view('admin.questionnaireout.partials.detail_form', compact('data'));
+        // 🔥 ดึง score เก่า
+        $scores = DB::table('score_assessment')
+                ->where('passcours_id', $id)
+                ->where('active', 'y')
+                ->get()
+                ->keyBy('type_course_score_weight');
 
-        return view('admin.questionnaireout.questionnaireout_detail', compact('data'));
+
+        // 🔥 ดึง file เก่า
+        $files = DB::table('file_assessment')
+                ->where('passcours_id', $id)
+                ->where('active', 'y')
+                ->get()
+                ->keyBy('type_course_score_weight');
+
+        return view(
+            'admin.questionnaireout.questionnaireout_detail',
+            compact('data', 'scores', 'files')
+        );
 
     } catch (\Exception $e) {
-        return $e->getMessage(); // 👈 จะเห็น error จริง
+
+        return $e->getMessage();
     }
 }
 
 public function questionnaireout_save(Request $request)
 {
     $request->validate([
-        'q_a_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
-        'operate_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
-        'assign_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
-        'observe_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
-    ],[
-        '*.mimes' => 'อนุญาตเฉพาะไฟล์ JPEG, PNG, PDF, Word, Excel เท่านั้น',
-        '*.max'   => 'ขนาดไฟล์ต้องไม่เกิน 5MB',
+        'q_a_file'       => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
+        'operate_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
+        'assign_file'    => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
+        'observe_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx|max:5120',
     ]);
 
     DB::beginTransaction();
@@ -5876,20 +5893,35 @@ public function questionnaireout_save(Request $request)
 
         $passcours_id = $request->passcours_id;
 
-        // 🔹 ดึง course_score_weight id
-        $weight = DB::table('course_score_weight')
-            ->join('passcours', 'passcours.passcours_cours', '=', 'course_score_weight.course_id')
+        // =====================================================
+        // หา course_score_weight
+        // =====================================================
+        $courseWeight = DB::table('course_score_weight')
+            ->join(
+                'passcours',
+                'passcours.passcours_cours',
+                '=',
+                'course_score_weight.course_id'
+            )
             ->where('passcours.passcours_id', $passcours_id)
-            ->select('course_score_weight.id')
+            ->select(
+                'course_score_weight.id',
+                'course_score_weight.q_a_weight',
+                'course_score_weight.operate_weight',
+                'course_score_weight.assign_weight',
+                'course_score_weight.observe_weight'
+            )
             ->first();
 
-        if (!$weight) {
-            throw new \Exception('ไม่พบ course_score_weight');
+        if (!$courseWeight) {
+            throw new \Exception('ไม่พบข้อมูล course_score_weight');
         }
 
-        $weight_id = $weight->id;
+        $weight_id = $courseWeight->id;
 
-        // 🔥 1. update status
+        // =====================================================
+        // update passcours
+        // =====================================================
         DB::table('passcours')
             ->where('passcours_id', $passcours_id)
             ->update([
@@ -5897,64 +5929,154 @@ public function questionnaireout_save(Request $request)
                 'updated_at' => now()
             ]);
 
-        // 🔥 mapping type
-        $types = [
-            1 => 'q_a',
-            2 => 'operate',
-            3 => 'assign',
-            4 => 'observe'
-        ];
+        // =====================================================
+        // ปิดข้อมูลเก่า
+        // =====================================================
+        DB::table('score_assessment')
+            ->where('passcours_id', $passcours_id)
+            ->where('active', 'y')
+            ->update([
+                'active' => 'n',
+                'updated_at' => now()
+            ]);
 
-        // 🔥 path upload
+        DB::table('file_assessment')
+            ->where('passcours_id', $passcours_id)
+            ->where('active', 'y')
+            ->update([
+                'active' => 'n',
+                'updated_at' => now()
+            ]);
+
+        // =====================================================
+        // สร้าง type ตาม weight จริง
+        // =====================================================
+        $types = [];
+
+        if (($courseWeight->q_a_weight ?? 0) > 0) {
+            $types[1] = 'q_a';
+        }
+
+        if (($courseWeight->operate_weight ?? 0) > 0) {
+            $types[2] = 'operate';
+        }
+
+        if (($courseWeight->assign_weight ?? 0) > 0) {
+            $types[3] = 'assign';
+        }
+
+        if (($courseWeight->observe_weight ?? 0) > 0) {
+            $types[4] = 'observe';
+        }
+
+        // =====================================================
+        // upload path
+        // =====================================================
         $destinationPath = public_path('images/uploads/assessment_files');
 
-        // 👉 สร้าง folder ถ้ายังไม่มี
         if (!file_exists($destinationPath)) {
             mkdir($destinationPath, 0775, true);
         }
 
+        // =====================================================
+        // loop save
+        // =====================================================
         foreach ($types as $type => $prefix) {
 
-            $score = $request->input($prefix . '_score');
-            $file  = $request->file($prefix . '_file');
+            $score  = $request->input($prefix . '_score');
             $remark = $request->input($prefix . '_remark');
+            $file   = $request->file($prefix . '_file');
 
-            // ======================
-            // 🔹 บันทึกคะแนน
-            // ======================
-            if ((!is_null($score) && $score !== '') || (!empty($remark))) {
+            // =================================================
+            // score เดิม
+            // =================================================
+            $oldScore = DB::table('score_assessment')
+                ->where('passcours_id', $passcours_id)
+                ->where('type_course_score_weight', $type)
+                ->where('active', 'n')
+                ->latest('id')
+                ->first();
+
+            // =================================================
+            // save score ใหม่
+            // =================================================
+            if (
+                ($score !== null && $score !== '')
+                || !empty($remark)
+            ) {
 
                 DB::table('score_assessment')->insert([
-                    'passcours_id' => $passcours_id,
+                    'passcours_id'            => $passcours_id,
                     'id_course_score_weight' => $weight_id,
-                    'score' => $score,
-                    'detail' => $remark,
+                    'score'                  => $score,
+                    'detail'                 => $remark,
                     'type_course_score_weight' => $type,
-                    'active' => 'y',
-                    'created_at' => now()
+                    'active'                 => 'y',
+                    'created_at'             => now(),
+                    'updated_at'             => now()
+                ]);
+
+            } else if ($oldScore) {
+
+                // =============================================
+                // clone score เดิม
+                // =============================================
+                DB::table('score_assessment')->insert([
+                    'passcours_id'            => $oldScore->passcours_id,
+                    'id_course_score_weight' => $oldScore->id_course_score_weight,
+                    'score'                  => $oldScore->score,
+                    'detail'                 => $oldScore->detail,
+                    'type_course_score_weight' => $oldScore->type_course_score_weight,
+                    'active'                 => 'y',
+                    'created_at'             => now(),
+                    'updated_at'             => now()
                 ]);
             }
 
-            // ======================
-            // 🔹 บันทึกไฟล์
-            // ======================
+            // =================================================
+            // file เดิม
+            // =================================================
+            $oldFile = DB::table('file_assessment')
+                ->where('passcours_id', $passcours_id)
+                ->where('type_course_score_weight', $type)
+                ->where('active', 'n')
+                ->latest('id')
+                ->first();
+
+            // =================================================
+            // save file ใหม่
+            // =================================================
             if ($file) {
 
-                $ext = $file->getClientOriginalExtension();
+                $extension = $file->getClientOriginalExtension();
 
-                // 🔥 ชื่อไฟล์ unique
-                $filename = Str::uuid() . '.' . $ext;
+                $filename = Str::uuid() . '.' . $extension;
 
-                // 🔥 move file
                 $file->move($destinationPath, $filename);
 
                 DB::table('file_assessment')->insert([
-                    'passcours_id' => $passcours_id,
+                    'passcours_id'            => $passcours_id,
                     'id_course_score_weight' => $weight_id,
-                    'file_name' => $filename,
+                    'file_name'              => $filename,
                     'type_course_score_weight' => $type,
-                    'active' => 'y',
-                    'created_at' => now()
+                    'active'                 => 'y',
+                    'created_at'             => now(),
+                    'updated_at'             => now()
+                ]);
+
+            } else if ($oldFile) {
+
+                // =============================================
+                // clone file เดิม
+                // =============================================
+                DB::table('file_assessment')->insert([
+                    'passcours_id'            => $oldFile->passcours_id,
+                    'id_course_score_weight' => $oldFile->id_course_score_weight,
+                    'file_name'              => $oldFile->file_name,
+                    'type_course_score_weight' => $oldFile->type_course_score_weight,
+                    'active'                 => 'y',
+                    'created_at'             => now(),
+                    'updated_at'             => now()
                 ]);
             }
         }
@@ -5975,6 +6097,90 @@ public function questionnaireout_save(Request $request)
             'error' => $e->getMessage()
         ], 500);
     }
+}
+
+public function questionnaireout_retest(Request $request){
+        if(AuthFacade::useradmin()){
+
+            $courses = DB::table('course_online')->get(); // 👈 สำคัญ
+            $results = []; // กัน error หน้าแรก
+
+            return view(
+                "admin.questionnaireout.questionnaireout_retest",
+                compact('courses', 'results')
+            );
+
+        }else{
+            return redirect()->route('login.admin');
+        }
+    }
+
+        public function questionnaireout_assessment_ajax_test(Request $request)
+{
+    if (AuthFacade::useradmin()) {
+
+       $query = DB::table('coursescore')
+    ->join('course_online', 'coursescore.course_id', '=', 'course_online.course_id')
+    ->leftJoin('users', 'coursescore.user_id', '=', 'users.id')
+    ->leftJoin('profiles', 'users.id', '=', 'profiles.user_id')
+    ->select(
+        'coursescore.course_id',
+        'coursescore.user_id',
+        'course_online.course_title',
+        'profiles.firstname',
+        'profiles.lastname'
+    )
+    ->where('coursescore.active', 'y');
+
+if (!empty($request->course_id)) {
+    $query->where('coursescore.course_id', $request->course_id);
+}
+
+if (!empty($request->firstname)) {
+    $query->where('profiles.firstname', 'like', '%' . $request->firstname . '%');
+}
+
+if (!empty($request->lastname)) {
+    $query->where('profiles.lastname', 'like', '%' . $request->lastname . '%');
+}
+
+$query->groupBy(
+    'coursescore.course_id',
+    'coursescore.user_id',
+    'course_online.course_title',
+    'profiles.firstname',
+    'profiles.lastname'
+);
+
+$results = $query->get();
+
+        // ✅ ใช้ partial เท่านั้น (ห้ามใช้ view หลัก)
+        $html = view(
+            "admin.questionnaireout.partials.table_test",
+            compact('results')
+        )->render();
+
+        return response()->json(['html' => $html]);
+
+    } else {
+        return response()->json(['html' => 'Unauthorized'], 403);
+    }
+}
+
+public function questionnaireout_reset_action(Request $request)
+{
+    DB::table('coursescore')
+        ->where('course_id', $request->course_id)
+        ->where('user_id', $request->user_id)
+        ->where('active', 'y')
+        ->update([
+            'active' => 'n',
+            'update_date' => now()
+        ]);
+
+    return response()->json([
+        'success' => true
+    ]);
 }
 
 }
