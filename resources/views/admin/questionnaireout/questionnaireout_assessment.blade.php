@@ -34,7 +34,7 @@
                             <div class="col-md-4">
                                 <label>หลักสูตร</label>
                                 <select id="course_id" class="form-control">
-                                    <option value="">-- ทั้งหมด --</option>
+                                    <option value="">-- เลือกหลักสูตร --</option>
                                     @foreach($courses as $course)
                                         <option value="{{ $course->course_id }}">
                                             {{ $course->course_title }}
