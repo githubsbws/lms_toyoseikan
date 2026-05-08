@@ -322,15 +322,15 @@ use App\Helpers\PermissionHelper;
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/questionnaireout') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
+                            <a href="{{ url('/questionnaireout_retest') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
                                 <p>การสอบซ่อม</p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{ url('/questionnaireout_result') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
                                 <p>ผลการเรียน</p>
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </li>
                 @endcanmenu
