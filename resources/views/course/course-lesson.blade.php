@@ -49,9 +49,10 @@
         </div>
 
         <div class="border-top pt-4">
-            <button id="btn-complete" class="btn btn-primary btn-lg px-5 font-weight-bold shadow-sm transition-transform" style="display: none">
-                <i class="fa fa-check-circle mr-2"></i> เรียนจบแล้ว
-            </button>
+            <a href="{{ route('course', ['page' => session('lesson_from_page', 1)]) }}#course-{{ session('lesson_from_course') }}"
+                class="btn btn-primary btn-lg px-5 font-weight-bold shadow-sm">
+                <i class="fa fa-arrow-left mr-2"></i> กลับหลักสูตร
+            </a>
         </div>
     </div>
 </div>

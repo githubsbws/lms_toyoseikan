@@ -198,7 +198,10 @@ class CourseService
     {
         $courses->each(function ($course) {
             $totalLessons  = $course->lesson->count();
-            $totalSteps    = $totalLessons + 1; // +1 ข้อสอบ
+            $hasQuestions = $course->groupTesting?->questions?->isNotEmpty() ?? false;
+
+            $examStep = $hasQuestions ? 1 : 0;
+            $totalSteps    = $totalLessons + $examStep; // +1 ข้อสอบ
 
             $passedLessons = $course->lesson
                 ->filter(fn($lesson) => $lesson->learn->first()?->lesson_status === 'pass')
@@ -214,7 +217,7 @@ class CourseService
             $attemptedCount = $userScores->count();
             $maxAttempts = 1 + (int)($course->course_retest_amount ?? 0);
 
-            $hasQuestions = $course->groupTesting?->questions?->isNotEmpty() ?? false;
+
             $course->progress = $totalSteps > 0
                 ? (int) round(($passedLessons + $examPassed) / $totalSteps * 100)
                 : 0;
@@ -224,6 +227,7 @@ class CourseService
             $course->score_has_wait  = $hasWait; //รอคะแนนสอบ
             $course->exam_attempts   = $attemptedCount; // สอบไปแล้วกี่ครั้ง
             $course->exam_max_attempts = $maxAttempts; // สอบได้สูงสุดกี่ครั้ง
+            $course->has_questions = $hasQuestions; // มีข้อสอบไหม
 
             // 6. เงื่อนไขการเข้าสอบ: ต้องเรียนครบ AND ยังไม่เคยสอบผ่าน AND จำนวนครั้งที่สอบยังไม่เกินสิทธิ์
             $course->can_exam = ($totalLessons > 0 && $passedLessons >= $totalLessons)
@@ -233,6 +237,26 @@ class CourseService
 
             $examType = $course->groupTesting?->questions->first()?->ques_type;
             $course->exam_type = $examType; // 2=ปรนัย, 3=อัตนัย
+        });
+    }
+
+    public function completeCourse(int $userId, int $courseId): void
+    {
+        DB::transaction(function () use ($userId, $courseId) {
+
+            // เช็คว่าผ่านแล้วหรือยัง ป้องกัน double submit
+            $exists = Passcourse::where('passcours_user', $userId)
+                            ->where('passcours_cours', $courseId)
+                            ->where('academic_year', now()->year)
+                            ->exists();
+            if ($exists) return;
+
+            Passcourse::create([
+                'passcours_cours'  => $courseId,
+                'passcours_user'   => $userId,
+                'passcours_status' => 'wait',
+                'academic_year'    => now()->year,
+            ]);
         });
     }
 }

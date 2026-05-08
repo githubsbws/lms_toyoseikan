@@ -13,6 +13,15 @@
     </style>
 <script>
     // ตรวจสอบ Session Flash และแสดง SweetAlert2
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'สำเร็จ',
+            text: "{{ session('success') }}",
+            confirmButtonText: 'ตกลง',
+            backdrop: false
+        });
+    @endif
     @if(session('error'))
         Swal.fire({
             icon: 'error',
@@ -281,7 +290,7 @@
                                                                             {{-- <span class="text-muted me-3">
                                                                                 <i class="fa fa-clock-o"></i> 30 นาที
                                                                             </span> --}}
-                                                                            <a href="{{ route('course.lessonLearn',[$lessons->id,$vdo->id,$item->id]) }}"><button class="btn btn-primary" style="border-radius: 6px;font-size:24px; padding: 5px 40px;">ดูวิดีโอ</button></a>
+                                                                            <a href="{{ route('course.lessonLearn',[$lessons->id,$vdo->id,'course_id' => $item->course_id,'from_page' => request()->query('page', 1)]) }}"><button class="btn btn-primary" style="border-radius: 6px;font-size:24px; padding: 5px 40px;">ดูวิดีโอ</button></a>
                                                                         </div>
                                                                     </div>
                                                                 @endforeach
@@ -306,94 +315,115 @@
                                                             @endif
                                                         </div>
                                                         @if($loop->last)
-                                                            {{-- Container หลัก --}}
-                                                            <div style="margin-top: 30px; margin-bottom: 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                                            @if($item->has_questions)
+                                                                {{-- Container หลัก --}}
+                                                                <div style="margin-top: 30px; margin-bottom: 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
 
-                                                                {{-- ส่วนหัว (Header) - สีน้ำเงิน ตัวอักษรขาว --}}
-                                                                <div style="background-color: #1F7BCC; color: white; padding: 18px 25px; display: flex; justify-content: space-between; align-items: center;">
-                                                                    <div>
-                                                                        <h3 style="font-size: 26px; font-weight: bold; margin: 0; color: white !important; line-height: 1;">
-                                                                            แบบทดสอบ Final Exam
-                                                                        </h3>
-                                                                        <p style="margin: 8px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">
-                                                                            สิทธิ์การสอบทั้งหมด: {{ $item->exam_attempts }}/{{ $item->exam_max_attempts }} ครั้ง
-                                                                        </p>
+                                                                    {{-- ส่วนหัว (Header) - สีน้ำเงิน ตัวอักษรขาว --}}
+                                                                    <div style="background-color: #1F7BCC; color: white; padding: 18px 25px; display: flex; justify-content: space-between; align-items: center;">
+                                                                        <div>
+                                                                            <h3 style="font-size: 26px; font-weight: bold; margin: 0; color: white !important; line-height: 1;">
+                                                                                แบบทดสอบ Final Exam
+                                                                            </h3>
+                                                                            <p style="margin: 8px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">
+                                                                                สิทธิ์การสอบทั้งหมด: {{ $item->exam_attempts }}/{{ $item->exam_max_attempts }} ครั้ง
+                                                                            </p>
+                                                                        </div>
+
+                                                                        {{-- ปุ่มสถานะ/เข้าสอบ (วางตำแหน่งเดียวกับปุ่มบทเรียน) --}}
+                                                                        <div>
+                                                                            @if($item->exam_has_passed)
+                                                                                <button class="btn btn-success" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; background-color: #28a745 !important; border: none; color: white !important; cursor: default;" disabled>
+                                                                                    สอบผ่านแล้ว
+                                                                                </button>
+                                                                            @elseif($item->can_exam && !$item->score_has_wait)
+                                                                                @php
+                                                                                    $examRoute = $item->exam_type == 2
+                                                                                        ? route('course.exam.multiple',[$item->course_id,'from_page' => request()->query('page', 1)])
+                                                                                        : route('course.exam.essay', [$item->course_id,'from_page' => request()->query('page', 1)]);
+                                                                                    $btnClass = $item->exam_attempts > 0 ? 'btn-warning' : 'btn-info';
+                                                                                @endphp
+                                                                                <a href="{{ $examRoute }}" class="btn {{ $btnClass }}" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 35px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                                                                    {{ $item->exam_attempts > 0 ? 'สอบซ่อมครั้งที่ ' . $item->exam_attempts : 'เริ่มทำข้อสอบ' }}
+                                                                                </a>
+                                                                            @elseif($item->score_has_wait)
+                                                                                <button class="btn btn-warning" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;" disabled>
+                                                                                    รอแอดมินตรวจข้อสอบ
+                                                                                </button>
+                                                                            @else
+                                                                                <button class="btn btn-danger" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;" disabled>
+                                                                                    {{ $item->exam_attempts >= $item->exam_max_attempts ? 'หมดสิทธิ์สอบ' : 'ต้องเรียนให้ครบก่อน' }}
+                                                                                </button>
+                                                                            @endif
+                                                                        </div>
                                                                     </div>
 
-                                                                    {{-- ปุ่มสถานะ/เข้าสอบ (วางตำแหน่งเดียวกับปุ่มบทเรียน) --}}
-                                                                    <div>
-                                                                        @if($item->exam_has_passed)
-                                                                            <button class="btn btn-success" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; background-color: #28a745 !important; border: none; color: white !important; cursor: default;" disabled>
-                                                                                สอบผ่านแล้ว
-                                                                            </button>
-                                                                        @elseif($item->can_exam && !$item->score_has_wait)
-                                                                            @php
-                                                                                $examRoute = $item->exam_type == 2
-                                                                                    ? route('course.exam.multiple',[$item->course_id,'from_page' => request()->query('page', 1)])
-                                                                                    : route('course.exam.essay', [$item->course_id,'from_page' => request()->query('page', 1)]);
-                                                                                $btnClass = $item->exam_attempts > 0 ? 'btn-warning' : 'btn-info';
-                                                                            @endphp
-                                                                            <a href="{{ $examRoute }}" class="btn {{ $btnClass }}" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 35px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                                                                                {{ $item->exam_attempts > 0 ? 'สอบซ่อมครั้งที่ ' . $item->exam_attempts : 'เริ่มทำข้อสอบ' }}
-                                                                            </a>
-                                                                        @elseif($item->score_has_wait)
-                                                                            <button class="btn btn-warning" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;" disabled>
-                                                                                รอแอดมินตรวจข้อสอบ
-                                                                            </button>
+                                                                    {{-- ส่วนเนื้อหาข้างล่าง (Body) - สีขาว/ฟ้าอ่อน แสดงประวัติคะแนนแบบรายการย่อย --}}
+                                                                    <div style="background-color: #f0f7ff; padding: 20px; border: 1px solid #1F7BCC; border-top: none; border-radius: 0 0 12px 12px;">
+
+                                                                        @if($item->all_exam_scores && $item->all_exam_scores->isNotEmpty())
+                                                                            <p style="font-size: 16px; font-weight: bold; color: #1F7BCC; margin-bottom: 15px;">
+                                                                                ประวัติการทำข้อสอบ:
+                                                                            </p>
+
+                                                                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                                                                @foreach($item->all_exam_scores as $index => $score)
+                                                                                    @php
+                                                                                        if ($score->score_status === 'pass') {
+                                                                                            $statusBg = '#28a745'; // สีเขียว
+                                                                                        } elseif ($score->score_status === 'fail') {
+                                                                                            $statusBg = '#dc3545'; // สีแดง
+                                                                                        } elseif ($score->score_status === 'wait') {
+                                                                                            $statusBg = '#ffc107'; // สีเหลือง (Warning)
+                                                                                        }
+                                                                                    @endphp
+                                                                                    {{-- แถบรายการคะแนน เลียนแบบสไตล์บทเรียนย่อย --}}
+                                                                                    <div style="background-color: white; border-radius: 10px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d1e6f9;">
+                                                                                        <div style="display: flex; align-items: center;">
+                                                                                            <div style="width: 35px; height: 35px; background-color: #1F7BCC; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">
+                                                                                                {{ $index + 1 }}
+                                                                                            </div>
+                                                                                            <span style="font-size: 17px; font-weight: 600; color: #333;">รอบที่ {{ $index + 1 }}</span>
+                                                                                        </div>
+
+                                                                                        <div style="display: flex; align-items: center; gap: 20px;">
+                                                                                            <span style="font-size: 18px; font-weight: bold; color: #1F7BCC;">
+                                                                                                {{ $score->score_number }} / {{ $score->score_total }} <small>คะแนน</small>
+                                                                                            </span>
+                                                                                            <span style="background-color: {{ $statusBg }}; color: white; padding: 4px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; text-transform: uppercase; min-width: 70px; text-align: center;">
+                                                                                                {{ $score->score_status }}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                @endforeach
+                                                                            </div>
                                                                         @else
-                                                                            <button class="btn btn-danger" style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;" disabled>
-                                                                                {{ $item->exam_attempts >= $item->exam_max_attempts ? 'หมดสิทธิ์สอบ' : 'ต้องเรียนให้ครบก่อน' }}
-                                                                            </button>
+                                                                            <div style="text-align: center; padding: 20px; color: #6c757d; font-style: italic;">
+                                                                                ยังไม่มีประวัติการทำข้อสอบในหลักสูตรนี้
+                                                                            </div>
                                                                         @endif
                                                                     </div>
                                                                 </div>
-
-                                                                {{-- ส่วนเนื้อหาข้างล่าง (Body) - สีขาว/ฟ้าอ่อน แสดงประวัติคะแนนแบบรายการย่อย --}}
-                                                                <div style="background-color: #f0f7ff; padding: 20px; border: 1px solid #1F7BCC; border-top: none; border-radius: 0 0 12px 12px;">
-
-                                                                    @if($item->all_exam_scores && $item->all_exam_scores->isNotEmpty())
-                                                                        <p style="font-size: 16px; font-weight: bold; color: #1F7BCC; margin-bottom: 15px;">
-                                                                            ประวัติการทำข้อสอบ:
-                                                                        </p>
-
-                                                                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                                                                            @foreach($item->all_exam_scores as $index => $score)
-                                                                                @php
-                                                                                    if ($score->score_status === 'pass') {
-                                                                                        $statusBg = '#28a745'; // สีเขียว
-                                                                                    } elseif ($score->score_status === 'fail') {
-                                                                                        $statusBg = '#dc3545'; // สีแดง
-                                                                                    } elseif ($score->score_status === 'wait') {
-                                                                                        $statusBg = '#ffc107'; // สีเหลือง (Warning)
-                                                                                    }
-                                                                                @endphp
-                                                                                {{-- แถบรายการคะแนน เลียนแบบสไตล์บทเรียนย่อย --}}
-                                                                                <div style="background-color: white; border-radius: 10px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d1e6f9;">
-                                                                                    <div style="display: flex; align-items: center;">
-                                                                                        <div style="width: 35px; height: 35px; background-color: #1F7BCC; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">
-                                                                                            {{ $index + 1 }}
-                                                                                        </div>
-                                                                                        <span style="font-size: 17px; font-weight: 600; color: #333;">รอบที่ {{ $index + 1 }}</span>
-                                                                                    </div>
-
-                                                                                    <div style="display: flex; align-items: center; gap: 20px;">
-                                                                                        <span style="font-size: 18px; font-weight: bold; color: #1F7BCC;">
-                                                                                            {{ $score->score_number }} / {{ $score->score_total }} <small>คะแนน</small>
-                                                                                        </span>
-                                                                                        <span style="background-color: {{ $statusBg }}; color: white; padding: 4px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; text-transform: uppercase; min-width: 70px; text-align: center;">
-                                                                                            {{ $score->score_status }}
-                                                                                        </span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            @endforeach
-                                                                        </div>
+                                                            @else
+                                                                {{-- ไม่มีข้อสอบ → ปุ่มสำเร็จการเรียน --}}
+                                                                <div style="margin-top: 30px; text-align: center;">
+                                                                    @if($item->passcourse->isNotEmpty())
+                                                                        <button class="btn btn-success btn-lg" disabled
+                                                                                style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 10px 40px;">
+                                                                            <i class="fa fa-check-circle mr-2"></i> สำเร็จการเรียนแล้ว
+                                                                        </button>
                                                                     @else
-                                                                        <div style="text-align: center; padding: 20px; color: #6c757d; font-style: italic;">
-                                                                            ยังไม่มีประวัติการทำข้อสอบในหลักสูตรนี้
-                                                                        </div>
+                                                                        <form action="{{ route('course.complete', $item->course_id) }}" method="POST">
+                                                                            @csrf
+                                                                            <input type="hidden" name="from_page" value="{{ request()->query('page', 1) }}">
+                                                                            <button type="submit" class="btn btn-primary btn-lg"
+                                                                                    style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 10px 40px;">
+                                                                                <i class="fa fa-check-circle mr-2"></i> กดเพื่อสำเร็จการเรียน
+                                                                            </button>
+                                                                        </form>
                                                                     @endif
                                                                 </div>
-                                                            </div>
+                                                            @endif
                                                         @endif
                                                     @endforeach
                                                 </div>

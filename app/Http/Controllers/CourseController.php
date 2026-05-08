@@ -57,8 +57,12 @@ class CourseController extends Controller
     }
     // Lession
 
-    public function lessonLearn(int $lessonId, int $fileId,)
+    public function lessonLearn(Request $request, int $lessonId, int $fileId,)
     {
+        session([
+            'lesson_from_course' => $request->query('course_id'),
+            'lesson_from_page'   => $request->query('from_page', 1)
+        ]);
         // โหลด Lesson พร้อม Course และไฟล์ที่ระบุ รวมถึงสถานะการเรียนล่าสุด
         $lesson = Lesson::with('course')->findOrFail($lessonId);
         $file = File::findOrFail($fileId);
@@ -160,6 +164,18 @@ class CourseController extends Controller
         $this->progressService->updateDocProgress(auth()->id(),$data);
 
         return response()->download($file_path, $file->original_filename);
+    }
+
+    public function courseComplete(Request $request, int $course_id)
+    {
+        if(auth()->check())
+        {
+            $this->courseService->completeCourse(auth()->id(), $course_id);
+            $page = $request->input('from_page', 1);
+            return redirect()->route('course.course',['page' => $page])
+                            ->with('success', 'สำเร็จการเรียนเรียบร้อยแล้ว')
+                            ->withFragment('course-' . $course_id);
+        }
     }
 
 }

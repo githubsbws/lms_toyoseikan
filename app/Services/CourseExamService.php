@@ -190,65 +190,61 @@ class CourseExamService
 
         // 2. เช็คเงื่อนไข "ตกทันที" (ส่งมาว่า Timeout OR เวลาใน DB หมดแล้วจริง)
         $isActuallyTimeout = ($timeout == 1 || now()->gt($examSession->expire_at));
-        if($timeout == 1){
-            return DB::transaction(function () use ($userId, $courseId, $answers, $isActuallyTimeout, $examSession, $maxScoreCount) {
+        return DB::transaction(function () use ($userId, $courseId, $answers, $isActuallyTimeout, $examSession, $maxScoreCount) {
+            if ($isActuallyTimeout) {
+                $currentScore = 0;
+                $maxScore = $maxScoreCount; // หรือจะนับจำนวนข้อสอบจริงส่งมาก็ได้
+                $status = 'fail';
+                $sessionStatus = 'timeout';
+            } else {
+                // Logic ตรวจคำตอบปกติ
+                $selectedChoiceIds = array_values($answers);
+                $maxScore = $maxScoreCount; // หรือดึงจำนวนข้อสอบจริงจาก DB จะแม่นยำกว่า
 
-                if ($isActuallyTimeout) {
-                    $currentScore = 0;
-                    $maxScore = $maxScoreCount; // หรือจะนับจำนวนข้อสอบจริงส่งมาก็ได้
-                    $status = 'fail';
-                    $sessionStatus = 'timeout';
-                } else {
-                    // Logic ตรวจคำตอบปกติ
-                    $selectedChoiceIds = array_values($answers);
-                    $maxScore = $maxScoreCount; // หรือดึงจำนวนข้อสอบจริงจาก DB จะแม่นยำกว่า
+                $correctChoicesCount = Choice::whereIn('choice_id', $selectedChoiceIds)
+                    ->where('choice_answer', 1)
+                    ->where('choice_type', 2)
+                    ->where('active', self::STATUS_ACTIVE)
+                    ->count();
 
-                    $correctChoicesCount = Choice::whereIn('choice_id', $selectedChoiceIds)
-                        ->where('choice_answer', 1)
-                        ->where('choice_type', 2)
-                        ->where('active', self::STATUS_ACTIVE)
-                        ->count();
+                $currentScore = $correctChoicesCount;
+                $percent = ($maxScore > 0) ? ($currentScore / $maxScore) * 100 : 0;
+                $status = ($percent >= self::PASS_THRESHOLD_PERCENT) ? 'pass' : 'fail';
+                $sessionStatus = 'completed';
+            }
 
-                    $currentScore = $correctChoicesCount;
-                    $percent = ($maxScore > 0) ? ($currentScore / $maxScore) * 100 : 0;
-                    $status = ($percent >= self::PASS_THRESHOLD_PERCENT) ? 'pass' : 'fail';
-                    $sessionStatus = 'completed';
-                }
+            // 3. บันทึกคะแนนสอบ (CourseScore)
+            $score = CourseScore::create([
+                'course_id'    => $courseId,
+                'user_id'      => $userId,
+                'type'         => 2,
+                'score_number' => $currentScore,
+                'score_total'  => $maxScore,
+                'score_status' => $status,
+                'active'       => self::STATUS_ACTIVE,
+                'create_date'  => now(),
+                'pass_year'    => now()->year,
+            ]);
 
-                // 3. บันทึกคะแนนสอบ (CourseScore)
-                $score = CourseScore::create([
-                    'course_id'    => $courseId,
-                    'user_id'      => $userId,
-                    'type'         => 2,
-                    'score_number' => $currentScore,
-                    'score_total'  => $maxScore,
-                    'score_status' => $status,
-                    'active'       => self::STATUS_ACTIVE,
-                    'create_date'  => now(),
-                    'pass_year'    => now()->year,
-                ]);
+            // 4. อัปเดตตารางรอบการสอบ (ExamResult) เพื่อ "ปิดรอบ"
+            $examSession->update([
+                'status' => $sessionStatus,
+            ]);
 
-                // 4. อัปเดตตารางรอบการสอบ (ExamResult) เพื่อ "ปิดรอบ"
-                $examSession->update([
-                    'status' => $sessionStatus,
-                ]);
+            // 5. ถ้าสอบผ่าน ให้สร้างบันทึกใน PassCourse
+            if ($status === 'pass') {
+                Passcourse::create(
+                    [
+                        'passcours_cours' => $courseId,
+                        'passcours_user'  => $userId,
+                        'academic_year'   => now()->year,
+                        'passcours_status' => 'wait',
+                    ]
+                );
+            }
 
-                // 5. ถ้าสอบผ่าน ให้สร้างบันทึกใน PassCourse
-                if ($status === 'pass') {
-                    Passcourse::create(
-                        [
-                            'passcours_cours' => $courseId,
-                            'passcours_user'  => $userId,
-                            'academic_year'   => now()->year,
-                            'passcours_status' => 'wait',
-                        ]
-                    );
-                }
-
-                return $score;
-            });
-        }
-
+            return $score;
+        });
     }
 
     private function getOrCreateExamSession(int $userId, int $courseId, int $type)
@@ -304,7 +300,7 @@ class CourseExamService
                 'user_id'    => $userId,
                 'course_id'  => $courseId,
                 'start_at' => now(),
-                'expire_at' => now()->addSecond(20), // addHour() ตั้งเวลา 1 ชม. (หรือตามที่น้องกำหนด)
+                'expire_at' => now()->addHour(), // addHour() ตั้งเวลา 1 ชม. (หรือตามที่น้องกำหนด)
                 'status'     => 'in_progress',
             ]);
         }
