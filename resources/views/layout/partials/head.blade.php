@@ -40,7 +40,7 @@ use App\Models\Usability;
     <link href="{{asset('themes/bws/js/vender/video-js/video-js.min.css')}}" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.min.css')}}">
-    <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.js')}}"></script>
+    {{-- <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.js')}}"></script> --}}
     <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.min.js')}}"></script>
     {{-- <link rel="stylesheet" href="{{asset('assets/bootstrap5.0.2/css/bootstrap.min.css')}}">
     <script src="{{asset('assets/bootstrap5.0.2/js/bootstrap.min.js')}}"></script> --}}
@@ -259,11 +259,11 @@ use App\Models\Usability;
 <script src="{{ asset('themes/bws/js/module-carousel-slick.min.js')}}"></script>
 <script src="{{ asset('themes/bws/js/module-player.min.js')}}"></script>
 <script src="{{ asset('themes/bws/js/module-messages.min.js')}}"></script>
-<script src="{{ asset('themes/bws/js/module-maps-google.min.js')}}"></script>
-<script src="{{ asset('themes/bws/js/module-charts-flot.min.js')}}"></script>
-<script src="{{ asset('themes/bws/layerslider/js/greensock.js')}}" type="text/javascript"></script>
+{{-- <script src="{{ asset('themes/bws/js/module-maps-google.min.js')}}"></script>
+<script src="{{ asset('themes/bws/js/module-charts-flot.min.js')}}"></script> --}}
+{{-- <script src="{{ asset('themes/bws/layerslider/js/greensock.js')}}" type="text/javascript"></script>
 <script src="{{ asset('themes/bws/layerslider/js/layerslider.transitions.js')}}" type="text/javascript"></script>
-<script src="{{ asset('themes/bws/layerslider/js/layerslider.kreaturamedia.jquery.js')}}" rel="stylesheet"></script>
+<script src="{{ asset('themes/bws/layerslider/js/layerslider.kreaturamedia.jquery.js')}}" rel="stylesheet"></script> --}}
 
 <script>
     var colors = {
