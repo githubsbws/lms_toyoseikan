@@ -17,8 +17,8 @@ class MailConfigService
 
         // ตั้งค่า mail runtime จาก DB
         Config::set('mail.mailers.smtp.transport', 'smtp');
-        Config::set('mail.mailers.smtp.host', 'webmail.brother.in.th');
-        Config::set('mail.mailers.smtp.port', 465);
+        // Config::set('mail.mailers.smtp.host', 'webmail.brother.in.th');
+        // Config::set('mail.mailers.smtp.port', 465);
         Config::set('mail.mailers.smtp.encryption', 'ssl');
         Config::set('mail.mailers.smtp.username', $setting->settings_user_email);
         Config::set('mail.mailers.smtp.password', $setting->settings_pass_email);
