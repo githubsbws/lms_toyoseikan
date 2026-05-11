@@ -90,7 +90,7 @@ class Course extends Model
 
     public function groupTesting()
     {
-        return $this->hasOne(GroupTesting::class, 'course_id', 'course_id');
+        return $this->hasOne(Grouptesting::class, 'course_id', 'course_id');
     }
 
 }
