@@ -650,6 +650,16 @@ use App\Helpers\PermissionHelper;
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{url('report_license')}}" class="nav-link {{ request()->is('report_license') ? 'active' : '' }}">
+                                <p>License person Report</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{url('personal-assessment')}}" class="nav-link {{ request()->is('personal-assessment') ? 'active' : '' }}">
+                                <p>Personal Assessment Report</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{url('report_questionnaire')}}" class="nav-link {{ request()->is('report_questionnaire') ? 'active' : '' }}">
                                 <p>รายงานแบบประเมิน แบบสอบถาม</p>
                             </a>

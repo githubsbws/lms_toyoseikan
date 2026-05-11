@@ -16,6 +16,8 @@ use App\Http\Controllers\UpvedioController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportLicensePersonController;
+use App\Http\Controllers\PersonalAssessmentController;
 use App\Http\Controllers\OcrSearchController;
 // -------
 use App\Http\Controllers\ChoiceController;
@@ -784,6 +786,12 @@ Route::get('report_userseach',[AdminController::class,'report_loguserstatus'])->
 
 Route::get('report_user',[AdminController::class,'report_user'])->name('report.user')->middleware('checkIdleTimeout');
 Route::get('report_user_skill/{id}',[AdminController::class,'report_user_skill'])->name('report.user_skill')->middleware('checkIdleTimeout');
+
+Route::get('report_license',[ReportLicensePersonController::class,'report_license'])->name('report.license')->middleware('checkIdleTimeout');
+
+Route::get('/personal-assessment',[PersonalAssessmentController::class,'index'])->name('personal.assessment');
+
+Route::get('/personal-assessment/{id}',[PersonalAssessmentController::class,'detail'])->name('personal.assessment.detail');
 
 Route::get('report_course',[AdminController::class,'report_course'])->name('report.course')->middleware('checkIdleTimeout');
 Route::get('report_courseseach',[AdminController::class,'report_course'])->name('report.coursesearch')->middleware('checkIdleTimeout');
