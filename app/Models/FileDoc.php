@@ -35,7 +35,7 @@ class FileDoc extends Model
 
     public function learnFileDoc()
     {
-        return $this->hasMany(LearnFileDoc::class, 'id', 'file_doc_id');
+        return $this->hasMany(LearnFileDoc::class, 'file_doc_id', 'id');
     }
 
 }
