@@ -12,7 +12,7 @@ class FileDoc extends Model
     protected $table = 'file_doc';
 
     protected $primaryKey = 'id';
-    
+
     protected $fillable = [
         'lesson_id',
         'filename' ,
@@ -20,7 +20,7 @@ class FileDoc extends Model
         'active',
         'file_position'
     ];
-    
+
     const CREATED_AT = 'create_date'; // Custom created_at column
     const UPDATED_AT = 'update_date'; // Custom update_at column
 
@@ -32,5 +32,10 @@ class FileDoc extends Model
     {
         return $this->belongsTo(Lesson::class, 'lesson_id', 'id');
     }
-    
+
+    public function learnFileDoc()
+    {
+        return $this->hasMany(LearnFileDoc::class, 'id', 'file_doc_id');
+    }
+
 }
