@@ -35,13 +35,16 @@ class SendWeeklySupervisorNotify extends Command
             $staffListForMail = [];
             $openingCourses   = []; // ← ประกาศก่อนเสมอ
 
+            // $subordinates = Users::with(['profiles'])
+            //     ->whereHas('orgchart', fn($q) => $q->where('parent_id', $lineId))
+            //     ->where('id', '!=', $boss->id)
+            //     ->whereDoesntHave('orgchart', function($q) {
+            //         $q->where('title', 'LIKE', '%Supervisor%')
+            //           ->orWhere('title', 'LIKE', '%Group Leader%');
+            //     })->get();
             $subordinates = Users::with(['profiles'])
-                ->whereHas('orgchart', fn($q) => $q->where('parent_id', $lineId))
-                ->where('id', '!=', $boss->id)
-                ->whereDoesntHave('orgchart', function($q) {
-                    $q->where('title', 'LIKE', '%Supervisor%')
-                      ->orWhere('title', 'LIKE', '%Group Leader%');
-                })->get();
+            ->whereHas('orgchart', fn($q) => $q->where('parent_id', $lineId))
+            ->get();
 
             // $this->info('ลูกน้อง: ' . $subordinates->count() . ' คน');
 

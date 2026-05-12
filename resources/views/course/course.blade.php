@@ -307,7 +307,7 @@
                                                                                 'lesson_id'   => $lessons->id,
                                                                                 'course_id'   => $lessons->course_id
                                                                         ]) }}"
-                                                                        class="btn btn-secondary btn-sm">
+                                                                        class="btn btn-secondary btn-sm btn-download-doc">
                                                                             <i class="fa fa-download"></i> ดาวน์โหลด
                                                                         </a>
                                                                     </div>
@@ -439,6 +439,15 @@
         </div>
     </div>
 </body>
+<script>
+    document.querySelectorAll('.btn-download-doc').forEach(btn => {
+        btn.addEventListener('click', function() {
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000); // รอ 2 วินาทีให้ server บันทึกเสร็จก่อน
+        });
+    });
+</script>
 {{-- เก็บไว้ตอนทำคะแนน --}}
 {{-- <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
     <span><i class="fa fa-check-circle text-primary"></i> ทำข้อสอบก่อนเรียน</span>
