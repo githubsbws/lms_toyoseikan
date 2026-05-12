@@ -1182,7 +1182,7 @@ class AdminController extends Controller
 
     function courseonline(){
         if(AuthFacade::useradmin()){
-            $course_online = Course::with('category')->where('active','y')->orderBy('sortOrder', 'desc')->get();
+            $course_online = Course::with('category')->where('active','y')->where('department_org_id',auth()->user()->department_org_id)->orderBy('sortOrder', 'desc')->get();
             return view("admin.courseonline.courseonline", compact('course_online'));
         }else{
             return redirect()->route('login.admin');
@@ -1213,7 +1213,7 @@ class AdminController extends Controller
     function courseonline_edit(Request $request, $id)
     {
         if(AuthFacade::useradmin()){
-            $course_detail = Course::where('course_id', $id)->first();
+            $course_detail = Course::with(['courseWeight'])->where('course_id', $id)->first();
             $category = DB::table('category')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
             $licenseOperation = OperationMachine::where('active','y')->get();
@@ -1384,6 +1384,12 @@ class AdminController extends Controller
                 $scoreWeight->observe_weight = $request->w_observe;
                 $scoreWeight->exam_weight = $request->w_exam;
                 $scoreWeight->assign_weight = $request->w_assign;
+
+                $scoreWeight->eval_knowledge = $request->has('eval_knowledge') ? true : false;
+                $scoreWeight->eval_skill     = $request->has('eval_skill') ? true : false;
+                $scoreWeight->eval_attitude  = $request->has('eval_attitude') ? true : false;
+                $scoreWeight->eval_problem_solv = $request->has('eval_problem_solv') ? true : false;
+                $scoreWeight->eval_awareness = $request->has('eval_awareness') ? true : false;
 
                 $scoreWeight->save();
 
@@ -1557,6 +1563,12 @@ class AdminController extends Controller
                 $scoreWeight->observe_weight = $request->w_observe;
                 $scoreWeight->exam_weight = $request->w_exam;
                 $scoreWeight->assign_weight = $request->w_assign;
+
+                $scoreWeight->eval_knowledge = $request->has('eval_knowledge') ? true : false;
+                $scoreWeight->eval_skill     = $request->has('eval_skill') ? true : false;
+                $scoreWeight->eval_attitude  = $request->has('eval_attitude') ? true : false;
+                $scoreWeight->eval_problem_solv = $request->has('eval_problem_solv') ? true : false;
+                $scoreWeight->eval_awareness = $request->has('eval_awareness') ? true : false;
 
                 $scoreWeight->save();
 
@@ -2524,7 +2536,7 @@ class AdminController extends Controller
             $choice = Choice::where('ques_id',$group->ques_id)
                         ->where('active','y')
                         ->get();
-                        
+
             return view("admin.grouptesting.ques_detail",['group' => $group,'choice' => $choice ]);
         }else{
             return redirect()->route('login.admin');

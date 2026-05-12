@@ -113,7 +113,30 @@
                                     </div>
                                 </div>
                             </div>
-
+                            <hr class="my-4" style="border-top: 2px solid #eee;">
+                            <label class="d-block mb-2"><u>หัวข้อการประเมินศักยภาพ</u></label>
+                            <div class="d-flex flex-wrap gap-4">
+                                <div class="form-check d-inline-block me-4" style="margin-right: 10px;">
+                                    <input class="form-check-input" type="checkbox" name="eval_knowledge" id="know" value="1">
+                                    <label class="form-check-label" for="know">1. ความรู้จากการฝึกอบรม</label>
+                                </div>
+                                <div class="form-check d-inline-block" style="margin-right: 10px;">
+                                    <input class="form-check-input" type="checkbox" name="eval_skill" id="skill" value="1">
+                                    <label class="form-check-label" for="skill">2. ทักษะในการปฏิบัติงาน</label>
+                                </div>
+                                <div class="form-check d-inline-block" style="margin-right: 10px;">
+                                    <input class="form-check-input" type="checkbox" name="eval_attitude" id="att" value="1">
+                                    <label class="form-check-label" for="att">3. ทัศนคติที่มีต่อการปฏิบัติงาน</label>
+                                </div>
+                                <div class="form-check d-inline-block" style="margin-right: 10px;">
+                                    <input class="form-check-input" type="checkbox" name="eval_problem_solv" id="prob" value="1">
+                                    <label class="form-check-label" for="prob">4. การแก้ปัญหาในการทำงาน</label>
+                                </div>
+                                <div class="form-check d-inline-block">
+                                    <input class="form-check-input" type="checkbox" name="eval_awareness" id="aware" value="1">
+                                    <label class="form-check-label" for="aware">5. ความตระหนักในด้านการทำงาน</label>
+                                </div>
+                            </div>
                             <hr class="my-4" style="border-top: 2px solid #eee;">
                             {{-- รอทำหน้าเพิ่มข้อมูล --}}
                             <div class="form-group">

@@ -20,6 +20,11 @@ class CourseScoreWeight extends Model
         'operate_weight',
         'assigh_weight',
         'observe_weight',
-        'exam_weight'
+        'exam_weight',
+        'eval_knowledge',
+        'eval_skill',
+        'eval_attitude',
+        'eval_problem_solv',
+        'eval_awareness',
     ];
 }

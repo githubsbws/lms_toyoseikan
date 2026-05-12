@@ -44,6 +44,7 @@ use App\Http\Controllers\ContactusController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CourseExamController;
 use App\Http\Controllers\LicensePersonController;
+use App\Http\Controllers\PotentialReportController;
 use App\Http\Controllers\RoadmapController;
 
 /*
@@ -807,6 +808,8 @@ Route::get('report_byuserseach',[AdminController::class,'report_byuser'])->name(
 
 Route::get('report_reset',[AdminController::class,'report_reset'])->name('report.reset')->middleware('checkIdleTimeout');
 Route::get('report_resetseach',[AdminController::class,'report_reset'])->name('report.resetsearch')->middleware('checkIdleTimeout');
+
+Route::get('report/learning_potential',[PotentialReportController::class,'PotentialReport'])->name('report.learning_potential')->middleware('checkIdleTimeout');
 
 Route::get('fetch-courses-and-lessons', [AdminController::class, 'fetchCoursesAndLessons'])->middleware('checkIdleTimeout');
 
