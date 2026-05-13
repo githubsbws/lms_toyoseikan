@@ -140,28 +140,31 @@ class CourseController extends Controller
         ]);
     }
 
-    public function downloadfile(Request $request)
+    // 1. บันทึก progress อย่างเดียว ไม่ download
+    public function markDocProgress(Request $request)
     {
         if (!auth()->check()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthenticated. Please log in again.'
-            ], 401); // Return 401 แทนที่จะปล่อยให้ 500
-        }
-        $file = FileDoc::where('id',$request->query('file_doc_id'))->first();
-
-        if (!$file) {
-            return response()->json(['error' => 'File not found'], 404);
-        }
-
-        $file_path = public_path('images/uploads/filedoc'.DIRECTORY_SEPARATOR. $file->filename);
-
-        if (!file_exists($file_path)) {
-            return response()->json(['error' => 'File not found on the server'], 404);
+            return response()->json(['status' => 'error'], 401);
         }
 
         $data = $request->only(['course_id', 'lesson_id', 'file_doc_id']);
-        $this->progressService->updateDocProgress(auth()->id(),$data);
+        $this->progressService->updateDocProgress(auth()->id(), $data);
+
+        return response()->json(['status' => 'success']);
+    }
+
+    // 2. download อย่างเดียว ไม่บันทึก
+    public function downloadfile(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['status' => 'error'], 401);
+        }
+
+        $file = FileDoc::where('id', $request->query('file_doc_id'))->first();
+        if (!$file) return response()->json(['error' => 'File not found'], 404);
+
+        $file_path = public_path('images/uploads/filedoc' . DIRECTORY_SEPARATOR . $file->filename);
+        if (!file_exists($file_path)) return response()->json(['error' => 'File not found on server'], 404);
 
         return response()->download($file_path, $file->original_filename);
     }

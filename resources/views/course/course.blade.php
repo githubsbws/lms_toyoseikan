@@ -307,7 +307,10 @@
                                                                                 'lesson_id'   => $lessons->id,
                                                                                 'course_id'   => $lessons->course_id
                                                                         ]) }}"
-                                                                        class="btn btn-secondary btn-sm btn-download-doc">
+                                                                        class="btn btn-secondary btn-sm btn-download-doc"
+                                                                        data-course-id="course-{{ $lessons->course_id }}"
+                                                                        data-doc-id="{{ $doc->id }}"
+                                                                        data-lesson-id="{{ $lessons->id }}">
                                                                             <i class="fa fa-download"></i> ดาวน์โหลด
                                                                         </a>
                                                                     </div>
@@ -438,16 +441,92 @@
             </div>
         </div>
     </div>
-</body>
-<script>
+    <script>
+        $(document).ready(function() {
+            // 1. ดึงค่า Fragment จาก URL (เช่น #course-52)
+            var hash = window.location.hash;
+
+            if (hash) {
+                // ดึงตัวเลข ID ออกมาจากคำว่า #course-52
+                var courseId = hash.replace('#course-', '');
+
+                // 2. สั่งให้ Bootstrap Tab ของคอร์สนั้นทำงาน
+                // เราอ้างอิงจาก ID ของปุ่ม v-pills-tab-{{ $item->course_id }}
+                var targetTab = $('#v-pills-tab-' + courseId);
+
+                if (targetTab.length > 0) {
+                    targetTab.tab('show'); // สั่งเปิด Tab ทันที
+
+                    // 3. (Optional) เลื่อนหน้าจอลงไปหาจุดนั้นหน่อย จะได้ไม่ต้องเลื่อนเอง
+                    setTimeout(function() {
+                        $('html, body').animate({
+                            scrollTop: $(hash).offset().top - 120 // -120 เผื่อระยะ Header ข้างบน
+                        }, 500);
+                    }, 300); // หน่วงเวลานิดนึงเพื่อให้ Tab กางออกเสร็จก่อน
+                }
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-download-doc').forEach(btn => {
-        btn.addEventListener('click', function() {
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000); // รอ 2 วินาทีให้ server บันทึกเสร็จก่อน
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+
+            const downloadUrl = this.getAttribute('href');
+            const courseId    = this.getAttribute('data-course-id');
+            const docId       = this.getAttribute('data-doc-id');
+            const lessonId    = this.getAttribute('data-lesson-id');
+
+            // 1. แสดง Swal ทันทีที่กด (แบบไม่มีปุ่มตกลง)
+            Swal.fire({
+                title: 'กำลังบันทึกและดาวน์โหลด...',
+                text: 'กรุณารอสักครู่',
+                icon: 'success',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                backdrop:false,
+                didOpen: () => {
+                    Swal.showLoading(); // แสดงไอคอนหมุนๆ ให้ดูว่ากำลังประมวลผล
+                }
+            });
+
+            try {
+                // 2. บันทึก progress (รอจน Server ตอบกลับ)
+                await fetch('{{ route("course.doc.progress") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        file_doc_id: docId,
+                        lesson_id:   lessonId,
+                        course_id:   courseId.replace('course-', '')
+                    })
+                });
+
+                // 3. สั่ง Download ไฟล์
+                // ใช้ท่าสร้าง iframe หรือเปิดลิ้งก์ใหม่แบบไม่ย้ายหน้า เพื่อไม่ให้รบกวน JS หลัก
+                window.location.href = downloadUrl;
+
+                // 4. รอสักพักให้ไฟล์เริ่มโหลด แล้วทำการรีโหลดหน้าเว็บ
+                setTimeout(() => {
+                    // สร้าง URL ใหม่ที่มี Fragment
+                    const nextUrl = window.location.origin + window.location.pathname + window.location.search + '#' + courseId;
+
+                    // บังคับเปลี่ยน URL และ Reload จริงๆ
+                    window.location.href = nextUrl;
+                    window.location.reload();
+                }, 1000); // ลดเหลือ 1 วินาที เพราะบันทึก DB เสร็จไปแล้วจาก fetch
+
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+            }
         });
     });
-</script>
+});
+    </script>
+</body>
 {{-- เก็บไว้ตอนทำคะแนน --}}
 {{-- <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
     <span><i class="fa fa-check-circle text-primary"></i> ทำข้อสอบก่อนเรียน</span>

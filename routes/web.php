@@ -162,6 +162,7 @@ Route::get('course/question/{group}',[CourseController::class,'coursequestion'])
 Route::get('course/images', [CourseController::class, 'store'])->name('images.store')->middleware('checkIdleTimeout');
 Route::post('course/images', [CourseController::class, 'store'])->name('images.store')->middleware('checkIdleTimeout');
 Route::get('download/learn-file-doc',[CourseController::class,'downloadfile'])->name('course.downloadfile')->middleware('checkIdleTimeout');
+Route::post('course/doc/progress', [CourseController::class, 'markDocProgress'])->name('course.doc.progress')->middleware('checkIdleTimeout');
 
 // choice
 Route::post('/choiceAnswer/{id}',[ChoiceController::class,'choiceAnswer'])->name('choice.Answer')->middleware('checkIdleTimeout');
