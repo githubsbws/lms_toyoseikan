@@ -45,7 +45,7 @@
 
         {{-- Security: ใช้ระบบ Clean HTML เสมอ ห้ามพ่นสด --}}
         <div class="text-muted mb-4 lead">
-            {!! $lesson->description !!}
+            {!! strip_tags(html_entity_decode($lesson->description)) !!}
         </div>
 
         <div class="border-top pt-4">

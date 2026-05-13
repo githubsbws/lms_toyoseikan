@@ -82,12 +82,10 @@ class LessonProgressService
                 ['user_id' => $userId, 'lesson_id' => $data['lesson_id']],
                 ['course_id' => $data['course_id'], 'lesson_status' => 'learning', 'learn_date' => now(),'created_at' => now(),'pass_year' => now()->year]
             );
-
             LearnFileDoc::updateOrCreate(
                 ['learn_id' => $learn->learn_id, 'file_doc_id' => $data['file_doc_id']],
                 ['learn_file_doc_status' => 'pass', 'learn_file_doc_date' => now(), 'pass_year' => now()->year]
             );
-
             $this->checkAndMarkLessonPassed($learn); // private ได้ปกติ
         });
     }
@@ -112,7 +110,6 @@ class LessonProgressService
             $learn->update([
                 'lesson_status' => LessonStatus::Success->value,
                 'learn_date'    => now(),
-                'pass_year'     => now()->year
             ]);
         }
     }
