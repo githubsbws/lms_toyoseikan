@@ -18,7 +18,7 @@
             <h2 id="timer-display">--:--</h2>
         </div>
 
-        <form action="{{ route('course.exam.submit-multiple', $course->course_id) }}" method="POST" id="exam-form">
+        <form action="{{ route('course.exam.submit-essay', $course->course_id) }}" method="POST" id="exam-form">
             @csrf
             <input type="hidden" name="exam_session_id" value="{{ $course->exam_session->id }}">
             <input type="hidden" name="is_timeout" id="is_timeout" value="0">
@@ -59,7 +59,7 @@
 
                         {{-- คำถาม --}}
                         <h5 style="font-weight: bold; color: #334155; line-height: 1.6; margin-bottom: 20px;">
-                            {{ $question->ques_title }}
+                            {!! strip_tags(html_entity_decode($question->ques_title)) !!}
                         </h5>
 
                         {{-- textarea --}}
