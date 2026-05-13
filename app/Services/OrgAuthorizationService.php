@@ -45,7 +45,7 @@ class OrgAuthorizationService
     {
         // พนักงานทั่วไป เช็คผ่าน course_org ตามปกติ
         return DB::table('org_course')
-            ->where('org_id', $user->org_id)
+            ->where('orgchart_id', $user->org_id)
             ->where('course_id', $courseId)
             ->exists();
     }
