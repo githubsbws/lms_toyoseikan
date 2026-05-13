@@ -326,11 +326,11 @@ use App\Helpers\PermissionHelper;
                                 <p>การสอบซ่อม</p>
                             </a>
                         </li>
-                        {{-- <li class="nav-item">
-                            <a href="{{ url('/questionnaireout_result') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
-                                <p>ผลการเรียน</p>
+                        <li class="nav-item">
+                            <a href="{{ url('/questionnaireout_check_exam') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
+                                <p>ตรวจข้อสอบอัตนัย</p>
                             </a>
-                        </li> --}}
+                        </li>
                     </ul>
                 </li>
                 @endcanmenu

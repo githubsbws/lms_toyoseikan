@@ -6195,4 +6195,200 @@ public function questionnaireout_reset_action(Request $request)
     ]);
 }
 
+public function questionnaireout_check_exam(Request $request){
+        if (AuthFacade::useradmin()) {
+
+            $courses = DB::table('course_online')->get(); // 👈 สำคัญ
+            $results = []; // กัน error หน้าแรก
+
+            return view(
+                "admin.questionnaireout.questionnaireout_check_exam",
+                compact('courses', 'results')
+            );
+
+        } else {
+            return redirect()->route('login.admin');
+        }
+    }
+
+public function questionnaireout_check_exam_ajax(Request $request)
+{
+    if (AuthFacade::useradmin()) {
+
+$query = DB::table('course_exam_essay_answer')
+    ->join(
+        'course_online',
+        'course_exam_essay_answer.course_id',
+        '=',
+        'course_online.course_id'
+    )
+    ->leftJoin(
+        'users',
+        'course_exam_essay_answer.user_id',
+        '=',
+        'users.id'
+    )
+    ->leftJoin(
+        'profiles',
+        'users.id',
+        '=',
+        'profiles.user_id'
+    )
+    ->leftJoin(
+        'question',
+        'course_exam_essay_answer.ques_id',
+        '=',
+        'question.ques_id'
+    )
+    ->select(
+        'course_exam_essay_answer.course_id',
+        'course_exam_essay_answer.user_id',
+        'course_online.course_title',
+        'profiles.firstname',
+        'profiles.lastname'
+    )
+    ->where('course_exam_essay_answer.status', 'wait');
+
+        $results = $query->get();
+
+        // ✅ partial table
+        $html = view(
+            "admin.questionnaireout.partials.table_exam",
+            compact('results')
+        )->render();
+
+        return response()->json([
+            'html' => $html
+        ]);
+
+    } else {
+
+        return response()->json([
+            'html' => 'Unauthorized'
+        ], 403);
+    }
+}
+
+public function questionnaireout_check_exam_detail(Request $request)
+{
+    try {
+
+       $data = DB::table('course_exam_essay_answer')
+    ->join(
+        'course_online',
+        'course_exam_essay_answer.course_id',
+        '=',
+        'course_online.course_id'
+    )
+    ->leftJoin(
+        'users',
+        'course_exam_essay_answer.user_id',
+        '=',
+        'users.id'
+    )
+    ->leftJoin(
+        'profiles',
+        'users.id',
+        '=',
+        'profiles.user_id'
+    )
+    ->leftJoin(
+        'question',
+        'course_exam_essay_answer.ques_id',
+        '=',
+        'question.ques_id'
+    )
+    ->leftJoin(
+        'course_score_weight',
+        'course_exam_essay_answer.course_id',
+        '=',
+        'course_score_weight.course_id'
+    )
+    ->where('course_exam_essay_answer.course_id', $request->course_id)
+    ->where('course_exam_essay_answer.user_id', $request->user_id)
+    ->where('course_exam_essay_answer.status', 'wait')
+    ->select(
+        'course_exam_essay_answer.course_id as course_id',
+        'course_exam_essay_answer.user_id as user_id',
+        'course_online.course_title',
+        'profiles.firstname',
+        'profiles.lastname',
+        'question.ques_title',
+        'question.answer',
+        'course_exam_essay_answer.answer_text',
+        'course_score_weight.exam_weight'
+    )
+    ->first();
+
+        return view(
+            'admin.questionnaireout.partials.check_exam_detail',
+            compact('data')
+        );
+
+    } catch (\Exception $e) {
+
+        return $e->getMessage();
+    }
+}
+
+public function questionnaireout_check_exam_save(Request $request)
+{
+    try {
+
+        // =========================
+        // update coursescore
+        // =========================
+        $updated = DB::table('coursescore')
+            ->where('course_id', $request->course_id)
+            ->where('user_id', $request->user_id)
+            ->where('type', '3')
+            ->update([
+
+                'score_number' => $request->score,
+
+                'score_total' => $request->score_total,
+
+                'score_status' => 'pass',
+
+                'update_date' => now()
+
+            ]);
+
+        if ($updated == 0) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'ไม่พบข้อมูล coursescore'
+            ]);
+
+        }
+
+        // =========================
+        // update essay answer
+        // =========================
+        DB::table('course_exam_essay_answer')
+            ->where('course_id', $request->course_id)
+            ->where('user_id', $request->user_id)
+            ->update([
+
+                'status' => 'pass',
+
+                'updated_date' => now()
+
+            ]);
+
+        return response()->json([
+            'success' => true
+        ]);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+
+    }
+}
+
 }
