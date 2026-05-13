@@ -55,15 +55,17 @@ class LessonProgressService
                 'last_watched_second' => DB::raw("GREATEST(tbl_learn_file.last_watched_second, excluded.last_watched_second)"),
                 'learn_file_status'   => DB::raw("CASE WHEN tbl_learn_file.learn_file_status = 'pass' THEN 'pass' ELSE excluded.learn_file_status END"),
                 'learn_file_date'     => now(),
-                'pass_year' => DB::raw("
-                    CASE
-                        WHEN tbl_learn_file.pass_year IS NOT NULL THEN tbl_learn_file.pass_year
-                        WHEN excluded.learn_file_status = 'pass' THEN {$currentYear}
-                        ELSE NULL
-                    END
-                "),
+                'pass_year' => $currentYear,
             ]
             );
+            //เก็บไว้ก่อนเผื่อเอาบันทึกปีหลังแก้
+            // DB::raw("
+            //         CASE
+            //             WHEN tbl_learn_file.pass_year IS NOT NULL THEN tbl_learn_file.pass_year
+            //             WHEN excluded.learn_file_status = 'pass' THEN {$currentYear}
+            //             ELSE NULL
+            //         END
+            //     "),
 
             // Defensive Check: ถ้าวิดีโอจบ ให้ลองเช็คว่าไฟล์อื่นในบทเรียนนี้จบครบหรือยัง
             if ($data['status'] == LessonStatus::Success->value) {
@@ -78,7 +80,7 @@ class LessonProgressService
         return DB::transaction(function () use ($userId, $data) {
             $learn = Learn::firstOrCreate(
                 ['user_id' => $userId, 'lesson_id' => $data['lesson_id']],
-                ['course_id' => $data['course_id'], 'lesson_status' => 'learning', 'learn_date' => now(),'created_at' => now()]
+                ['course_id' => $data['course_id'], 'lesson_status' => 'learning', 'learn_date' => now(),'created_at' => now(),'pass_year' => now()->year]
             );
 
             LearnFileDoc::updateOrCreate(
