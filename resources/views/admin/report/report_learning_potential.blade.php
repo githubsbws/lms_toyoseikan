@@ -20,23 +20,62 @@
 					</div>
                     <div class="card m-0">
                         <div class="card-header">
-                            <form action="" method="GET">
-                                <div class="row align-items-end">
-                                    <div class="col-md-4">
-                                        <label>ค้นหาชื่อ หรือรหัสพนักงาน</label>
-                                        <input type="text" name="search" class="form-control" placeholder="ค้นหาข้อมูลในตาราง...">
+                            <form action="" method="GET" class="mb-4">
+                                <div class="row align-items-end g-3"> <div class="col-md-3">
+                                        <label class="form-label">ค้นหาพนักงาน</label>
+                                        <input type="text" name="search" class="form-control"
+                                            value="{{ request('search') }}"
+                                            placeholder="ชื่อ-นามสกุล">
                                     </div>
+
                                     <div class="col-md-3">
-                                        <label>หัวข้ออบรม</label>
-                                        <select name="course" class="form-control">
-                                            <option value="">-- เลือกหัวข้ออบรม --</option>
-                                            <option value="Safety">Safety</option>
+                                        <label class="form-label">หัวข้ออบรม</label>
+                                        <select name="course_id" class="form-select select2">
+                                            <option value="">-- ทั้งหมด --</option>
+                                            @foreach($courses as $course)
+                                                <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
+                                                    {{ $course->course_name }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
+
                                     <div class="col-md-2">
-                                        <button type="submit" class="btn btn-primary btn-block">
-                                            <i class="fa fa-search"></i> ค้นหา
+                                        <label class="form-label">Department</label>
+                                        <select name="department_id" id="department_id" class="form-select">
+                                            <option value="">-- ทั้งหมด --</option>
+                                            @foreach($departments as $dept)
+                                                <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>
+                                                    {{ $dept->org_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">Section</label>
+                                        <select name="section_id" id="section_id" class="form-select">
+                                            <option value="">-- ทั้งหมด --</option>
+                                            </select>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">Line</label>
+                                        <select name="line_id" id="line_id" class="form-select">
+                                            <option value="">-- ทั้งหมด --</option>
+                                            </select>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fa fa-search me-1"></i> ค้นหา
                                         </button>
+                                    </div>
+
+                                    <div class="col-md-1">
+                                        <a href="{{ url()->current() }}" class="btn btn-light w-100">
+                                            ล้าง
+                                        </a>
                                     </div>
                                 </div>
                             </form>
@@ -56,7 +95,7 @@
                                             <th colspan="8" style="background-color: #ffffff;">ประเมินศักยภาพผู้เข้าอบรม</th>
                                         </tr>
                                         <tr>
-                                            <th rowspan="2" style="background-color: #ccffcc;">ที่</th>
+                                            <th rowspan="2" style="background-color: #ccffcc;">No.</th>
                                             <th rowspan="2" style="background-color: #ccffcc;">ชื่อ - สกุล</th>
                                             <th rowspan="2" style="background-color: #ccffcc;">รหัสพนักงาน</th>
                                             <th rowspan="2" style="background-color: #ccffcc;">ตำแหน่ง</th>

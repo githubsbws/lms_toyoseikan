@@ -1182,7 +1182,7 @@ class AdminController extends Controller
 
     function courseonline(){
         if(AuthFacade::useradmin()){
-            $course_online = Course::with('category')->where('active','y')->where('department_org_id',auth()->user()->department_org_id)->orderBy('sortOrder', 'desc')->get();
+            $course_online = Course::with('category')->where('active','y')->where('create_by',auth()->id())->orderBy('sortOrder', 'desc')->get();
             return view("admin.courseonline.courseonline", compact('course_online'));
         }else{
             return redirect()->route('login.admin');
