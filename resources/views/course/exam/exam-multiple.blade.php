@@ -2,7 +2,7 @@
 @section('title', 'Course')
 @section('content')
 @php
-    $questions = $course->groupTesting->questions;
+    $questions = $course->groupTesting->questions->shuffle();
 @endphp
 <div class="d-flex flex-column" style="min-height: 100vh;">
     <div class="container" style="max-width: 900px; padding-top: 110px; padding-bottom: 50px;">
@@ -43,7 +43,7 @@
                 {{-- ตัวเลือก --}}
                 <div style="padding: 30px;">
                     <div style="display: flex; flex-direction: column; gap: 12px;">
-                        @foreach($question->choices as $choice)
+                        @foreach($question->choices->shuffle() as $choice)
                             <label class="choice-container"
                                 style="display: flex; align-items: center;
                                         background-color: #f1f5f9;

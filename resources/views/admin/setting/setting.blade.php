@@ -8,7 +8,14 @@
 					<div class="container-fluid d-flex align-items-center">
 						<div>
 							<h4 class="m-0">จัดการตั้งค่าระบบ</h4>
-							<p class="m-0 text-black-50"><li><a href="{{route('admin')}}">หน้าหลัก</a></li></p>
+						</div>
+                        <div class="ml-3">
+							<a href="{{route('admin')}}">
+								<button class="btn btn-warning d-flex align-items-center">
+									<i class="fas fa-angle-left mr-2"></i>
+									หน้าหลัก
+								</button>
+							</a>
 						</div>
 					</div>
 				</div>
@@ -30,9 +37,9 @@
 												</div>
 												<div class="form-group px-0 mr-3 w-100">
 													<label for="con_firstname">Pass Email ที่ใช้ในการส่งข้อมูล</label>
-													<input type="text" class="form-control"  name="settings_pass_email" value="{{ $setting->settings_pass_email}}">
+													<input type="password" class="form-control"  name="settings_pass_email" value="{{ $setting->settings_pass_email}}">
 												</div>
-												<div class="form-group px-0 w-100">
+												{{-- <div class="form-group px-0 w-100">
 													<label for="con_lastname">เปิด-ปิด การเฉลยข้อสอบ</label>
 													<div>
 														@php
@@ -53,14 +60,14 @@
 												</div>
 
 												<div class="progress progress-inverse progress-mini">
-													<div class="progress-bar" id="progress-bar" 
+													<div class="progress-bar" id="progress-bar"
 														 style="width: {{ $setting->settings_score ?? 0 }}%; background-color: #007bff; transition: width 0.5s;">
 													</div>
 												</div>
 
 												<div class="form-group px-0 mr-3 w-100">
 													<label for="settings_score">
-														เปอร์เซ็นการคำนวณคะแนน การทดสอบผ่าน 
+														เปอร์เซ็นการคำนวณคะแนน การทดสอบผ่าน
 														(ใส่ค่า 80 คือผ่าน 80 เปอร์เซ็นของคะแนนสอบ)
 													</label>
 													<input type="number" id="settings_score" class="form-control" name="settings_score"
@@ -75,7 +82,7 @@
 
 											<div class="card-footer">
 												<button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
-											</div>
+											</div> --}}
 										</form>
 									</div>
 								</div>

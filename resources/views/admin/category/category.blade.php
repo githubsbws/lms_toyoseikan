@@ -8,8 +8,15 @@
 					<div class="container-fluid d-flex align-items-center">
 						<div>
 							<h4 class="m-0">จัดการระบบหมวดหลักสูตร</h4>
-							<p class="m-0 text-black-50"><li><a href="{{route('admin')}}">หน้าหลัก</a></li></p>
 						</div>
+                        <div class="ml-3">
+                            <a href="{{route('admin')}}">
+                                <button class="btn btn-warning d-flex align-items-center">
+                                    <i class="fas fa-angle-left mr-2"></i>
+                                    กลับหน้าหลัก
+                                </button>
+                            </a>
+                        </div>
 					</div>
 				</div>
 				<div class="content">
@@ -40,8 +47,8 @@
 											<td class="text-center">{{ $item->cate_short_detail}}</td>
 											<td class="text-center">{!! htmlspecialchars_decode($item->cate_detail) !!}</td>
 											<td class="text-center">
-												<a class="btn {{ $item->cate_show == '1' ? 'btn-primary' : 'btn-light' }}" 
-													href="{{ route('category.openshow', ['id' => $item->cate_id, $item->cate_show == '1' ? 'off' : 'on' => $item->cate_show == '1' ? '0' : '1']) }}" 
+												<a class="btn {{ $item->cate_show == '1' ? 'btn-primary' : 'btn-light' }}"
+													href="{{ route('category.openshow', ['id' => $item->cate_id, $item->cate_show == '1' ? 'off' : 'on' => $item->cate_show == '1' ? '0' : '1']) }}"
 													role="button">
 													{{ $item->cate_show == '1' ? 'เปิด' : 'ปิด' }}
 												 </a>

@@ -1028,7 +1028,7 @@ class AdminController extends Controller
     }
     function category(){
         if(AuthFacade::useradmin()){
-            $category_on = DB::table('category')->where('category.active', 'y')->orderBy('cate_id', 'desc')->get();
+            $category_on = DB::table('category')->where('category.active', 'y')->where('create_by',auth()->user()->id)->orderBy('cate_id', 'desc')->get();
             return view("admin.category.category",compact('category_on'));
         }else{
             return redirect()->route('login.admin');
@@ -1836,7 +1836,7 @@ class AdminController extends Controller
     function lesson(Request $request){
         if(AuthFacade::useradmin()){
             $course_online = Course::where('active', 'y')->orderBy('sortOrder', 'desc')->get();
-            $lesson = Lesson::where('lesson.active', 'y')->get();
+            $lesson = Lesson::where('lesson.active', 'y')->where('lesson.create_by',auth()->user()->id)->get();
             return view("admin.lesson.lesson",compact('course_online','lesson'));
         }else{
             return redirect()->route('login.admin');
@@ -1934,6 +1934,7 @@ class AdminController extends Controller
                 $lesson_update->view_all = $request->input('view_all');
                 $lesson_update->cate_amount = $request->input('cate_amount');
                 $lesson_update->time_test = $request->input('time_test');
+                $lesson_update->create_by = auth()->user()->id;
                 $lesson_update->update_by = Auth::user()->id;
 
                 // if ($request->has('view_all')) {
@@ -2074,6 +2075,7 @@ class AdminController extends Controller
                 $lesson_create->view_all = $request->view_all;
                 $lesson_create->cate_amount = $request->cate_amount;
                 $lesson_create->time_test = $request->time_test;
+                $lesson_create->create_by = auth()->user()->id;
                 $lesson_create->update_by = Auth::id();
                 $lesson_create->active = 'y';
                 $lesson_create->save();
@@ -2287,15 +2289,10 @@ class AdminController extends Controller
             $id = $request->query('id');
             $type = $request->query('type');
             if($id !== null && $type !== null ){
-                $manage = Manage::where('id', $id)->where('type', $type)->first();
-                // ตรวจสอบว่า $manage ไม่เป็น null ก่อนที่จะดำเนินการต่อ
-                if($manage !== null){
-                    $grouptesting = Grouptesting::where('course_id', $manage->id)->whereIn('active', ['y', 'w'])->orderBy('create_date','DESC')->get();
-                } else {
-                    $grouptesting = Grouptesting::whereIn('active', ['y', 'w'])->orderBy('create_date','DESC')->get();
-                }
+                $grouptesting = Grouptesting::whereIn('active', ['y', 'w'])->where('create_by',auth()->user()->id)->orderBy('create_date','DESC')->get();
+
             } else {
-                $grouptesting = Grouptesting::whereIn('active', ['y', 'w'])->orderBy('create_date','DESC')->get();
+                $grouptesting = Grouptesting::whereIn('active', ['y', 'w'])->where('create_by',auth()->user()->id)->orderBy('create_date','DESC')->get();
             }
 
             return view("admin.grouptesting.grouptesting",['grouptesting' => $grouptesting]);
@@ -4242,7 +4239,7 @@ class AdminController extends Controller
     }
     function pgroup_create(){
         if(AuthFacade::useradmin()){
-            $menuHead = AdminMenu::whereNull('parent_id')->get();
+            $menuHead = AdminMenu::whereNull('parent_id')->where('active','y')->get();
             // $menuList = AdminMenu::whereNotNull('parent_id')->get();
             // dd($menuHead);
             return view("admin.pgroup.pgroup-create",compact('menuHead'));
@@ -4291,7 +4288,7 @@ class AdminController extends Controller
     function pgroup_edit($pgroup_id){
         if(AuthFacade::useradmin()){
             $group_id = Pgroup::get()->where('id',$pgroup_id)->first();
-            $menuHead = AdminMenu::whereNull('parent_id')->get();
+            $menuHead = AdminMenu::whereNull('parent_id')->where('active','y')->get();
             $checkMenu = Permission::where('group_id',$pgroup_id)->where('active',1)->get();
             foreach ($checkMenu as $data)
             {

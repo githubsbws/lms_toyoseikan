@@ -16,7 +16,7 @@ use App\Helpers\PermissionHelper;
                     </a>
                 </li>
                 @endcanmenu
-                @canmenu(2)
+                {{-- @canmenu(2)
                 <li class="nav-item {{ request()->is('aboutus*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('aboutus*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-sliders-h"></i>
@@ -55,7 +55,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
+                @endcanmenu --}}
                 @canmenu(4)
                 <li class="nav-item {{ request()->is('setting*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('setting*') ? 'active' : '' }}">
@@ -74,7 +74,7 @@ use App\Helpers\PermissionHelper;
                     </ul>
                 </li>
                 @endcanmenu
-                @canmenu(5)
+                {{-- @canmenu(5)
                 <li class="nav-item {{ request()->is('contactus*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('contactus*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-address-book"></i>
@@ -91,8 +91,8 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
-                @canmenu(6)
+                @endcanmenu --}}
+                {{-- @canmenu(6)
                 <li class="nav-item {{ request()->is('video*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('video*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-cogs"></i>
@@ -114,8 +114,8 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
-                @canmenu(7)
+                @endcanmenu --}}
+                {{-- @canmenu(7)
                 <li class="nav-item {{ request()->is('document*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('document*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-cogs"></i>
@@ -152,7 +152,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
+                @endcanmenu --}}
                 {{-- @canmenu(8)
                 <li class="nav-item {{ request()->is('ocr*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('ocr*') ? 'active' : '' }}">
@@ -401,7 +401,7 @@ use App\Helpers\PermissionHelper;
                     </ul>
                 </li>
                 @endcanmenu
-                @canmenu(15)
+                {{-- @canmenu(15)
                 <li class="nav-item {{ request()->is('captcha*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('captcha*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-print"></i>
@@ -415,16 +415,16 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
-                @canmenu(16)
+                @endcanmenu --}}
+                {{-- @canmenu(16)
                 <li class="nav-item">
                     <a href="{{ url('learnreset')}}" class="nav-link {{ request()->is('learnreset') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-sync-alt"></i>
                         <p>ระบบรีเซ็ตผลการเรียนการสอบ</p>
                     </a>
                 </li>
-                @endcanmenu
-                @canmenu(17)
+                @endcanmenu --}}
+                {{-- @canmenu(17)
                 <li class="nav-item {{ request()->is('usability*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('usability*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-book"></i>
@@ -446,8 +446,8 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
-                @canmenu(18)
+                @endcanmenu --}}
+                {{-- @canmenu(18)
                 <li class="nav-item {{ request()->is('reportproblem*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('reportproblem*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-bug"></i>
@@ -461,8 +461,8 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
-                @canmenu(19)
+                @endcanmenu --}}
+                {{-- @canmenu(19)
                 <li class="nav-item {{ request()->is('faq*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('faq*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-question-circle"></i>
@@ -484,7 +484,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
+                @endcanmenu --}}
                 @canmenu(20)
                 <li class="nav-item {{ request()->is('adminuser*') || request()->is('adminuser*')  ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('pgroup*') || request()->is('adminuser*') ? 'active' : '' }}">
@@ -519,22 +519,21 @@ use App\Helpers\PermissionHelper;
                     </a>
 
                     <ul class="nav nav-treeview">
-                        {{-- เพิ่มสมาชิก --}}
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{ url('/useradmin_create') }}" class="nav-link {{ request()->is('useradmin_create') ? 'active' : '' }}">
                                 <p>เพิ่มสมาชิก</p>
                             </a>
                         </li>
 
-                        {{-- เพิ่มจาก Excel --}}
+
                         <li class="nav-item">
                             <a href="{{ url('/userexcel') }}" class="nav-link {{ request()->is('userexcel') ? 'active' : '' }}">
                                 <p>เพิ่มสมาชิกจาก Excel</p>
                             </a>
-                        </li>
+                        </li> --}}
 
                         {{-- Company / ASC / Position --}}
-                        <li class="nav-item {{ request()->is(['company*','asc*','position*']) ? 'menu-open' : '' }}">
+                        {{-- <li class="nav-item {{ request()->is(['company*','asc*','position*']) ? 'menu-open' : '' }}">
                             <a href="#" class="nav-link">
                                 <p>
                                     แก้ไขและจัดการข้อมูลสมาชิก
@@ -543,7 +542,7 @@ use App\Helpers\PermissionHelper;
                             </a>
 
                             <ul class="nav nav-treeview">
-                                {{-- Company --}}
+
                                 <li class="nav-item {{ request()->is('company*') ? 'menu-open' : '' }}">
                                     <a href="#" class="nav-link">
                                         <p>Chanel <i class="right fas fa-angle-left"></i></p>
@@ -562,7 +561,7 @@ use App\Helpers\PermissionHelper;
                                     </ul>
                                 </li>
 
-                                {{-- ASC --}}
+
                                 <li class="nav-item {{ request()->is('asc*') ? 'menu-open' : '' }}">
                                     <a href="#" class="nav-link">
                                         <p>Company <i class="right fas fa-angle-left"></i></p>
@@ -581,7 +580,7 @@ use App\Helpers\PermissionHelper;
                                     </ul>
                                 </li>
 
-                                {{-- Position --}}
+
                                 <li class="nav-item {{ request()->is('position*') ? 'menu-open' : '' }}">
                                     <a href="#" class="nav-link">
                                         <p>Position <i class="right fas fa-angle-left"></i></p>
@@ -600,7 +599,7 @@ use App\Helpers\PermissionHelper;
                                     </ul>
                                 </li>
                             </ul>
-                        </li>
+                        </li> --}}
 
                         {{-- รายชื่อสมาชิก --}}
                         <li class="nav-item">
@@ -672,7 +671,7 @@ use App\Helpers\PermissionHelper;
                     </ul>
                 </li>
                 @endcanmenu
-                @canmenu(24)
+                {{-- @canmenu(24)
                 <li class="nav-item {{ request()->is('log*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('log*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-print"></i>
@@ -694,7 +693,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
+                @endcanmenu --}}
                 <li class="nav-item">
                     <a href="{{ route('logout.admin')}}" class="nav-link">
                         <i class="nav-icon fas fa-sign-out-alt"></i>
