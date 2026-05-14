@@ -94,6 +94,7 @@ use App\Models\Zoom;
 use App\Models\OrgchartUser;
 use App\Models\OcrFile;
 use App\Models\OcrFilePage;
+use App\Models\Team;
 
 
 use App\Models\AdminMenu;
@@ -5528,44 +5529,237 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
     }
-    function report_user(Request $request) {
+    public function report_user(Request $request)
+    {
         if(AuthFacade::useradmin()){
 
-            $users = Users::join('profiles','profiles.user_id','=','users.id')
-                        ->where('users.status', '1')
-                        ->select('users.*','profiles.firstname','profiles.lastname')
-                        ->orderBy('users.id', 'DESC')
-                        ->get();
+            $line_id = $request->line_id;
+            $section_id = $request->section_id;
+            $team_id = $request->team_id;
+            $cate_id = $request->cate_id;
 
-            $courses = Course::join('category','category.cate_id','=','course_online.cate_id')
+            $userDetail = auth()->user();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Users Query
+            |--------------------------------------------------------------------------
+            */
+
+            $usersQuery = Users::join(
+                    'profiles',
+                    'profiles.user_id',
+                    '=',
+                    'users.id'
+                )
+                ->leftJoin(
+                    'orgchart',
+                    'orgchart.id',
+                    '=',
+                    'users.org_id'
+                )
+                ->where('users.status', '1');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Section Filter
+            |--------------------------------------------------------------------------
+            */
+
+            if($section_id){
+
+                $lineIds = Orgchart::where(
+                        'parent_id',
+                        (string)$section_id
+                    )
+                    ->where('active','y')
+                    ->pluck('id');
+
+                $usersQuery->whereIn(
+                    'users.org_id',
+                    $lineIds
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Line Filter
+            |--------------------------------------------------------------------------
+            */
+
+            if($line_id){
+
+                $usersQuery->where(
+                    'users.org_id',
+                    $line_id
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Team Filter
+            |--------------------------------------------------------------------------
+            */
+
+            if($team_id){
+
+                $usersQuery->where(
+                    'orgchart.team_id',
+                    $team_id
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Users
+            |--------------------------------------------------------------------------
+            */
+
+            $users = $usersQuery
+                ->select(
+                    'users.*',
+                    'profiles.firstname',
+                    'profiles.lastname'
+                )
+                ->orderBy('users.id', 'DESC')
+                ->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Categories
+            |--------------------------------------------------------------------------
+            */
+
+            $categories = Category::where('active','y')
+                ->orderBy('cate_title')
+                ->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Courses / Learns
+            |--------------------------------------------------------------------------
+            */
+
+            $courses = collect();
+            $learns = collect();
+
+            if($cate_id){
+
+                $courses = Course::join(
+                        'category',
+                        'category.cate_id',
+                        '=',
+                        'course_online.cate_id'
+                    )
                     ->where('course_online.active','y')
+                    ->where('course_online.cate_id', $cate_id)
                     ->select(
                         'course_online.course_id',
                         'course_online.course_title',
                         'course_online.cate_id',
                         'category.cate_title as cate_name'
                     )
-                    ->orderBy('course_online.cate_id')
+                    ->orderBy('course_online.course_id')
                     ->get();
 
-            $groupedCourses = $courses->groupBy('cate_name');
+                $learns = Learn::whereIn(
+                        'course_id',
+                        $courses->pluck('course_id')
+                    )
+                    ->whereIn(
+                        'user_id',
+                        $users->pluck('id')
+                    )
+                    ->get()
+                    ->groupBy('user_id');
+            }
 
-            $learns = Learn::whereIn('course_id', $courses->pluck('course_id'))
-                            ->whereIn('user_id', $users->pluck('id'))
-                            ->get()
-                            ->groupBy('user_id');
+            /*
+            |--------------------------------------------------------------------------
+            | Department
+            |--------------------------------------------------------------------------
+            */
+
+            $departments = Orgchart::where(
+                    'id',
+                    $userDetail->department_org_id
+                )
+                ->first();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sections
+            |--------------------------------------------------------------------------
+            */
+
+            $sections = Orgchart::where(
+                    'parent_id',
+                    $userDetail->department_org_id
+                )
+                ->where('active','y')
+                ->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lines
+            |--------------------------------------------------------------------------
+            */
+
+            $lines = collect();
+
+            if($section_id){
+
+                $lines = Orgchart::where(
+                        'parent_id',
+                        (string)$section_id
+                    )
+                    ->where('active','y')
+                    ->get();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Teams
+            |--------------------------------------------------------------------------
+            */
+
+            $teams = Team::where('active','y')->get();
 
             return view("admin.report.report_user", [
+
                 'users' => $users,
                 'courses' => $courses,
-                'groupedCourses' => $groupedCourses,
-                'learns' => $learns
+                'learns' => $learns,
+
+                'departments' => $departments,
+                'sections' => $sections,
+                'lines' => $lines,
+                'teams' => $teams,
+                'categories' => $categories,
+
+                'line_id' => $line_id,
+                'section_id' => $section_id,
+                'team_id' => $team_id,
+                'cate_id' => $cate_id
             ]);
 
-        }else{
-            return redirect()->route('login.admin');
         }
+
+        return redirect()->route('login.admin');
     }
+
+    public function getLines($section_id)
+    {
+        $lines = Orgchart::where(
+                'parent_id',
+                (string)$section_id
+            )
+            ->where('active', 'y')
+            ->get(['id', 'title']);
+
+        return response()->json($lines);
+    }
+
     function report_user_skill($user_id) {
         if(AuthFacade::useradmin()){
 

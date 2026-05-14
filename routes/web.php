@@ -40,6 +40,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ConditionController;
 use App\Http\Controllers\ContactusController;
+use App\Http\Controllers\ReportExcelController;
 //-------
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CourseExamController;
@@ -794,12 +795,21 @@ Route::get('report_userseach',[AdminController::class,'report_loguserstatus'])->
 
 Route::get('report_user',[AdminController::class,'report_user'])->name('report.user')->middleware('checkIdleTimeout');
 Route::get('report_user_skill/{id}',[AdminController::class,'report_user_skill'])->name('report.user_skill')->middleware('checkIdleTimeout');
+Route::get('/get-lines/{section_id}',[AdminController::class, 'getLines'])->name('get.lines');
+
+Route::get('/report-user-export', [ReportExcelController::class, 'export'])->name('report.user.export')->middleware('checkIdleTimeout');
 
 Route::get('report_license',[ReportLicensePersonController::class,'report_license'])->name('report.license')->middleware('checkIdleTimeout');
+Route::get('/get-lines-license/{section_id}',[AdminController::class, 'getLines'])->name('get.lines.license');
+
+Route::get('/report/license/export',[ReportExcelController::class, 'report_license_export'])->name('report.license.export');
 
 Route::get('/personal-assessment',[PersonalAssessmentController::class,'index'])->name('personal.assessment');
+Route::get('/get-lines-personal/{section_id}',[AdminController::class, 'getLines'])->name('get.lines.personal');
 
 Route::get('/personal-assessment/{id}',[PersonalAssessmentController::class,'detail'])->name('personal.assessment.detail');
+
+Route::get('/report/personal-assessment/{id}/export',[ReportExcelController::class, 'detail_export'])->name('personal.assessment.detail.export');
 
 Route::get('report_course',[AdminController::class,'report_course'])->name('report.course')->middleware('checkIdleTimeout');
 Route::get('report_courseseach',[AdminController::class,'report_course'])->name('report.coursesearch')->middleware('checkIdleTimeout');

@@ -115,6 +115,18 @@ th.rotate > div {
 						</div>
 					</div>
 				</div>
+                <div class="card m-2">
+                    <div class="card-header">
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <a href="{{ route('personal.assessment.detail.export', $user->id) }}"
+                                    class="btn btn-success mb-3">
+                                    Export Excel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 			</div>
 			<div class="content">
 				<div class="container-fluid">

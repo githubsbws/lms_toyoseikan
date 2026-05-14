@@ -114,6 +114,74 @@ th.rotate > div {
 							</a>
 						</div>
 					</div>
+                    <div class="card m-2">
+                        <div class="card-header">
+                            {{-- <span class="badge badge-primary px-3 py-2 ml-1 shadow-sm" style="font-size: 1rem; border-radius: 8px; background: linear-gradient(45deg, #007bff, #0056b3);" data-id="{{ $departments->id }}">
+                                    <i class="fas fa-building mr-1"></i> {{ $departments->title }}
+                                </span> --}}
+                            <form method="GET" action="">
+								<div class="row mb-3">
+
+									<div class="col-md-2">
+										<label>Section</label>
+										<select name="section_id"  id="section_id" class="form-control">
+											<option value="">--ทั้งหมด--</option>
+
+											@foreach($sections as $section)
+												<option value="{{ $section->id }}"
+													{{ $section_id == $section->id ? 'selected' : '' }}>
+													{{ $section->title }}
+												</option>
+											@endforeach
+										</select>
+									</div>
+									
+									<div class="col-md-2">
+										<label>Line</label>
+										<select name="line_id" id="line_id" class="form-control">
+											<option value="">--ทั้งหมด--</option>
+
+											@foreach($lines as $line)
+												<option value="{{ $line->id }}"
+													{{ $line_id == $line->id ? 'selected' : '' }}>
+													{{ $line->title }}
+												</option>
+											@endforeach
+										</select>
+									</div>
+
+									<div class="col-md-2">
+										<label>ค้นหาทีม</label>
+
+										<select name="team_id" class="form-control">
+											<option value="">--ทั้งหมด--</option>
+
+											@foreach($teams as $team)
+												<option value="{{ $team->id }}"
+													{{ $team_id == $team->id ? 'selected' : '' }}>
+													{{ $team->name }}
+												</option>
+											@endforeach
+										</select>
+									</div>
+
+									<div class="col-md-3 d-flex align-items-end">
+
+										<button type="submit" class="btn btn-primary mr-2">
+											<i class="fa fa-search me-1"></i> ค้นหา
+										</button>
+
+										<a href="{{ route('personal.assessment') }}"
+											class="btn btn-secondary mr-2">
+											Reset
+										</a>
+
+									</div>
+
+								</div>
+							</form>
+                        </div>
+                    </div>
 				</div>
 			</div>
 			<div class="content">
@@ -193,6 +261,44 @@ th.rotate > div {
 			}
 		});
 	});
+    $(document).ready(function(){
+
+    $('#section_id').change(function(){
+
+        let sectionId = $(this).val();
+
+        $('#line_id').html(
+            '<option value="">--ทั้งหมด--</option>'
+        );
+
+        if(sectionId){
+
+            $.ajax({
+
+                url: '/get-lines-personal/' + sectionId,
+                type: 'GET',
+
+                success: function(lines){
+
+                    $.each(lines, function(index, line){
+
+                        $('#line_id').append(
+                            `<option value="${line.id}">
+                                ${line.title}
+                            </option>`
+                        );
+
+                    });
+
+                }
+
+            });
+
+        }
+
+    });
+
+});
 </script>
 </body>
 @endsection
