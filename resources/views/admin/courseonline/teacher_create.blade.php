@@ -42,12 +42,12 @@
                                 <textarea name="teacher_detail" id="summernote" class="form-control"></textarea>
                             </div>
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="summernote">รูปภาพ</label><span class="text-danger">*</span>
                                 <div class="fileupload fileupload-new" data-provides="fileupload">
                                     <div class="input-append">
                                         <div class="uneditable-input span3">
-                                            <i class="icon-file fileupload-exists"></i> 
+                                            <i class="icon-file fileupload-exists"></i>
                                             <span class="fileupload-preview"></span>
                                         </div>
                                         <img id="previewImage" src="#" alt="Preview Image" style="display: none;">
@@ -58,18 +58,17 @@
                                             <input name="image" id="imageInput"  type="file" >
                                         </span>
                                         <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
-                                        {{-- <input type="file" id="imageInput" name="image"> --}}
-
+                                        <input type="file" id="imageInput" name="image">
                                     </div>
                                     <script>
                                         document.addEventListener('DOMContentLoaded', function() {
                                             var imageInput = document.getElementById('imageInput');
                                             var previewImage = document.getElementById('previewImage');
-                                
+
                                             imageInput.addEventListener('change', function() {
                                                 previewImageFile(this);
                                             });
-                                
+
                                             function previewImageFile(input) {
                                                 var file = input.files[0];
                                                 if (file) {
@@ -84,13 +83,15 @@
                                         });
                                     </script>
                                 </div>
-                            </div>
+                            </div> --}}
 
-                            <div class="form-group">
+
+
+                            {{-- <div class="form-group">
                                 <font color="#990000">
                                     รูปภาพควรมีขนาด 250x180(แนวนอน) หรือ ขนาด 250x(xxx) (แนวยาว)
                                 </font>
-                            </div>
+                            </div> --}}
 
                             <div class="card-footer">
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
@@ -106,7 +107,6 @@
                             <table id="settingTable" class="table table-striped table-bordered nowrap" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>รูปภาพ</th>
                                         <th>วิทยากร/ผู้สอน</th>
                                         <th>รายละเอียดย่อ</th>
                                         <th>จัดการ</th>
@@ -115,9 +115,6 @@
                                 <tbody id="sortable">
                                     @foreach($teacher as $item)
                                     <tr>
-                                        <td>
-                                            <img src="{{ asset('images/uploads/teacher/'.$item->teacher_id.'/original/' . $item->teacher_picture) }}" alt="{{ $item->teacher_picture }}" width="100px" height="100px">
-                                        </td>
                                         <td class="text-center">
                                             {{ $item->teacher_name }}
                                         </td>
@@ -146,7 +143,7 @@
     $(document).ready(function() {
         $('#summernote').summernote();
         });
-    
+
     $(document).ready(function() {
         // Initialize DataTable
         $('#settingTable').DataTable({
@@ -157,7 +154,7 @@
             }
         });
     });
-    
+
     $(document).ready(function() {
                 // ตรวจสอบว่า jQuery โหลดหรือไม่
                 if (typeof jQuery === "undefined") {
@@ -231,7 +228,7 @@
                 confirmButtonText: 'ตกลง' // เพิ่มปุ่มยืนยัน
             });
         @endif
-</script> 
+</script>
 </body>
 @endsection
 

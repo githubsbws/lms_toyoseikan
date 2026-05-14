@@ -229,11 +229,11 @@ use App\Helpers\PermissionHelper;
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        {{-- <li class="nav-item">
+                        <li class="nav-item">
                             <a href="{{url('teacher_create')}}" class="nav-link {{ request()->is('teacher_create') ? 'active' : '' }}">
                                 <p>เพิ่มข้อมูลผู้สอน</p>
                             </a>
-                        </li> --}}
+                        </li>
                         <li class="nav-item">
                             <a href="{{url('courseonline_create')}}" class="nav-link {{ request()->is('courseonline_create') ? 'active' : '' }}">
                                 <p>เพิ่มหลักสูตร (ภาษา US)</p>

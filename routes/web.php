@@ -817,6 +817,8 @@ Route::get('report_reset',[AdminController::class,'report_reset'])->name('report
 Route::get('report_resetseach',[AdminController::class,'report_reset'])->name('report.resetsearch')->middleware('checkIdleTimeout');
 
 Route::get('report/learning_potential',[PotentialReportController::class,'PotentialReport'])->name('report.learning_potential')->middleware('checkIdleTimeout');
+Route::get('report/learning_potential/getLines/{section_id}',[PotentialReportController::class,'getLines'])->name('report.learning_potential.get_line')->middleware('checkIdleTimeout');
+Route::get('report/learning_potential/export/excel',[PotentialReportController::class,'exportPotentialReport'])->name('report.learning_potential.export.excel')->middleware('checkIdleTimeout');
 
 Route::get('fetch-courses-and-lessons', [AdminController::class, 'fetchCoursesAndLessons'])->middleware('checkIdleTimeout');
 

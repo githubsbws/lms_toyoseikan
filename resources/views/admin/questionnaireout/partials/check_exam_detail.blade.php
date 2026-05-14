@@ -39,7 +39,7 @@
         <div class="card-body">
 
             <div class="p-3 rounded bg-light border">
-                {!! nl2br(e($data->ques_title)) !!}
+                {!! strip_tags(html_entity_decode($data->ques_title), '<b><strong><i><em><u>') !!}
             </div>
 
         </div>
@@ -58,7 +58,7 @@
 
             <div class="p-4 rounded border bg-light"
                  style="min-height:180px; font-size:15px; line-height:1.8;">
-                {!! nl2br(e($data->answer)) !!}
+                {!! strip_tags(html_entity_decode($data->answer), '<b><strong><i><em><u>') !!}
             </div>
 
         </div>
@@ -77,8 +77,7 @@
 
             <div class="p-4 rounded border bg-light"
                  style="min-height:180px; font-size:15px; line-height:1.8;">
-
-                {!! nl2br(e($data->answer_text)) !!}
+                {!! strip_tags(html_entity_decode($data->answer_text), '<b><strong><i><em><u>') !!}
 
             </div>
 

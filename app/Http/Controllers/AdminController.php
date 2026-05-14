@@ -1404,7 +1404,7 @@ class AdminController extends Controller
     {
         if(AuthFacade::useradmin()){
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
-            $teacher = Teacher::where('active','y')->get();
+            $teacher = Teacher::where('active','y')->where('department_org_id',auth()->user()->department_org_id)->get();
             $licenseOperation = OperationMachine::where('active','y')->get();
             $licenseParameter = ParameterSetting::where('active','y')->get();
             // 3. รวม ID ทั้งหมด (สาขา + แผนก + ลูกหลานทุกชั้น)
@@ -1614,7 +1614,7 @@ class AdminController extends Controller
                 $validator = Validator::make($request->all(), [
                     'teacher_name' => 'required|string', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                     'teacher_detail' =>'nullable',
-                    'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+                    // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
 
                 ]);
 
@@ -1627,28 +1627,29 @@ class AdminController extends Controller
                 $teacher = new Teacher;
                 $teacher->teacher_name = $request->input('teacher_name');
                 $teacher->teacher_detail = htmlspecialchars($request->input('teacher_detail'));
-                $teacher->update_by = Auth::user()->id;
-                $teacher->create_by = Auth::user()->id;
+                $teacher->update_by = auth()->user()->id;
+                $teacher->create_by = auth()->user()->id;
                 $teacher->active = 'y';
+                $teacher->department_org_id = auth()->user()->department_org_id;
                 $teacher->save();
-                if($request->file('image')){
-                    $image = $request->file('image');
-                    $imageName = $image->getClientOriginalName();
-                    $teacher->teacher_picture = $imageName;
+                // if($request->file('image')){
+                //     $image = $request->file('image');
+                //     $imageName = $image->getClientOriginalName();
+                //     $teacher->teacher_picture = $imageName;
 
-                    $idFolder = public_path('images/uploads/teacher/'.$teacher->teacher_id);
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder, 0777, true);
-                    }
+                //     $idFolder = public_path('images/uploads/teacher/'.$teacher->teacher_id);
+                //     if (!file_exists($idFolder)) {
+                //         mkdir($idFolder, 0777, true);
+                //     }
 
-                    $idFolder2 = $idFolder . '/thumb/';
-                    if (!file_exists($idFolder2)) {
-                        mkdir($idFolder2, 0777, true);
-                    }
+                //     $idFolder2 = $idFolder . '/thumb/';
+                //     if (!file_exists($idFolder2)) {
+                //         mkdir($idFolder2, 0777, true);
+                //     }
 
-                    // ย้ายไฟล์ภาพไปยังโฟลเดอร์ thumb
-                    $image->move($idFolder2, $imageName);
-                }
+                //     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ thumb
+                //     $image->move($idFolder2, $imageName);
+                // }
                 $teacher->save();
 
                 return redirect()->route('courseonline')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -1668,7 +1669,7 @@ class AdminController extends Controller
                 $validator = Validator::make($request->all(), [
                     'teacher_name' => 'nullable', // ตัวอย่างกำหนดเงื่อนไขในการตรวจสอบข้อมูล
                     'teacher_detail' =>'nullable',
-                    'image' => 'nullable'
+                    // 'image' => 'nullable'
 
                 ]);
                 // dd($validator);
@@ -1680,26 +1681,27 @@ class AdminController extends Controller
                 $teacher = Teacher::findById($id);
                 $teacher->teacher_name = $request->input('teacher_name');
                 $teacher->teacher_detail = htmlspecialchars($request->input('teacher_detail'));
-                $teacher->update_by = Auth::user()->id;
-                $teacher->create_by = Auth::user()->id;
-                if($request->file('image')){
-                    $image = $request->file('image');
-                    $imageName = $image->getClientOriginalName();
-                    $teacher->teacher_picture = $imageName;
+                $teacher->update_by = auth()->user()->id;
+                $teacher->create_by = auth()->user()->id;
+                $teacher->department_org_id = auth()->user()->department_org_id;
+                // if($request->file('image')){
+                //     $image = $request->file('image');
+                //     $imageName = $image->getClientOriginalName();
+                //     $teacher->teacher_picture = $imageName;
 
-                    $idFolder = public_path('images/uploads/teacher/'.$teacher->teacher_id);
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder, 0777, true);
-                    }
+                //     $idFolder = public_path('images/uploads/teacher/'.$teacher->teacher_id);
+                //     if (!file_exists($idFolder)) {
+                //         mkdir($idFolder, 0777, true);
+                //     }
 
-                    $idFolder2 = $idFolder . '/thumb/';
-                    if (!file_exists($idFolder2)) {
-                        mkdir($idFolder2, 0777, true);
-                    }
+                //     $idFolder2 = $idFolder . '/thumb/';
+                //     if (!file_exists($idFolder2)) {
+                //         mkdir($idFolder2, 0777, true);
+                //     }
 
-                    // ย้ายไฟล์ภาพไปยังโฟลเดอร์ thumb
-                    $image->move($idFolder2, $imageName);
-                }
+                //     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ thumb
+                //     $image->move($idFolder2, $imageName);
+                // }
                 $teacher->save();
 
                 return redirect()->route('teacher.create')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');

@@ -25,11 +25,16 @@ class Passcourse extends Model
 
     public function user()
     {
-        return $this->hasOne(Users::class,'id','user_id');
+        return $this->belongsTo(Users::class,'passcours_user','id');
     }
     public function courseonline()
     {
-        return $this->hasOne(Course::class,'course_id','passcours_course');
+        return $this->belongsTo(Course::class,'passcours_course','course_id');
+    }
+
+    public function scoreAssessment()
+    {
+        return $this->hasMany(ScoreAssessment::class,'passcours_id','passcours_id');
     }
 
 }

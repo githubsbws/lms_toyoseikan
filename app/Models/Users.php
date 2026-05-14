@@ -69,11 +69,13 @@ class Users extends AuthenticatableUser implements Authenticatable
 
     public function scores()
     {
-        return $this->hasMany(Score::class, 'user_id', 'id');
+        return $this->hasMany(CourseScore::class, 'user_id', 'id');
     }
 
     public function Team()
     {
         return $this->belongsTo(Team::class, 'team_id', 'id');
     }
+
+
 }
