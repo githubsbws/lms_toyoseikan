@@ -1029,7 +1029,13 @@ class AdminController extends Controller
     }
     function category(){
         if(AuthFacade::useradmin()){
-            $category_on = DB::table('category')->where('category.active', 'y')->where('create_by',auth()->user()->id)->orderBy('cate_id', 'desc')->get();
+            $category_on = Category::where('category.active', 'y')
+            ->when(auth()->user()->superuser == 0 ,function($query){
+                return $query->where('create_by',auth()->user()->id);
+            })
+            ->orderBy('cate_id', 'desc')
+            ->get();
+
             return view("admin.category.category",compact('category_on'));
         }else{
             return redirect()->route('login.admin');
@@ -1183,7 +1189,14 @@ class AdminController extends Controller
 
     function courseonline(){
         if(AuthFacade::useradmin()){
-            $course_online = Course::with('category')->where('active','y')->where('create_by',auth()->id())->orderBy('sortOrder', 'desc')->get();
+            $course_online = Course::with('category')
+                ->where('active', 'y')
+                // ถ้าไม่ใช่ superuser (เป็น 0) ให้เพิ่มเงื่อนไขกรองตาม id ผู้สร้าง
+                ->when(auth()->user()->superuser == 0, function ($query) {
+                    return $query->where('create_by', auth()->id());
+                })
+                ->orderBy('sortOrder', 'desc')
+                ->get();
             return view("admin.courseonline.courseonline", compact('course_online'));
         }else{
             return redirect()->route('login.admin');
@@ -1850,8 +1863,11 @@ class AdminController extends Controller
      }
     function lesson(Request $request){
         if(AuthFacade::useradmin()){
-            $course_online = Course::where('active', 'y')->orderBy('sortOrder', 'desc')->get();
-            $lesson = Lesson::where('lesson.active', 'y')->where('lesson.create_by',auth()->user()->id)->get();
+            $lesson = Lesson::where('lesson.active', 'y')
+            ->when(auth()->user()->superuser == 0 ,function($query){
+                return $query->where('lesson.create_by',auth()->user()->id);
+            })
+            ->get();
             return view("admin.lesson.lesson",compact('course_online','lesson'));
         }else{
             return redirect()->route('login.admin');
