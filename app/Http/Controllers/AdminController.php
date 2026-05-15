@@ -1868,7 +1868,7 @@ class AdminController extends Controller
                 return $query->where('lesson.create_by',auth()->user()->id);
             })
             ->get();
-            return view("admin.lesson.lesson",compact('course_online','lesson'));
+            return view("admin.lesson.lesson",compact('lesson'));
         }else{
             return redirect()->route('login.admin');
         }
