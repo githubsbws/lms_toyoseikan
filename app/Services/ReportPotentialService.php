@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\LessonStatus;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -64,15 +65,20 @@ class ReportPotentialService
         };
         // ใช้ whereHas กรอง "ผู้เรียน" ตามเงื่อนไขการค้นหา
         $query->whereHas('passcourse', function($q) use ($currentYear, $userFilter) {
+            $q->where('passcours_status',LessonStatus::Success->value);
             $q->where('academic_year', $currentYear);
             $q->whereHas('user',$userFilter);
 
+            $q->has('scoreAssessment');
+
         });
+
 
         // อย่าลืมดึงข้อมูลพ่วง (Eager Load) ให้ครบเหมือนเดิม
         $results = $query->with([
             'courseWeight',
             'passcourse' => function($q) use ($currentYear, $userFilter, $request) {
+                $q->where('passcours_status',LessonStatus::Success->value);
                 $q->where('academic_year', $currentYear);
                 $q->whereHas('user', $userFilter); // กรองพนักงานที่จะดึงมาโชว์ในตาราง
 
@@ -80,6 +86,7 @@ class ReportPotentialService
                     'user.Profiles',
                     'user.orgchart',
                     'user.Team',
+                    'scoreAssessment',
                     'user.scores' => function($scoreQuery) use ($request, $currentYear) {
                         $scoreQuery->where('pass_year',$currentYear);
                         // ดึงคะแนนเฉพาะคอร์สนี้
