@@ -1328,6 +1328,9 @@ class AdminController extends Controller
                 $course_update->save();
 
                 if($request->boolean('onboarding') && $request->has('milestone')){
+                    $oldRoadmapCourse = DB::table('roadmap_course')
+                        ->where('course_id', $course_update->course_id)
+                        ->first();
                     $firstLeafId = collect(explode(',', $request->input('org_ids')))->first();
 
                     $lineId = Orgchart::with('line')->find($firstLeafId);
@@ -1351,12 +1354,23 @@ class AdminController extends Controller
                         $roadmap->save();
                         }
 
+                        if ($oldRoadmapCourse && $oldRoadmapCourse->roadmap_id != $roadmap->id) {
+                            // ถ้าบ้านใหม่คนละหลังกับบ้านเก่า ให้ลบชื่อออกจากบ้านเก่าซะ
+                            DB::table('roadmap_course')
+                                ->where('course_id', $course_update->course_id)
+                                ->where('roadmap_id', $oldRoadmapCourse->roadmap_id)
+                                ->delete();
+                        }
+                    // -
+
+                        $lastOrder = RoadmapCourse::where('roadmap_id', $roadmap->id)->max('order');
                         DB::table('roadmap_course')->updateOrInsert(
                             [
                                 'roadmap_id' => $roadmap->id,
                                 'course_id'  => $course_update->course_id,
                             ],
                             [
+                                'order'         => $lastOrder ? $lastOrder + 1 : 1,
                                 'active'         => 'y',
                                 'milestone_days' => $request->input('milestone'),
                             ]
