@@ -2702,6 +2702,7 @@ class AdminController extends Controller
         $request->validate([
             'ques_type' => 'required',
             'ques_title' => 'required',
+            'answer'     => 'required_if:ques_type,3',
         ]);
 
         $userId = auth()->id();
@@ -2710,6 +2711,9 @@ class AdminController extends Controller
         $question = Question::create([
             'ques_type'   => $request->ques_type,
             'ques_title'  => htmlspecialchars($request->ques_title),
+            'answer'      => $request->ques_type == '3'
+                        ? htmlspecialchars($request->answer)
+                        : null,
             'group_id'    => $id,
             'active'      => 'y',
             'create_date' => Carbon::now(),
@@ -2759,6 +2763,9 @@ class AdminController extends Controller
         $question->update([
             'ques_type' => $request->ques_type,
             'ques_title' => htmlspecialchars($request->ques_title),
+            'answer'     => $request->ques_type == '3'
+                        ? htmlspecialchars($request->answer)
+                        : null,
             'update_by' => auth()->id(),
         ]);
 

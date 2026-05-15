@@ -29,12 +29,12 @@
                     <div class="card-body">
                              <form method="POST" action="{{ route('questions.update', ['id'=>$question->ques_id]) }}">
                                 @csrf
-
+                                <input type="hidden" name="ques_type" value="{{ $question->ques_type }}">
                                 <!-- ประเภท -->
                                 <div class="mb-3">
                                     <label>ประเภทคำถาม</label>
-                                    <select name="ques_type" id="ques_type" class="form-control">
-                                        <option value="1" {{ $question->ques_type == 1 ? 'selected' : '' }}>หลายคำตอบ</option>
+                                    <select  id="ques_type" class="form-control" disabled>
+                                        {{-- <option value="1" {{ $question->ques_type == 1 ? 'selected' : '' }}>หลายคำตอบ</option> --}}
                                         <option value="2" {{ $question->ques_type == 2 ? 'selected' : '' }}>คำตอบเดียว</option>
                                         <option value="3" {{ $question->ques_type == 3 ? 'selected' : '' }}>อธิบาย</option>
                                     </select>
@@ -45,7 +45,11 @@
                                     <label>คำถาม</label>
                                     <textarea name="ques_title" id="summernote" class="form-control">{!! htmlspecialchars_decode($question->ques_title) !!}</textarea>
                                 </div>
-
+                                <!-- Text -->
+                                <div class="mb-3" id="answer-wrapper" style="display:none;">
+                                    <label>คำตอบ</label>
+                                    <textarea name="answer" id="summernote2" class="form-control" rows="5">{!! htmlspecialchars_decode($question->answer) !!}</textarea>
+                                </div>
                                 <!-- Choices -->
                                 <div id="choice-wrapper">
                                     <label>ตัวเลือก</label>
@@ -87,7 +91,10 @@
 <script>
     $(document).ready(function() {
         $('#summernote').summernote();
-        });
+    });
+    $(document).ready(function() {
+        $('#summernote2').summernote();
+    });
 let index = Date.now();
 
 document.getElementById('add-choice').addEventListener('click', function() {
@@ -115,17 +122,32 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ซ่อน choice
-document.getElementById('ques_type').addEventListener('change', function() {
+//โชว์คำตอบของคำถามอธิบาย
+document.addEventListener('DOMContentLoaded', function() {
+
+    let type = document.getElementById('ques_type').value;
+
     let wrapper = document.getElementById('choice-wrapper');
     let btn = document.getElementById('add-choice');
+    let answerWrapper = document.getElementById('answer-wrapper');
 
-    if (this.value == '3') {
+    if (type == '3') {
+
+        // ซ่อน choice
         wrapper.style.display = 'none';
         btn.style.display = 'none';
+
+        // แสดง answer
+        answerWrapper.style.display = 'block';
+
     } else {
+
+        // แสดง choice
         wrapper.style.display = 'block';
         btn.style.display = 'inline-block';
+
+        // ซ่อน answer
+        answerWrapper.style.display = 'none';
     }
 });
 
