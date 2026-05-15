@@ -173,9 +173,9 @@
                                 </div>
                             </div>
                         @else
-                        <div class="card-body text-center">
-                            <p>กรุณากดเลือกหลักสูตร | ไม่มีข้อมูล</p>
-                        </div>
+                            <div class="alert alert-info text-center" style="margin-bottom:0rem">
+								กรุณากดเลือกหลักสูตร | ไม่มีข้อมูล
+							</div>
                         @endif
                     </div>
                 </div>
