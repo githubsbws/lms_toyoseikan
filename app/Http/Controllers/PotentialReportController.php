@@ -27,6 +27,7 @@ class PotentialReportController extends Controller
             $teams = Team::where('active','y')->get();
 
             $potentialData = $this->reportPotentialService->getPotentialData($request);
+            // dd($potentialData);
             return view('admin.report.report_learning_potential',compact('potentialData','courses','departments','sections','teams'));
         }
         return redirect()->route('login.admin');
