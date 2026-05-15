@@ -51,12 +51,22 @@ use App\Models\Choice;
                                             {!! htmlspecialchars_decode($item->ques_title) !!}
                                         </td>
 										<td>
-											@if($item->correctChoices->isEmpty())
-												-
+											 @if($item->ques_type == 3)
+
+												{!! htmlspecialchars_decode($item->answer) !!}
+
 											@else
-												@foreach($item->correctChoices as $answer)
-													{!! htmlspecialchars_decode($answer->choice_detail) !!},
-												@endforeach
+
+												@if($item->correctChoices->isEmpty())
+													-
+												@else
+
+													@foreach($item->correctChoices as $answer)
+														{!! htmlspecialchars_decode($answer->choice_detail) !!}{{ !$loop->last ? ',' : '' }}
+													@endforeach
+
+												@endif
+
 											@endif
 										</td>
                                         <td>

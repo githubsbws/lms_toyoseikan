@@ -46,6 +46,11 @@
                                     <textarea name="ques_title" id="summernote" class="form-control"></textarea>
                                 </div>
 
+                                <!-- Text -->
+                                <div class="mb-3" id="answer-wrapper" style="display:none;">
+                                    <label>คำตอบ</label>
+                                    <textarea name="answer" id="summernote2" class="form-control" rows="5"></textarea>
+                                </div>
                                 <!-- Choices -->
                                 <div id="choice-wrapper">
                                     <label>ตัวเลือก</label>
@@ -79,6 +84,9 @@
     $(document).ready(function() {
         $('#summernote').summernote();
         });
+    $(document).ready(function() {
+        $('#summernote2').summernote();
+    });
 let index = 1;
 
 document.getElementById('add-choice').addEventListener('click', function() {
@@ -106,17 +114,30 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ซ่อน choice ถ้า type 3
+//โชว์คำตอบของคำถามอธิบาย
 document.getElementById('ques_type').addEventListener('change', function() {
+
     let wrapper = document.getElementById('choice-wrapper');
     let btn = document.getElementById('add-choice');
+    let answerWrapper = document.getElementById('answer-wrapper');
 
     if (this.value == '3') {
+
+        // ซ่อน choices
         wrapper.style.display = 'none';
         btn.style.display = 'none';
+
+        // แสดง answer
+        answerWrapper.style.display = 'block';
+
     } else {
+
+        // แสดง choices
         wrapper.style.display = 'block';
         btn.style.display = 'inline-block';
+
+        // ซ่อน answer
+        answerWrapper.style.display = 'none';
     }
 });
 
