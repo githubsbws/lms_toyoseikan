@@ -5,6 +5,7 @@
 /public/storage
 /public/images/*
 /public/images
+/public/temp_upload
 /storage/*.key
 
 .env

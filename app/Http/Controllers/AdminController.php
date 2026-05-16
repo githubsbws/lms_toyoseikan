@@ -1861,12 +1861,13 @@ class AdminController extends Controller
             return redirect()->route('login.admin');
         }
      }
-    function lesson(Request $request){
+    function lesson(){
         if(AuthFacade::useradmin()){
             $lesson = Lesson::where('lesson.active', 'y')
             ->when(auth()->user()->superuser == 0 ,function($query){
                 return $query->where('lesson.create_by',auth()->user()->id);
             })
+            ->orderBy('id','DESC')
             ->get();
             return view("admin.lesson.lesson",compact('lesson'));
         }else{
@@ -1946,7 +1947,7 @@ class AdminController extends Controller
                     'cate_amount'=>'nullable',
                     'time_test'=>'nullable',
                     'content'=>'nullable',
-                    'filename.*' => 'nullable|mimes:mp3,mp4',
+                    // 'filename.*' => 'nullable|mimes:mp3,mp4',
                     'doc.*' => 'nullable|mimes:pdf,docx,pptx',
                     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
 
@@ -1974,30 +1975,65 @@ class AdminController extends Controller
                 //     $lesson_update->view_all = "n";
                 // }
 
-                if ($request->hasFile('filename')) {
-                    $getID3 = new getID3;
-                    foreach ($request->file('filename') as $file) {
-                        $Folder_file = public_path("images/uploads/lesson/");
-                        $fileName = time() . "_" . $file->getClientOriginalName();
+                if ($request->has('uploaded_files')) {
+                    $tempPath = public_path("temp_upload/");
+                    if (!FileStore::isDirectory($tempPath)) {
+                        FileStore::makeDirectory($tempPath, 0777, true, true);
+                    }
 
-                        $fileInfo = $getID3->analyze($file->getRealPath());
-                        $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
-                        $file->move($Folder_file, $fileName);
+                    $realPath = public_path("images/uploads/lesson/");
+                    if (!FileStore::isDirectory($realPath)) {
+                        FileStore::makeDirectory($realPath, 0777, true, true);
+                    }
 
-                        // 🔹 บันทึกลง Database
+                    foreach ($request->uploaded_files as $fileData) {
+                        [$fileName, $duration] = explode('|', $fileData);
+
+                        $sourceFile = $tempPath . $fileName; // พิกัดไฟล์ในโฟลเดอร์ temp
+                        $destinationFile = $realPath . $fileName; // พิกัดที่จะย้ายไปอยู่จริง
+
+                        // เพิ่มจุดนี้: ตรวจสอบว่ามีไฟล์ตัวเป็นๆ รออยู่ใน temp ไหม ค่อยสั่งย้าย
+                        if (file_exists($sourceFile)) {
+                            rename($sourceFile, $destinationFile); // ย้ายไฟล์ในเสี้ยววินาที (0.001 วินาที)
+                        }
                         File::create([
-                            'lesson_id' => $id,
-                            'file_name' => $lesson->title,
-                            'filename' => $fileName,
-                            'length' => '2.00',
+                            'lesson_id' => $lesson_update->id,
+                            'file_name' => $lesson_update->title,
+                            'filename'  => $fileName,
+                            'length'    => '2.00',
                             'create_by' => Auth::id(),
                             'update_by' => Auth::id(),
-                            'active' => 'y',
-                            'views' => 0,
-                            'duration' => $duration
+                            'active'    => 'y',
+                            'views'     => 0,
+                            'duration'  => (int)$duration,
                         ]);
                     }
                 }
+
+                // if ($request->hasFile('filename')) {
+                //     $getID3 = new getID3;
+                //     foreach ($request->file('filename') as $file) {
+                //         $Folder_file = public_path("images/uploads/lesson/");
+                //         $fileName = time() . "_" . $file->getClientOriginalName();
+
+                //         $fileInfo = $getID3->analyze($file->getRealPath());
+                //         $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
+                //         $file->move($Folder_file, $fileName);
+
+                //         // 🔹 บันทึกลง Database
+                //         File::create([
+                //             'lesson_id' => $id,
+                //             'file_name' => $lesson->title,
+                //             'filename' => $fileName,
+                //             'length' => '2.00',
+                //             'create_by' => Auth::id(),
+                //             'update_by' => Auth::id(),
+                //             'active' => 'y',
+                //             'views' => 0,
+                //             'duration' => $duration
+                //         ]);
+                //     }
+                // }
 
                 if($request->hasFile('doc')){
                     $doc = $request->file('doc');
@@ -2082,7 +2118,7 @@ class AdminController extends Controller
                 'title' => 'required|string',
                 'description' => 'required|string',
                 'content' => 'required',
-                'filename.*' => 'nullable|mimes:mp3,mp4',
+                // 'filename.*' => 'nullable|mimes:mp3,mp4',
                 'doc.*' => 'nullable|mimes:pdf,docx,pptx',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
             ]);
@@ -2098,11 +2134,7 @@ class AdminController extends Controller
                 $lesson_create->title = $request->title;
                 $lesson_create->content = htmlspecialchars($request->content);
                 $lesson_create->description = $request->description;
-                // if ($request->has('view_all')) {
-                //     $lesson_create->view_all = "y";
-                // }else{
-                //     $lesson_create->view_all = "n";
-                // }
+
                 $lesson_create->view_all = $request->view_all;
                 $lesson_create->cate_amount = $request->cate_amount;
                 $lesson_create->time_test = $request->time_test;
@@ -2126,32 +2158,58 @@ class AdminController extends Controller
                     }
                 }
 
-                // 📌 **อัปโหลดไฟล์ mp3/mp4**
-                if ($request->hasFile('filename')) {
+                if ($request->has('uploaded_files')) {
+                    $tempPath = public_path("temp_upload/");
+                    $realPath = public_path("images/uploads/lesson/");
+                    foreach ($request->uploaded_files as $fileData) {
+                        [$fileName, $duration] = explode('|', $fileData);
 
-                    $getID3 = new getID3;
-                    foreach ($request->file('filename') as $file) {
-                        $Folder_file = public_path("images/uploads/lesson/");
-                        $fileName = time() . "_" . $file->getClientOriginalName();
+                        $sourceFile = $tempPath . $fileName; // พิกัดไฟล์ในโฟลเดอร์ temp
+                        $destinationFile = $realPath . $fileName; // พิกัดที่จะย้ายไปอยู่จริง
 
-                        $fileInfo = $getID3->analyze($file->getRealPath());
-                        $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
-                        $file->move($Folder_file, $fileName);
-
-                        // 🔹 บันทึกลง Database
+                        // เพิ่มจุดนี้: ตรวจสอบว่ามีไฟล์ตัวเป็นๆ รออยู่ใน temp ไหม ค่อยสั่งย้าย
+                        if (file_exists($sourceFile)) {
+                            rename($sourceFile, $destinationFile); // ย้ายไฟล์ในเสี้ยววินาที (0.001 วินาที)
+                        }
                         File::create([
                             'lesson_id' => $lesson_create->id,
                             'file_name' => $lesson_create->title,
-                            'filename' => $fileName,
-                            'length' => '2.00',
+                            'filename'  => $fileName,
+                            'length'    => '2.00',
                             'create_by' => Auth::id(),
                             'update_by' => Auth::id(),
-                            'active' => 'y',
-                            'views' => 0,
-                            'duration' => $duration,
+                            'active'    => 'y',
+                            'views'     => 0,
+                            'duration'  => (int)$duration,
                         ]);
                     }
                 }
+                // 📌 **อัปโหลดไฟล์ mp3/mp4**
+                // if ($request->hasFile('filename')) {
+
+                //     $getID3 = new getID3;
+                //     foreach ($request->file('filename') as $file) {
+                //         $Folder_file = public_path("images/uploads/lesson/");
+                //         $fileName = time() . "_" . $file->getClientOriginalName();
+
+                //         $fileInfo = $getID3->analyze($file->getRealPath());
+                //         $duration = isset($fileInfo['playtime_seconds']) ? floor($fileInfo['playtime_seconds']) : 0;
+                //         $file->move($Folder_file, $fileName);
+
+                //         // 🔹 บันทึกลง Database
+                //         File::create([
+                //             'lesson_id' => $lesson_create->id,
+                //             'file_name' => $lesson_create->title,
+                //             'filename' => $fileName,
+                //             'length' => '2.00',
+                //             'create_by' => Auth::id(),
+                //             'update_by' => Auth::id(),
+                //             'active' => 'y',
+                //             'views' => 0,
+                //             'duration' => $duration,
+                //         ]);
+                //     }
+                // }
 
                 // 📌 **อัปโหลดไฟล์เอกสาร**
                 if ($request->hasFile('doc')) {
