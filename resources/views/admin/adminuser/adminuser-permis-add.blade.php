@@ -47,7 +47,7 @@
 							<form action="{{ route('permission_insert',['id' => $id]) }}" enctype="multipart/form-data" method="post" id="question-form">
 								@csrf
 								<div class="form-group">
-									<label for="cms_title">ชื่อ: {{ $user->Profiles->firstname ?? '-' }} {{ $user->Profiles->lastname ?? '-' }}</label>
+									<label for="cms_title">ชื่อ: {{ $user->firstname ?? '-' }} {{ $user->lastname ?? '-' }}</label>
 								</div>
 
 								<div class="form-group">

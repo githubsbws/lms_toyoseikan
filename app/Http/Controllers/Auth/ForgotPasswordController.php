@@ -37,10 +37,9 @@ class ForgotPasswordController extends Controller
         $request->validate([
             'login_or_email' => 'required|string',
         ]);
-        
+
         $loginOrEmail = $request->input('login_or_email');
-        $user = Users::where('email', $loginOrEmail)
-                    ->orWhere('username', $loginOrEmail)
+        $user = Users::where('username', $loginOrEmail)
                     ->first();
 
         if (!$user) {
@@ -82,12 +81,12 @@ class ForgotPasswordController extends Controller
                 if (preg_match('/(\d)\1{7,}/', $value)) {
                     $fail('รหัสผ่านไม่สามารถเป็นตัวเลขเดียวกันซ้ำกันได้');
                 }
-                
+
                 // ตรวจสอบว่า password มีอักษรพิเศษอย่างน้อย 1 ตัว
-                if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
-                    $fail('รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว');
-                }
-                
+                // if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
+                //     $fail('รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว');
+                // }
+
                 // ตรวจสอบว่า password มีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว
                 if (!preg_match('/[a-z]/', $value) || !preg_match('/[A-Z]/', $value)) {
                     $fail('รหัสผ่านต้องมีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว');
@@ -95,7 +94,7 @@ class ForgotPasswordController extends Controller
             },
         ],
     ]);
-    
+
     if ($validator->fails()) {
         return back()->withErrors($validator)->withInput($request->only('password'));
     }
