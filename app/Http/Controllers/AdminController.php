@@ -6313,6 +6313,28 @@ public function questionnaireout_check_exam_save(Request $request)
 {
     try {
 
+        DB::beginTransaction();
+
+        // =========================
+        // คำนวณผลสอบ
+        // =========================
+        $score = (float) $request->score;
+
+        $scoreTotal = (float) $request->score_total;
+
+        // 🔥 คิดเปอร์เซ็นต์
+        $percent = 0;
+
+        if ($scoreTotal > 0) {
+
+            $percent = ($score / $scoreTotal) * 100;
+
+        }
+
+        // 🔥 สถานะผ่าน/ไม่ผ่าน
+        $passStatus = $percent >= 70 ? 'pass' : 'fail';
+
+
         // =========================
         // update coursescore
         // =========================
@@ -6322,11 +6344,11 @@ public function questionnaireout_check_exam_save(Request $request)
             ->where('type', '3')
             ->update([
 
-                'score_number' => $request->score,
+                'score_number' => $score,
 
-                'score_total' => $request->score_total,
+                'score_total' => $scoreTotal,
 
-                'score_status' => 'pass',
+                'score_status' => $passStatus,
 
                 'update_date' => now()
 
@@ -6334,12 +6356,15 @@ public function questionnaireout_check_exam_save(Request $request)
 
         if ($updated == 0) {
 
+            DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'message' => 'ไม่พบข้อมูล coursescore'
             ]);
 
         }
+
 
         // =========================
         // update essay answer
@@ -6349,17 +6374,45 @@ public function questionnaireout_check_exam_save(Request $request)
             ->where('user_id', $request->user_id)
             ->update([
 
-                'status' => 'pass',
+                'status' => $passStatus,
 
                 'updated_date' => now()
 
             ]);
 
+
+        // =========================
+        // insert passcours เฉพาะผ่าน
+        // =========================
+        if ($passStatus == 'pass') {
+
+            DB::table('passcours')->insert([
+
+                'passcours_cours' => $request->course_id,
+
+                'passcours_user' => $request->user_id,
+
+                'passcours_status' => $passStatus,
+
+                'academic_year' => date('Y'),
+
+                'created_at' => now()
+
+            ]);
+
+        }
+
+
+        DB::commit();
+
         return response()->json([
-            'success' => true
+            'success' => true,
+            'status' => $passStatus
         ]);
 
     } catch (\Exception $e) {
+
+        DB::rollBack();
 
         return response()->json([
             'success' => false,
