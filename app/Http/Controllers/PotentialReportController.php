@@ -21,7 +21,12 @@ class PotentialReportController extends Controller
         if(auth()->check())
         {
             $userDetail = auth()->user();
-            $courses = Course::where('create_by',$userDetail->id)->where('active','y')->get();
+            $courses = Course::where('active','y')
+            ->when(auth()->user()->superuser == 0,function($q){
+                return $q->where('create_by',auth()->user()->id);
+            })
+            ->get();
+
             $departments = Orgchart::where('id',$userDetail->department_org_id)->first();
             $sections = Orgchart::where('parent_id',$userDetail->department_org_id)->get();
             $teams = Team::where('active','y')->get();
