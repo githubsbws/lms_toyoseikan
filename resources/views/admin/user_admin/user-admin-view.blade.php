@@ -46,11 +46,28 @@
                                 <label for="cms_short_title">Email </label>
                                 <h4>{{ @$query->email ?? '-' }}</h4>
                             </div>
-
+                            {{-- แสดง org path --}}
                             <div class="form-group">
-                                <label for="cms_short_title">ตำแหน่ง </label>
-                                <h4>{{ @$query->Position->position_title ?? '-' }}</h4>
+                                <label>สังกัดองค์กร</label>
+                                @if(!empty($orgPath))
+                                    <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                        @foreach($orgPath as $index => $orgId)
+                                            @php $org = \App\Models\Orgchart::find($orgId); @endphp
+                                            @if($org)
+                                                @if($index > 0)
+                                                    <i class="fas fa-angle-right text-muted"></i>
+                                                @endif
+                                                <span class="badge badge-primary" style="font-size: 14px; padding: 6px 12px;">
+                                                    {{ $org->title }}
+                                                </span>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <h4>-</h4>
+                                @endif
                             </div>
+
                     </div>
                 </div>
             </div>

@@ -61,6 +61,9 @@ class RegisterController extends Controller
         $user->password = Hash::make($request->password);
         $user->email = $request->email;
         $user->org_id = $request->org_id;
+        $user->superuser = 0;
+        $user->status = 1;
+        $user->del_status = 0;
         $user->team_id = $request->team_id;
         $user->department_org_id = $request->department_id;
         $user->work_start = $request->work_start_date;

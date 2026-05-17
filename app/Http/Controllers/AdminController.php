@@ -4463,12 +4463,10 @@ class AdminController extends Controller
 
     function user_admin(Request $request){
         if(AuthFacade::useradmin()){
-                $company = Company::get();
-                $division = Division::get();
                 $query = Users::where('del_status', 0)
                 ->get();
                 // dd($query->toArray());
-            return view("admin.user_admin.user-admin",['company' => $company,'division' => $division,'query' => $query]);
+            return view("admin.user_admin.user-admin",['query' => $query]);
         }else{
             return redirect()->route('login.admin');
         }
@@ -4496,102 +4494,123 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $query = Users::with('Profiles')
                 ->where('id', $id)->first();
-            return view("admin.user_admin.user-admin-view", compact('query'));
+            $orgPath = array_slice($this->getOrgPath($query->org_id), 1);
+            return view("admin.user_admin.user-admin-view", compact('query','orgPath'));
         }else{
             return redirect()->route('login.admin');
         }
     }
 
-    function userAdminCreate(){
-        if(AuthFacade::useradmin()){
-            $profTitle = ProfilesTitle::get();
-            $company = Company::get();
+    // function userAdminCreate(){
+    //     if(AuthFacade::useradmin()){
+    //         $profTitle = ProfilesTitle::get();
+    //         $company = Company::get();
 
-            return view("admin.user_admin.user-admin-create", compact('profTitle', 'company'));
-        }else{
-            return redirect()->route('login.admin');
-        }
-    }
+    //         return view("admin.user_admin.user-admin-create", compact('profTitle', 'company'));
+    //     }else{
+    //         return redirect()->route('login.admin');
+    //     }
+    // }
     public function userAdminEdit($id){
         if(AuthFacade::useradmin()){
-            $user = Users::where('id',$id)->first();
-            $profTitle = ProfilesTitle::get();
-            $company = Company::get();
+            $user = Users::with(['Team'])->where('id',$id)->first();
+            $orgchart = Orgchart::where('active','y')
+                    ->where('level',2)
+                    ->get();
+            $team = Team::where('active','y')->get();
+            $orgPath = array_slice($this->getOrgPath($user->org_id), 1);
+            // $profTitle = ProfilesTitle::get();
 
-            return view('admin.user_admin.user-admin-edit',compact('user','profTitle','company'));
+            return view('admin.user_admin.user-admin-edit',compact('user','orgchart','team','orgPath'));
         }else{
             return redirect()->route('login.admin');
         }
     }
-    public function userAdminInsert(Request $request){
-        if(AuthFacade::useradmin()){
-            $validator = Validator::make($request->all(), [
-                'username' => 'required',
-                'password' => [
-                        'required',
-                        'min:8',
-                        function ($attribute, $value, $fail) use ($request) {
-                            // ตรวจสอบว่า password ไม่เป็นตัวเลขเดียวกันทั้งหมด
-                            if (preg_match('/(\d)\1{7,}/', $value)) {
-                                $fail('รหัสผ่านไม่สามารถเป็นตัวเลขเดียวกันซ้ำกันได้');
-                            }
 
-                            // ตรวจสอบว่า password มีอักษรพิเศษอย่างน้อย 1 ตัว
-                            if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
-                                $fail('รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว');
-                            }
+    private function getOrgPath(int $orgId): array
+    {
+        $path = [];
+        $current = Orgchart::find($orgId);
 
-                            // ตรวจสอบว่า password มีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว
-                            if (!preg_match('/[a-z]/', $value) || !preg_match('/[A-Z]/', $value)) {
-                                $fail('รหัสผ่านต้องมีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว');
-                            }
-                        },
-                    ],
-                'firstname' => 'required',
-                'lastname' => 'required',
-                'identification' => 'required|min:13|max:13'
-            ]);
-            // ถ้า validation ไม่ผ่าน กลับไปยังหน้า login form พร้อมแสดง errors
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput($request->only('username'));
-            }
-            $user = new Users();
-            $user->username = $request->username;
-            $user->password = Hash::make($request->password);
-            $user->email = $request->email ?? null;
-            $user->company_id = $request->company ?? null;
-            $user->asc_id = $request->asc ?? null;
-            $user->position_id = $request->position ?? null;
-            $user->department_id = '1';
-            $user->activkey = md5(microtime().$request->password);
-            $user->create_at = now()->format('Y-m-d H:i:s');
-            $user->_token = $request->_token;
-            $user->save();
-            // dd($user->toArray());
-
-            $profile = new Profiles();
-            $profile->user_id = $user->id;
-            $profile->title_id = $request->title ?? null;
-            $profile->firstname = $request->firstname;
-            $profile->lastname = $request->lastname;
-            $profile->identification = $request->identification;
-            $profile->phone = $request->phone ?? null;
-            $profile->firstname_en = $request->firstname_en ?? null;
-            $profile->lastname_en = $request->lastname_en ?? null;
-            $profile->save();
-
-            return redirect()->route('user_admin')->with('success','Register Successful');
-        }else{
-            return redirect()->route('login.admin');
+        // วนขึ้นไปหา parent จนถึง root
+        while ($current) {
+            array_unshift($path, $current->id);
+            $current = $current->parent_id
+                ? Orgchart::find($current->parent_id)
+                : null;
         }
+
+        return $path;
     }
+
+    // public function userAdminInsert(Request $request){
+    //     if(AuthFacade::useradmin()){
+    //         $validator = Validator::make($request->all(), [
+    //             'username' => 'required',
+    //             'password' => [
+    //                     'required',
+    //                     'min:8',
+    //                     function ($attribute, $value, $fail) use ($request) {
+    //                         // ตรวจสอบว่า password ไม่เป็นตัวเลขเดียวกันทั้งหมด
+    //                         if (preg_match('/(\d)\1{7,}/', $value)) {
+    //                             $fail('รหัสผ่านไม่สามารถเป็นตัวเลขเดียวกันซ้ำกันได้');
+    //                         }
+
+    //                         // ตรวจสอบว่า password มีอักษรพิเศษอย่างน้อย 1 ตัว
+    //                         // if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
+    //                         //     $fail('รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว');
+    //                         // }
+
+    //                         // ตรวจสอบว่า password มีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว
+    //                         if (!preg_match('/[a-z]/', $value) || !preg_match('/[A-Z]/', $value)) {
+    //                             $fail('รหัสผ่านต้องมีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว');
+    //                         }
+    //                     },
+    //                 ],
+    //             'firstname' => 'required',
+    //             'lastname' => 'required',
+    //             'identification' => 'required|min:13|max:13'
+    //         ]);
+    //         // ถ้า validation ไม่ผ่าน กลับไปยังหน้า login form พร้อมแสดง errors
+    //         if ($validator->fails()) {
+    //             return back()->withErrors($validator)->withInput($request->only('username'));
+    //         }
+    //         $user = new Users();
+    //         $user->username = $request->username;
+    //         $user->password = Hash::make($request->password);
+    //         $user->email = $request->email ?? null;
+    //         $user->company_id = $request->company ?? null;
+    //         $user->asc_id = $request->asc ?? null;
+    //         $user->position_id = $request->position ?? null;
+    //         $user->department_id = '1';
+    //         $user->activkey = md5(microtime().$request->password);
+    //         $user->create_at = now()->format('Y-m-d H:i:s');
+    //         $user->_token = $request->_token;
+    //         $user->save();
+    //         // dd($user->toArray());
+
+    //         $profile = new Profiles();
+    //         $profile->user_id = $user->id;
+    //         $profile->title_id = $request->title ?? null;
+    //         $profile->firstname = $request->firstname;
+    //         $profile->lastname = $request->lastname;
+    //         $profile->identification = $request->identification;
+    //         $profile->phone = $request->phone ?? null;
+    //         $profile->firstname_en = $request->firstname_en ?? null;
+    //         $profile->lastname_en = $request->lastname_en ?? null;
+    //         $profile->save();
+
+    //         return redirect()->route('user_admin')->with('success','Register Successful');
+    //     }else{
+    //         return redirect()->route('login.admin');
+    //     }
+    // }
 
     private function updateUserProfile($request, $user) {
         $user->email = $request->email ?? null;
-        $user->company_id = $request->company ?? null;
-        $user->division_id = $request->division ?? null;
-        $user->position_id = $request->position ?? null;
-        $user->asc_id = $request->asc ?? null;
+        $user->org_id = $request->org_id ?? null;
+        $user->department_org_id = $request->department_id ?? null;
+        $user->team_id = $request->team_id ?? null;
         $user->save();
 
         $profile = Profiles::where('user_id', $request->id)->first();
@@ -4617,9 +4636,9 @@ class AdminController extends Controller
                             if (preg_match('/(\d)\1{7,}/', $value)) {
                                 $fail('รหัสผ่านไม่สามารถเป็นตัวเลขเดียวกันซ้ำกันได้');
                             }
-                            if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
-                                $fail('รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว');
-                            }
+                            // if (!preg_match('/[^a-zA-Z0-9]/', $value)) {
+                            //     $fail('รหัสผ่านต้องมีอักษรพิเศษอย่างน้อย 1 ตัว');
+                            // }
                             if (!preg_match('/[a-z]/', $value) || !preg_match('/[A-Z]/', $value)) {
                                 $fail('รหัสผ่านต้องมีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว');
                             }
