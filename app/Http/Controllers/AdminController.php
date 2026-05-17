@@ -6090,7 +6090,14 @@ public function questionnaireout_reset_action(Request $request)
 public function questionnaireout_check_exam(Request $request){
         if (AuthFacade::useradmin()) {
 
-            $courses = DB::table('course_online')->get(); // 👈 สำคัญ
+            $query = DB::table('course_online');
+
+                    if ((string) auth()->user()->superuser !== '1') {
+                        $query->where('create_by', auth()->user()->id);
+                    }
+
+                    $courses = $query->get(); // 👈 สำคัญ
+            
             $results = []; // กัน error หน้าแรก
 
             return view(
@@ -6107,39 +6114,114 @@ public function questionnaireout_check_exam_ajax(Request $request)
 {
     if (AuthFacade::useradmin()) {
 
-$query = DB::table('course_exam_essay_answer')
-    ->join(
-        'course_online',
-        'course_exam_essay_answer.course_id',
-        '=',
-        'course_online.course_id'
-    )
-    ->leftJoin(
-        'users',
-        'course_exam_essay_answer.user_id',
-        '=',
-        'users.id'
-    )
-    ->leftJoin(
-        'profiles',
-        'users.id',
-        '=',
-        'profiles.user_id'
-    )
-    ->leftJoin(
-        'question',
-        'course_exam_essay_answer.ques_id',
-        '=',
-        'question.ques_id'
-    )
-    ->select(
-        'course_exam_essay_answer.course_id',
-        'course_exam_essay_answer.user_id',
-        'course_online.course_title',
-        'profiles.firstname',
-        'profiles.lastname'
-    )
-    ->where('course_exam_essay_answer.status', 'wait');
+        $query = DB::table('course_exam_essay_answer')
+            ->join(
+                'course_online',
+                'course_exam_essay_answer.course_id',
+                '=',
+                'course_online.course_id'
+            )
+            ->leftJoin(
+                'users',
+                'course_exam_essay_answer.user_id',
+                '=',
+                'users.id'
+            )
+            ->leftJoin(
+                'profiles',
+                'users.id',
+                '=',
+                'profiles.user_id'
+            )
+            ->leftJoin(
+                'question',
+                'course_exam_essay_answer.ques_id',
+                '=',
+                'question.ques_id'
+            )
+            ->select(
+                'course_exam_essay_answer.course_id',
+                'course_exam_essay_answer.user_id',
+                'course_online.course_title',
+                'profiles.firstname',
+                'profiles.lastname'
+            )
+
+            // 🔥 เอาเฉพาะคนที่ยังมี status = wait
+            ->whereExists(function ($sub) {
+
+                $sub->select(DB::raw(1))
+                    ->from('course_exam_essay_answer as sub_exam')
+                    ->whereColumn(
+                        'sub_exam.course_id',
+                        'course_exam_essay_answer.course_id'
+                    )
+                    ->whereColumn(
+                        'sub_exam.user_id',
+                        'course_exam_essay_answer.user_id'
+                    )
+                    ->where('sub_exam.status', 'wait');
+
+            });
+
+
+        // 🔍 เช็คว่ามีการค้นหาไหม
+        $hasSearch = !empty($request->course_id)
+            || !empty(trim($request->firstname))
+            || !empty(trim($request->lastname));
+
+        if (!$hasSearch) {
+
+            // ถ้าไม่ค้นหา ไม่แสดงข้อมูล
+            $query->whereRaw('1 = 0');
+
+        }
+
+
+        // 🔍 filter course
+        if (!empty($request->course_id)) {
+
+            $query->where(
+                'course_exam_essay_answer.course_id',
+                $request->course_id
+            );
+
+        }
+
+
+        // 🔍 filter firstname
+        if (!empty(trim($request->firstname))) {
+
+            $query->where(
+                'profiles.firstname',
+                'like',
+                '%' . trim($request->firstname) . '%'
+            );
+
+        }
+
+
+        // 🔍 filter lastname
+        if (!empty(trim($request->lastname))) {
+
+            $query->where(
+                'profiles.lastname',
+                'like',
+                '%' . trim($request->lastname) . '%'
+            );
+
+        }
+
+
+        // 🔥 group
+        $query->groupBy(
+            'course_exam_essay_answer.course_id',
+            'course_exam_essay_answer.user_id',
+            'course_online.course_title',
+            'profiles.firstname',
+            'profiles.lastname'
+        );
+
 
         $results = $query->get();
 
@@ -6200,8 +6282,10 @@ public function questionnaireout_check_exam_detail(Request $request)
     ->where('course_exam_essay_answer.user_id', $request->user_id)
     ->where('course_exam_essay_answer.status', 'wait')
     ->select(
+        'course_exam_essay_answer.id',
         'course_exam_essay_answer.course_id as course_id',
         'course_exam_essay_answer.user_id as user_id',
+        'course_exam_essay_answer.ques_id',
         'course_online.course_title',
         'profiles.firstname',
         'profiles.lastname',
@@ -6210,7 +6294,9 @@ public function questionnaireout_check_exam_detail(Request $request)
         'course_exam_essay_answer.answer_text',
         'course_score_weight.exam_weight'
     )
-    ->first();
+    ->distinct()
+    ->orderBy('course_exam_essay_answer.ques_id', 'DESC')
+    ->get();
 
         return view(
             'admin.questionnaireout.partials.check_exam_detail',
