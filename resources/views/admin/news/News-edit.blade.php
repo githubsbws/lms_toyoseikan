@@ -38,10 +38,15 @@
 									<label for="cms_short_title">รายละเอียดย่อ</label>
 									<input type="text" name="cms_short_title" class="form-control" value="{{ $news->cms_short_title }}">
 								</div>
-	
+
 								<div class="form-group">
 									<label for="cms_short_title">เนื้อหาข่าว </label>
 									<textarea name="cms_detail" id="summernote" class="form-control">{{ htmlspecialchars_decode(htmlspecialchars_decode($news->cms_detail)) }}</textarea>
+								</div>
+
+                                <div class="form-group">
+									<label for="summernote">วันหมดอายุข่าว</label>
+									<input type="date" name="cms_expire" class="form-control" value="{{ $news->expired_date }}"></input>
 								</div>
 
 								<div class="form-group">
@@ -50,7 +55,7 @@
 									<div class="fileupload fileupload-new" data-provides="fileupload">
 										<div class="input-append">
 											<div class="uneditable-input span3">
-												<i class="icon-file fileupload-exists"></i> 
+												<i class="icon-file fileupload-exists"></i>
 												<span class="fileupload-preview"></span>
 											</div>
 											<img id="previewImage" src="#" alt="Preview Image" style="display: none;">
@@ -68,11 +73,11 @@
 											document.addEventListener('DOMContentLoaded', function() {
 												var imageInput = document.getElementById('imageInput');
 												var previewImage = document.getElementById('previewImage');
-									
+
 												imageInput.addEventListener('change', function() {
 													previewImageFile(this);
 												});
-									
+
 												function previewImageFile(input) {
 													var file = input.files[0];
 													if (file) {

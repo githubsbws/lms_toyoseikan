@@ -13,7 +13,7 @@ class News extends Model
 
     protected $primaryKey = 'cms_id';
 
-    protected $fillable = [ 'cms_title','cms_short_title','cms_picture','create_date','create_by','update_date','update_by','active'];
+    protected $fillable = [ 'cms_title','cms_short_title','cms_picture','create_date','create_by','update_date','update_by','active','expired_date'];
 
     const CREATED_AT = 'create_date'; // Custom created_at column
     const UPDATED_AT = 'update_date'; // Custom update_at column
@@ -27,5 +27,5 @@ class News extends Model
     {
         return $this->belongsTo(Profiles::class, 'update_by','user_id');
     }
-    
+
 }

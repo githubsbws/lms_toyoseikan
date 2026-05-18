@@ -13,13 +13,17 @@ use App\Models\DownloadFile;
 
 <style>
     /* --- Pure CSS Custom Reset & Typography --- */
-    body {
+ /*    body {
         font-family: 'Prompt', sans-serif;
         background-color: #fcfcfc;
         color: #000000;
         margin: 0;
         padding: 0;
-    }
+    } */
+
+        .navbar.navbar-size-large .navbar-nav>li>a {
+            font-size: 24px !important;
+        }
 
     a,
     a:hover,
@@ -96,12 +100,12 @@ use App\Models\DownloadFile;
         overflow: hidden;
     }
 
-    .hero-banner-img {
+ /*    .hero-banner-img {
         width: 100%;
         height: auto;
         display: block;
     }
-
+ */
     /* --- โซนเมนูของเราด้านล่าง (Menu Section) --- */
     .menu-section {
         padding: 60px 40px;
@@ -114,7 +118,7 @@ use App\Models\DownloadFile;
 
     /* หัวข้อฝั่งซ้าย */
     .menu-title-block {
-        min-width: 160px;
+        display: inline-block;
     }
 
     .menu-title-block h3 {
@@ -135,13 +139,13 @@ use App\Models\DownloadFile;
     }
 
     /* กลุ่มกล่องเมนูฝั่งขวา (ใช้ Flex เพื่อความยืดหยุ่นในการจัดช่องไฟ) */
-    .menu-cards-grid {
+    /*   .menu-cards-grid {
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
         flex: 1;
     }
-
+ */
     /* สไตล์กล่องการ์ดพื้นฐาน */
     .menu-card {
         flex: 1;
@@ -171,7 +175,7 @@ use App\Models\DownloadFile;
     }
 
     .menu-card span {
-        font-size: 16px;
+        font-size: 20px;
         font-weight: 500;
         color: #222222;
     }
@@ -692,6 +696,14 @@ use App\Models\DownloadFile;
     .mymenu {
         display: flex;
         margin: 40px 0 40px 0;
+        text-align: center;
+        flex-direction: column;
+    }
+
+    .menu-cards-grid {
+        display: flex;
+    margin-top: 30px;
+    justify-content: center;
     }
 
     .custom-accordion-container {
@@ -888,13 +900,14 @@ use App\Models\DownloadFile;
     .main-video {
         padding: 40px 20px;
     }
+    
 </style>
 
 <body>
 
     <div class="main-content">
-        <section class="hero-banner-container">
-            <img src="{{ asset('assets/images/banner.png') }}" alt="E-Learning Banner" class="hero-banner-img">
+        <section class="hero-banner-container" >
+            <img src="{{ asset('assets/images/banner.png') }}" alt="E-Learning Banner" class="hero-banner-img" style="width: 100%;">
         </section>
 
         @if(Auth::user())
@@ -909,7 +922,7 @@ use App\Models\DownloadFile;
 
                     <a href="{{ url('course') }}">
                         <div class="menu-card card-pink" onclick="location.href='#'">
-                            <i class="fa-solid fa-desktop"></i>
+                             <img src="{{ asset('assets/images/menu1.png') }}" alt="E-Learning Banner" class="hero-banner-img">
                             <span>หลักสูตรของฉัน</span>
                         </div>
                     </a>
@@ -1192,7 +1205,7 @@ use App\Models\DownloadFile;
             </div>
         </div>
 
-       <!--  <div class="question-index text-center">
+        <!--  <div class="question-index text-center">
             <div class="container-fluid">
 
                 <h2 class="page-main-title">คำถามที่พบบ่อย</h2>

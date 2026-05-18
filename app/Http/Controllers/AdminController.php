@@ -909,6 +909,7 @@ class AdminController extends Controller
                 $news_create->create_by = Auth::user()->id;
                 $news_create->update_by = Auth::user()->id;
                 $news_create->active = 'y';
+                $news_create->expired_date = $request->input('cms_expire');
                 ///image
                 if($request->file('image')){
                 $image = $request->file('image');
@@ -924,12 +925,12 @@ class AdminController extends Controller
                     $image = $request->file('image');
 
                     $idFolder = public_path('images/uploads/news/'.$news_create->cms_id);
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder);
+                    if (!FileStore::isDirectory($idFolder)) {
+                        FileStore::makeDirectory($idFolder,0777,true,true);
 
                         $idFolder2 = public_path('images/uploads/news/'.$news_create->cms_id.'/original/');
-                        if (!file_exists($idFolder2)) {
-                            mkdir($idFolder2);
+                        if (!FileStore::isDirectory($idFolder2)) {
+                            FileStore::makeDirectory($idFolder2,0777,true,true);
                         }
                     }
 
@@ -967,19 +968,19 @@ class AdminController extends Controller
                 $news_update->cms_short_title = $request->input('cms_short_title');
                 $news_update->cms_detail = htmlspecialchars($request->input('cms_detail'));
                 $news_update->update_by = Auth::user()->id;
+                $news_update->expired_date = $request->input('cms_expire');
                 if($request->file('image')){
                     $image = $request->file('image');
-
+                    // dd($image);
                     $idFolder = public_path('images/uploads/news/'.$id);
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder);
-
-                        $idFolder2 = public_path('images/uploads/news/'.$id.'/original/');
-                        if (!file_exists($idFolder2)) {
-                            mkdir($idFolder2);
-                        }
+                    if (!FileStore::isDirectory($idFolder)) {
+                        FileStore::makeDirectory($idFolder, 0777, true, true);
                     }
 
+                    $idFolder2 = public_path('images/uploads/news/'.$id.'/original/');
+                    if (!FileStore::isDirectory($idFolder2)) {
+                        FileStore::makeDirectory($idFolder2,0777, true, true);
+                    }
                     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
                     $imageName = $image->getClientOriginalName();
                     $image->move($idFolder2, $imageName);
@@ -6120,7 +6121,7 @@ class AdminController extends Controller
                     }
 
                     $courses = $query->get(); // 👈 สำคัญ
-            
+
             $results = []; // กัน error หน้าแรก
 
             return view(
@@ -6554,7 +6555,7 @@ public function questionnaireout_retest(Request $request){
                     }
 
                     $courses = $query->get(); // 👈 สำคัญ
-            
+
             $results = []; // กัน error หน้าแรก
 
             return view(
@@ -6645,7 +6646,7 @@ public function questionnaireout_check_exam(Request $request){
                     }
 
                     $courses = $query->get(); // 👈 สำคัญ
-            
+
             $results = []; // กัน error หน้าแรก
 
             return view(
@@ -6662,116 +6663,120 @@ public function questionnaireout_check_exam_ajax(Request $request)
 {
     if (AuthFacade::useradmin()) {
 
-        $query = DB::table('course_exam_essay_answer')
-            ->join(
-                'course_online',
-                'course_exam_essay_answer.course_id',
-                '=',
-                'course_online.course_id'
-            )
-            ->leftJoin(
-                'users',
-                'course_exam_essay_answer.user_id',
-                '=',
-                'users.id'
-            )
-            ->leftJoin(
-                'profiles',
-                'users.id',
-                '=',
-                'profiles.user_id'
-            )
-            ->leftJoin(
-                'question',
-                'course_exam_essay_answer.ques_id',
-                '=',
-                'question.ques_id'
-            )
-            ->select(
-                'course_exam_essay_answer.course_id',
-                'course_exam_essay_answer.user_id',
-                'course_online.course_title',
-                'profiles.firstname',
-                'profiles.lastname'
-            )
+$query = DB::table('course_exam_essay_answer as exam')
 
-            // 🔥 เอาเฉพาะคนที่ยังมี status = wait
-            ->whereExists(function ($sub) {
+    ->join(
+        'course_online as course',
+        'exam.course_id',
+        '=',
+        'course.course_id'
+    )
 
-                $sub->select(DB::raw(1))
-                    ->from('course_exam_essay_answer as sub_exam')
-                    ->whereColumn(
-                        'sub_exam.course_id',
-                        'course_exam_essay_answer.course_id'
-                    )
-                    ->whereColumn(
-                        'sub_exam.user_id',
-                        'course_exam_essay_answer.user_id'
-                    )
-                    ->where('sub_exam.status', 'wait');
+    ->leftJoin(
+        'users as u',
+        'exam.user_id',
+        '=',
+        'u.id'
+    )
 
-            });
+    ->leftJoin(
+        'profiles as p',
+        'u.id',
+        '=',
+        'p.user_id'
+    )
+
+    ->leftJoin(
+        'question as q',
+        'exam.ques_id',
+        '=',
+        'q.ques_id'
+    )
+
+    ->select(
+        'exam.course_id',
+        'exam.user_id',
+        'exam.status',
+        'course.course_title',
+        'p.firstname',
+        'p.lastname',
+
+        DB::raw("
+            CASE
+                WHEN tbl_exam.status = 'wait' THEN 'รอ'
+                WHEN tbl_exam.status = 'pass' THEN 'ผ่าน'
+                WHEN tbl_exam.status = 'fail' THEN 'ไม่ผ่าน'
+                ELSE '-'
+            END as status_text
+        ")
+    );
 
 
-        // 🔍 เช็คว่ามีการค้นหาไหม
-        $hasSearch = !empty($request->course_id)
-            || !empty(trim($request->firstname))
-            || !empty(trim($request->lastname));
-
-        if (!$hasSearch) {
-
-            // ถ้าไม่ค้นหา ไม่แสดงข้อมูล
-            $query->whereRaw('1 = 0');
-
-        }
+// 🔍 เช็คว่ามีการค้นหาไหม
+$hasSearch = !empty($request->course_id)
+    || !empty(trim($request->firstname))
+    || !empty(trim($request->lastname));
 
 
-        // 🔍 filter course
-        if (!empty($request->course_id)) {
+// ❌ ถ้าไม่ค้นหา ไม่แสดงข้อมูล
+if (!$hasSearch) {
 
-            $query->where(
-                'course_exam_essay_answer.course_id',
-                $request->course_id
-            );
+    $query->whereRaw('1 = 0');
 
-        }
+}
 
 
-        // 🔍 filter firstname
-        if (!empty(trim($request->firstname))) {
+// 🔍 filter course
+if (!empty($request->course_id)) {
 
-            $query->where(
-                'profiles.firstname',
-                'like',
-                '%' . trim($request->firstname) . '%'
-            );
+    $query->where(
+        'exam.course_id',
+        $request->course_id
+    );
 
-        }
-
-
-        // 🔍 filter lastname
-        if (!empty(trim($request->lastname))) {
-
-            $query->where(
-                'profiles.lastname',
-                'like',
-                '%' . trim($request->lastname) . '%'
-            );
-
-        }
+}
 
 
-        // 🔥 group
-        $query->groupBy(
-            'course_exam_essay_answer.course_id',
-            'course_exam_essay_answer.user_id',
-            'course_online.course_title',
-            'profiles.firstname',
-            'profiles.lastname'
-        );
+// 🔍 filter firstname
+if (!empty(trim($request->firstname))) {
+
+    $query->where(
+        'p.firstname',
+        'like',
+        '%' . trim($request->firstname) . '%'
+    );
+
+}
 
 
-        $results = $query->get();
+// 🔍 filter lastname
+if (!empty(trim($request->lastname))) {
+
+    $query->where(
+        'p.lastname',
+        'like',
+        '%' . trim($request->lastname) . '%'
+    );
+
+}
+
+
+// 🔥 group by
+$query->groupBy(
+    'exam.course_id',
+    'exam.user_id',
+    'exam.status',
+    'course.course_title',
+    'p.firstname',
+    'p.lastname'
+);
+
+
+// 🔥 เรียงล่าสุด
+$query->orderBy('exam.course_id', 'desc');
+
+
+$results = $query->get();
 
         // ✅ partial table
         $html = view(

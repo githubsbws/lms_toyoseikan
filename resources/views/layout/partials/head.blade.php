@@ -52,9 +52,36 @@ use App\Models\Usability;
     }
 
     .navbar-right a {
-        display: flex;
-        align-items: center;
-        column-gap: 6px;
+        padding: 0px 21px !important;
+        margin: 9px 4px 4px 4px !important !important;
+        border-radius: 42px !important;
+        line-height: 2.5 !important;
+    }
+
+    .navbar-nav>li>.dropdown-menu {
+        height: auto !important;
+    }
+
+    .navbar-right a {
+        padding: 10px;
+    }
+
+    .dropdown-profile {
+        background-color: #093880 !important;
+        border-color: #093880 !important;
+        border-radius: 26px !important;
+        color: #fff !important;
+        display: flex !important;
+        align-items: center !important;
+        height: auto !important;
+        line-height: 3 !important;
+        padding: 0 16px !important;
+        margin-top: 10px !important;
+    }
+
+    .navbar.navbar-size-xlarge .navbar-btn {
+        margin-top: 16px !important;
+        margin-bottom: 16px !important;
     }
 </style>
 
@@ -131,7 +158,7 @@ use App\Models\Usability;
                 </button>
                 <div class="navbar-brand navbar-brand-logo">
                     <a href="{{url('index')}}">
-                        <img src="{{ asset('themes/bws/images/toyologo.jpg') }}" class="logonav" style="width: 80px !important; height: auto !important;">
+                        <img src="{{ asset('themes/bws/images/toyologo.jpg') }}" class="logonav" style="width: 74px !important; height: auto !important;">
                     </a>
                 </div>
             </div>
@@ -208,28 +235,28 @@ use App\Models\Usability;
                     <ul class="nav navbar-nav navbar-nav-bordered">
                         <!-- user -->
                         <li class="dropdown user" style="border-right-color: #fff;">
-                            <a href="#" class="dropdown-toggle ripple" data-toggle="dropdown" aria-expanded="false"><span class="ink animate"></span>
+                            <a href="#" class="dropdown-toggle ripple dropdown-profile" data-toggle="dropdown" aria-expanded="false"><span class="ink animate"></span>
 
                                 <img class="img-circle" style="height:30px;" src="{{ asset('themes/bws/images/default-avatar.png') }}" alt="No Image"> {{Auth::user()->username}} <span class="caret"></span>
 
                             </a>
                             <ul class="dropdown-menu" role="menu" style="height: auto; display: none; overflow: visible; top: 100%; opacity: 0;">
-                                <li><a href="{{ url('dashboard') }}"><i class="fa fa-bar-chart-o"></i> Dashboard</a></li>
-                                <li><a href="{{ url('course') }}"><i class="fa fa-mortar-board"></i> หลักสูตรของฉัน</a></li>
-                                <li><a href="{{ url('profile') }}"><i class="fa fa-user"></i>
+                                <!-- <li><a href="{{ url('dashboard') }}"><i class="fa fa-bar-chart-o"></i> Dashboard</a></li> -->
+                                <!-- <li><a href="{{ url('course') }}"><i class="fa fa-mortar-board"></i> หลักสูตรของฉัน</a></li> -->
+                                <!--                 <li><a href="{{ url('profile') }}"><i class="fa fa-user"></i>
                                         โปรไฟล์</a></li>
 
-                                <li>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                        @csrf
+                                <li> -->
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                    @csrf
 
-                                    </form>
-                                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fa fa-sign-out"></i>
-                                        ออกจากระบบ
-                                    </a>
-                                </li>
-                            </ul>
+                                </form>
+                                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fa fa-sign-out"></i>
+                                    ออกจากระบบ
+                                </a>
                         </li>
+                    </ul>
+                    </li>
                     </ul>
                 </div>
 
