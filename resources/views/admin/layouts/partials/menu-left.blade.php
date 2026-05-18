@@ -310,7 +310,7 @@ use App\Helpers\PermissionHelper;
                     <a href="#" class="nav-link {{ request()->is('questionnaireout*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-alt"></i>
                         <p>
-                            ระบบประเมินภาคปฏิบัติ
+                            ระบบประเมิน
                             <i class="right fas fa-angle-left"></i>
                             <span class="badge badge-info right">5</span>
                         </p>
@@ -650,7 +650,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                         <li class="nav-item">
                             <a href="{{url('report_license')}}" class="nav-link {{ request()->is('report_license') ? 'active' : '' }}">
-                                <p>License person Report</p>
+                                <p>License Person Report</p>
                             </a>
                         </li>
                         <li class="nav-item">
