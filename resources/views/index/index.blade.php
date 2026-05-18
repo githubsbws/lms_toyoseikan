@@ -13,13 +13,13 @@ use App\Models\DownloadFile;
 
 <style>
     /* --- Pure CSS Custom Reset & Typography --- */
-    body {
+ /*    body {
         font-family: 'Prompt', sans-serif;
         background-color: #fcfcfc;
         color: #000000;
         margin: 0;
         padding: 0;
-    }
+    } */
 
     a,
     a:hover,

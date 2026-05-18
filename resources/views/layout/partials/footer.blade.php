@@ -6,11 +6,11 @@
 
     .text-headline {
         margin-bottom: 8px !important;
-        font-size: 20px !important;
+        font-size: 22px !important;
     }
 
     .col-lg-4 p {
-        font-size: 16px !important;
+        font-size: 18px !important;
     }
 </style>
 
