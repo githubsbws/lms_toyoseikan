@@ -6800,55 +6800,107 @@ public function questionnaireout_check_exam_detail(Request $request)
 {
     try {
 
-       $data = DB::table('course_exam_essay_answer')
+$data = DB::table('course_exam_essay_answer')
+
     ->join(
         'course_online',
         'course_exam_essay_answer.course_id',
         '=',
         'course_online.course_id'
     )
+
     ->leftJoin(
         'users',
         'course_exam_essay_answer.user_id',
         '=',
         'users.id'
     )
+
     ->leftJoin(
         'profiles',
         'users.id',
         '=',
         'profiles.user_id'
     )
+
     ->leftJoin(
         'question',
         'course_exam_essay_answer.ques_id',
         '=',
         'question.ques_id'
     )
+
     ->leftJoin(
         'course_score_weight',
         'course_exam_essay_answer.course_id',
         '=',
         'course_score_weight.course_id'
     )
-    ->where('course_exam_essay_answer.course_id', $request->course_id)
-    ->where('course_exam_essay_answer.user_id', $request->user_id)
-    ->where('course_exam_essay_answer.status', 'wait')
+
+    // ✅ เพิ่ม join coursescore
+    ->leftJoin(
+        'coursescore',
+        function ($join) {
+
+            $join->on(
+                'course_exam_essay_answer.course_id',
+                '=',
+                'coursescore.course_id'
+            );
+
+            $join->on(
+                'course_exam_essay_answer.user_id',
+                '=',
+                'coursescore.user_id'
+            );
+
+        }
+    )
+
+    ->where(
+        'course_exam_essay_answer.course_id',
+        $request->course_id
+    )
+
+    ->where(
+        'course_exam_essay_answer.user_id',
+        $request->user_id
+    )
+
     ->select(
         'course_exam_essay_answer.id',
+
         'course_exam_essay_answer.course_id as course_id',
+
         'course_exam_essay_answer.user_id as user_id',
+
         'course_exam_essay_answer.ques_id',
+
         'course_online.course_title',
+
         'profiles.firstname',
+
         'profiles.lastname',
+
         'question.ques_title',
+
         'question.answer',
+
         'course_exam_essay_answer.answer_text',
-        'course_score_weight.exam_weight'
+
+        'course_score_weight.exam_weight',
+
+        // ✅ เพิ่มคะแนน
+        'coursescore.score_number as score'
     )
+
     ->distinct()
-    ->orderBy('course_exam_essay_answer.ques_id', 'DESC')
+
+    ->orderBy(
+        'course_exam_essay_answer.ques_id',
+        'DESC'
+    )
+
     ->get();
 
         return view(

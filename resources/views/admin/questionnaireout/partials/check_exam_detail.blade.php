@@ -114,7 +114,7 @@
     @endforeach
 
     {{-- SCORE --}}
-    <div id="scoreSection" style="display:none;">
+   <div id="scoreSection" style="display:none;">
 
         <div class="card shadow-sm border-0 mb-4">
 
@@ -135,12 +135,13 @@
                         </label>
 
                         <input type="number"
-                               name="score"
-                               class="form-control form-control-lg score-input"
-                               max="{{ $data[0]->exam_weight }}"
-                               data-max="{{ $data[0]->exam_weight }}"
-                               min="0"
-                               placeholder="กรอกคะแนน">
+                            name="score"
+                            class="form-control form-control-lg score-input"
+                            max="{{ $data[0]->exam_weight }}"
+                            data-max="{{ $data[0]->exam_weight }}"
+                            min="0"
+                            value="{{ $data[0]->score ?? '' }}"
+                            placeholder="กรอกคะแนน">
 
                         <small class="text-muted mt-2 d-block">
                             คะแนนเต็ม {{ $data[0]->exam_weight }} คะแนน
