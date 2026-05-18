@@ -31,6 +31,7 @@
 											<th>รูปภาพ</th>
 											<th>ชื่อหัวข้อ</th>
 											<th>รายละเอียดย่อ</th>
+                                            <th>วันหมดอายุข่าว</th>
 											<th>จัดการ</th>
 										</tr>
 									</thead>
@@ -44,6 +45,7 @@
 												{{$item->cms_title}}
 											</td>
 											<td>{{$item->cms_short_title}}</td>
+                                            <td>{{$item->expired_date}}</td>
 											<td>
 												<a href="{{route('news.detail',['id'=>$item->cms_id])}}" class="btn btn-warning btn-sm"><i class="fas fa-search"></i></a>
 												<a href="{{route('news_edit',$item->cms_id)}}" class="btn btn-warning btn-sm"><i class="fas fa-pen"></i></a>

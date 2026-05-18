@@ -908,6 +908,7 @@ class AdminController extends Controller
                 $news_create->create_by = Auth::user()->id;
                 $news_create->update_by = Auth::user()->id;
                 $news_create->active = 'y';
+                $news_create->expired_date = $request->input('cms_expire');
                 ///image
                 if($request->file('image')){
                 $image = $request->file('image');
@@ -923,12 +924,12 @@ class AdminController extends Controller
                     $image = $request->file('image');
 
                     $idFolder = public_path('images/uploads/news/'.$news_create->cms_id);
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder);
+                    if (!FileStore::isDirectory($idFolder)) {
+                        FileStore::makeDirectory($idFolder,0777,true,true);
 
                         $idFolder2 = public_path('images/uploads/news/'.$news_create->cms_id.'/original/');
-                        if (!file_exists($idFolder2)) {
-                            mkdir($idFolder2);
+                        if (!FileStore::isDirectory($idFolder2)) {
+                            FileStore::makeDirectory($idFolder2,0777,true,true);
                         }
                     }
 
@@ -966,19 +967,19 @@ class AdminController extends Controller
                 $news_update->cms_short_title = $request->input('cms_short_title');
                 $news_update->cms_detail = htmlspecialchars($request->input('cms_detail'));
                 $news_update->update_by = Auth::user()->id;
+                $news_update->expired_date = $request->input('cms_expire');
                 if($request->file('image')){
                     $image = $request->file('image');
-
+                    // dd($image);
                     $idFolder = public_path('images/uploads/news/'.$id);
-                    if (!file_exists($idFolder)) {
-                        mkdir($idFolder);
-
-                        $idFolder2 = public_path('images/uploads/news/'.$id.'/original/');
-                        if (!file_exists($idFolder2)) {
-                            mkdir($idFolder2);
-                        }
+                    if (!FileStore::isDirectory($idFolder)) {
+                        FileStore::makeDirectory($idFolder);
                     }
 
+                    $idFolder2 = public_path('images/uploads/news/'.$id.'/original/');
+                    if (!FileStore::isDirectory($idFolder2)) {
+                        FileStore::makeDirectory($idFolder2,0777,true,true);
+                    }
                     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
                     $imageName = $image->getClientOriginalName();
                     $image->move($idFolder2, $imageName);
@@ -6110,7 +6111,7 @@ class AdminController extends Controller
                     }
 
                     $courses = $query->get(); // 👈 สำคัญ
-            
+
             $results = []; // กัน error หน้าแรก
 
             return view(
@@ -6544,7 +6545,7 @@ public function questionnaireout_retest(Request $request){
                     }
 
                     $courses = $query->get(); // 👈 สำคัญ
-            
+
             $results = []; // กัน error หน้าแรก
 
             return view(
@@ -6635,7 +6636,7 @@ public function questionnaireout_check_exam(Request $request){
                     }
 
                     $courses = $query->get(); // 👈 สำคัญ
-            
+
             $results = []; // กัน error หน้าแรก
 
             return view(

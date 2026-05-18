@@ -28,7 +28,7 @@
 						</div>
 						<div class="card-body">
 							<p>ค่าที่มี <span class="text-danger">*</span> จำเป็นต้องใส่ให้ครบ</p>
-	
+
 							<form action="{{route('news.create')}}" method="POST" enctype="multipart/form-data">
 								@csrf
 								<div class="form-group">
@@ -46,12 +46,17 @@
 									<textarea name="cms_detail" id="summernote" class="form-control"></textarea>
 								</div>
 
+                                <div class="form-group">
+									<label for="summernote">วันหมดอายุข่าว</label>
+									<input type="date" name="cms_expire" class="form-control"></input>
+								</div>
+
 								<div class="form-group">
 									<label for="summernote">รูปภาพ</label>
 									<div class="fileupload fileupload-new" data-provides="fileupload">
 										<div class="input-append">
 											<div class="uneditable-input span3">
-												<i class="icon-file fileupload-exists"></i> 
+												<i class="icon-file fileupload-exists"></i>
 												<span class="fileupload-preview"></span>
 											</div>
 											<img id="previewImage" src="#" alt="Preview Image" style="display: none;">
@@ -69,11 +74,11 @@
 											document.addEventListener('DOMContentLoaded', function() {
 												var imageInput = document.getElementById('imageInput');
 												var previewImage = document.getElementById('previewImage');
-									
+
 												imageInput.addEventListener('change', function() {
 													previewImageFile(this);
 												});
-									
+
 												function previewImageFile(input) {
 													var file = input.files[0];
 													if (file) {
@@ -88,12 +93,6 @@
 											});
 										</script>
 									</div>
-								</div>
-
-								<div class="form-group">
-									<font color="#990000">
-										<span style="margin:0;" class="btn-action single glyphicons circle_question_mark"><i></i></span> รูปภาพควรมีขนาด 250x180(แนวนอน) หรือ ขนาด 250x(xxx) (แนวยาว)
-									</font>
 								</div>
 
 								<div class="card-footer">
