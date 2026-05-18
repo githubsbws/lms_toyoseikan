@@ -973,12 +973,12 @@ class AdminController extends Controller
                     // dd($image);
                     $idFolder = public_path('images/uploads/news/'.$id);
                     if (!FileStore::isDirectory($idFolder)) {
-                        FileStore::makeDirectory($idFolder);
+                        FileStore::makeDirectory($idFolder, 0777, true, true);
                     }
 
                     $idFolder2 = public_path('images/uploads/news/'.$id.'/original/');
                     if (!FileStore::isDirectory($idFolder2)) {
-                        FileStore::makeDirectory($idFolder2,0777,true,true);
+                        FileStore::makeDirectory($idFolder2,0777, true, true);
                     }
                     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
                     $imageName = $image->getClientOriginalName();
