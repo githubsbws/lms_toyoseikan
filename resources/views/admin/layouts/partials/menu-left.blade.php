@@ -322,12 +322,12 @@ use App\Helpers\PermissionHelper;
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/questionnaireout_retest') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
+                            <a href="{{ url('/questionnaireout_retest') }}" class="nav-link {{ request()->is('questionnaireout_retest') ? 'active' : '' }}">
                                 <p>การสอบซ่อม</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/questionnaireout_check_exam') }}" class="nav-link {{ request()->is('questionnaireout') ? 'active' : '' }}">
+                            <a href="{{ url('/questionnaireout_check_exam') }}" class="nav-link {{ request()->is('questionnaireout_check_exam') ? 'active' : '' }}">
                                 <p>ตรวจข้อสอบอัตนัย</p>
                             </a>
                         </li>
