@@ -8,7 +8,7 @@
         <div class="content-header">
             <div class="container-fluid">
                 <div class="d-flex align-items-center">
-                    <h4 class="m-0">การประเมินภาคปฏิบัติ</h4>
+                    <h4 class="m-0">การประเมินภาคปฎิบัติ</h4>
 
                     <div class="ml-3">
                         <a href="{{ route('admin') }}">
@@ -51,6 +51,24 @@
                             <div class="col-md-3">
                                 <label>นามสกุล</label>
                                 <input type="text" id="lastname" class="form-control">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label>สถานะ</label>
+
+                                <select id="status" class="form-control">
+
+                                    <option value="">-- ทั้งหมด --</option>
+
+                                    <option value="pass">
+                                        กรอกข้อมูลแล้ว
+                                    </option>
+
+                                    <option value="wait">
+                                        ยังไม่ได้กรอกข้อมูล
+                                    </option>
+
+                                </select>
                             </div>
 
                         </div>
@@ -99,7 +117,8 @@ $(document).ready(function(){
             data: {
                 course_id: $('#course_id').val(),
                 firstname: $('#firstname').val(),
-                lastname: $('#lastname').val()
+                lastname: $('#lastname').val(),
+                status: $('#status').val()
             },
             success: function(res){
                 $('#resultTable').html(res.html);
@@ -108,6 +127,7 @@ $(document).ready(function(){
     }
 
     $('#course_id').change(loadData);
+    $('#status').change(loadData);
 
     let delayTimer;
     $('#firstname, #lastname').keyup(function(){

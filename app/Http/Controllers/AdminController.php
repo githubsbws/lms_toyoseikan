@@ -6065,7 +6065,14 @@ class AdminController extends Controller
         public function questionnaireout_assessment(Request $request){
         if (AuthFacade::useradmin()) {
 
-            $courses = DB::table('course_online')->get(); // 👈 สำคัญ
+            $query = DB::table('course_online');
+
+                    if ((string) auth()->user()->superuser !== '1') {
+                        $query->where('create_by', auth()->user()->id);
+                    }
+
+                    $courses = $query->get(); // 👈 สำคัญ
+            
             $results = []; // กัน error หน้าแรก
 
             return view(
@@ -6108,29 +6115,100 @@ class AdminController extends Controller
 {
     if (AuthFacade::useradmin()) {
 
-       $query = DB::table('passcours')
-    ->join('course_online', 'passcours.passcours_cours', '=', 'course_online.course_id')
-    ->leftJoin('users', 'passcours.passcours_user', '=', 'users.id')
-    ->leftJoin('profiles', 'users.id', '=', 'profiles.user_id')
-    ->select(
-        'passcours.passcours_id as passcours_id',
-        'course_online.course_id',
-        'course_online.course_title',
-        'profiles.firstname',
-        'profiles.lastname'
-    );
+        $query = DB::table('passcours')
+            ->join(
+                'course_online',
+                'passcours.passcours_cours',
+                '=',
+                'course_online.course_id'
+            )
+            ->leftJoin(
+                'users',
+                'passcours.passcours_user',
+                '=',
+                'users.id'
+            )
+            ->leftJoin(
+                'profiles',
+                'users.id',
+                '=',
+                'profiles.user_id'
+            )
+            ->select(
+                'passcours.passcours_id as passcours_id',
+                'course_online.course_id',
+                'course_online.course_title',
+                'profiles.firstname',
+                'profiles.lastname',
+                'passcours.passcours_status'
+            );
 
-if (!empty($request->course_id)) {
-    $query->where('course_online.course_id', $request->course_id);
-}
 
-if (!empty($request->firstname)) {
-    $query->where('profiles.firstname', 'like', '%' . $request->firstname . '%');
-}
+        // 🔍 filter course
+        if (!empty($request->course_id)) {
 
-if (!empty($request->lastname)) {
-    $query->where('profiles.lastname', 'like', '%' . $request->lastname . '%');
-}
+            $query->where(
+                'course_online.course_id',
+                $request->course_id
+            );
+
+        }
+
+
+        // 🔍 filter firstname
+        if (!empty($request->firstname)) {
+
+            $query->where(
+                'profiles.firstname',
+                'like',
+                '%' . $request->firstname . '%'
+            );
+
+        }
+
+
+        // 🔍 filter lastname
+        if (!empty($request->lastname)) {
+
+            $query->where(
+                'profiles.lastname',
+                'like',
+                '%' . $request->lastname . '%'
+            );
+
+        }
+
+
+        // 🔥 filter status
+        if (!empty($request->status)) {
+
+            // กรอกข้อมูลแล้ว
+            if ($request->status == 'pass') {
+
+                $query->where(
+                    'passcours.passcours_status',
+                    'pass'
+                );
+
+            }
+
+            // ยังไม่ได้กรอกข้อมูล
+            if ($request->status == 'wait') {
+
+                $query->where(function($q){
+
+                    $q->whereNull('passcours.passcours_status')
+                    ->orWhere(
+                        'passcours.passcours_status',
+                        'wait'
+                    );
+
+                });
+
+            }
+
+        }
+
 
         $results = $query->get();
 
@@ -6421,7 +6499,14 @@ public function questionnaireout_save(Request $request)
 public function questionnaireout_retest(Request $request){
         if(AuthFacade::useradmin()){
 
-            $courses = DB::table('course_online')->get(); // 👈 สำคัญ
+            $query = DB::table('course_online');
+
+                    if ((string) auth()->user()->superuser !== '1') {
+                        $query->where('create_by', auth()->user()->id);
+                    }
+
+                    $courses = $query->get(); // 👈 สำคัญ
+            
             $results = []; // กัน error หน้าแรก
 
             return view(

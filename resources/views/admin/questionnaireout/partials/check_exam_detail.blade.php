@@ -182,18 +182,18 @@
     {{-- BUTTON --}}
     <div class="d-flex justify-content-between align-items-center mt-4">
 
-        {{-- ซ้าย --}}
-        <button type="button"
-                class="btn btn-secondary"
-                id="prevBtn">
+            {{-- ซ้าย --}}
+            <button type="button"
+                    class="btn btn-secondary"
+                    id="prevBtn">
 
-            <i class="fas fa-arrow-left"></i>
-            ย้อนกลับ
+                <i class="fas fa-arrow-left"></i>
+                ย้อนกลับ
 
-        </button>
+            </button>
 
-        {{-- ขวา --}}
-        <div>
+            {{-- ขวา --}}
+            <div>
 
             <button type="button"
                     class="btn btn-primary"
