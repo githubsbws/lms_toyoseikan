@@ -1,8 +1,16 @@
 @extends('layout/mainlayout')
 @section('content')
+<style>
+    .page-section{
+        margin: 0 !important
+    }
+    .main-content {
+        min-height: 100vh;
+    }
+</style>
 <body>
 
-    <div class="span-19">
+    <div class="main-content">
         <div id="content">
             <!---->
             <!--<h1>Faqs</h1>-->
@@ -45,64 +53,36 @@
                                     <div class="media v-middle">
                                         <div class="media-body">
                                             <h4 class="text-headline margin-none" style="font-size: 26px;font-weight: bold;">{{ $type->faq_type_title_TH }}</h4>
-                                            <!--                            <p class="text-subhead text-light">คำถามที่พบบ่อย</p>-->
                                         </div>
                                         <div class="media-right">
                                         </div>
                                     </div>
                                 </li>
-                                <li class="list-group-item media v-middle">
-                                    
+                                {{-- <li class="list-group-item media v-middle">
+
                                     <div class="panel panel-default" data-toggle="panel-collapse" data-open="false">
-                                        
+
                                         <div class="panel-heading panel-collapse-trigger collapse in collapsed" data-toggle="collapse" data-target="#3caeb8e4-baaa-9587-7891-500dc5108dfe" aria-expanded="false" style="">
                                             <h3 class="panel-title" style="font-size: 22px;"><img src="{{ asset('themes/bws/images/brotherlogo.png') }}" alt="person" style="width: 25px;">{{ $type->faq_THtopic}}</h3>
                                         </div>
 
-                                        
-                                            <div class="panel-body list-group">
-                                                <ul class="list-group list-group-menu">
-                                                    <li class="list-group-item" style="padding-left: 15px;padding:10px;">
-                                                        <ul>
-                                                            <li>
-                                                                <p><strong>{!! htmlspecialchars_decode($type->faq_THanswer) !!}</strong></p>
-                                                            </li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        
-                                        
+
+                                        <div class="panel-body list-group">
+                                            <ul class="list-group list-group-menu">
+                                                <li class="list-group-item" style="padding-left: 15px;padding:10px;">
+                                                    <ul>
+                                                        <li>
+                                                            <p><strong>{!! htmlspecialchars_decode($type->faq_THanswer) !!}</strong></p>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
-                                    
-                                </li>
+                                </li> --}}
                             </ul>
                         </div>
                         @endforeach
-                    </div>
-                    <div class="col-md-3">
-                        <form action="{{ url('faq_f_seach')}}" method="get">
-                            <div class="panel panel-default" data-toggle="panel-collapse" data-open="true">
-                                <div class="panel-heading panel-collapse-trigger collapse in" data-toggle="collapse" data-target="#db1bec6e-26b3-0d7f-8fb2-2ea6a985de3c" aria-expanded="true" style="">
-                                    <h4 class="panel-title" style="font-weight: bold;">ค้นหา</h4>
-                                </div>
-
-                                <div id="db1bec6e-26b3-0d7f-8fb2-2ea6a985de3c" class="collapse in">
-                                    <div class="panel-body">
-                                        <div class="form-group input-group margin-none">
-                                            <div class="row margin-none">
-                                                <div class="col-xs-12 padding-none">
-                                                    <input class="form-control" type="text" name="search_text" placeholder="คำค้นหา" value="">
-                                                </div>
-                                            </div>
-                                            <div class="input-group-btn">
-                                                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>

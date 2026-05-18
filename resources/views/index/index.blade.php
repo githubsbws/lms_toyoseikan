@@ -957,23 +957,22 @@ use App\Models\DownloadFile;
                 <div class="row">
                     @if($course_detail->isNotEmpty())
                         @foreach ($course_detail as $course)
-
-                        @endforeach
-                        <a href="{{ url('course') }}">
-                            <div class="col-md-4 col-sm-6">
-                                <div class="course-card-item">
-                                    <div class="course-image-area">
-                                        <img src="{{ asset('images/uploads/courseonline/' . $course->course_id . '/original/'. $course->course_picture) }}" alt="Course Cover" loading="lazy">
-                                    </div>
-                                    <div class="course-detail-body">
-                                        <h4 class="course-title">{{ $course->course_title }}</h4>
-                                        <div class="instructor-profile-footer">
-                                            <span class="instructor-name">ผู้สอน: {{ $course->teacher->teacher_name ?? '-' }}</span>
+                            <a href="{{ url('course') }}">
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="course-card-item">
+                                        <div class="course-image-area">
+                                            <img src="{{ asset('images/uploads/courseonline/' . $course->course_id . '/original/'. $course->course_picture) }}" alt="Course Cover" loading="lazy">
+                                        </div>
+                                        <div class="course-detail-body">
+                                            <h4 class="course-title">{{ $course->course_title }}</h4>
+                                            <div class="instructor-profile-footer">
+                                                <span class="instructor-name">ผู้สอน: {{ $course->teacher->teacher_name ?? '-' }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </a>
+                            </a>
+                        @endforeach
                     @else
                     <h3>ยังไม่มีหลักสูตรในสายงานของคุณ</h3>
                     @endif
