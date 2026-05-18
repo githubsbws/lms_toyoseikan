@@ -25,28 +25,28 @@
                             <div class="form">
                                 <form method="POST" action="{{ route('password.update') }}" onsubmit="return validatePassword()">
                                     @csrf
-            
+
                                     <input type="hidden" name="token" value="{{ $token }}">
-            
+
                                     <div class="row mb-3">
                                         <label for="email" class="col-md-4 col-form-label text-md-end">Email Address</label>
-            
+
                                         <div class="col-md-6">
                                             <input id="email" type="email" class="form-control" name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus>
                                         </div>
                                     </div>
-            
+
                                     <div class="row mb-3">
                                         <label for="password" class="col-md-4 col-form-label text-md-end">Password</label>
-            
+
                                         <div class="col-md-6">
                                             <input id="password" type="password" class="form-control" name="password" required autocomplete="new-password" oninput="checkPassword()">
                                         </div>
                                     </div>
-            
+
                                     <div class="row mb-3">
                                         <label for="password-confirm" class="col-md-4 col-form-label text-md-end">Confirm Password</label>
-            
+
                                         <div class="col-md-6">
                                             <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
                                         </div>
@@ -59,12 +59,18 @@
                                         </div>
                                     </div>
                                     <div class="row mb-3">
+                                        <label for="password-case" class="col-md-4 col-form-label text-md-end">รหัสผ่านต้องมีตัวอักษรทั้งพิมพ์เล็กและพิมพ์ใหญ่อย่างน้อย 1 ตัว</label>
+                                        <div class="col-md-6">
+                                            <span id="password-case-status"></span>
+                                        </div>
+                                    </div>
+                                    {{-- <div class="row mb-3">
                                         <label for="password-special" class="col-md-4 col-form-label text-md-end">รหัสผ่านต้องมีสัญลักษณ์พิเศษอย่างน้อย 1 ตัว</label>
                                         <div class="col-md-6">
                                             <span id="password-special-status"></span>
                                         </div>
-                                    </div>
-                                    
+                                    </div> --}}
+
                                     @error('password')
                                         <div class="form-group">
                                             <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
