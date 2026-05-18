@@ -21,6 +21,10 @@ use App\Models\DownloadFile;
         padding: 0;
     } */
 
+        .navbar.navbar-size-large .navbar-nav>li>a {
+            font-size: 24px !important;
+        }
+
     a,
     a:hover,
     a:focus {
@@ -896,6 +900,7 @@ use App\Models\DownloadFile;
     .main-video {
         padding: 40px 20px;
     }
+    
 </style>
 
 <body>
