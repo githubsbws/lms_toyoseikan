@@ -26,13 +26,48 @@ class ReportUserExport implements
 {
     protected $users;
     protected $groupedCourses;
-    protected $learns;
+    protected $passCourses;
+    protected $assessmentScores;
 
-    public function __construct($users, $groupedCourses, $learns)
+    public function __construct($users, $groupedCourses, $passCourses,$assessmentScores)
     {
         $this->users = $users;
         $this->groupedCourses = $groupedCourses;
-        $this->learns = $learns;
+        $this->passCourses = $passCourses;
+        $this->assessmentScores = $assessmentScores;
+    }
+
+    private function getSkillLevel($percent)
+    {
+        if ($percent == 100) return 5;
+        if ($percent >= 80) return 4;
+        if ($percent >= 60) return 3;
+        if ($percent >= 25) return 2;
+        if ($percent >= 0) return 1;
+
+        return 0;
+    }
+
+    private function skillSymbol($skill)
+    {
+        if (is_null($skill)) {
+            return '○';
+        }
+
+        switch ((int)$skill) {
+            case 5:
+                return '★';
+            case 4:
+                return '●';
+            case 3:
+                return '◕';
+            case 2:
+                return '◑';
+            case 1:
+                return '◔';
+            default:
+                return '○';
+        }
     }
 
     public function array(): array
@@ -102,18 +137,32 @@ class ReportUserExport implements
                     : '-'
             ];
 
-            $userLearns = $this->learns[$user->id] ?? collect();
-            $courseMap = $userLearns->keyBy('course_id');
-
             foreach($this->groupedCourses as $group => $items){
 
                 foreach($items as $course){
 
-                    $percent = $courseMap[$course->course_id]->score ?? null;
+                    $key = $user->id.'_'.$course->course_id;
 
-                    $row[] = is_null($percent)
-                        ? 'N/A'
-                        : $percent.'%';
+                    $passCourse = $this->passCourses->get($key);
+
+                    $percent = null;
+
+                    if($passCourse){
+
+                        $scores = $this->assessmentScores
+                            ->get($passCourse->passcours_id, collect());
+
+                        // รวมคะแนน assessment
+                        $percent = $scores->sum(function($item){
+                            return (float)$item->score;
+                        });
+                    }
+
+                    $skill = is_null($percent)
+                        ? null
+                        : $this->getSkillLevel($percent);
+
+                    $row[] = $this->skillSymbol($skill);
                 }
             }
 
@@ -249,6 +298,84 @@ class ReportUserExport implements
                 foreach(range(1, $sheet->getHighestRow()) as $row){
                     $sheet->getRowDimension($row)
                         ->setRowHeight(25);
+                }
+
+                $startRow = 3; // data row เริ่ม
+                $startCol = 6; // F
+
+                for ($row = $startRow; $row <= $sheet->getHighestRow(); $row++) {
+
+                    for ($col = $startCol; $col <= \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($sheet->getHighestColumn()); $col++) {
+
+                        $cell = $this->columnLetter($col).$row;
+                        $value = $sheet->getCell($cell)->getValue();
+
+                        $color = null;
+
+                        switch ($value) {
+                            case '★':
+                                $color = 'FFD700'; // gold
+                                break;
+                            case '●':
+                                $color = '333333';
+                                break;
+                            case '◕':
+                                $color = '666666';
+                                break;
+                            case '◑':
+                                $color = '999999';
+                                break;
+                            case '◔':
+                                $color = 'CCCCCC';
+                                break;
+                            case '○':
+                                $color = 'EEEEEE'; 
+                                break;
+                        }
+
+                        if ($color) {
+
+                            $borderColor = ($value == '○')
+                                ? 'BFBFBF'
+                                : null;
+
+                            $fontColor = in_array($value, ['●', '◕']) 
+                                ? 'FFFFFF' 
+                                : '000000';
+
+                            $sheet->getStyle($cell)->applyFromArray([
+
+                                'fill' => [
+                                    'fillType' => Fill::FILL_SOLID,
+                                    'startColor' => [
+                                        'rgb' => $color
+                                    ]
+                                ],
+                                'borders' => $value == '○'
+                                ? [
+                                    'outline' => [
+                                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                        'color' => [
+                                            'rgb' => 'BFBFBF'
+                                        ]
+                                    ]
+                                ]
+                                : [],
+                                'font' => [
+                                    'bold' => true,
+                                    'size' => 14,
+                                    'color' => [
+                                        'rgb' => $fontColor
+                                    ]
+                                ],
+
+                                'alignment' => [
+                                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                                ]
+                            ]);
+                        }
+                    }
                 }
 
             }

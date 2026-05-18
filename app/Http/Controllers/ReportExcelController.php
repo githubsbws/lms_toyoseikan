@@ -14,7 +14,8 @@ use App\Exports\ReportLicenseExport;
 use App\Exports\PersonalAssessmentDetailExport;
 use App\Models\Users;
 use App\Models\Course;
-use App\Models\Learn;
+use App\Models\Passcourse;
+use App\Models\ScoreAssessment;
 use App\Models\OperationMachine;
 use App\Models\ParameterSetting;
 use App\Models\LicensePerson;
@@ -73,22 +74,62 @@ class ReportExcelController extends Controller
 
         $groupedCourses = $courses->groupBy('cate_name');
 
-        $learns = Learn::whereIn(
-                'course_id',
+        /*
+        |--------------------------------------------------------------------------
+        | Pass Course
+        |--------------------------------------------------------------------------
+        */
+
+        $passCourses = Passcourse::whereIn(
+                'passcours_cours',
                 $courses->pluck('course_id')
             )
             ->whereIn(
-                'user_id',
+                'passcours_user',
                 $users->pluck('id')
             )
+            ->where(
+                'passcours_status',
+                'pass'
+            )
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Score Assessment
+        |--------------------------------------------------------------------------
+        */
+
+        $assessmentScores = ScoreAssessment::whereIn(
+                'passcours_id',
+                $passCourses->pluck('passcours_id')
+            )
+            ->where(
+                'active',
+                'y'
+            )
             ->get()
-            ->groupBy('user_id');
+            ->groupBy('passcours_id');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Key Map
+        |--------------------------------------------------------------------------
+        */
+
+        $passCourses = $passCourses->keyBy(function($item){
+            return $item->passcours_user
+                .'_'.
+                $item->passcours_cours;
+        });
+
 
         return Excel::download(
             new ReportUserExport(
                 $users,
                 $groupedCourses,
-                $learns
+                $passCourses,
+                $assessmentScores
             ),
             'report_user.xlsx'
         );

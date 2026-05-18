@@ -109,7 +109,7 @@ use App\Models\Profiles;
 use App\Models\ProfilesTitle;
 use App\Models\Roadmap;
 use App\Models\RoadmapCourse;
-
+use App\Models\ScoreAssessment;
 use getID3;
 // use App\Models\Users;
 
@@ -5755,9 +5755,10 @@ class AdminController extends Controller
             */
 
             $courses = collect();
-            $learns = collect();
+            $passCourses = collect();
+            $assessmentScores = collect();
 
-            if($cate_id){
+           if($cate_id){
 
                 $courses = Course::join(
                         'category',
@@ -5776,16 +5777,52 @@ class AdminController extends Controller
                     ->orderBy('course_online.course_id')
                     ->get();
 
-                $learns = Learn::whereIn(
-                        'course_id',
+                /*
+                |--------------------------------------------------------------------------
+                | Course ที่ผ่านแล้ว
+                |--------------------------------------------------------------------------
+                */
+
+                $passCourses = Passcourse::whereIn(
+                        'passcours_cours',
                         $courses->pluck('course_id')
                     )
                     ->whereIn(
-                        'user_id',
+                        'passcours_user',
                         $users->pluck('id')
                     )
+                    ->where(
+                        'passcours_status',
+                        'pass'
+                    )
+                    ->get();
+
+                /*
+                |--------------------------------------------------------------------------
+                | Assessment Score
+                |--------------------------------------------------------------------------
+                */
+
+                $assessmentScores = ScoreAssessment::whereIn(
+                        'passcours_id',
+                        $passCourses->pluck('passcours_id')
+                    )
+                    ->where(
+                        'active',
+                        'y'
+                    )
                     ->get()
-                    ->groupBy('user_id');
+                    ->groupBy('passcours_id');
+
+                /*
+                |--------------------------------------------------------------------------
+                | Map user_id + course_id
+                |--------------------------------------------------------------------------
+                */
+
+                $passCourses = $passCourses->keyBy(function($item){
+                    return $item->passcours_user.'_'.$item->passcours_cours;
+                });
             }
 
             /*
@@ -5843,7 +5880,8 @@ class AdminController extends Controller
 
                 'users' => $users,
                 'courses' => $courses,
-                'learns' => $learns,
+                'passCourses' => $passCourses,
+                'assessmentScores' => $assessmentScores,
 
                 'departments' => $departments,
                 'sections' => $sections,
