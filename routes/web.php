@@ -188,7 +188,7 @@ Route::get('new',[NewController::class,'new'])->name('new')->middleware('checkId
 Route::get('new_detail/{id}',[NewController::class,'new_detail'])->name('new_detail')->middleware('checkIdleTimeout');
 Route::get('new_search', [NewController::class, 'new'])->middleware('checkIdleTimeout');
 // ----- usability
-Route::get('usability_front/{id}',[UsabilityController::class,'usability_front'])->name('usability_front')->middleware('checkIdleTimeout');
+Route::get('usability_front',[UsabilityController::class,'usability_front'])->name('usability_front')->middleware('checkIdleTimeout');
 // ----- virtualclassroom
 Route::get('virtualclassroom',[VirtualclassroomController::class,'virtualclassroom'])->name('virtualclassroom')->middleware('checkIdleTimeout');
 // ----- WebboardController

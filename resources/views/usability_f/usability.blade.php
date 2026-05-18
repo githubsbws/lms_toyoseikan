@@ -1,8 +1,15 @@
 @extends('layout/mainlayout')
 @section('content')
+<style>
+    .page-section{
+        margin: 0 !important
+    }
+    .main-content {
+        min-height: 100vh;
+    }
+</style>
 <body>
-
-    <div class="span-19">
+    <div class="main-content">
         <div id="content">
             <style>
                 .custom-color1 {
@@ -27,13 +34,12 @@
                     <div class="panel-body">
                         @foreach ($usa as $us)
                         <p><span style="font-family: tahoma, arial, helvetica, sans-serif; font-size: x-large;"><strong>{{ $us->usa_title}} &nbsp;</strong> &nbsp;</span></p>
-                        <p><span style="font-family: tahoma, arial, helvetica, sans-serif; font-size: large;">{!! htmlspecialchars_decode($us->usa_detail) !!}</span></p>
+                        {{-- <p><span style="font-family: tahoma, arial, helvetica, sans-serif; font-size: large;">{!! htmlspecialchars_decode($us->usa_detail) !!}</span></p> --}}
                         @endforeach
                     </div>
                 </div>
             </div>
         </div><!-- content -->
     </div>
-
 </body>
 @endsection

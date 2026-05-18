@@ -188,63 +188,27 @@ use App\Models\Usability;
                         <a href="{{url('new')}}">ข่าวสาร</a>
                         <!-- <a href="#modal-ckeck-key-new" data-toggle="modal">ข่าวสาร</a> -->
                     </li>
-                    <!-- <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">หลักสูตร <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="/lms_brother_docker/lms/app/index.php/course/index">หลักสูตรทั้งหมด</a></li>
-                            <li><a href="#">หลักสูตร A</a></li>
-                        </ul>
-                    </li> -->
                     @if(Auth::check())
                     <li class="dropdown">
                         <a href="{{ url('course') }}">หลักสูตร</a>
                     </li>
 
-                    @endif
-                    <!--  <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">วิธีการใช้งาน <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            @php
-                            $usa = Usability::where('active','y')->get();
-                            @endphp
-                            @foreach ($usa as $us)
-                            <li>
-                                <a href="{{ url('usability_front',$us->usa_id) }}">{{ $us->usa_title }}</a>
-                            </li>
-                            @endforeach
-                        </ul>
-                    </li> -->
-                    <!--     <li class="dropdown">
-                        <a href="{{ url('faq_f') }}">คำถามที่พบบ่อย</a>
-                    </li> -->
-                    @if(Auth::check())
-                    <!-- <li class="dropdown">
-
-                        <a href="{{url('virtualclassroom')}}">ห้องเรียน</a>
-
-                    </li> -->
                     <li class="dropdown">
-
                         <a href="{{url('dashboard')}}">แดชบอร์ด</a>
-
                     </li>
                     @endif
-
+                    </li>
+                       <li class="dropdown">
+                        <a href="{{ route('faq_front') }}">คำถามที่พบบ่อย</a>
+                    </li>
+                    </li>
+                       <li class="dropdown">
+                        <a href="{{ route('usability_front') }}">วิธีการใช้งาน</a>
+                    </li>
                     <li class="dropdown">
                         <a href="{{ route('site.contactus') }}">ติดต่อเรา</a>
                     </li>
 
-                    <!--                    <li class="dropdown--><!--">-->
-                    <!--                        <a href="-->
-                    <!--">แบบประเมิน</a>-->
-                    <!--                    </li>-->
-                    <!--                    <li class="dropdown--><!--">-->
-                    <!--                        <a href="--><!--">ข้อสอบ</a>-->
-                    <!--                    </li>-->
-                    <!--                    <li class="dropdown--><!--">-->
-                    <!--                        <a href="-->
-                    <!--">สมัครสมาชิก</a>-->
-                    <!--                    </li>-->
                 </ul>
                 @if(Auth::check())
                 <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
