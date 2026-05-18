@@ -119,7 +119,7 @@
                             class="form-control"
                             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
 
-                        {{-- @if(isset($files[2]) && !empty($files[2]->file_name))
+                        @if(isset($files[2]) && !empty($files[2]->file_name))
                             <div class="mt-2">
                                 <a href="{{ asset('images/uploads/assessment_files/'.$files[2]->file_name) }}"
                                 target="_blank"
@@ -127,7 +127,7 @@
                                     <i class="fas fa-file"></i> ดูไฟล์เดิม
                                 </a>
                             </div>
-                        @endif --}}
+                        @endif
                     </div>
 
                     {{-- 📝 หมายเหตุ --}}

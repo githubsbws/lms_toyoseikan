@@ -8,7 +8,7 @@
         <div class="content-header">
             <div class="container-fluid">
                 <div class="d-flex align-items-center">
-                    <h4 class="m-0">ผลการเรียน</h4>
+                    <h4 class="m-0">การสอบซ่อม</h4>
 
                     <div class="ml-3">
                         <a href="{{ route('admin') }}">
