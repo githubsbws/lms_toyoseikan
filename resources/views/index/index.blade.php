@@ -1012,7 +1012,7 @@ use App\Models\DownloadFile;
                                 <a href="{{ route('new_detail',$news->cms_id) }}">
                                     <div class="col-md-4 col-sm-12">
                                         <div class="news-card-item small-box">
-                                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$new->cms_picture) }}" alt="News Image 2" loading="lazy">
+                                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 2" loading="lazy">
                                             <div class="news-overlay-content">
                                                 <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
                                                 <div class="news-meta-info">
