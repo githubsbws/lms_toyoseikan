@@ -7,7 +7,7 @@
 				<div class="container-fluid">
 					<div class="d-flex align-items-center">
 						<div class="">
-							<h4 class="m-0">Learning Potential</h4>
+							<h4 class="m-0">Learning Potential Report</h4>
 						</div>
 						<div class="ml-3">
 							<a href="{{route('admin')}}">

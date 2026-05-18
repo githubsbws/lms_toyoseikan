@@ -63,8 +63,8 @@ th.rotate > div {
 /* Skill 5 ⭐ */
 .skill-5 {
     background: transparent;
-    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 
-                       79% 91%, 50% 70%, 21% 91%, 32% 57%, 
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
+                       79% 91%, 50% 70%, 21% 91%, 32% 57%,
                        2% 35%, 39% 35%);
 }
 
@@ -100,7 +100,7 @@ th.rotate > div {
 				<div class="container-fluid">
 					<div class="d-flex align-items-center">
 						<div class="">
-							<h4 class="m-0">ระบบReport</h4>
+							<h4 class="m-0">Skill Matrix Visual Report</h4>
 						</div>
 						<div class="ml-3">
 							<a href="{{route('admin')}}">
@@ -146,7 +146,7 @@ th.rotate > div {
 											@endforeach
 										</select>
 									</div>
-									
+
 									<div class="col-md-2">
 										<label>Line</label>
 										<select name="line_id" id="line_id" class="form-control">
@@ -238,8 +238,8 @@ th.rotate > div {
 										<td>{{ $user->firstname }} {{ $user->lastname }}</td>
 										<td>{{ $user->staff_id }}</td>
 										<td>{{ $user->Orgchart->title ?? '-' }}</td>
-										<td>{{ $user->work_start 
-												? \Carbon\Carbon::parse($user->work_start)->format('d F Y') 
+										<td>{{ $user->work_start
+												? \Carbon\Carbon::parse($user->work_start)->format('d F Y')
 												: '-' }}
 										</td>
 										@php

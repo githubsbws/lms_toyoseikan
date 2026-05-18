@@ -118,6 +118,7 @@
                                                 </button>
                                             </div>
 
+
                                             @else
                                             <h5>ไม่มีวิดีโอ</h5>
 
@@ -135,6 +136,7 @@
                                     {{-- <input type="file" class="fileupload fileupload-new" name="filename[]" id="fileInput" multiple onchange="displayFileNames()"> --}}
                                     </div>
                                     <div id="fileList"></div>
+                                    <div id="uploadedFiles"></div>
 								</div>
 
                             </div>
@@ -203,6 +205,7 @@
         </div>
     </div>
     <div class="clearfix"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/resumable.js/1.1.0/resumable.min.js"></script>
 <script>
     $(document).ready(function() {
         $('#summernote').summernote();
@@ -310,6 +313,102 @@
 				reader.readAsDataURL(input.files[0]);
 			}
 		}
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var uploadedCount = 0;
+            var totalFiles    = 0;
+
+            var r = new Resumable({
+                target: '{{ route("upload.chunk") }}',
+                chunkSize: 5 * 1024 * 1024,
+                simultaneousUploads: 1,
+                testChunks: false,
+                fileType: ['mp3', 'mp4'],
+                fileTypeErrorCallback: function(file, errorCount) {
+                    alert('ระบบรองรับเฉพาะไฟล์ .mp3 และ .mp4 เท่านั้น');
+                },
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            r.assignBrowse(document.getElementById('fileInput'));
+
+            document.getElementById('fileInput').addEventListener('change', function() {
+                totalFiles    = this.files.length;
+                uploadedCount = 0;
+                document.getElementById('uploadedFiles').innerHTML = '';
+            });
+            r.on('fileAdded', function(file) {
+                var fileList = document.getElementById('fileList');
+                fileList.innerHTML += `
+                    <div id="progress-wrap-${file.uniqueIdentifier}" style="margin-bottom: 6px;">
+                        <small id="status-${file.uniqueIdentifier}" class="text-muted">กำลังอัพโหลด...</small>
+                        <div class="progress" style="height: 6px;">
+                            <div id="progress-${file.uniqueIdentifier}"
+                                class="progress-bar progress-bar-striped active"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+                `;
+                r.upload();
+            });
+
+            r.on('fileProgress', function(file) {
+                var percent = Math.floor(file.progress() * 100);
+                var uploadedMB = ((file.size * file.progress()) / 1024 / 1024).toFixed(1);
+                var totalMB    = (file.size / 1024 / 1024).toFixed(1);
+                document.getElementById('progress-' + file.uniqueIdentifier).style.width = percent + '%';
+                document.getElementById('status-' + file.uniqueIdentifier).textContent =
+                    `กำลังอัพโหลด ${percent}% (${uploadedMB}/${totalMB} MB)`;
+            });
+
+            r.on('fileSuccess', function(file) {
+                document.getElementById('status-' + file.uniqueIdentifier).textContent = 'กำลัง merge...';
+
+                fetch('{{ route("upload.merge") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        identifier:  file.uniqueIdentifier,
+                        filename:    file.fileName,
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('status-' + file.uniqueIdentifier).textContent = '✓ เสร็จแล้ว';
+                        document.getElementById('progress-' + file.uniqueIdentifier).style.width = '100%';
+                        document.getElementById('progress-' + file.uniqueIdentifier).classList.remove('active');
+                        document.getElementById('progress-' + file.uniqueIdentifier).classList.add('bg-success');
+
+                        var hidden = document.createElement('input');
+                        hidden.type  = 'hidden';
+                        hidden.name  = 'uploaded_files[]';
+                        hidden.value = data.filename + '|' + data.duration;
+                        document.getElementById('uploadedFiles').appendChild(hidden);
+
+                        uploadedCount++;
+                    }
+                });
+            });
+
+            r.on('fileError', function(file) {
+                document.getElementById('status-' + file.uniqueIdentifier).textContent = '❌ อัพโหลดล้มเหลว';
+                document.getElementById('progress-' + file.uniqueIdentifier).classList.add('bg-danger');
+            });
+
+            document.getElementById('uploadForm').addEventListener('submit', function(e) {
+                if (totalFiles > 0 && uploadedCount < totalFiles) {
+                    e.preventDefault();
+                    alert('กรุณารอให้ไฟล์ upload เสร็จก่อนครับ');
+                }
+            });
+
+        });
 </script>
 </body>
 

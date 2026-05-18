@@ -35,7 +35,7 @@ class RegisterController extends Controller
     {
         $request->validate([
             'username' => 'required',
-            'password' => 'required',
+            'password' => ['required','min:8'],
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required|email',
@@ -47,6 +47,7 @@ class RegisterController extends Controller
             'username.required' => 'กรุณาใส่เลขพนักงาน',
             // 'username.min'      => 'ชื่อผู้ใช้งานต้องมีอย่างน้อย :min ตัวอักษรนะ',
             'password.required'   => 'กรุณาใส่รหัสผ่าน',
+            'password.min'   => 'รหัสผ่านต้องมีความยาวอย่างน้อย8หลัก',
             'firstname.required'   => 'กรุณาใส่ชื่อ',
             'lastname.required'   => 'กรุณาใส่นามสกุล',
             'email.required'   => 'กรุณาใส่Email',
@@ -61,6 +62,9 @@ class RegisterController extends Controller
         $user->password = Hash::make($request->password);
         $user->email = $request->email;
         $user->org_id = $request->org_id;
+        $user->superuser = 0;
+        $user->status = 1;
+        $user->del_status = 0;
         $user->team_id = $request->team_id;
         $user->department_org_id = $request->department_id;
         $user->work_start = $request->work_start_date;

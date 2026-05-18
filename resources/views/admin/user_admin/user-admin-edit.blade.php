@@ -45,7 +45,7 @@ use App\Models\ASC;
                                 <label for="password">Password</label>
                                 <input id="password" type="password" class="form-control" name="password"  autocomplete="new-password" oninput="checkPassword()" >
                                 <input type="hidden" name="old_password" value="{{ $user->password }}">
-                                
+
                             </div>
                             <div class="form-group">
                                 <label for="password-length">รหัสผ่านต้องมีความยาวมากว่า 8 ตัว</label>
@@ -53,12 +53,12 @@ use App\Models\ASC;
                                     <span id="password-length-status"></span>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="password-special">รหัสผ่านต้องมีสัญลักษณ์พิเศษอย่างน้อย 1 ตัว</label>
                                 <div class="col-md-6">
                                     <span id="password-special-status"></span>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="form-group">
                                 <label for="password-confirm">Confirm Password</label>
                                 <input id="password-confirm" type="password" class="form-control" name="password_confirmation"  autocomplete="new-password">
@@ -70,7 +70,7 @@ use App\Models\ASC;
                                 </div>
                             </div>
                             @enderror
-                            @php
+                            {{-- @php
                             $pro = ProfilesTitle::where('prof_id',$user->Profiles->title_id)->first();
                             @endphp
                             <div class="form-group">
@@ -84,7 +84,7 @@ use App\Models\ASC;
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>
+                            </div> --}}
                             <div class="form-group">
                                 <label for="">ชื่อ(EN)</label>
                                 <input type="text"  class="form-control" name="firstname_en" value="{{ $user->Profiles->firstname_en ?? '-'}}">
@@ -113,53 +113,84 @@ use App\Models\ASC;
                                 <label for="">เบอร์โทรศัพท์</label>
                                 <input type="text"  class="form-control" name="phone" value="{{ $user->Profiles->phone ?? null }}">
                             </div>
-                            <div class="form-group">
-                                @php
-                                $user_com = Company::find($user->company_id);
-                                @endphp
-                                <label for="">company</label>
-                                <select class="form-control" name="company" id="company">
-                                    <option value="">---เลือก---</option>
-                                    @foreach ($company as $comp)
-                                        <option value="{{ $comp->company_id }}"
-                                            {{ $user->company_id == $comp->company_id ? 'selected' : '' }}>
-                                            {{ $comp->company_title }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            @php
-                            $asc_all = ASC::where('active','y')->get();
-                            @endphp
-                                <div class="form-group">
-                                    <label for="">ASC</label>
-                                    <select class="form-control" name="asc" id="asc">
-                                        <option value="">---เลือก---</option>
-                                        @foreach ($asc_all as $as)
-                                            <option value="{{ $as->id }}"
-                                                {{ $user->asc_id == $as->id ? 'selected' : '' }}>
-                                                {{ $as->name }}
+                            <div class="form-group org-group">
+                                <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                        for="level-2" class="required">องค์กร </label></label>
+                                <div class="col-sm-9">
+                                    <select class="form-control org-select" id="level-2" name="orgchart_id" data-next="level-3" data-label-name="องค์กร" data-level="2">
+                                        <option value="" disabled selected>---เลือกรายการ---</option>
+                                        @foreach ($orgchart as $org)
+                                            <option value="{{ $org->id }}">
+                                                {{ $org->title }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('orgchart_id')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                            <div class="form-group">
-                                @php
-                                $user_position = Position::find($user->position_id)
-                                @endphp
-                                <label for="">ตำแหน่ง</label>
-                                @if($user_position != null)
+                            </div>
 
-                                <select name="position" id="position"  class="form-control">
-                                    <option value="{{$user_position->id}}">{{ $user_position->position_title}}</option>
-                                </select>
-                                @else
-                                <select name="position" id="position"  class="form-control">
-                                    
-                                </select>
-                                @endif
+                            <div class="form-group org-group" id="group-level-3" style="display:none;">
+                                <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                        for="level-3" class="required">แผนก</label></label>
+                                <div class="col-sm-9">
+                                    <select class="form-control org-select" id="level-3" name="department_id" data-next="level-4" data-level="3" data-label-name="แผนก" disabled>
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group org-group" id="group-level-4" style="display:none;">
+                                <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                        for="level-4" class="required">ส่วนงาน</label></label>
+                                <div class="col-sm-9">
+                                    <select class="form-control org-select" id="level-4" name="section_id" data-next="level-5" data-level="4" data-label-name="ส่วนงาน" disabled>
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group org-group" id="group-level-5" style="display:none;">
+                                <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                        for="level-5" class="required">สายการผลิต</label></label>
+                                <div class="col-sm-9">
+                                    <select class="form-control org-select" id="level-5" name="line_id" data-next="level-6" data-level="5" data-label-name="สายการผลิต" disabled>
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group org-group" id="group-level-6" style="display:none;">
+                                <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                        for="level-6" class="required">ตำแหน่ง</label></label>
+                                <div class="col-sm-9">
+                                    <select class="form-control org-select" id="level-6" name="position_id" data-level="6" data-label-name="ตำแหน่ง" disabled>
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-3 control-label"><label
+                                        for="" class="required">ทีม</label></label>
+                                <div class="col-sm-9">
+                                    <select class="form-control"  name="team_id">
+                                        <option value="" disabled selected>---เลือกรายการ---</option>
+                                        @foreach ($team as $teams)
+                                            <option value="{{ $teams->id }}" {{ $user->team_id == $teams->id ? 'selected' : '' }}>
+                                                {{ $teams->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('team_id')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
                             </div>
                             <input type="hidden" name="id" value="{{ $user->id }}">
+                            <input type="hidden" name="org_id" id="final_org_id" value="{{ $user->org_id }}">
+                            <input type="hidden" name="department_id" id="department_id" value="{{ $user->department_org_id }}">
 
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
                         </form>
@@ -171,32 +202,70 @@ use App\Models\ASC;
         </div>
     </div>
     <div class="clearfix"></div>
-<script type="text/javascript">
-    document.getElementById('company').addEventListener('change', function() {
-        var selectedId = this.value;
+<script>
+    $(document).ready(function () {
+        $('.org-select').on('change', function () {
+            var currentSelect = $(this);
+            // console.log(currentSelect);
+            var parentId = currentSelect.val();
+            var nextId = currentSelect.data('next');
+            var currentLevel = currentSelect.data('level');
 
-        // ส่งค่าไปยัง backend เพื่อคิวรี่ข้อมูลสองอันที่เหลือ
-        fetch('/useradmin_create/company_selector/' + selectedId)
-            .then(response => response.json())
-            .then(data => {
-                populateSecondDropdown(data.position);
-                populateThirdDropdown(data.division);
+            // 1. อัปเดต ID ล่าสุดลงใน Hidden Input เสมอ
+            $('#final_org_id').val(parentId);
+
+            if(currentLevel === 3){
+                $('#department_id').val(parentId); //เก็บ department เพื่อไว้กรองการมองเห็นหลังบ้าน
+            }
+            // 2. ล้างค่าตัวลูกทั้งหมด (Chain Reset)
+            resetChildren(currentLevel);
+
+            // 3. ถ้าไม่ได้เลือกอะไร หรือเป็นตัวสุดท้ายแล้ว ให้หยุด
+            if (!parentId || !nextId) return;
+
+            // 4. ดึงข้อมูลตัวลูกผ่าน API
+            $.get('/api/get-sub-org/' + parentId, function (res) {
+                console.log(res);
+                var nextSelect = $('#' + nextId);
+                var nextGroup = $('#group-' + nextId);
+                var nextLabel = $(`label[for="${nextId}"]`);
+                if (res.has_child) {
+                    // มีลูกต่อ: วาด Option และเปิดให้กด
+                    // console.log(nextId);
+                    nextLabel.text(nextSelect.data('label-name'));
+                    var options = '<option value="" disabled selected>-- เลือกรายการ --</option>';
+                    $.each(res.data, function (key, item) {
+                        options += `<option value="${item.id}">${item.title}</option>`;
+                    });
+
+                    nextSelect.html(options).prop('disabled', false);
+                    nextGroup.show();
+                } else {
+                    // ไม่มีลูกแล้ว: จบสายงานที่ตรงนี้
+                    var currentLabel = $(`label[for="${currentSelect.attr('id')}"]`);
+                        console.log(currentLabel);
+                    // เช็คเลเวลหน่อย เผื่อเลเวล 6 เราไม่อยากยุ่งกับมัน (เพราะมันคือตำแหน่งอยู่แล้ว)
+                    if (currentLevel < 6) {
+                        currentLabel.text('ตำแหน่ง');
+                    }
+                    nextSelect.prop('disabled', true);
+                    nextGroup.hide();
+                }
             });
+        });
+
+        // ฟังก์ชันล้างค่าตัวลูก (ล้างทุกตัวที่ Level สูงกว่าตัวปัจจุบัน)
+        function resetChildren(level) {
+            $('.org-select').each(function () {
+                var thisLevel = $(this).data('level');
+                if (thisLevel > level) {
+                    $(this).val('').prop('disabled', true);
+                    $(this).closest('.org-group').hide();
+                }
+            });
+        }
     });
 
-    function populateSecondDropdown(data) {
-        var secondDropdown = document.getElementById('position');
-        secondDropdown.innerHTML = '<option value="" selected disabled>เลือกตำแหน่ง</option>';
-
-        data.forEach(function(item) {
-            var option = document.createElement('option');
-            option.value = item.id;
-            option.textContent = item.position_title;
-            secondDropdown.appendChild(option);
-        });
-    }
-</script>
-<script>
     function checkPassword() {
         var password = document.getElementById("password").value;
 
@@ -208,11 +277,11 @@ use App\Models\ASC;
         }
 
         // ตรวจสอบว่ามีอักขระพิเศษอย่างน้อย 1 ตัว
-        if (!/[!@#$%^&*]/.test(password)) {
-            document.getElementById("password-special-status").innerHTML = "<p style='color:red;'>รหัสผ่านต้องมีสัญลักษณ์พิเศษอย่างน้อย 1 ตัว</p>";
-        } else {
-            document.getElementById("password-special-status").innerHTML = "<p style='color:green;'>&#x2714;</p>";
-        }
+        // if (!/[!@#$%^&*]/.test(password)) {
+        //     document.getElementById("password-special-status").innerHTML = "<p style='color:red;'>รหัสผ่านต้องมีสัญลักษณ์พิเศษอย่างน้อย 1 ตัว</p>";
+        // } else {
+        //     document.getElementById("password-special-status").innerHTML = "<p style='color:green;'>&#x2714;</p>";
+        // }
     }
     function validatePassword() {
     const password = document.getElementById('password').value;
@@ -225,6 +294,47 @@ use App\Models\ASC;
 
     return true;
 }
+</script>
+<script>
+$(document).ready(function() {
+    var orgPath = @json($orgPath ?? []);
+
+    function autoSelectOrg(path, index) {
+        if (index >= path.length) return;
+
+        var id     = path[index];
+        if (!id) return;
+
+        var level         = index + 2;
+        var currentSelect = $('.org-select[data-level="' + level + '"]');
+
+        currentSelect.val(id);
+
+        var nextId = currentSelect.data('next');
+        if (!nextId || index + 1 >= path.length) return;
+
+        $.get('/api/get-sub-org/' + id, function(res) {
+            if (res.has_child) {
+                var nextSelect = $('#' + nextId);
+                var nextGroup  = $('#group-' + nextId);
+
+                var options = '<option value="" disabled selected>-- เลือกรายการ --</option>';
+                $.each(res.data, function(key, item) {
+                    options += '<option value="' + item.id + '">' + item.title + '</option>';
+                });
+
+                nextSelect.html(options).prop('disabled', false);
+                nextGroup.show();
+
+                autoSelectOrg(path, index + 1);
+            }
+        });
+    }
+
+    if (orgPath.length > 0) {
+        autoSelectOrg(orgPath, 0);
+    }
+});
 </script>
 </body>
 @endsection

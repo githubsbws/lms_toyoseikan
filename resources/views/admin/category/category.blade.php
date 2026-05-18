@@ -33,7 +33,7 @@
 											<th>ชื่อหมวดหลักสูตร</th>
 											<th>รายละเอียดย่อ</th>
 											<th>รายละเอียด</th>
-											<th>เปิด-ปิด</th>
+											{{-- <th>เปิด-ปิด</th> --}}
 											<th>จัดการ</th>
 										</tr>
 									</thead>
@@ -46,13 +46,13 @@
 											<td class="text-center">{{$item->cate_title}}</td>
 											<td class="text-center">{{ $item->cate_short_detail}}</td>
 											<td class="text-center">{!! htmlspecialchars_decode($item->cate_detail) !!}</td>
-											<td class="text-center">
+											{{-- <td class="text-center">
 												<a class="btn {{ $item->cate_show == '1' ? 'btn-primary' : 'btn-light' }}"
 													href="{{ route('category.openshow', ['id' => $item->cate_id, $item->cate_show == '1' ? 'off' : 'on' => $item->cate_show == '1' ? '0' : '1']) }}"
 													role="button">
 													{{ $item->cate_show == '1' ? 'เปิด' : 'ปิด' }}
 												 </a>
-											</td>
+											</td> --}}
 											<td>
 												<a href="{{ route('category.detail',['id'=>$item->cate_id]) }}" class="btn btn-warning btn-sm"><i class="fas fa-search"></i></a>
 												<a href="{{ route('category.edit',['id' =>$item->cate_id]) }}" class="btn btn-warning btn-sm"><i class="fas fa-pen"></i></a>

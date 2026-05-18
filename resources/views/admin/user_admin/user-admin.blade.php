@@ -33,9 +33,7 @@ use App\Models\Users;
                                     <tr>
 										<th>username</th>
 										<th>ชื่อ นามสกุล</th>
-										<th>Position</th>
-										<th>Company</th>
-										<th>Chanel</th>
+
 										<th>Status</th>
 										<th>Create_at</th>
 										<th>Lastvisit_at</th>
@@ -54,18 +52,9 @@ use App\Models\Users;
                                         <td class="text-center">
                                             {{ $data->Profiles->firstname ?? '-' }} {{ $data->Profiles->lastname ?? '-' }}
                                         </td>
-										<td class="text-center">
-                                            {{ $data->Position->position_title ?? '-'}}
-                                        </td>
-										<td class="text-center">
-                                            {{ $data->ASC->name ?? '-' }}
-                                        </td>
-										<td class="text-center">
-                                            {{ $data->Company->company_title ?? '-' }}
-                                        </td>
 										@if($data->status == 1)
 										<td>
-											<a href="{{ route('user.toggle', $data->id) }}" 
+											<a href="{{ route('user.toggle', $data->id) }}"
 											class="btn btn-success"
 											onclick="return confirm('ยืนยันเปลี่ยนเป็น Inactive ?')">
 												User Active
@@ -73,7 +62,7 @@ use App\Models\Users;
 										</td>
 										@else
 										<td>
-											<a href="{{ route('user.toggle', $data->id) }}" 
+											<a href="{{ route('user.toggle', $data->id) }}"
 											class="btn btn-danger"
 											onclick="return confirm('ยืนยันเปลี่ยนเป็น Active ?')">
 												Inactive

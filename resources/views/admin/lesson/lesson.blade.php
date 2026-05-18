@@ -90,6 +90,7 @@
 		$('#settingTable').DataTable({
 			responsive: true,
 			scrollX: true,
+            order: [],
 			language: {
 				url: '/include/languageDataTable.json',
 			}

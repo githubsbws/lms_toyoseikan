@@ -57,17 +57,35 @@
 
             <div class="card-body">
 
-                <div class="p-3 rounded bg-light border">
-                    {{-- {!! nl2br(e($item->ques_title)) !!} --}}
-                    {!! strip_tags(html_entity_decode($item->ques_title), '<b><strong><i><em><u>') !!}
-                </div>
+            <div class="p-3 rounded bg-light border">
+                {!! nl2br(e($data->ques_title)) !!}
+            </div>
 
             </div>
 
         </div>
 
-        {{-- ANSWER --}}
-        <div class="card shadow-sm border-0 mb-4">
+    {{-- Correct Answer --}}
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-success text-white">
+            <i class="fas fa-check-circle"></i>
+            เฉลย
+        </div>
+
+        <div class="card-body">
+
+            <div class="p-4 rounded border bg-light"
+                 style="min-height:180px; font-size:15px; line-height:1.8;">
+                {!! nl2br(e($data->answer)) !!}
+            </div>
+
+        </div>
+
+    </div>
+
+    {{-- User Answer --}}
+    <div class="card shadow-sm border-0 mb-4">
 
             <div class="card-header bg-warning">
                 <i class="fas fa-user-edit"></i>
@@ -104,6 +122,9 @@
                     {!! strip_tags(html_entity_decode($item->answer), '<b><strong><i><em><u>') !!}
 
                 </div>
+            <div class="p-4 rounded border bg-light"
+                 style="min-height:180px; font-size:15px; line-height:1.8;">
+                {!! strip_tags(html_entity_decode($data->answer_text), '<b><strong><i><em><u>') !!}
 
             </div>
 

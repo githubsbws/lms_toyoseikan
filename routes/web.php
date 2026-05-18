@@ -47,6 +47,7 @@ use App\Http\Controllers\CourseExamController;
 use App\Http\Controllers\LicensePersonController;
 use App\Http\Controllers\PotentialReportController;
 use App\Http\Controllers\RoadmapController;
+use App\Http\Controllers\UploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -318,6 +319,9 @@ Route::get('file_edit/{id?}', [AdminController::class,'file_edit'])->name('file.
 Route::post('file_delete/{id?}', [AdminController::class,'file_delete'])->name('file_delete')->middleware('checkIdleTimeout');
 
 Route::post('/file/sort', [AdminController::class, 'sort'])->name('file.sort');
+
+Route::post('/upload/chunk', [UploadController::class, 'uploadChunk'])->name('upload.chunk')->middleware('checkIdleTimeout');
+Route::post('/upload/merge', [UploadController::class, 'mergeChunks'])->name('upload.merge')->middleware('checkIdleTimeout');
 
 // Route::get('/lession-create',[LessonController::class,'lessioncreate'])->name('lession-create');
 // Route::post('/admin/index.php/Lesson/create',[LessonController::class,'lessioncreateto'])->name('lession-create-to');

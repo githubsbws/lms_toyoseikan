@@ -27,10 +27,10 @@
                                     @csrf
                                     <div class="form-group">
                                         <label for="inputEmail3" class="col-sm-3 control-label">
-                                            <label for="UserRecoveryForm_login_or_email">Username หรือ อีเมลล์</label>
+                                            <label for="UserRecoveryForm_login_or_email">Username</label>
                                         </label>
                                         <div class="col-sm-9">
-                                            <input class="form-control" placeholder="Username หรือ อีเมลล์" name="login_or_email" id="UserRecoveryForm_login_or_email" type="text">
+                                            <input class="form-control" placeholder="กรุณาใส่ Username" name="login_or_email" id="UserRecoveryForm_login_or_email" type="text">
                                         </div>
                                     </div>
                                     <div class="form-group">

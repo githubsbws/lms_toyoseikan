@@ -92,8 +92,8 @@ class LessonProgressService
 
     private function checkAndMarkLessonPassed(Learn $learn)
     {
-        $totalVdo = File::where('lesson_id', $learn->lesson_id)->count();
-        $totalDoc = FileDoc::where('lesson_id', $learn->lesson_id)->count();
+        $totalVdo = File::where('lesson_id', $learn->lesson_id)->where('active','y')->count();
+        $totalDoc = FileDoc::where('lesson_id', $learn->lesson_id)->where('active','y')->count();
         $totalFilesCount = $totalVdo + $totalDoc;
 
         // นับที่จบแล้วทั้ง vdo และ doc

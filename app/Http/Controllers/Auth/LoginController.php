@@ -68,16 +68,9 @@ class LoginController extends Controller
 
         // ตรวจสอบว่าข้อมูลที่กรอกมาเป็น email หรือไม่
         $usernameInput = $request->input('username');
-        $isEmail = filter_var($usernameInput, FILTER_VALIDATE_EMAIL);
-
         // สร้างข้อมูล credentials
-        if ($isEmail) {
-            // ถ้าเป็น email, ตรวจสอบกับฟิลด์ email ในฐานข้อมูล
-            $credentials = ['email' => $usernameInput, 'password' => $request->input('password')];
-        } else {
-            // ถ้าไม่ใช่ email, ตรวจสอบกับฟิลด์ username ในฐานข้อมูล
-            $credentials = ['username' => $usernameInput, 'password' => $request->input('password')];
-        }
+        $credentials = ['username' => $usernameInput, 'password' => $request->input('password')];
+
 
         if (Auth::attempt($credentials)) {
             // Authentication passed

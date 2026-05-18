@@ -38,7 +38,7 @@
             <div class="container parallax-layer" data-opacity="true">
                 <div class="media media-grid v-middle">
                     <div class="media-body">
-                        <h3 class="text-display-2 text-white margin-none">Roadmap สำหรับ พนังงานใหม่</h3>
+                        <h3 class="text-display-2 text-white margin-none">{{ auth()->user()->team_id == 6 ? 'Roadmap สำหรับ พนักงานใหม่' : 'Roadmap สำหรับ พนักงานทั่วไป' }}</h3>
 
                     </div>
                 </div>

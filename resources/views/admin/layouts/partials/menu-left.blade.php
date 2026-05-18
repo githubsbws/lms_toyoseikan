@@ -310,7 +310,7 @@ use App\Helpers\PermissionHelper;
                     <a href="#" class="nav-link {{ request()->is('questionnaireout*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-alt"></i>
                         <p>
-                            ระบบประเมินภาคปฏิบัติ
+                            ระบบประเมิน
                             <i class="right fas fa-angle-left"></i>
                             <span class="badge badge-info right">5</span>
                         </p>
@@ -610,7 +610,7 @@ use App\Helpers\PermissionHelper;
                     </ul>
                 </li>
                 @endcanmenu
-                @canmenu(22)
+                {{-- @canmenu(22)
                 <li class="nav-item {{ request()->is('imgslide*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('imgslide*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-bullhorn"></i>
@@ -632,7 +632,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
+                @endcanmenu --}}
                 @canmenu(23)
                 <li class="nav-item {{ request()->is('report*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('report*') ? 'active' : '' }}">
@@ -650,7 +650,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                         <li class="nav-item">
                             <a href="{{url('report_license')}}" class="nav-link {{ request()->is('report_license') ? 'active' : '' }}">
-                                <p>License person Report</p>
+                                <p>License Person Report</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -665,7 +665,7 @@ use App\Helpers\PermissionHelper;
                         </li> --}}
                         <li class="nav-item">
                             <a href="{{url('report/learning_potential')}}" class="nav-link {{ request()->is('report/learning_potential') ? 'active' : '' }}">
-                                <p>Learning Potentail</p>
+                                <p>Learning Potentail Report</p>
                             </a>
                         </li>
                     </ul>
