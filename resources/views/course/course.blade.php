@@ -208,6 +208,31 @@
                                             </div>
                                         </div>
 
+                                        {{-- <div class="panel panel-default paper-shadow mb-5" data-z="0.5" style="border-radius: 12px">
+                                            <div class="panel-body p-5">
+                                                <div class="row">
+                                                    <div class="col-lg-6">
+                                                        <h5 class="mb-0">จำนวนบทเรียน</h5>
+                                                        <div class="col-6 m-5">
+                                                            <i class="fa fa-book fa-5x" style="color: #428bca;"></i>
+                                                            <p class="mx-0">{{ $item->lesson()->count() }} บทเรียน</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <h5 class="mb-0">สถานะการประเมิน</h5>
+                                                        <div class="col-6 m-5">
+                                                            <i class="fa fa-certificate fa-5x m-3" style="color: #428bca;"></i>
+                                                            @if ($isLearning)
+                                                            <p class="mx-0">กรุณาเรียนให้จบก่อน</p>
+                                                            @elseif(!$isLearning && !$isPassed)
+                                                            <p class="mx-0">รอคะแนนในส่วนอื่นๆจากแอดมิน</p>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> --}}
+
                                         <div class="panel-head">
                                             <h3>รายการบทเรียน</h3>
                                         </div>
