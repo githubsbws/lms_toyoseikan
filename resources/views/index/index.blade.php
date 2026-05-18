@@ -157,11 +157,15 @@ use App\Models\DownloadFile;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 25px;
+        gap: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         transition: transform 0.2s, box-shadow 0.2s;
         cursor: pointer;
         border: none;
+    }
+
+    .menu-card img {
+        width: 30px !important;
     }
 
     .menu-card:hover {
@@ -175,8 +179,8 @@ use App\Models\DownloadFile;
     }
 
     .menu-card span {
-        font-size: 20px;
-        font-weight: 500;
+        font-size: 22px;
+        font-weight: bold;
         color: #222222;
     }
 
@@ -246,10 +250,11 @@ use App\Models\DownloadFile;
         margin: 0;
         padding-bottom: 8px;
         color: #111111;
+            border-bottom: 3px solid #2196f3;
     }
 
     /* เส้นใต้สีน้ำเงินหนาๆ ตามแบบ UI ดีไซน์ */
-    .section-headline::after {
+    /*    .section-headline::after {
         content: '';
         position: absolute;
         left: 0;
@@ -258,13 +263,13 @@ use App\Models\DownloadFile;
         height: 4px;
         background-color: #2196f3;
         border-radius: 2px;
-    }
+    } */
 
     /* ปุ่ม ดูทั้งหมด สีดำโค้งมน */
     .btn-view-all {
         background-color: #0a0a0f;
         color: #ffffff !important;
-        font-size: 13px;
+        font-size: 18px;
         padding: 8px 22px;
         border-radius: 20px;
         font-weight: 400;
@@ -334,7 +339,7 @@ use App\Models\DownloadFile;
     }
 
     .course-title {
-        font-size: 16px;
+        font-size: 22px;
         font-weight: 500;
         color: #111111;
         margin: 0 0 15px 0;
@@ -385,7 +390,7 @@ use App\Models\DownloadFile;
     }
 
     .instructor-name {
-        font-size: 13px;
+        font-size: 18px;
         font-weight: 500;
         color: #333333;
     }
@@ -409,12 +414,13 @@ use App\Models\DownloadFile;
         font-weight: bold;
         position: relative;
         margin: 0;
-        padding-bottom: 8px;
+        padding-bottom: 2px;
         color: #111111;
+        border-bottom: 3px solid #2196f3;
     }
 
     /* เส้นใต้สีน้ำเงินหนาๆ ตามแบบ UI ดีไซน์ */
-    .section-headlines::after {
+    /*  .section-headlines::after {
         content: '';
         position: absolute;
         left: 0;
@@ -423,22 +429,8 @@ use App\Models\DownloadFile;
         height: 4px;
         background-color: #2196f3;
         border-radius: 2px;
-    }
+    } */
 
-    /* ปุ่ม ดูทั้งหมด สีดำโค้งมน */
-    .btn-view-all {
-        background-color: #0a0a0f;
-        color: #ffffff !important;
-        font-size: 13px;
-        padding: 8px 22px;
-        border-radius: 20px;
-        font-weight: 400;
-        transition: opacity 0.2s;
-    }
-
-    .btn-view-all:hover {
-        opacity: 0.85;
-    }
 
     /* --- สไตล์กล่องการ์ดข่าว (News Cards) --- */
     .news-card-item {
@@ -493,7 +485,7 @@ use App\Models\DownloadFile;
     }
 
     .news-title {
-        font-size: 16px;
+        font-size: 22px;
         font-weight: 400;
         margin: 0 0 10px 0;
         line-height: 1.4;
@@ -506,7 +498,7 @@ use App\Models\DownloadFile;
     }
 
     .news-card-item.large-box .news-title {
-        font-size: 18px;
+        font-size: 22px;
         /* ขยายฟอนต์หัวข้อบนกล่องใหญ่ */
     }
 
@@ -523,6 +515,7 @@ use App\Models\DownloadFile;
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        font-size: 18px;
     }
 
     .news-meta-item i {
@@ -574,7 +567,7 @@ use App\Models\DownloadFile;
     }
 
     .cta-description {
-        font-size: 14px;
+        font-size: 18px;
         color: #666666;
         line-height: 1.7;
         margin: 0 0 30px 0;
@@ -585,7 +578,7 @@ use App\Models\DownloadFile;
         padding: 10px 30px;
         border: 1.5px solid #111111;
         border-radius: 30px;
-        font-size: 14px;
+        font-size: 22px;
         font-weight: 400;
         color: #111111 !important;
         background-color: transparent;
@@ -627,14 +620,15 @@ use App\Models\DownloadFile;
 
     .main-video-headline {
         font-size: 26px;
-        font-weight: 500;
         position: relative;
         margin: 0;
-        padding-bottom: 8px;
+        padding-bottom: 2px;
         color: #111111;
+        font-weight: bold;
+        border-bottom: 3px solid #2196f3;
     }
 
-    .main-video-headline::after {
+    /*   .main-video-headline::after {
         content: '';
         position: absolute;
         left: 0;
@@ -643,7 +637,7 @@ use App\Models\DownloadFile;
         height: 4px;
         background-color: #2196f3;
         border-radius: 2px;
-    }
+    } */
 
     .main-video-btn-all {
         background-color: #0a0a0f;
@@ -834,25 +828,8 @@ use App\Models\DownloadFile;
         padding-bottom: 10px;
     }
 
-    .main-video-headline {
-        font-size: 26px;
-        font-weight: 500;
-        position: relative;
-        margin: 0;
-        padding-bottom: 8px;
-        color: #111111;
-    }
 
-    .main-video-headline::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 140px;
-        height: 4px;
-        background-color: #2196f3;
-        border-radius: 2px;
-    }
+
 
     .main-video-btn-all {
         background-color: #0a0a0f;
@@ -934,16 +911,18 @@ use App\Models\DownloadFile;
 
                             <div class="col-lg-4">
                                 <div class="menu-card card-cream" onclick="location.href='#'">
-                                    <i class="fa-solid fa-book-open"></i>
+                                    <img src="{{ asset('assets/images/user-guide.png') }}" alt="E-Learning Banner" class="hero-banner-img">
                                     <span>วิธีการใช้งาน</span>
                                 </div>
                             </div>
 
                             <div class="col-lg-4">
-                                <div class="menu-card card-green" onclick="location.href='#'">
-                                    <i class="fa-solid fa-list-check"></i>
-                                    <span>สถานะการเรียน</span>
-                                </div>
+                                <a href="{{ url('course') }}">
+                                    <div class="menu-card card-green" onclick="location.href='#'">
+                                        <img src="{{ asset('assets/images/check-list.png') }}" alt="E-Learning Banner" class="hero-banner-img">
+                                        <span>สถานะการเรียน</span>
+                                    </div>
+                                </a>
                             </div>
                         </div>
 
