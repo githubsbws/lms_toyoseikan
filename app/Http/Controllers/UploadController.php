@@ -32,7 +32,12 @@ class UploadController extends Controller
             $chunkPath   = storage_path("app/chunks/{$identifier}/");
             $chunkFiles  = FileStore::files($chunkPath);
             $totalChunks = count($chunkFiles);
+            $tempPath    = public_path("temp_upload");
             $outputPath  = public_path("temp_upload/{$fileName}");
+
+            if (!FileStore::isDirectory($tempPath)) {
+                FileStore::makeDirectory($tempPath, 0777, true, true);
+            }
 
             $output = fopen($outputPath, 'wb');
             for ($i = 1; $i <= $totalChunks; $i++) {

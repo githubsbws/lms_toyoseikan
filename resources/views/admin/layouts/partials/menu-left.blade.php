@@ -665,7 +665,7 @@ use App\Helpers\PermissionHelper;
                         </li> --}}
                         <li class="nav-item">
                             <a href="{{url('report/learning_potential')}}" class="nav-link {{ request()->is('report/learning_potential') ? 'active' : '' }}">
-                                <p>Learning Potentail</p>
+                                <p>Learning Potentail Report</p>
                             </a>
                         </li>
                     </ul>

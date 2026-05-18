@@ -189,8 +189,8 @@ use App\Models\ASC;
                                 </div>
                             </div>
                             <input type="hidden" name="id" value="{{ $user->id }}">
-                            <input type="hidden" name="org_id" id="final_org_id">
-                            <input type="hidden" name="department_id" id="department_id">
+                            <input type="hidden" name="org_id" id="final_org_id" value="{{ $user->org_id }}">
+                            <input type="hidden" name="department_id" id="department_id" value="{{ $user->department_org_id }}">
 
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
                         </form>
