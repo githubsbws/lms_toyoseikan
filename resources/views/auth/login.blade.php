@@ -35,7 +35,7 @@
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
                                                 for="UserLogin_username" class="required">Staff ID<span
                                                     class="required">*</span></label></label>
-                                        <div class="col-sm-9">
+                                        <div class="col-lg-8">
                                             <input class="form-control" placeholder="Staff ID"
                                                 name="username" id="username" type="text" value="{{ old('username') }}">
                                         </div>
@@ -45,22 +45,26 @@
                                                 class="required">รหัสผ่าน <span
                                                     class="required">*</span></label></label>
 
-                                        <div class="col-sm-9">
+                                        <div class="col-lg-8">
                                             <input class="form-control" placeholder="Password"
                                                 name="password" id="password" type="password">
                                         </div>
                                     </div><br>
                                     {{-- เพิ่ม --}}
 
+                                    <div class="col-lg-3">
+
+                                    </div>
+
                                     <div class="form-group">
-                                        <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
+                                        <div class="col-sm-6 col-sm-offset-3" >
                                             <p class="hint">
                                                 <a href="/forgot-pass">ลืมรหัสผ่าน?</a>
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
+                                    <!-- <div class="form-group">
+                                        <div class="col-sm-6 col-sm-offset-3" >
                                             <div class="checkbox icheck">
                                                 <input id="ytUserLogin_rememberMe" type="hidden" value="0"
                                                     name="UserLogin[rememberMe]">
@@ -69,20 +73,20 @@
                                                 <label for="UserLogin_rememberMe">จำการเข้าระบบ</label>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                     {{-- <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
                                             <span class="input-error">กรุณาเปลี่ยนรหัสผ่านก่อนเข้าใช้งาน 1 ครั้ง</span>
                                         </div>
                                     </div> --}}
                                     <div class="form-group">
-                                        <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
+                                        <div class="col-sm-6 col-sm-offset-3" >
                                             <div class="g-recaptcha" data-sitekey="6Le3zv8pAAAAACNf85umY6OIKbJYQOJMzoLjR8ZK" data-action="LOGIN"></div>
                                         </div>
                                     </div>
 
                                     <div class="form-group">
-                                        <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
+                                        <div class="col-sm-6 col-sm-offset-3 text-center" >
                                             <input class="btn btn-primary" type="submit" name="yt0"
                                                 value="เข้าสู่ระบบ">
                                         </div>

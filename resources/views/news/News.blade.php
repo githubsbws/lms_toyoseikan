@@ -1,8 +1,90 @@
 @extends('layout/mainlayout')
 @section('content')
+
+
+<style>
+    /*  body {
+        height: auto !important;
+    } */
+
+    .col-lg-4 {
+        margin-bottom: 18px;
+    }
+
+    .main-content {
+        height: 100vh;
+    }
+
+    .nav-header .navbar {
+        position: relative !important;
+    }
+
+    img {
+        width: 100%;
+    }
+
+    .title-page {
+        margin: 18px 0;
+    }
+
+    .all-news .card {
+        position: relative;
+    }
+
+
+    .all-news .card .card-body {
+        position: absolute;
+        bottom: 0;
+        color: #fff !important;
+        height: auto;
+        width: auto;
+        margin: 0;
+        padding: 0;
+        border: none;
+        background-color: #6f6f6fa6;
+        text-align: start;
+        padding: 2px 8px;
+
+        h5 {
+            color: #fff;
+        }
+    }
+</style>
+
+
+
 <body>
 
-    <div class="span-19">
+    <div class="main-content all-news">
+
+        <h3 class="text-center title-page">ข่าวประชาสัมพันธ์</h3>
+
+        <div class="container-fluid row">
+
+            <div class="col-lg-4">
+                <a href="{{ url('News_detail.blade.php') }}">
+                    <div class="card position-relative">
+                        <img src="https://cdn.pixabay.com/photo/2026/03/03/10/12/tylijura-car-10153221_1280.jpg" alt="announcement image" class="card-img">
+                        <div class="card-body">
+                            <h5 class="card-title">Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                                Molestias
+                                autem
+                                neque impedit? Rem sequi hic necessitatibus quaerat odit?</h5>
+                            <p class="mb-0"><i class="fa-solid fa-computer"></i> 10 เมษายน 2564</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+
+
+
+
+    </div>
+
+    <!-- <div class="span-19">
         <div id="content">
             <div class="parallax overflow-hidden page-section bg-blue-300" style="margin-top: 81px;">
                 <div class="container parallax-layer" data-opacity="true">
@@ -104,8 +186,8 @@
                     </div>
                 </div>
             </div>
-        </div><!-- content -->
-    </div>
+        </div>
+    </div> -->
 
 </body>
 @endsection
