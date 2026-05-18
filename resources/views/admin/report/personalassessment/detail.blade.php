@@ -176,109 +176,118 @@ th.rotate > div {
                             </tr>
 
                             </table>
-                            <table id="settingTable2" class="table table-striped table-bordered nowrap" style="width:100%">
+                            <table id="settingTable2"
+                                class="table table-bordered text-center nowrap"
+                                style="width:100%">
 
                                 <thead>
 
-                                <tr>
+                                    {{-- Header Row 1 --}}
+                                    <tr>
 
-                                    <th>ลำดับ</th>
+                                        <th rowspan="2">ลำดับที่</th>
 
-                                    <th>หัวข้ออบรม</th>
+                                        <th rowspan="2">หมวดวิชา</th>
 
-                                    <th>วันที่</th>
+                                        <th rowspan="2">หัวข้อการอบรม</th>
 
-                                    <th>ถาม-ตอบ</th>
+                                        <th rowspan="2">วัน/เดือน/ปี</th>
 
-                                    <th>ปฏิบัติจริง</th>
+                                        <th colspan="4">
+                                            วิธีการประเมิน
+                                        </th>
 
-                                    <th>ข้อสอบ</th>
+                                        <th rowspan="2">
+                                            คะแนน
+                                        </th>
 
-                                    <th>ผลงาน</th>
+                                        <th colspan="2">
+                                            ผลการประเมิน
+                                        </th>
 
-                                    <th>คะแนน</th>
+                                        <th rowspan="2">
+                                            หมายเหตุ
+                                        </th>
 
-                                    <th>ผลประเมิน</th>
+                                    </tr>
 
-                                </tr>
+                                    {{-- Header Row 2 --}}
+                                    <tr>
+
+                                        <th>ถาม-ตอบ</th>
+
+                                        <th>ปฏิบัติ</th>
+
+                                        <th>ข้อสอบ</th>
+
+                                        <th>ผลงาน</th>
+
+                                        <th>ผ่าน</th>
+
+                                        <th>ไม่ผ่าน</th>
+
+                                    </tr>
 
                                 </thead>
 
-                                    <tbody>
+                                <tbody>
 
-                                        @foreach($assessments as $index => $assessment)
+                                    @foreach($assessments as $index => $assessment)
 
-                                        <tr>
+                                    <tr>
 
-                                            <td class="center">
-                                                {{ $index+1 }}
-                                            </td>
+                                        <td>{{ $index + 1 }}</td>
 
-                                            <td>
-                                                {{ $assessment->course_name ?? '-' }}
-                                            </td>
+                                        <td>Orientation</td>
 
-                                            <td class="center">
-                                                {{ $assessment->assessment_date }}
-                                            </td>
+                                        <td class="text-left">
+                                            {{ $assessment->course_name }}
+                                        </td>
 
-                                            
+                                        <td>
+                                            {{ $assessment->assessment_date }}
+                                        </td>
 
-                                            <td class="center">
-                                                {{ $assessment->qa_score }}
-                                            </td>
+                                        <td>{{ $assessment->qa_score }}</td>
 
-                                            <td class="center">
-                                                {{ $assessment->operate_score }}
-                                            </td>
+                                        <td>{{ $assessment->operate_score }}</td>
 
-                                            <td class="center">
-                                                {{ $assessment->assign_score }}
-                                            </td>
+                                        <td>{{ $assessment->assign_score }}</td>
 
-                                            <td class="center">
-                                                {{ $assessment->observe_score }}
-                                            </td>
 
-                                            <td class="center">
-                                                {{ $assessment->total_score }}%
-                                            </td>
+                                        <td>{{ $assessment->observe_score }}</td>
 
-                                            <td class="
-                                            center
+                                        <td>
+                                            {{ $assessment->total_score }}%
+                                        </td>
 
+                                        {{-- ผ่าน --}}
+                                        <td>
                                             @if($assessment->level == 3)
-                                                pass
-                                            @elseif($assessment->level == 2)
-                                                warning
-                                            @else
-                                                fail
+                                                <span class="text-success font-weight-bold">
+                                                    ✔
+                                                </span>
                                             @endif
-                                            ">
+                                        </td>
 
-                                            @if($assessment->level == 3)
-
-                                                ✔ ผ่าน
-
-                                            @elseif($assessment->level == 2)
-
-                                                ⚠ Under Supervision
-
-                                            @else
-
-                                                ✖ ไม่ผ่าน
-
+                                        {{-- ไม่ผ่าน --}}
+                                        <td>
+                                            @if($assessment->level != 3)
+                                                <span class="text-danger font-weight-bold">
+                                                    ✖
+                                                </span>
                                             @endif
+                                        </td>
 
-                                            </td>
+                                        <td></td>
 
-                                        </tr>
+                                    </tr>
 
-                                        @endforeach
+                                    @endforeach
 
-                                    </tbody>
+                                </tbody>
 
-                                </table>
+                            </table>
 						</div>
 					</div>
 				</div>

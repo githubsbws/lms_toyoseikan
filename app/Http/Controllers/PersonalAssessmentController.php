@@ -16,6 +16,8 @@ use App\Models\Passcourse;
 use App\Models\ScoreAssessment;
 use App\Models\Course;
 
+use App\Helpers\ChildOrgHelper;
+
 class PersonalAssessmentController extends Controller
 {
     public function index(Request $request)
@@ -50,6 +52,12 @@ class PersonalAssessmentController extends Controller
                     '=',
                     'users.org_id'
                 )
+                ->leftJoin(
+                    'team',
+                    'team.id',
+                    '=',
+                    'users.team_id'
+                )
                 ->where('users.status', 1);
 
             /*
@@ -60,16 +68,14 @@ class PersonalAssessmentController extends Controller
 
             if($section_id){
 
-                $lineIds = Orgchart::where(
-                        'parent_id',
-                        (string)$section_id
-                    )
-                    ->where('active','y')
-                    ->pluck('id');
+                $orgIds = collect([$section_id])
+                    ->merge(
+                        ChildOrgHelper::getAllChildOrgIds([$section_id])
+                    );
 
                 $usersQuery->whereIn(
                     'users.org_id',
-                    $lineIds
+                    $orgIds
                 );
             }
 
@@ -81,9 +87,14 @@ class PersonalAssessmentController extends Controller
 
             if($line_id){
 
-                $usersQuery->where(
+                $orgIds = collect([$line_id])
+                    ->merge(
+                        ChildOrgHelper::getAllChildOrgIds([$line_id])
+                    );
+
+                $usersQuery->whereIn(
                     'users.org_id',
-                    $line_id
+                    $orgIds
                 );
             }
 
@@ -95,14 +106,10 @@ class PersonalAssessmentController extends Controller
 
             if($team_id){
 
-                // ถ้า team อยู่ใน users table
                 $usersQuery->where(
                     'users.team_id',
                     $team_id
                 );
-
-                // ถ้า team อยู่ใน orgchart ใช้อันเดิมแทน
-                // $usersQuery->where('orgchart.team_id', $team_id);
             }
 
             /*

@@ -19,6 +19,8 @@ use App\Models\OperationMachine;
 use App\Models\ParameterSetting;
 use App\Models\LicensePerson;
 
+use App\Helpers\ChildOrgHelper;
+
 class ReportLicensePersonController extends Controller
 {
     private function getSkillLevel($percent)
@@ -60,6 +62,12 @@ class ReportLicensePersonController extends Controller
                     '=',
                     'users.org_id'
                 )
+                ->leftJoin(
+                    'team',
+                    'team.id',
+                    '=',
+                    'users.team_id'
+                )
                 ->where('users.status', '1');
 
             /*
@@ -70,16 +78,14 @@ class ReportLicensePersonController extends Controller
 
             if($section_id){
 
-                $lineIds = Orgchart::where(
-                        'parent_id',
-                        (string)$section_id
-                    )
-                    ->where('active','y')
-                    ->pluck('id');
+                $orgIds = collect([$section_id])
+                    ->merge(
+                        ChildOrgHelper::getAllChildOrgIds([$section_id])
+                    );
 
                 $usersQuery->whereIn(
                     'users.org_id',
-                    $lineIds
+                    $orgIds
                 );
             }
 
@@ -91,9 +97,14 @@ class ReportLicensePersonController extends Controller
 
             if($line_id){
 
-                $usersQuery->where(
+                $orgIds = collect([$line_id])
+                    ->merge(
+                        ChildOrgHelper::getAllChildOrgIds([$line_id])
+                    );
+
+                $usersQuery->whereIn(
                     'users.org_id',
-                    $line_id
+                    $orgIds
                 );
             }
 
@@ -106,7 +117,7 @@ class ReportLicensePersonController extends Controller
             if($team_id){
 
                 $usersQuery->where(
-                    'orgchart.team_id',
+                    'users.team_id',
                     $team_id
                 );
             }

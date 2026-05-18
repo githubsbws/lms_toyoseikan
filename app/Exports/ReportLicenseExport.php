@@ -49,7 +49,8 @@ class ReportLicenseExport implements
             'No',
             'Name',
             'Emp Code',
-            'Position'
+            'Position',
+            'Team'
         ];
 
         // Operate Machine Group
@@ -69,6 +70,7 @@ class ReportLicenseExport implements
         */
 
         $header2 = [
+            '',
             '',
             '',
             '',
@@ -94,11 +96,12 @@ class ReportLicenseExport implements
 
         foreach($this->users as $index => $user){
 
-            $row = [
+           $row = [
                 $index + 1,
                 $user->firstname.' '.$user->lastname,
-                $user->staff_id,
-                optional($user->Orgchart)->title
+                $user->username,
+                optional($user->Orgchart)->title,
+                optional($user->Team)->name
             ];
 
             $userLicenses = $this->licenses[$user->id] ?? collect();
@@ -123,17 +126,20 @@ class ReportLicenseExport implements
 
                 if(!$license){
 
-                    $row[] = 'N/A';
+                    $row[] = '';
+
+                }elseif($license->license_level == 3){
+
+                    $row[] = '✅';
+
+                }elseif($license->license_level == 2){
+
+                    $row[] = '⚠️';
 
                 }else{
 
-                    if($license->license_level == 3){
-                        $row[] = 'LP3';
-                    }elseif($license->license_level == 2){
-                        $row[] = 'LP2';
-                    }else{
-                        $row[] = 'LP1';
-                    }
+                    $row[] = '❌';
+
                 }
             }
 
@@ -147,7 +153,23 @@ class ReportLicenseExport implements
 
                 $license = $parameterMap[$setting->id] ?? null;
 
-                $row[] = $license ? 'O' : '-';
+                if(!$license){
+
+                    $row[] = '';
+
+                }elseif($license->license_level == 3){
+
+                    $row[] = '✅';
+
+                }elseif($license->license_level == 2){
+
+                    $row[] = '⚠️';
+
+                }else{
+
+                    $row[] = '❌';
+
+                }
             }
 
             $rows[] = $row;
@@ -192,6 +214,7 @@ class ReportLicenseExport implements
                 $sheet->mergeCells('B1:B2');
                 $sheet->mergeCells('C1:C2');
                 $sheet->mergeCells('D1:D2');
+                $sheet->mergeCells('E1:E2');
 
                 /*
                 |--------------------------------------------------------------------------
@@ -199,7 +222,7 @@ class ReportLicenseExport implements
                 |--------------------------------------------------------------------------
                 */
 
-                $operateStart = 5;
+                $operateStart = 6;
                 $operateEnd = $operateStart + count($this->operateMachines) - 1;
 
                 $sheet->mergeCells(
@@ -256,13 +279,78 @@ class ReportLicenseExport implements
                     ]
                 ]);
 
+                $sheet->getStyle(
+                    'F3:'.$sheet->getHighestColumn().$sheet->getHighestRow()
+                )->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'E0E0E0' // เทาอ่อน
+                        ]
+                    ]
+                ]);
+
+
+                $dataStartRow = 3;
+                $dataEndRow = $sheet->getHighestRow();
+
+                for($row = $dataStartRow; $row <= $dataEndRow; $row++){
+
+                    for($col = 6; $col <= $parameterEnd; $col++){
+
+                        $cell = $this->columnLetter($col).$row;
+
+                        $value = trim(
+                            (string)$sheet->getCell($cell)->getValue()
+                        );
+
+                        $bgColor = 'BDBDBD'; // default N/A = เทา
+                        $fontColor = '000000';
+
+                        if($value == '✅'){
+
+                            // LP3 = เขียว
+                            $fontColor = '28A745';
+                            $bgColor = 'FFFFFF';
+
+                        }elseif(str_contains($value, '⚠')){
+
+                            // LP2 = เหลือง
+                            $fontColor = 'FFC107';
+                            $bgColor = 'FFFFFF';
+
+                        }elseif($value == '❌'){
+
+                            // LP1 = แดง
+                            $fontColor = 'DC3545';
+                            $bgColor = 'FFFFFF';
+                        }
+
+                        $sheet->getStyle($cell)->applyFromArray([
+
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'startColor' => [
+                                    'rgb' => $bgColor
+                                ]
+                            ],
+
+                            'font' => [
+                                'color' => [
+                                    'rgb' => $fontColor
+                                ],
+                                'bold' => true
+                            ]
+                        ]);
+                    }
+                }
                 /*
                 |--------------------------------------------------------------------------
                 | Freeze Pane
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->freezePane('E3');
+                $sheet->freezePane('F3');
             }
         ];
     }

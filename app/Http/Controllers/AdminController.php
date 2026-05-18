@@ -112,6 +112,7 @@ use App\Models\RoadmapCourse;
 use App\Models\ScoreAssessment;
 use getID3;
 // use App\Models\Users;
+use App\Helpers\ChildOrgHelper;
 
 use App\Services\RoadmapService;
 use Google\LongRunning\Operation;
@@ -5672,6 +5673,12 @@ class AdminController extends Controller
                     '=',
                     'users.org_id'
                 )
+                ->leftJoin(
+                    'team',
+                    'team.id',
+                    '=',
+                    'users.team_id'
+                )
                 ->where('users.status', '1');
 
             /*
@@ -5682,16 +5689,14 @@ class AdminController extends Controller
 
             if($section_id){
 
-                $lineIds = Orgchart::where(
-                        'parent_id',
-                        (string)$section_id
-                    )
-                    ->where('active','y')
-                    ->pluck('id');
+                $orgIds = collect([$section_id])
+                    ->merge(
+                        ChildOrgHelper::getAllChildOrgIds([$section_id])
+                    );
 
                 $usersQuery->whereIn(
                     'users.org_id',
-                    $lineIds
+                    $orgIds
                 );
             }
 
@@ -5703,9 +5708,14 @@ class AdminController extends Controller
 
             if($line_id){
 
-                $usersQuery->where(
+                $orgIds = collect([$line_id])
+                    ->merge(
+                        ChildOrgHelper::getAllChildOrgIds([$line_id])
+                    );
+
+                $usersQuery->whereIn(
                     'users.org_id',
-                    $line_id
+                    $orgIds
                 );
             }
 
@@ -5718,7 +5728,7 @@ class AdminController extends Controller
             if($team_id){
 
                 $usersQuery->where(
-                    'orgchart.team_id',
+                    'users.team_id',
                     $team_id
                 );
             }

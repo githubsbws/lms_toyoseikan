@@ -82,10 +82,11 @@ class ReportUserExport implements
 
         $header1 = [
             'No',
-            'Name',
-            'Emp Code',
-            'Position',
-            'Period'
+            'ชื่อ - สกุล',
+            'รหัสพนักงาน',
+            'ตำแหน่ง',
+            'ทีม',
+            'วันที่เริ่มงาน'
         ];
 
         foreach($this->groupedCourses as $group => $items){
@@ -102,6 +103,7 @@ class ReportUserExport implements
         */
 
         $header2 = [
+            '',
             '',
             '',
             '',
@@ -130,8 +132,9 @@ class ReportUserExport implements
             $row = [
                 $index + 1,
                 $user->firstname.' '.$user->lastname,
-                $user->staff_id,
+                $user->username,
                 optional($user->Orgchart)->title,
+                $user->Team->name,
                 $user->work_start
                     ? \Carbon\Carbon::parse($user->work_start)->format('d/m/Y')
                     : '-'
@@ -218,7 +221,7 @@ class ReportUserExport implements
                 |--------------------------------------------------------------------------
                 */
 
-                $startCol = 6;
+                $startCol = 7;
 
                 foreach($this->groupedCourses as $group => $items){
 
@@ -245,6 +248,7 @@ class ReportUserExport implements
                 $sheet->mergeCells('C1:C2');
                 $sheet->mergeCells('D1:D2');
                 $sheet->mergeCells('E1:E2');
+                $sheet->mergeCells('F1:F2');
 
                 /*
                 |--------------------------------------------------------------------------
@@ -287,7 +291,7 @@ class ReportUserExport implements
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->freezePane('F3');
+                $sheet->freezePane('G3');
 
                 /*
                 |--------------------------------------------------------------------------
@@ -301,7 +305,7 @@ class ReportUserExport implements
                 }
 
                 $startRow = 3; // data row เริ่ม
-                $startCol = 6; // F
+                $startCol = 7; // G
 
                 for ($row = $startRow; $row <= $sheet->getHighestRow(); $row++) {
 
