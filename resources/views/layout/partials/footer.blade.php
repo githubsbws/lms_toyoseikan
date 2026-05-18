@@ -31,10 +31,8 @@
                     <li><a href="{{route('course')}}" style=" color: #757575;">หลักสูตร</a></li>
                 </ul>
             </div>
-            <div class="col-lg-4">
-                <!-- Histats.com  START  (standard)-->
+            {{-- <div class="col-lg-4">
                 <h4 class="text-headline text-light" style="font-size: 20px;">สถิติการเข้าชมเว็บไซต์</h4>
-                <!-- Histats.com  START  (standard)-->
                 <script type="text/javascript">
                     document.write(unescape("%3Cscript src=%27http://s10.histats.com/js15.js%27 type=%27text/javascript%27%3E%3C/script%3E"));
                 </script>
@@ -50,7 +48,7 @@
                 </a>
                 <noscript><a href="http://www.histats.com" target="_blank"><img src="http://sstatic1.histats.com/0.gif?3337735&101" alt="" border="0"></a></noscript>
                 <!-- Histats.com  END  -->
-            </div>
+            </div> --}}
             <div class="col-lg-4">
                 <h4 class="text-headline text-light" style="font-size: 20px;">ติดต่อเรา</h4>
                 <p>บริษัท โตโย ไซกัน (ประเทศไทย) จำกัด (สำนักงานใหญ่)</p>
