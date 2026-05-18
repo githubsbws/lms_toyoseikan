@@ -13,7 +13,7 @@ use App\Models\DownloadFile;
 
 <style>
     /* --- Pure CSS Custom Reset & Typography --- */
- /*    body {
+    /*    body {
         font-family: 'Prompt', sans-serif;
         background-color: #fcfcfc;
         color: #000000;
@@ -21,9 +21,9 @@ use App\Models\DownloadFile;
         padding: 0;
     } */
 
-        .navbar.navbar-size-large .navbar-nav>li>a {
-            font-size: 24px !important;
-        }
+    .navbar.navbar-size-large .navbar-nav>li>a {
+        font-size: 24px !important;
+    }
 
     a,
     a:hover,
@@ -100,7 +100,7 @@ use App\Models\DownloadFile;
         overflow: hidden;
     }
 
- /*    .hero-banner-img {
+    /*    .hero-banner-img {
         width: 100%;
         height: auto;
         display: block;
@@ -157,11 +157,15 @@ use App\Models\DownloadFile;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 25px;
+        gap: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         transition: transform 0.2s, box-shadow 0.2s;
         cursor: pointer;
         border: none;
+    }
+
+    .menu-card img {
+        width: 30px !important;
     }
 
     .menu-card:hover {
@@ -175,8 +179,8 @@ use App\Models\DownloadFile;
     }
 
     .menu-card span {
-        font-size: 20px;
-        font-weight: 500;
+        font-size: 22px;
+        font-weight: bold;
         color: #222222;
     }
 
@@ -246,10 +250,11 @@ use App\Models\DownloadFile;
         margin: 0;
         padding-bottom: 8px;
         color: #111111;
+        border-bottom: 3px solid #2196f3;
     }
 
     /* เส้นใต้สีน้ำเงินหนาๆ ตามแบบ UI ดีไซน์ */
-    .section-headline::after {
+    /*    .section-headline::after {
         content: '';
         position: absolute;
         left: 0;
@@ -258,13 +263,13 @@ use App\Models\DownloadFile;
         height: 4px;
         background-color: #2196f3;
         border-radius: 2px;
-    }
+    } */
 
     /* ปุ่ม ดูทั้งหมด สีดำโค้งมน */
     .btn-view-all {
         background-color: #0a0a0f;
         color: #ffffff !important;
-        font-size: 13px;
+        font-size: 18px;
         padding: 8px 22px;
         border-radius: 20px;
         font-weight: 400;
@@ -334,7 +339,7 @@ use App\Models\DownloadFile;
     }
 
     .course-title {
-        font-size: 16px;
+        font-size: 22px;
         font-weight: 500;
         color: #111111;
         margin: 0 0 15px 0;
@@ -385,7 +390,7 @@ use App\Models\DownloadFile;
     }
 
     .instructor-name {
-        font-size: 13px;
+        font-size: 18px;
         font-weight: 500;
         color: #333333;
     }
@@ -409,12 +414,13 @@ use App\Models\DownloadFile;
         font-weight: bold;
         position: relative;
         margin: 0;
-        padding-bottom: 8px;
+        padding-bottom: 2px;
         color: #111111;
+        border-bottom: 3px solid #2196f3;
     }
 
     /* เส้นใต้สีน้ำเงินหนาๆ ตามแบบ UI ดีไซน์ */
-    .section-headlines::after {
+    /*  .section-headlines::after {
         content: '';
         position: absolute;
         left: 0;
@@ -423,22 +429,8 @@ use App\Models\DownloadFile;
         height: 4px;
         background-color: #2196f3;
         border-radius: 2px;
-    }
+    } */
 
-    /* ปุ่ม ดูทั้งหมด สีดำโค้งมน */
-    .btn-view-all {
-        background-color: #0a0a0f;
-        color: #ffffff !important;
-        font-size: 13px;
-        padding: 8px 22px;
-        border-radius: 20px;
-        font-weight: 400;
-        transition: opacity 0.2s;
-    }
-
-    .btn-view-all:hover {
-        opacity: 0.85;
-    }
 
     /* --- สไตล์กล่องการ์ดข่าว (News Cards) --- */
     .news-card-item {
@@ -493,7 +485,7 @@ use App\Models\DownloadFile;
     }
 
     .news-title {
-        font-size: 16px;
+        font-size: 22px;
         font-weight: 400;
         margin: 0 0 10px 0;
         line-height: 1.4;
@@ -506,7 +498,7 @@ use App\Models\DownloadFile;
     }
 
     .news-card-item.large-box .news-title {
-        font-size: 18px;
+        font-size: 22px;
         /* ขยายฟอนต์หัวข้อบนกล่องใหญ่ */
     }
 
@@ -523,6 +515,7 @@ use App\Models\DownloadFile;
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        font-size: 18px;
     }
 
     .news-meta-item i {
@@ -574,7 +567,7 @@ use App\Models\DownloadFile;
     }
 
     .cta-description {
-        font-size: 14px;
+        font-size: 18px;
         color: #666666;
         line-height: 1.7;
         margin: 0 0 30px 0;
@@ -585,7 +578,7 @@ use App\Models\DownloadFile;
         padding: 10px 30px;
         border: 1.5px solid #111111;
         border-radius: 30px;
-        font-size: 14px;
+        font-size: 22px;
         font-weight: 400;
         color: #111111 !important;
         background-color: transparent;
@@ -627,14 +620,15 @@ use App\Models\DownloadFile;
 
     .main-video-headline {
         font-size: 26px;
-        font-weight: 500;
         position: relative;
         margin: 0;
-        padding-bottom: 8px;
+        padding-bottom: 2px;
         color: #111111;
+        font-weight: bold;
+        border-bottom: 3px solid #2196f3;
     }
 
-    .main-video-headline::after {
+    /*   .main-video-headline::after {
         content: '';
         position: absolute;
         left: 0;
@@ -643,7 +637,7 @@ use App\Models\DownloadFile;
         height: 4px;
         background-color: #2196f3;
         border-radius: 2px;
-    }
+    } */
 
     .main-video-btn-all {
         background-color: #0a0a0f;
@@ -702,8 +696,8 @@ use App\Models\DownloadFile;
 
     .menu-cards-grid {
         display: flex;
-    margin-top: 30px;
-    justify-content: center;
+        /* margin-top: 30px; */
+        justify-content: center;
     }
 
     .custom-accordion-container {
@@ -834,25 +828,8 @@ use App\Models\DownloadFile;
         padding-bottom: 10px;
     }
 
-    .main-video-headline {
-        font-size: 26px;
-        font-weight: 500;
-        position: relative;
-        margin: 0;
-        padding-bottom: 8px;
-        color: #111111;
-    }
 
-    .main-video-headline::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 140px;
-        height: 4px;
-        background-color: #2196f3;
-        border-radius: 2px;
-    }
+
 
     .main-video-btn-all {
         background-color: #0a0a0f;
@@ -901,58 +878,155 @@ use App\Models\DownloadFile;
         padding: 40px 20px;
     }
 
+    /* คำถามที่พบบ่อย */
+    .page-sidebar-title {
+        padding: 30px 40px 10px 40px;
+        font-size: 20px;
+        color: #111111;
+    }
+
+    .page-main-title {
+        font-size: 26px;
+        font-weight: 500;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 40px;
+    }
+
+    /* --- ตกแต่งทับ Collapse/Accordion ของ Bootstrap 3 ให้โมเดิร์น --- */
+    .custom-accordion-container {
+        max-width: 850px;
+        margin: 0 auto 100px auto;
+        padding: 0 15px;
+    }
+
+    /* ล้างกรอบสีเทาเหลี่ยมๆ ของ BT3 Panel ออก */
+    .panel-group#accordion .panel {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        overflow: hidden;
+    }
+
+    .panel-group#accordion .panel+.panel {
+        margin-top: 0;
+        /* เคลียร์ค่าทับซ้อนของ BT3 */
+    }
+
+    /* ส่วนหัวแถบคำถาม */
+    .panel-group#accordion .panel-heading {
+        background-color: #ffffff !important;
+        padding: 0;
+        border: none;
+    }
+
+    .panel-group#accordion .panel-title a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        font-size: 16px;
+        font-weight: 400;
+        width: 100%;
+    }
+
+    /* ไอคอนลูกศรเปลี่ยนทิศทางเมื่อเปิด-ปิด (พึ่งพาคลาสของ BT3) */
+    .panel-group#accordion .panel-title a .chevron-icon {
+        transition: transform 0.2s ease;
+        font-size: 16px;
+        color: #555;
+    }
+
+    /* ถ้าไม่ได้หดตัวอยู่ (คือเปิดอยู่) ให้หมุนลูกศรกลับหัว */
+    .panel-group#accordion .panel-title a:not(.collapsed) .chevron-icon {
+        transform: rotate(180deg);
+    }
+
+    /* ส่วนกล่องคำตอบ */
+    .panel-group#accordion .panel-collapse {
+        border: none !important;
+    }
+
+    .panel-group#accordion .panel-body {
+        border-top: none !important;
+        /* ลบเส้นคั่นดีฟอลต์ของ BT3 */
+        padding: 0 24px 24px 24px;
+        font-size: 14px;
+        color: #333333;
+        line-height: 1.7;
+    }
+
+    .faq-text-block {
+        margin-bottom: 12px;
+    }
 </style>
 
 <body>
 
     <div class="main-content">
-        <section class="hero-banner-container" >
+        <section class="hero-banner-container">
             <img src="{{ asset('assets/images/banner.png') }}" alt="E-Learning Banner" class="hero-banner-img" style="width: 100%;">
         </section>
 
         @if(Auth::user())
         <div class="container-fluid">
-            <div class="mymenu">
-                <div class="menu-title-block">
-                    <h3>เมนู</h3>
-                    <p>ของเรา</p>
+            <div class="row" style="display: flex; align-items: center; padding: 3rem 0;">
+                <div class="col-lg-2">
+                    <div class="menu-title-block">
+                        <h3>เมนู</h3>
+                        <p>ของเรา</p>
+                    </div>
                 </div>
 
-                <div class="menu-cards-grid">
+                <div class="col-lg-10">
+                    <div class="menu-cards-grid">
 
-                    <a href="{{ url('course') }}">
-                        <div class="menu-card card-pink" onclick="location.href='#'">
-                             <img src="{{ asset('assets/images/menu1.png') }}" alt="E-Learning Banner" class="hero-banner-img">
-                            <span>หลักสูตรของฉัน</span>
+                        <div class="row" style="    width: 100%;">
+                            <div class=" col-lg-4">
+                                <a href="{{ url('course') }}">
+                                    <div class="menu-card card-pink" onclick="location.href='#'">
+                                        <img src="{{ asset('assets/images/menu1.png') }}" alt="E-Learning Banner" class="hero-banner-img">
+                                        <span>หลักสูตรของฉัน</span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="menu-card card-cream" onclick="location.href='#'">
+                                    <img src="{{ asset('assets/images/user-guide.png') }}" alt="E-Learning Banner" class="hero-banner-img">
+                                    <span>วิธีการใช้งาน</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <a href="{{ url('course') }}">
+                                    <div class="menu-card card-green" onclick="location.href='#'">
+                                        <img src="{{ asset('assets/images/check-list.png') }}" alt="E-Learning Banner" class="hero-banner-img">
+                                        <span>สถานะการเรียน</span>
+                                    </div>
+                                </a>
+                            </div>
                         </div>
-                    </a>
 
-
-                    <!--  <div class="menu-card card-cream" onclick="location.href='#'">
-                        <i class="fa-solid fa-book-open"></i>
-                        <span>วิธีการใช้งาน</span>
-                    </div> -->
-
-                    <!--   <div class="menu-card card-green" onclick="location.href='#'">
-                        <i class="fa-solid fa-list-check"></i>
-                        <span>สถานะการเรียน</span>
-                    </div> -->
-
+                    </div>
                 </div>
             </div>
         </div>
-        @endif
+    </div>
+    @endif
 
 
-        @if(Auth::user())
+    @if(Auth::user())
 
-        <div class="container-fluid course-index">
-            <div class="courses-wrapper">
+    <div class="container-fluid course-index">
+        <div class="courses-wrapper">
 
-                <div class="courses-top-bar">
-                    <h3 class="section-headline">หลักสูตรของเรา</h3>
-                    <!-- <a href="#" class="btn-view-all">ดูทั้งหมด</a> -->
-                </div>
+            <div class="courses-top-bar">
+                <h3 class="section-headline">หลักสูตรของเรา</h3>
+                <!-- <a href="#" class="btn-view-all">ดูทั้งหมด</a> -->
+            </div>
 
                 <div class="row">
                     @if($course_detail->isNotEmpty())
@@ -982,100 +1056,181 @@ use App\Models\DownloadFile;
         @endif
 
 
-        <div class="container-fluid">
-            <div class="news-wrapper">
+    <div class="container-fluid">
+        <div class="news-wrapper">
 
-                <div class="news-top-bar">
-                    <h3 class="section-headlines">ข่าวประชาสัมพันธ์</h3>
-                    <a href="{{ url('new') }}" class="btn-view-all">ดูทั้งหมด</a>
+            <div class="news-top-bar">
+                <h3 class="section-headlines">ข่าวประชาสัมพันธ์</h3>
+                <a href="{{ url('new') }}" class="btn-view-all">ดูทั้งหมด</a>
+            </div>
+
+            <div class="row">
+                @if($news_desc->isNotEmpty())
+                @foreach ( $news_desc as $news )
+                @if($loop->first)
+                <a href="{{ route('new_detail',$news->cms_id) }}">
+                    <div class="col-md-8 col-sm-12">
+                        <div class="news-card-item large-box">
+                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 1" loading="lazy">
+                            <div class="news-overlay-content">
+                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
+                                <div class="news-meta-info">
+                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                @else
+                <a href="{{ route('new_detail',$news->cms_id) }}">
+                    <div class="col-md-4 col-sm-12">
+                        <div class="news-card-item small-box">
+                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 2" loading="lazy">
+                            <div class="news-overlay-content">
+                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
+                                <div class="news-meta-info">
+                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                @endif
+                @endforeach
+                @else
+                <h3>ไม่มีข่าวสารในตอนนี้ กรุณาติดตามรอ</h3>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">Learn and Grow with<br>Top <span class="highlight">Online Courses</span></h2>
+            <p class="cta-description">
+                Lorem Ipsum is simply dummy text of the printing and typesetting industry.<br>
+                Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+            </p>
+            <a href="#" class="cta-btn-contact">Contact Us</a>
+        </div>
+    </section>
+
+
+    <div class="container-fluid">
+        <div class="main-video">
+            <div class="main-video-top-bar">
+                <h3 class="main-video-headline">วิดีโอแนะนำ</h3>
+                <!-- <a href="#" class="main-video-btn-all">ดูทั้งหมด</a> -->
+            </div>
+            <div class="row">
+                <!-- Video 1 -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="main-video-card">
+                        <div class="main-video-card-iframe">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="row">
-                    @if($news_desc->isNotEmpty())
-                        @foreach ( $news_desc as $news )
-                            @if($loop->first)
-                                <a href="{{ route('new_detail',$news->cms_id) }}">
-                                    <div class="col-md-8 col-sm-12">
-                                        <div class="news-card-item large-box">
-                                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 1" loading="lazy">
-                                            <div class="news-overlay-content">
-                                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
-                                                <div class="news-meta-info">
-                                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            @else
-                                <a href="{{ route('new_detail',$news->cms_id) }}">
-                                    <div class="col-md-4 col-sm-12">
-                                        <div class="news-card-item small-box">
-                                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 2" loading="lazy">
-                                            <div class="news-overlay-content">
-                                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
-                                                <div class="news-meta-info">
-                                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            @endif
-                        @endforeach
-                    @else
-                        <h3>ไม่มีข่าวสารในตอนนี้ กรุณาติดตามรอ</h3>
-                    @endif
+                <!-- Video 2 -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="main-video-card">
+                        <div class="main-video-card-iframe">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+                <!-- Video 3 -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="main-video-card">
+                        <div class="main-video-card-iframe">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <section class="cta-section">
-            <div class="cta-content">
-                <h2 class="cta-title">Learn and Grow with<br>Top <span class="highlight">Online Courses</span></h2>
-                <p class="cta-description">
-                    Lorem Ipsum is simply dummy text of the printing and typesetting industry.<br>
-                    Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
-                </p>
-                <a href="#" class="cta-btn-contact">Contact Us</a>
-            </div>
-        </section>
+    <div class="container-fluid">
 
+        <h2 class="page-main-title">คำถามที่พบบ่อย</h2>
 
-        <div class="container-fluid">
-            <div class="main-video">
-                <div class="main-video-top-bar">
-                    <h3 class="main-video-headline">วิดีโอแนะนำ</h3>
-                    <!-- <a href="#" class="main-video-btn-all">ดูทั้งหมด</a> -->
-                </div>
-                <div class="row">
-                    <!-- Video 1 -->
-                    <div class="col-md-4 col-sm-6">
-                        <div class="main-video-card">
-                            <div class="main-video-card-iframe">
-                                <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            </div>
-                        </div>
+        <div class="custom-accordion-container">
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                1. การเรียน/สอบ ผ่านระบบ E-Learning
+                                <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                            </a>
+                        </h4>
                     </div>
-                    <!-- Video 2 -->
-                    <div class="col-md-4 col-sm-6">
-                        <div class="main-video-card">
-                            <div class="main-video-card-iframe">
-                                <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Video 3 -->
-                    <div class="col-md-4 col-sm-6">
-                        <div class="main-video-card">
-                            <div class="main-video-card-iframe">
-                                <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            </div>
+                    <div id="collapseOne" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <div class="faq-text-block">
+                                1. "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." </div>
+                            <div class="faq-text-block">
+                                2. The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero. </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h4 class="panel-title">
+                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                2. ลืมรหัสผ่าน
+                                <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="panel-body">
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingThree">
+                        <h4 class="panel-title">
+                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                3. วิธีแจ้งปัญหาการใช้งาน
+                                <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                        <div class="panel-body">
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingFour">
+                        <h4 class="panel-title">
+                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                4. สามารถใช้งานภาษาอะไรได้บ้าง
+                                <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                        <div class="panel-body">
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
+    </div>
     </div>
 </body>
 <script>
