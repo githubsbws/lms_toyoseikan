@@ -8,7 +8,7 @@
         <div>
 
             <h4 class="font-weight-bold text-primary mb-1">
-                {{ $data[0]->course_title }}
+                {{ $data[0]->course_title }}d
             </h4>
 
             <div class="text-muted">
