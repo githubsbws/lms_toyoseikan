@@ -12,12 +12,26 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Users;
 use App\Models\Orgchart;
 use App\Models\Team;
+use App\Models\Course;
+use App\Models\Passcourse;
+use App\Models\ScoreAssessment;
 use App\Models\OperationMachine;
 use App\Models\ParameterSetting;
 use App\Models\LicensePerson;
 
 class ReportLicensePersonController extends Controller
 {
+    private function getSkillLevel($percent)
+    {
+        if ($percent == 100) return 5;
+        if ($percent >= 80) return 4;
+        if ($percent >= 60) return 3;
+        if ($percent >= 25) return 2;
+        if ($percent >= 0) return 1;
+
+        return 0;
+    }
+
     public function report_license(Request $request)
     {
         if(AuthFacade::useradmin()){
@@ -142,13 +156,93 @@ class ReportLicensePersonController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $licenses = LicensePerson::whereIn(
-                    'user_id',
+            $licenseCourses = Course::where('active', 'y')
+                ->where(function($q){
+                    $q->whereNotNull('op_mac_id')
+                    ->orWhereNotNull('par_st_id');
+                })
+                ->get()
+                ->keyBy('course_id');
+
+            
+            /*
+            |--------------------------------------------------------------------------
+            | PassCourses
+            |--------------------------------------------------------------------------
+            */
+            $passCourses = Passcourse::whereIn(
+                    'passcours_cours',
+                    $licenseCourses->pluck('course_id')
+                )
+                ->whereIn(
+                    'passcours_user',
                     $users->pluck('id')
                 )
-                ->get()
-                ->groupBy('user_id');
+                ->where(
+                    'passcours_status',
+                    'pass'
+                )
+                ->get();
 
+            /*
+            |--------------------------------------------------------------------------
+            | AssessmentScores
+            |--------------------------------------------------------------------------
+            */
+            
+            $assessmentScores = ScoreAssessment::whereIn(
+                    'passcours_id',
+                    $passCourses->pluck('passcours_id')
+                )
+                ->where(
+                    'active',
+                    'y'
+                )
+                ->get()
+                ->groupBy('passcours_id');
+            
+
+            $licenseSkills = collect();
+
+                foreach($passCourses as $pass){
+
+                    $course = $licenseCourses
+                        ->get($pass->passcours_cours);
+
+                    if(!$course){
+                        continue;
+                    }
+
+                    $percent = $assessmentScores
+                        ->get($pass->passcours_id, collect())
+                        ->sum(function($item){
+                            return (float)$item->score;
+                        });
+
+                    // skill matrix
+                    $skill = $this->getSkillLevel($percent);
+
+                    // convert to license
+                    if($skill >= 4){
+                        $licenseLevel = 3;
+                    }
+                    elseif($skill >= 2){
+                        $licenseLevel = 2;
+                    }
+                    else{
+                        $licenseLevel = 1;
+                    }
+
+                    $licenseSkills->push((object)[
+                        'user_id' => $pass->passcours_user,
+                        'operation_machine_id' => $course->op_mac_id,
+                        'parameter_setting_id' => $course->par_st_id,
+                        'license_level' => $licenseLevel
+                    ]);
+                }
+
+                $licenses = $licenseSkills
+                    ->groupBy('user_id');
             /*
             |--------------------------------------------------------------------------
             | Department

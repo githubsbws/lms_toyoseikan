@@ -106,6 +106,18 @@ th.rotate > div {
 .skill-0 {
     background: #ccc;
 }
+
+.license-box{
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-right: 5px;
+    border: 1px solid #999;
+}
 </style>
 <body class="">
 	<div id="wrapper">
@@ -204,6 +216,33 @@ th.rotate > div {
 				<div class="container-fluid">
 					<div class="card m-0">
 						<div class="card-body">
+							<div class="mb-3">
+
+								<span class="license-box license-lp3">☑</span>
+								LP3 - Qualified
+								<small class="text-muted">
+									(80–100% : ผ่านเกณฑ์รับรองว่าสามารถปฏิบัติงานได้)
+								</small>
+
+								<span class="license-box license-lp2 ml-4">⚠</span>
+								LP2 - Under Supervision
+								<small class="text-muted">
+									(60–79% : ปฏิบัติงานได้โดยมีผู้ควบคุม)
+								</small>
+
+								<span class="license-box license-lp1 ml-4">✖</span>
+								LP1 - Not Qualified (In Training)
+								<small class="text-muted">
+									(0–59% : ยังต้องพัฒนาทักษะ)
+								</small>
+
+								<span class="license-box license-na ml-4"></span>
+								N/A
+								<small class="text-muted">
+									(ไม่เกี่ยวข้องกับหน้าที่)
+								</small>
+
+							</div>
 							<table id="settingTable" class="table table-striped table-bordered nowrap" style="width:100%">
 								 <thead>
 
@@ -289,19 +328,35 @@ th.rotate > div {
 											@endforeach
 											@foreach($parameterSettings as $setting)
 
-											@php
-											$license = $parameterMap[$setting->id] ?? null;
-											@endphp
+												@php
+												$license = $parameterMap[$setting->id] ?? null;
+												@endphp
 
-											<td class="
-												{{ $license ? 'license-pass' : 'license-na' }}
-											">
+												<td class="
+													@if(!$license)
+														license-na
+													@elseif($license->license_level == 3)
+														license-lp3
+													@elseif($license->license_level == 2)
+														license-lp2
+													@else
+														license-lp1
+													@endif
+												">
 
-											@if($license)
-												O
-											@endif
+													@if($license)
 
-											</td>
+														@if($license->license_level == 3)
+															☑
+														@elseif($license->license_level == 2)
+															⚠
+														@else
+															✖
+														@endif
+
+													@endif
+
+												</td>
 
 											@endforeach
 									</tr>
