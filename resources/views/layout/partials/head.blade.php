@@ -52,9 +52,10 @@ use App\Models\Usability;
     }
 
     .navbar-right a {
-        display: flex;
-        align-items: center;
-        column-gap: 6px;
+        padding: 0px 21px !important;
+        margin: 9px 4px 4px 4px !important !important;
+        border-radius: 42px !important;
+        line-height: 2.5 !important;
     }
 
     .navbar-nav>li>.dropdown-menu {
@@ -76,6 +77,11 @@ use App\Models\Usability;
         line-height: 3 !important;
         padding: 0 16px !important;
         margin-top: 10px !important;
+    }
+
+    .navbar.navbar-size-xlarge .navbar-btn {
+        margin-top: 16px !important;
+        margin-bottom: 16px !important;
     }
 </style>
 

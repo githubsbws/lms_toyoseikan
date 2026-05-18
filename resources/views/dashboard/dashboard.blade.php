@@ -25,16 +25,16 @@ use App\Models\Ques_ans;
             }
             
         </style>
-        <div class="parallax overflow-hidden page-section bg-blue-300">
-            <div class="container parallax-layer" data-opacity="true" style="transform: translate3d(0px, 0px, 0px); opacity: 1;">
+        <div class="overflow-hidden page-section bg-blue-300">
+            <div class="container-fluid " data-opacity="true" style="transform: translate3d(0px, 0px, 0px); opacity: 1;">
                 <div class="media media-grid v-middle">
                     <div class="media-left">
                         <span class="icon-block half bg-blue-500 text-white" style="height: 45px;"><i class="fa fa-tachometer"></i></span>
                     </div>
                     <div class="media-body">
                         <h3 class="text-display-2 text-white margin-none">Dashboard</h3>
-                        <p class="text-white text-subhead" style="font-size: 1.6rem;">รวมหลักสูตร การทำงานของ Product ของ
-                            Brother</p>
+                       <!--  <p class="text-white text-subhead" style="font-size: 1.6rem;">รวมหลักสูตร การทำงานของ Product ของ
+                            Brother</p> -->
                     </div>
                 </div>
             </div>
@@ -47,11 +47,11 @@ use App\Models\Ques_ans;
                             
                             <div class="item col-12" style="position: absolute; left: 580px; top: 0px;">
                                 <div class="panel panel-primary paper-shadow" data-z="0.5">
-                                    <div class="panel-heading">
+                                    <!-- <div class="panel-heading">
                                         <h4 class="margin-none" style="color: white;font-weight: bold;">หลักสูตร</h4>
 
                                         <p class="text-subhead text-light" style="color: white;">หลักสูตรทั้งหมดที่ต้องเรียน</p>
-                                    </div>
+                                    </div> -->
                                     <ul class="list-group">
                                         
                                         @foreach ($course as $cs)
@@ -114,12 +114,12 @@ use App\Models\Ques_ans;
                         </div>
                     </div>
                     <div class="col-lg-6 col-sm-12">
-                        <div class="panel panel-primary">
+                  <!--       <div class="panel panel-primary">
                             <div class="panel-heading">
                                 <h4 class="margin-none" style="color: white;font-weight: bold;">ผลการเรียน</h4>
                                 <p class="text-subhead text-light" style="color: white;">ผลการเรียน</p>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="panel-group" id="accordion" style="margin-top: 10px;">
                             @foreach($course as $cos)
                             @php
