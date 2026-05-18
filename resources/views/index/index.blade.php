@@ -13,7 +13,7 @@ use App\Models\DownloadFile;
 
 <style>
     /* --- Pure CSS Custom Reset & Typography --- */
- /*    body {
+    /*    body {
         font-family: 'Prompt', sans-serif;
         background-color: #fcfcfc;
         color: #000000;
@@ -21,9 +21,9 @@ use App\Models\DownloadFile;
         padding: 0;
     } */
 
-        .navbar.navbar-size-large .navbar-nav>li>a {
-            font-size: 24px !important;
-        }
+    .navbar.navbar-size-large .navbar-nav>li>a {
+        font-size: 24px !important;
+    }
 
     a,
     a:hover,
@@ -100,7 +100,7 @@ use App\Models\DownloadFile;
         overflow: hidden;
     }
 
- /*    .hero-banner-img {
+    /*    .hero-banner-img {
         width: 100%;
         height: auto;
         display: block;
@@ -702,8 +702,8 @@ use App\Models\DownloadFile;
 
     .menu-cards-grid {
         display: flex;
-    margin-top: 30px;
-    justify-content: center;
+        /* margin-top: 30px; */
+        justify-content: center;
     }
 
     .custom-accordion-container {
@@ -900,183 +900,194 @@ use App\Models\DownloadFile;
     .main-video {
         padding: 40px 20px;
     }
-
 </style>
 
 <body>
 
     <div class="main-content">
-        <section class="hero-banner-container" >
+        <section class="hero-banner-container">
             <img src="{{ asset('assets/images/banner.png') }}" alt="E-Learning Banner" class="hero-banner-img" style="width: 100%;">
         </section>
 
         @if(Auth::user())
         <div class="container-fluid">
-            <div class="mymenu">
-                <div class="menu-title-block">
-                    <h3>เมนู</h3>
-                    <p>ของเรา</p>
+            <div class="row" style="display: flex; align-items: center; padding: 3rem 0;">
+                <div class="col-lg-2">
+                    <div class="menu-title-block">
+                        <h3>เมนู</h3>
+                        <p>ของเรา</p>
+                    </div>
                 </div>
 
-                <div class="menu-cards-grid">
+                <div class="col-lg-10">
+                    <div class="menu-cards-grid">
 
-                    <a href="{{ url('course') }}">
-                        <div class="menu-card card-pink" onclick="location.href='#'">
-                             <img src="{{ asset('assets/images/menu1.png') }}" alt="E-Learning Banner" class="hero-banner-img">
-                            <span>หลักสูตรของฉัน</span>
-                        </div>
-                    </a>
-
-
-                    <!--  <div class="menu-card card-cream" onclick="location.href='#'">
-                        <i class="fa-solid fa-book-open"></i>
-                        <span>วิธีการใช้งาน</span>
-                    </div> -->
-
-                    <!--   <div class="menu-card card-green" onclick="location.href='#'">
-                        <i class="fa-solid fa-list-check"></i>
-                        <span>สถานะการเรียน</span>
-                    </div> -->
-
-                </div>
-            </div>
-        </div>
-        @endif
-
-
-        @if(Auth::user())
-
-        <div class="container-fluid course-index">
-            <div class="courses-wrapper">
-
-                <div class="courses-top-bar">
-                    <h3 class="section-headline">หลักสูตรของเรา</h3>
-                    <!-- <a href="#" class="btn-view-all">ดูทั้งหมด</a> -->
-                </div>
-
-                <div class="row">
-                    @if($course_detail->isNotEmpty())
-                        @foreach ($course_detail as $course)
-
-                        @endforeach
-                        <a href="{{ url('course') }}">
-                            <div class="col-md-4 col-sm-6">
-                                <div class="course-card-item">
-                                    <div class="course-image-area">
-                                        <img src="{{ asset('images/uploads/courseonline/' . $course->course_id . '/original/'. $course->course_picture) }}" alt="Course Cover" loading="lazy">
+                        <div class="row" style="    width: 100%;">
+                            <div class=" col-lg-4">
+                                <a href="{{ url('course') }}">
+                                    <div class="menu-card card-pink" onclick="location.href='#'">
+                                        <img src="{{ asset('assets/images/menu1.png') }}" alt="E-Learning Banner" class="hero-banner-img">
+                                        <span>หลักสูตรของฉัน</span>
                                     </div>
-                                    <div class="course-detail-body">
-                                        <h4 class="course-title">{{ $course->course_title }}</h4>
-                                        <div class="instructor-profile-footer">
-                                            <span class="instructor-name">ผู้สอน: {{ $course->teacher->teacher_name ?? '-' }}</span>
-                                        </div>
-                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="menu-card card-cream" onclick="location.href='#'">
+                                    <i class="fa-solid fa-book-open"></i>
+                                    <span>วิธีการใช้งาน</span>
                                 </div>
                             </div>
-                        </a>
-                    @else
-                    <h3>ยังไม่มีหลักสูตรในสายงานของคุณ</h3>
-                    @endif
-                </div>
-            </div>
-        </div>
-        @endif
 
-
-        <div class="container-fluid">
-            <div class="news-wrapper">
-
-                <div class="news-top-bar">
-                    <h3 class="section-headlines">ข่าวประชาสัมพันธ์</h3>
-                    <a href="{{ url('new') }}" class="btn-view-all">ดูทั้งหมด</a>
-                </div>
-
-                <div class="row">
-                    @if($news_desc->isNotEmpty())
-                        @foreach ( $news_desc as $news )
-                            @if($loop->first)
-                                <a href="{{ route('new_detail',$news->cms_id) }}">
-                                    <div class="col-md-8 col-sm-12">
-                                        <div class="news-card-item large-box">
-                                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 1" loading="lazy">
-                                            <div class="news-overlay-content">
-                                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
-                                                <div class="news-meta-info">
-                                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            @else
-                                <a href="{{ route('new_detail',$news->cms_id) }}">
-                                    <div class="col-md-4 col-sm-12">
-                                        <div class="news-card-item small-box">
-                                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 2" loading="lazy">
-                                            <div class="news-overlay-content">
-                                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
-                                                <div class="news-meta-info">
-                                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            @endif
-                        @endforeach
-                    @else
-                        <h3>ไม่มีข่าวสารในตอนนี้ กรุณาติดตามรอ</h3>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <section class="cta-section">
-            <div class="cta-content">
-                <h2 class="cta-title">Learn and Grow with<br>Top <span class="highlight">Online Courses</span></h2>
-                <p class="cta-description">
-                    Lorem Ipsum is simply dummy text of the printing and typesetting industry.<br>
-                    Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
-                </p>
-                <a href="#" class="cta-btn-contact">Contact Us</a>
-            </div>
-        </section>
-
-
-        <div class="container-fluid">
-            <div class="main-video">
-                <div class="main-video-top-bar">
-                    <h3 class="main-video-headline">วิดีโอแนะนำ</h3>
-                    <!-- <a href="#" class="main-video-btn-all">ดูทั้งหมด</a> -->
-                </div>
-                <div class="row">
-                    <!-- Video 1 -->
-                    <div class="col-md-4 col-sm-6">
-                        <div class="main-video-card">
-                            <div class="main-video-card-iframe">
-                                <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            <div class="col-lg-4">
+                                <div class="menu-card card-green" onclick="location.href='#'">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <span>สถานะการเรียน</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Video 2 -->
-                    <div class="col-md-4 col-sm-6">
-                        <div class="main-video-card">
-                            <div class="main-video-card-iframe">
-                                <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Video 3 -->
-                    <div class="col-md-4 col-sm-6">
-                        <div class="main-video-card">
-                            <div class="main-video-card-iframe">
-                                <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    @endif
+
+
+    @if(Auth::user())
+
+    <div class="container-fluid course-index">
+        <div class="courses-wrapper">
+
+            <div class="courses-top-bar">
+                <h3 class="section-headline">หลักสูตรของเรา</h3>
+                <!-- <a href="#" class="btn-view-all">ดูทั้งหมด</a> -->
+            </div>
+
+            <div class="row">
+                @if($course_detail->isNotEmpty())
+                @foreach ($course_detail as $course)
+
+                @endforeach
+                <a href="{{ url('course') }}">
+                    <div class="col-md-4 col-sm-6">
+                        <div class="course-card-item">
+                            <div class="course-image-area">
+                                <img src="{{ asset('images/uploads/courseonline/' . $course->course_id . '/original/'. $course->course_picture) }}" alt="Course Cover" loading="lazy">
+                            </div>
+                            <div class="course-detail-body">
+                                <h4 class="course-title">{{ $course->course_title }}</h4>
+                                <div class="instructor-profile-footer">
+                                    <span class="instructor-name">ผู้สอน: {{ $course->teacher->teacher_name ?? '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                @else
+                <h3>ยังไม่มีหลักสูตรในสายงานของคุณ</h3>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+
+
+    <div class="container-fluid">
+        <div class="news-wrapper">
+
+            <div class="news-top-bar">
+                <h3 class="section-headlines">ข่าวประชาสัมพันธ์</h3>
+                <a href="{{ url('new') }}" class="btn-view-all">ดูทั้งหมด</a>
+            </div>
+
+            <div class="row">
+                @if($news_desc->isNotEmpty())
+                @foreach ( $news_desc as $news )
+                @if($loop->first)
+                <a href="{{ route('new_detail',$news->cms_id) }}">
+                    <div class="col-md-8 col-sm-12">
+                        <div class="news-card-item large-box">
+                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 1" loading="lazy">
+                            <div class="news-overlay-content">
+                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
+                                <div class="news-meta-info">
+                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                @else
+                <a href="{{ route('new_detail',$news->cms_id) }}">
+                    <div class="col-md-4 col-sm-12">
+                        <div class="news-card-item small-box">
+                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 2" loading="lazy">
+                            <div class="news-overlay-content">
+                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
+                                <div class="news-meta-info">
+                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                @endif
+                @endforeach
+                @else
+                <h3>ไม่มีข่าวสารในตอนนี้ กรุณาติดตามรอ</h3>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">Learn and Grow with<br>Top <span class="highlight">Online Courses</span></h2>
+            <p class="cta-description">
+                Lorem Ipsum is simply dummy text of the printing and typesetting industry.<br>
+                Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+            </p>
+            <a href="#" class="cta-btn-contact">Contact Us</a>
+        </div>
+    </section>
+
+
+    <div class="container-fluid">
+        <div class="main-video">
+            <div class="main-video-top-bar">
+                <h3 class="main-video-headline">วิดีโอแนะนำ</h3>
+                <!-- <a href="#" class="main-video-btn-all">ดูทั้งหมด</a> -->
+            </div>
+            <div class="row">
+                <!-- Video 1 -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="main-video-card">
+                        <div class="main-video-card-iframe">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+                <!-- Video 2 -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="main-video-card">
+                        <div class="main-video-card-iframe">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+                <!-- Video 3 -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="main-video-card">
+                        <div class="main-video-card-iframe">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/njX2bu-_Vw4?si=Kt3_fLnGoNYKIbCU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 </body>
 <script>
