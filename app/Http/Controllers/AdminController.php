@@ -6398,7 +6398,14 @@ public function questionnaireout_reset_action(Request $request)
 public function questionnaireout_check_exam(Request $request){
         if (AuthFacade::useradmin()) {
 
-            $courses = DB::table('course_online')->get(); // 👈 สำคัญ
+            $query = DB::table('course_online');
+
+                    if ((string) auth()->user()->superuser !== '1') {
+                        $query->where('create_by', auth()->user()->id);
+                    }
+
+                    $courses = $query->get(); // 👈 สำคัญ
+            
             $results = []; // กัน error หน้าแรก
 
             return view(
@@ -6415,39 +6422,114 @@ public function questionnaireout_check_exam_ajax(Request $request)
 {
     if (AuthFacade::useradmin()) {
 
-$query = DB::table('course_exam_essay_answer')
-    ->join(
-        'course_online',
-        'course_exam_essay_answer.course_id',
-        '=',
-        'course_online.course_id'
-    )
-    ->leftJoin(
-        'users',
-        'course_exam_essay_answer.user_id',
-        '=',
-        'users.id'
-    )
-    ->leftJoin(
-        'profiles',
-        'users.id',
-        '=',
-        'profiles.user_id'
-    )
-    ->leftJoin(
-        'question',
-        'course_exam_essay_answer.ques_id',
-        '=',
-        'question.ques_id'
-    )
-    ->select(
-        'course_exam_essay_answer.course_id',
-        'course_exam_essay_answer.user_id',
-        'course_online.course_title',
-        'profiles.firstname',
-        'profiles.lastname'
-    )
-    ->where('course_exam_essay_answer.status', 'wait');
+        $query = DB::table('course_exam_essay_answer')
+            ->join(
+                'course_online',
+                'course_exam_essay_answer.course_id',
+                '=',
+                'course_online.course_id'
+            )
+            ->leftJoin(
+                'users',
+                'course_exam_essay_answer.user_id',
+                '=',
+                'users.id'
+            )
+            ->leftJoin(
+                'profiles',
+                'users.id',
+                '=',
+                'profiles.user_id'
+            )
+            ->leftJoin(
+                'question',
+                'course_exam_essay_answer.ques_id',
+                '=',
+                'question.ques_id'
+            )
+            ->select(
+                'course_exam_essay_answer.course_id',
+                'course_exam_essay_answer.user_id',
+                'course_online.course_title',
+                'profiles.firstname',
+                'profiles.lastname'
+            )
+
+            // 🔥 เอาเฉพาะคนที่ยังมี status = wait
+            ->whereExists(function ($sub) {
+
+                $sub->select(DB::raw(1))
+                    ->from('course_exam_essay_answer as sub_exam')
+                    ->whereColumn(
+                        'sub_exam.course_id',
+                        'course_exam_essay_answer.course_id'
+                    )
+                    ->whereColumn(
+                        'sub_exam.user_id',
+                        'course_exam_essay_answer.user_id'
+                    )
+                    ->where('sub_exam.status', 'wait');
+
+            });
+
+
+        // 🔍 เช็คว่ามีการค้นหาไหม
+        $hasSearch = !empty($request->course_id)
+            || !empty(trim($request->firstname))
+            || !empty(trim($request->lastname));
+
+        if (!$hasSearch) {
+
+            // ถ้าไม่ค้นหา ไม่แสดงข้อมูล
+            $query->whereRaw('1 = 0');
+
+        }
+
+
+        // 🔍 filter course
+        if (!empty($request->course_id)) {
+
+            $query->where(
+                'course_exam_essay_answer.course_id',
+                $request->course_id
+            );
+
+        }
+
+
+        // 🔍 filter firstname
+        if (!empty(trim($request->firstname))) {
+
+            $query->where(
+                'profiles.firstname',
+                'like',
+                '%' . trim($request->firstname) . '%'
+            );
+
+        }
+
+
+        // 🔍 filter lastname
+        if (!empty(trim($request->lastname))) {
+
+            $query->where(
+                'profiles.lastname',
+                'like',
+                '%' . trim($request->lastname) . '%'
+            );
+
+        }
+
+
+        // 🔥 group
+        $query->groupBy(
+            'course_exam_essay_answer.course_id',
+            'course_exam_essay_answer.user_id',
+            'course_online.course_title',
+            'profiles.firstname',
+            'profiles.lastname'
+        );
+
 
         $results = $query->get();
 
@@ -6508,8 +6590,10 @@ public function questionnaireout_check_exam_detail(Request $request)
     ->where('course_exam_essay_answer.user_id', $request->user_id)
     ->where('course_exam_essay_answer.status', 'wait')
     ->select(
+        'course_exam_essay_answer.id',
         'course_exam_essay_answer.course_id as course_id',
         'course_exam_essay_answer.user_id as user_id',
+        'course_exam_essay_answer.ques_id',
         'course_online.course_title',
         'profiles.firstname',
         'profiles.lastname',
@@ -6518,7 +6602,9 @@ public function questionnaireout_check_exam_detail(Request $request)
         'course_exam_essay_answer.answer_text',
         'course_score_weight.exam_weight'
     )
-    ->first();
+    ->distinct()
+    ->orderBy('course_exam_essay_answer.ques_id', 'DESC')
+    ->get();
 
         return view(
             'admin.questionnaireout.partials.check_exam_detail',
@@ -6535,6 +6621,28 @@ public function questionnaireout_check_exam_save(Request $request)
 {
     try {
 
+        DB::beginTransaction();
+
+        // =========================
+        // คำนวณผลสอบ
+        // =========================
+        $score = (float) $request->score;
+
+        $scoreTotal = (float) $request->score_total;
+
+        // 🔥 คิดเปอร์เซ็นต์
+        $percent = 0;
+
+        if ($scoreTotal > 0) {
+
+            $percent = ($score / $scoreTotal) * 100;
+
+        }
+
+        // 🔥 สถานะผ่าน/ไม่ผ่าน
+        $passStatus = $percent >= 70 ? 'pass' : 'fail';
+
+
         // =========================
         // update coursescore
         // =========================
@@ -6544,11 +6652,11 @@ public function questionnaireout_check_exam_save(Request $request)
             ->where('type', '3')
             ->update([
 
-                'score_number' => $request->score,
+                'score_number' => $score,
 
-                'score_total' => $request->score_total,
+                'score_total' => $scoreTotal,
 
-                'score_status' => 'pass',
+                'score_status' => $passStatus,
 
                 'update_date' => now()
 
@@ -6556,12 +6664,15 @@ public function questionnaireout_check_exam_save(Request $request)
 
         if ($updated == 0) {
 
+            DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'message' => 'ไม่พบข้อมูล coursescore'
             ]);
 
         }
+
 
         // =========================
         // update essay answer
@@ -6571,17 +6682,45 @@ public function questionnaireout_check_exam_save(Request $request)
             ->where('user_id', $request->user_id)
             ->update([
 
-                'status' => 'pass',
+                'status' => $passStatus,
 
                 'updated_date' => now()
 
             ]);
 
+
+        // =========================
+        // insert passcours เฉพาะผ่าน
+        // =========================
+        if ($passStatus == 'pass') {
+
+            DB::table('passcours')->insert([
+
+                'passcours_cours' => $request->course_id,
+
+                'passcours_user' => $request->user_id,
+
+                'passcours_status' => $passStatus,
+
+                'academic_year' => date('Y'),
+
+                'created_at' => now()
+
+            ]);
+
+        }
+
+
+        DB::commit();
+
         return response()->json([
-            'success' => true
+            'success' => true,
+            'status' => $passStatus
         ]);
 
     } catch (\Exception $e) {
+
+        DB::rollBack();
 
         return response()->json([
             'success' => false,
