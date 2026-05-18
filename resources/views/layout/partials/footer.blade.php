@@ -5,7 +5,12 @@
     }
 
     .text-headline {
-            margin-bottom: 8px !important;
+        margin-bottom: 8px !important;
+        font-size: 20px !important;
+    }
+
+    .col-lg-4 p {
+        font-size: 16px !important;
     }
 </style>
 
@@ -13,7 +18,7 @@
     <div class="container">
         <div class="row ">
             <!--  <div class="col-sm-6 col-md-2">
-                <h4 class="text-headline text-light" style="font-size: 24px;">Corporate</h4>
+                <h4 class="text-headline text-light" style="font-size: 20px;">Corporate</h4>
                 <ul class="list-unstyled" style="font-size: 1.4rem;">
                     <li><a href="{{route('about')}}">เกี่ยวกับบริษัท</a></li>
                     <li><a href="{{route('conditions')}}">เงื่อนไขการใช้งาน</a></li>
@@ -21,14 +26,14 @@
                 </ul>
             </div> -->
             <div class="col-lg-4">
-                <h4 class="text-headline text-light" style="font-size: 24px;">เกี่ยวกับการเรียน</h4>
+                <h4 class="text-headline text-light" style="font-size: 20px;">เกี่ยวกับการเรียน</h4>
                 <ul class="list-unstyled" style="font-size: 1.4rem;">
                     <li><a href="{{route('course')}}" style=" color: #757575;">หลักสูตร</a></li>
                 </ul>
             </div>
             <div class="col-lg-4">
                 <!-- Histats.com  START  (standard)-->
-                <h4 class="text-headline text-light" style="font-size: 24px;">สถิติการเข้าชมเว็บไซต์</h4>
+                <h4 class="text-headline text-light" style="font-size: 20px;">สถิติการเข้าชมเว็บไซต์</h4>
                 <!-- Histats.com  START  (standard)-->
                 <script type="text/javascript">
                     document.write(unescape("%3Cscript src=%27http://s10.histats.com/js15.js%27 type=%27text/javascript%27%3E%3C/script%3E"));
@@ -47,7 +52,7 @@
                 <!-- Histats.com  END  -->
             </div>
             <div class="col-lg-4">
-                <h4 class="text-headline text-light" style="font-size: 24px;">ติดต่อเรา</h4>
+                <h4 class="text-headline text-light" style="font-size: 20px;">ติดต่อเรา</h4>
                 <p>บริษัท โตโย ไซกัน (ประเทศไทย) จำกัด (สำนักงานใหญ่)</p>
                 <p>95 หมู่ 3, สวนอุตสาหกรรมโรจนะ 2,
                     ตำบล บ้านช้าง, อำเภอ อุทัย,
