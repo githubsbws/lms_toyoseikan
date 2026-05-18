@@ -1,11 +1,6 @@
 @extends('layout/mainlayout')
 @section('title', 'Brother e-learning')
 @section('content')
-@php
-use App\Models\Downloadcategoty;
-use App\Models\DownloadFile;
-
-@endphp
 
 <style>
     a,

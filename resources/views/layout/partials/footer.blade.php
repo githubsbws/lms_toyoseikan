@@ -22,7 +22,7 @@
                 <ul class="list-unstyled" style="font-size: 1.4rem;">
                     <li><a href="{{route('about')}}">เกี่ยวกับบริษัท</a></li>
                     <li><a href="{{route('conditions')}}">เงื่อนไขการใช้งาน</a></li>
-                    <li><a href="{{route('contactus_f')}}">ติดต่อเรา</a></li>
+                    <li><a href="{{route('site.contactus')}}">ติดต่อเรา</a></li>
                 </ul>
             </div> -->
             <div class="col-lg-4">

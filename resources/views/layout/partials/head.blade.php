@@ -215,7 +215,7 @@ use App\Models\Usability;
                     @endif
 
                     <li class="dropdown">
-                        <a href="{{ url('contact') }}">ติดต่อเรา</a>
+                        <a href="{{ route('site.contactus') }}">ติดต่อเรา</a>
                     </li>
 
                     <!--                    <li class="dropdown--><!--">-->

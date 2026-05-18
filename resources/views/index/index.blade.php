@@ -900,7 +900,7 @@ use App\Models\DownloadFile;
     .main-video {
         padding: 40px 20px;
     }
-    
+
 </style>
 
 <body>
@@ -955,121 +955,28 @@ use App\Models\DownloadFile;
                 </div>
 
                 <div class="row">
-                    <a href="{{ url('course') }}">
-                        <div class="col-md-4 col-sm-6">
-                            <div class="course-card-item">
-                                <div class="course-image-area">
-                                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=500" alt="Course Cover">
-                                </div>
-                                <div class="course-detail-body">
-                                    <h4 class="course-title">Entrepreneurship & Business Growth Strategies Course</h4>
-                                    <div class="course-stats-row">
-                                        <span class="stat-badge-pill"><i class="fa-regular fa-clock"></i> 11h 30m</span>
-                                    </div>
-                                    <div class="instructor-profile-footer">
-                                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" alt="Instructor Profile" class="instructor-avatar">
-                                        <span class="instructor-name">Sausage Rcode</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
+                    @if($course_detail->isNotEmpty())
+                        @foreach ($course_detail as $course)
 
-                    <a href="{{ url('course') }}">
-                        <div class="col-md-4 col-sm-6">
-                            <div class="course-card-item">
-                                <div class="course-image-area">
-                                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=500" alt="Course Cover">
-                                </div>
-                                <div class="course-detail-body">
-                                    <h4 class="course-title">Entrepreneurship & Business Growth Strategies Course</h4>
-                                    <div class="course-stats-row">
-                                        <span class="stat-badge-pill"><i class="fa-regular fa-clock"></i> 11h 30m</span>
+                        @endforeach
+                        <a href="{{ url('course') }}">
+                            <div class="col-md-4 col-sm-6">
+                                <div class="course-card-item">
+                                    <div class="course-image-area">
+                                        <img src="{{ asset('images/uploads/courseonline/' . $course->course_id . '/original/'. $course->course_picture) }}" alt="Course Cover" loading="lazy">
                                     </div>
-                                    <div class="instructor-profile-footer">
-                                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" alt="Instructor Profile" class="instructor-avatar">
-                                        <span class="instructor-name">Sausage Rcode</span>
+                                    <div class="course-detail-body">
+                                        <h4 class="course-title">{{ $course->course_title }}</h4>
+                                        <div class="instructor-profile-footer">
+                                            <span class="instructor-name">ผู้สอน: {{ $course->teacher->teacher_name ?? '-' }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
-
-
-                    <a href="{{ url('course') }}">
-                        <div class="col-md-4 col-sm-6">
-                            <div class="course-card-item">
-                                <div class="course-image-area">
-                                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=500" alt="Course Cover">
-                                </div>
-                                <div class="course-detail-body">
-                                    <h4 class="course-title">Entrepreneurship & Business Growth Strategies Course</h4>
-                                    <div class="course-stats-row">
-                                        <span class="stat-badge-pill"><i class="fa-regular fa-clock"></i> 11h 30m</span>
-                                    </div>
-                                    <div class="instructor-profile-footer">
-                                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" alt="Instructor Profile" class="instructor-avatar">
-                                        <span class="instructor-name">Sausage Rcode</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- <div class="col-md-4 col-sm-6">
-                        <div class="course-card-item">
-                            <div class="course-image-area">
-                                <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=500" alt="Course Cover">
-                            </div>
-                            <div class="course-detail-body">
-                                <h4 class="course-title">Entrepreneurship & Business Growth Strategies Course</h4>
-                                <div class="course-stats-row">
-                                    <span class="stat-badge-pill"><i class="fa-regular fa-clock"></i> 11h 30m</span>
-                                </div>
-                                <div class="instructor-profile-footer">
-                                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" alt="Instructor Profile" class="instructor-avatar">
-                                    <span class="instructor-name">Sausage Rcode</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-6">
-                        <div class="course-card-item">
-                            <div class="course-image-area">
-                                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=500" alt="Course Cover">
-                            </div>
-                            <div class="course-detail-body">
-                                <h4 class="course-title">Entrepreneurship & Business Growth Strategies Course</h4>
-                                <div class="course-stats-row">
-                                    <span class="stat-badge-pill"><i class="fa-regular fa-clock"></i> 11h 30m</span>
-                                </div>
-                                <div class="instructor-profile-footer">
-                                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" alt="Instructor Profile" class="instructor-avatar">
-                                    <span class="instructor-name">Sausage Rcode</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-6">
-                        <div class="course-card-item">
-                            <div class="course-image-area">
-                                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=500" alt="Course Cover">
-                            </div>
-                            <div class="course-detail-body">
-                                <h4 class="course-title">Entrepreneurship & Business Growth Strategies Course</h4>
-                                <div class="course-stats-row">
-                                    <span class="stat-badge-pill"><i class="fa-regular fa-clock"></i> 11h 30m</span>
-                                </div>
-                                <div class="instructor-profile-footer">
-                                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" alt="Instructor Profile" class="instructor-avatar">
-                                    <span class="instructor-name">Sausage Rcode</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-
+                        </a>
+                    @else
+                    <h3>ยังไม่มีหลักสูตรในสายงานของคุณ</h3>
+                    @endif
                 </div>
             </div>
         </div>
@@ -1085,75 +992,41 @@ use App\Models\DownloadFile;
                 </div>
 
                 <div class="row">
-
-                    <div class="col-md-8 col-sm-12">
-                        <div class="news-card-item large-box">
-                            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800" alt="News Image 1">
-                            <div class="news-overlay-content">
-                                <h4 class="news-title">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's</h4>
-                                <div class="news-meta-info">
-                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i> 10 เมษายน 2564</span>
-                                    <span class="news-meta-item">Name What is Lorem Ipsum</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-12">
-                        <div class="news-card-item small-box">
-                            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=500" alt="News Image 2">
-                            <div class="news-overlay-content">
-                                <h4 class="news-title">Lorem Ipsum is simply dummy text of the industry.</h4>
-                                <div class="news-meta-info">
-                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i> 10 เมษายน 2564</span>
-                                    <span class="news-meta-item">Name What is Lorem Ipsum</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="row">
-
-                    <div class="col-md-4 col-sm-6">
-                        <div class="news-card-item bottom-box">
-                            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=500" alt="News Image 3">
-                            <div class="news-overlay-content">
-                                <h4 class="news-title">Lorem Ipsum is simply dummy text of the</h4>
-                                <div class="news-meta-info">
-                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i> 10 เมษายน 2564</span>
-                                    <span class="news-meta-item">Name What is Lorem Ipsum</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-6">
-                        <div class="news-card-item bottom-box">
-                            <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&q=80&w=500" alt="News Image 4">
-                            <div class="news-overlay-content">
-                                <h4 class="news-title">Lorem Ipsum is simply dummy text of the</h4>
-                                <div class="news-meta-info">
-                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i> 10 เมษายน 2564</span>
-                                    <span class="news-meta-item">Name What is Lorem Ipsum</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-6">
-                        <div class="news-card-item bottom-box">
-                            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=500" alt="News Image 5">
-                            <div class="news-overlay-content">
-                                <h4 class="news-title">Lorem Ipsum is simply dummy text of the</h4>
-                                <div class="news-meta-info">
-                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i> 10 เมษายน 2564</span>
-                                    <span class="news-meta-item">Name What is Lorem Ipsum</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                    @if($news_desc->isNotEmpty())
+                        @foreach ( $news_desc as $news )
+                            @if($loop->first)
+                                <a href="{{ route('new_detail',$news->cms_id) }}">
+                                    <div class="col-md-8 col-sm-12">
+                                        <div class="news-card-item large-box">
+                                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$news->cms_picture) }}" alt="News Image 1" loading="lazy">
+                                            <div class="news-overlay-content">
+                                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
+                                                <div class="news-meta-info">
+                                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            @else
+                                <a href="{{ route('new_detail',$news->cms_id) }}">
+                                    <div class="col-md-4 col-sm-12">
+                                        <div class="news-card-item small-box">
+                                            <img src="{{ asset('images/uploads/news/'.$news->cms_id.'/original/'.$new->cms_picture) }}" alt="News Image 2" loading="lazy">
+                                            <div class="news-overlay-content">
+                                                <h4 class="news-title">{!! trim(strip_tags(html_entity_decode($news->cms_short_title))) ?: '-' !!}</h4>
+                                                <div class="news-meta-info">
+                                                    <span class="news-meta-item"><i class="fa-regular fa-calendar"></i>{{ $news->create_date ? \Carbon\Carbon::parse($news->create_date)->locale('th')->isoFormat('D MMMM') . ' ' . (\Carbon\Carbon::parse($news->create_date)->year + 543) : '-' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endif
+                        @endforeach
+                    @else
+                        <h3>ไม่มีข่าวสารในตอนนี้ กรุณาติดตามรอ</h3>
+                    @endif
                 </div>
             </div>
         </div>
@@ -1204,225 +1077,7 @@ use App\Models\DownloadFile;
                 </div>
             </div>
         </div>
-
-        <!--  <div class="question-index text-center">
-            <div class="container-fluid">
-
-                <h2 class="page-main-title">คำถามที่พบบ่อย</h2>
-
-                <div class="custom-accordion-container">
-                    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading" role="tab" id="headingOne">
-                                <h4 class="panel-title">
-                                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                        1. การเรียน/สอบ ผ่านระบบ E-Learning
-                                        <i class="fa-solid fa-chevron-down chevron-icon"></i>
-                                    </a>
-                                </h4>
-                            </div>
-                            <div id="collapseOne" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
-                                <div class="panel-body">
-                                    <div class="faq-text-block">
-                                        1. "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." </div>
-                                    <div class="faq-text-block">
-                                        2. The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero. </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading" role="tab" id="headingTwo">
-                                <h4 class="panel-title">
-                                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                        2. ลืมรหัสผ่าน
-                                        <i class="fa-solid fa-chevron-down chevron-icon"></i>
-                                    </a>
-                                </h4>
-                            </div>
-                            <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-                                <div class="panel-body">
-                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading" role="tab" id="headingThree">
-                                <h4 class="panel-title">
-                                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                        3. วิธีแจ้งปัญหาการใช้งาน
-                                        <i class="fa-solid fa-chevron-down chevron-icon"></i>
-                                    </a>
-                                </h4>
-                            </div>
-                            <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-                                <div class="panel-body">
-                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading" role="tab" id="headingFour">
-                                <h4 class="panel-title">
-                                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                                        4. สามารถใช้งานภาษาอะไรได้บ้าง
-                                        <i class="fa-solid fa-chevron-down chevron-icon"></i>
-                                    </a>
-                                </h4>
-                            </div>
-                            <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
-                                <div class="panel-body">
-                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-
-                                </div>
-                            </div>
-                        </div>
-                        <a href="#" class="main-video-btn-all mt-3">ดูทั้งหมด</a>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-
-
-
     </div>
-
-
-
-    <!--  <div class="owl-carousel owl-theme owl-index">
-        <div class="item">
-            <h4>1</h4>
-        </div>
-        <div class="item">
-            <h4>2</h4>
-        </div>
-        <div class="item">
-            <h4>3</h4>
-        </div>
-        <div class="item">
-            <h4>4</h4>
-        </div>
-        <div class="item">
-            <h4>5</h4>
-        </div>
-        <div class="item">
-            <h4>6</h4>
-        </div>
-        <div class="item">
-            <h4>7</h4>
-        </div>
-        <div class="item">
-            <h4>8</h4>
-        </div>
-        <div class="item">
-            <h4>9</h4>
-        </div>
-        <div class="item">
-            <h4>10</h4>
-        </div>
-        <div class="item">
-            <h4>11</h4>
-        </div>
-        <div class="item">
-            <h4>12</h4>
-        </div>
-    </div> -->
-
-    <!--  <div class="container-fluid">
-        <div class="row menu-index">
-            <div class="text" style="top: 0 !important;">
-                <h2 class="menu-title">เมนู<br><span>ของเรา</span></h2>
-            </div>
-
-            <div class="col-6">
-
-                <div class="menu-card pink">
-                    <a href="course-main.php">
-                        <img src="assets/images/online-test.png">
-                        <p>หลักสูตรของฉัน</p>
-                    </a>
-                </div>
-                <div class="menu-card orange">
-                    <a href="guild.php">
-                        <img src="assets/images/user-guide.png">
-                        <p>วิธีการใช้งาน</p>
-                    </a>
-                </div>
-
-                <div class="menu-card green" onclick="window.location.href='Status.php'">
-                    <a href="course-main-2.php">
-                        <img src="assets/images/check-list.png">
-                        <p>สถานะการเรียน</p>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
-    <!--   <div class="container">
-        <div class="page-cover">
-            <div class="image-slider">
-                @foreach($img as $item)
-                <div class="slide">
-                    <a href="{{ $item->imgslide_link }}">
-                        <img src="{{asset('images/uploads/imgslides/'.$item->imgslide_picture)}}" alt="">
-                    </a>
-                </div>
-                @endforeach
-            </div>
-            @if(count($img) > 1)
-            <button class="prev" onclick="moveSlide(-1)">&#9664; </button>
-            <button class="next" onclick="moveSlide(1)"> &#9654;</button>
-            @else
-
-            @endif
-        </div>
-        <script>
-            let slideIndex = 0;
-            const slides = document.querySelectorAll('.slide');
-
-            function showSlides(n) {
-                slides.forEach(slide => slide.classList.remove('active'));
-                slides[n].classList.add('active');
-            }
-
-            function moveSlide(step) {
-                slideIndex += step;
-                if (slideIndex >= slides.length) slideIndex = 0;
-                if (slideIndex < 0) slideIndex = slides.length - 1;
-                showSlides(slideIndex);
-            }
-
-            // เริ่มต้นแสดงสไลด์แรก
-            showSlides(slideIndex);
-        </script>
-
-        <div class="col-lg-4 col-md-4 box-video login pd-20">
-
-            <h2 class="title-layout"><span>วีดีโอแนะนำ</span> </h2>
-            <video width="100%" controls="">
-                <source src=" {{asset('themes/bws/video/brother-video-1.mp4')}}" type="video/mp4">
-                <source src="mov_bbb.ogg" type="video/ogg">
-                Your browser does not support HTML5 video.
-            </video>
-
-            <h2 class="title-layout"><span>เกี่ยวกับบริษัท</span> </h2>
-
-            <div class="group-link">
-                <div class="depart-well-regis">
-                    <a href="{{route('contactus_f')}}"> ติดต่อเรา </a>
-                </div>
-                <div class="depart">
-                    <a href="{{route('conditions')}}"> เงื่อนไขการใช้งาน </a>
-                </div>
-            </div>
-        </div>
-    </div> -->
 </body>
 <script>
     document.addEventListener('DOMContentLoaded', () => {

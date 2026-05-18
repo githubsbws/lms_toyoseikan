@@ -196,8 +196,9 @@ Route::get('about',[AboutController::class,'about'])->name('about')->middleware(
 
 Route::get('conditions',[ConditionController::class,'conditions'])->name('conditions')->middleware('checkIdleTimeout');
 
-Route::get('contactus_f',[ContactusController::class,'contactus_f'])->name('contactus_f')->middleware('checkIdleTimeout');
-Route::post('contactus_f',[ContactusController::class,'contactus_f'])->name('contactus_f')->middleware('checkIdleTimeout');
+Route::get('/site/contactus',[ContactusController::class,'contactus'])->name('site.contactus')->middleware('checkIdleTimeout');
+// Route::get('contactus_f',[ContactusController::class,'contactus_f'])->name('contactus_f')->middleware('checkIdleTimeout');
+// Route::post('contactus_f',[ContactusController::class,'contactus_f'])->name('contactus_f')->middleware('checkIdleTimeout');
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('checkIdleTimeout');
 
