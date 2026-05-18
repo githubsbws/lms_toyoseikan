@@ -4,8 +4,8 @@
 
     <div class="span-19">
         <div id="content">
-            <div class="parallax overflow-hidden page-section bg-blue-300" style="margin-top: 81px;">
-                <div class="container parallax-layer" data-opacity="true">
+            <div class="overflow-hidden page-section bg-blue-300">
+                <div class="container-fluid parallax-layer" data-opacity="true">
                     <div class="media media-grid v-middle">
                         <div class="media-left">
                             <span class="icon-block half bg-blue-500 text-white" style="height: 45px;"><i class="fa fa-fw fa-newspaper-o"></i></span>

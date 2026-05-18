@@ -59,7 +59,11 @@ use App\Models\Usability;
     }
 
     .navbar-nav>li>.dropdown-menu {
-        height: auto !important;
+        height: 50px !important;
+        overflow: visible !important;
+        top: 74px !important;
+        opacity: 1 !important;
+        border-radius: 16px !important;
     }
 
     .navbar-right a {
@@ -82,6 +86,18 @@ use App\Models\Usability;
     .navbar.navbar-size-xlarge .navbar-btn {
         margin-top: 16px !important;
         margin-bottom: 16px !important;
+    }
+
+    .dropdown-menu {
+        opacity: 1 !important;
+
+        a {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-direction: row-reverse !important;
+            column-gap: 16px !important;
+        }
     }
 </style>
 

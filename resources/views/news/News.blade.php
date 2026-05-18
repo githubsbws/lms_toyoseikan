@@ -62,9 +62,9 @@
         <h3 class="text-center title-page">ข่าวประชาสัมพันธ์</h3>
         <div class="container-fluid">
             <div class="row">
+                @if($news_desc->isNotEmpty())
+                @foreach ($news_desc as $new)
                 <div class="col-lg-4">
-                    @if($news_desc->isNotEmpty())
-                    @foreach ($news_desc as $new)
                     <a href="{{ route('new_detail',$new->cms_id) }}">
                         <div class="card position-relative">
                             <img src="{{ asset('images/uploads/news/'.$new->cms_id.'/original/'.$new->cms_picture) }}" alt="announcement image" class="card-img">
@@ -74,15 +74,16 @@
                             </div>
                         </div>
                     </a>
-                    @endforeach
-                    @else
-                    <div class="card position-relative">
-                        <h3>ไม่มีข่าวสารในตอนนี้ กรุณารออัพเดต</h3>
-                    </div>
-                    @endif
                 </div>
+                @endforeach
+                @else
+                <div class="card position-relative">
+                    <h3>ไม่มีข่าวสารในตอนนี้ กรุณารออัพเดต</h3>
+                </div>
+                @endif
             </div>
         </div>
+
     </div>
 </body>
 @endsection
