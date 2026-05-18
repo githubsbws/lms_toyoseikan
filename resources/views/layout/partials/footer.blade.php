@@ -12,6 +12,11 @@
     .col-lg-4 p {
         font-size: 18px !important;
     }
+
+      .login-page {
+           margin-bottom: 7rem !important;
+    margin-top: 6rem !important;
+    } 
 </style>
 
 <section class="footer-section">
@@ -49,6 +54,10 @@
                 <noscript><a href="http://www.histats.com" target="_blank"><img src="http://sstatic1.histats.com/0.gif?3337735&101" alt="" border="0"></a></noscript>
                 <!-- Histats.com  END  -->
             </div> --}}
+
+            <div class="col-lg-4">
+                
+            </div>
             <div class="col-lg-4">
                 <h4 class="text-headline text-light" style="font-size: 20px;">ติดต่อเรา</h4>
                 <p>บริษัท โตโย ไซกัน (ประเทศไทย) จำกัด (สำนักงานใหญ่)</p>
