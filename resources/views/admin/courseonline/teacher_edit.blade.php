@@ -39,12 +39,12 @@
                                 <textarea name="teacher_detail" id="summernote" class="form-control">{!!  htmlspecialchars_decode($teacher->teacher_detail) !!}</textarea>
                             </div>
 
-                             <div class="form-group">
+                             {{-- <div class="form-group">
                                 <div id="picture_show" style="">
                                     ภาพประกอบ <br>
                                     <img src="{{ asset('images/uploads/teacher/'.$teacher->teacher_id.'/thumb/'.$teacher->teacher_picture) }}" name="teacher_picture"><br><br>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             {{-- <div class="form-group">
                                 <label for="summernote">รูปภาพ</label>
