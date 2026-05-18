@@ -193,8 +193,10 @@ th.rotate > div {
 
                                     <tr>
                                         <th>No.</th>
-                                        <th>Name</th>
-                                        <th>Emp Code</th>
+                                        <th>ชื่อ - สกุล</th>
+                                        <th>รหัสพนักงาน</th>
+                                        <th>ตำแหน่ง</th>
+                                        <th>ทีม</th>
                                         <th>Action</th>
                                     </tr>
 
@@ -216,9 +218,10 @@ th.rotate > div {
                                         </td>
 
                                         <td>
-                                            {{ $user->staff_id }}
+                                            {{ $user->username }}
                                         </td>
-
+                                        <td>{{ $user->Orgchart->title ?? '-' }}</td>
+										<td>{{ $user->Team->name ?? '-' }}</td>
                                         <td>
 
                                             <a

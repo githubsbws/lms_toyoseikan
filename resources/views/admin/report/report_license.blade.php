@@ -13,31 +13,36 @@ function getSkillLevel($percent) {
 }
 @endphp
 <style>
-.license-lp3 {
-    background: #00ff00;
-    text-align: center;
-    font-size: 22px;
-    font-weight: bold;
+.license-box{
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 5px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
 }
 
-.license-lp2 {
-    background: #fff3cd;
-    text-align: center;
-    font-size: 22px;
-    font-weight: bold;
+/* icon color */
+.license-lp3{
+    color: #28a745; /* เขียว */
 }
 
-.license-lp1 {
-    background: #ff4d4d;
-    color: white;
-    text-align: center;
-    font-size: 22px;
-    font-weight: bold;
+.license-lp2{
+    color: #ffc107; /* เหลือง */
 }
 
-.license-na {
-    background: #bdbdbd;
+.license-lp1{
+    color: #dc3545; /* แดง */
 }
+
+.license-na{
+    color: #bdbdbd; /* เทา */
+}
+
 .skill-icon {
     width: 22px;
     height: 22px;
@@ -107,17 +112,6 @@ th.rotate > div {
     background: #ccc;
 }
 
-.license-box{
-    width: 24px;
-    height: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    font-weight: bold;
-    margin-right: 5px;
-    border: 1px solid #999;
-}
 </style>
 <body class="">
 	<div id="wrapper">
@@ -218,19 +212,25 @@ th.rotate > div {
 						<div class="card-body">
 							<div class="mb-3">
 
-								<span class="license-box license-lp3">☑</span>
+								<span class="license-box license-lp3">
+									<i class="far fa-check-square"></i>
+								</span>
 								LP3 - Qualified
 								<small class="text-muted">
 									(80–100% : ผ่านเกณฑ์รับรองว่าสามารถปฏิบัติงานได้)
 								</small>
 
-								<span class="license-box license-lp2 ml-4">⚠</span>
+								<span class="license-box license-lp2 ml-4">
+									<i class="fas fa-exclamation-triangle"></i>
+								</span>
 								LP2 - Under Supervision
 								<small class="text-muted">
 									(60–79% : ปฏิบัติงานได้โดยมีผู้ควบคุม)
 								</small>
 
-								<span class="license-box license-lp1 ml-4">✖</span>
+								<span class="license-box license-lp1 ml-4">
+									<i class="fas fa-times"></i>
+								</span>
 								LP1 - Not Qualified (In Training)
 								<small class="text-muted">
 									(0–59% : ยังต้องพัฒนาทักษะ)
@@ -248,10 +248,10 @@ th.rotate > div {
 
 									<tr>
 										<th rowspan="2">No.</th>
-										<th rowspan="2">Name</th>
-										<th rowspan="2">Emp Code</th>
-										<th rowspan="2">Position</th>
-
+										<th rowspan="2">ชื่อ - สกุล</th>
+										<th rowspan="2">รหัสพนักงาน</th>
+										<th rowspan="2">ตำแหน่ง</th>
+										<th rowspan="2">ทีม</th>
 										<th colspan="{{ count($operateMachines) }}">
 											Operate Machine
 										</th>
@@ -290,8 +290,9 @@ th.rotate > div {
 									<tr>
 										<td>{{ $index+1 }}</td>
 										<td>{{ $user->firstname }} {{ $user->lastname }}</td>
-										<td>{{ $user->staff_id }}</td>
+										<td>{{ $user->username }}</td>
 										<td>{{ $user->Orgchart->title ?? '-' }}</td>
+										<td>{{ $user->Team->name ?? '-' }}</td>
 
 											@foreach($operateMachines as $machine)
 
@@ -314,11 +315,17 @@ th.rotate > div {
 												@if($license)
 
 													@if($license->license_level == 3)
-														✔
+														<span class="license-box license-lp3">
+															<i class="far fa-check-square"></i>
+														</span>
 													@elseif($license->license_level == 2)
-														⚠
+														<span class="license-box license-lp2 ml-4">
+															<i class="fas fa-exclamation-triangle"></i>
+														</span>
 													@else
-														✖
+														<span class="license-box license-lp1 ml-4">
+															<i class="fas fa-times"></i>
+														</span>
 													@endif
 
 												@endif
@@ -347,11 +354,17 @@ th.rotate > div {
 													@if($license)
 
 														@if($license->license_level == 3)
-															☑
+															<span class="license-box license-lp3">
+																<i class="far fa-check-square"></i>
+															</span>
 														@elseif($license->license_level == 2)
-															⚠
+															<span class="license-box license-lp2 ml-4">
+																<i class="fas fa-exclamation-triangle"></i>
+															</span>
 														@else
-															✖
+															<span class="license-box license-lp1 ml-4">
+																<i class="fas fa-times"></i>
+															</span>
 														@endif
 
 													@endif

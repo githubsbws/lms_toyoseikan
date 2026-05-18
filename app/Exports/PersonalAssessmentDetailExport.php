@@ -15,7 +15,6 @@ use Maatwebsite\Excel\Events\AfterSheet;
 class PersonalAssessmentDetailExport implements
     FromArray,
     WithStyles,
-    ShouldAutoSize,
     WithEvents
 {
     protected $user;
@@ -59,11 +58,18 @@ class PersonalAssessmentDetailExport implements
             'ชื่อ - สกุล',
             $this->user->Profiles->firstname.' '.$this->user->Profiles->lastname,
             '',
-            'รหัส',
-            $this->user->staff_id,
             '',
+            
+            'รหัส',
+            $this->user->username,
+
             'ตำแหน่ง',
-            optional($this->user->Orgchart)->title
+            optional($this->user->Orgchart)->title,
+            'แผนก',
+            optional($this->user->Department)->title,
+            '',
+            '',
+            ''
         ];
 
         /*
@@ -76,21 +82,55 @@ class PersonalAssessmentDetailExport implements
 
         /*
         |--------------------------------------------------------------------------
-        | TABLE HEADER
+        | TABLE HEADER ROW 1
         |--------------------------------------------------------------------------
         */
 
         $rows[] = [
-            'ลำดับ',
-            'หัวข้ออบรม',
-            'วันที่',
-            'ชั่วโมง',
-            'ถาม-ตอบ',
-            'ปฏิบัติจริง',
-            'ข้อสอบ',
-            'ผลงาน',
+
+            'ลำดับที่',
+            'หมวดวิชา',
+            'หัวข้อการอบรม',
+            'วัน/เดือน/ปี',
+            
+            'วิธีการประเมิน',
+            '',
+            '',
+            '',
+
             'คะแนน',
-            'ผลประเมิน'
+
+            'ผลการประเมิน',
+            '',
+
+            'หมายเหตุ'
+        ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | TABLE HEADER ROW 2
+        |--------------------------------------------------------------------------
+        */
+
+        $rows[] = [
+
+            '', // A
+            '', // B
+            '', // C
+            '', // D
+
+            'ถาม-ตอบ', // E
+            'ปฏิบัติ', // F
+            'ข้อสอบ', // G
+            'ผลงาน',  // H
+
+            '', // I = คะแนน
+
+            'ผ่าน', // J
+            'ไม่ผ่าน', // K
+
+            ''
+
         ];
 
         /*
@@ -101,40 +141,33 @@ class PersonalAssessmentDetailExport implements
 
         foreach($this->assessments as $index => $assessment){
 
+            $pass = '';
+            $fail = '';
+
             if($assessment->level == 3){
-
-                $result = '✔ ผ่าน';
-
-            }elseif($assessment->level == 2){
-
-                $result = '⚠ Under Supervision';
-
+                $pass = '✔';
             }else{
-
-                $result = '✖ ไม่ผ่าน';
+                $fail = '✖';
             }
 
             $rows[] = [
 
                 $index + 1,
-
-                $assessment->topic->topic_name ?? '-',
-
+                'Orientation',
+                $assessment->course_name,
                 $assessment->assessment_date,
 
-                $assessment->training_hours,
-
                 $assessment->qa_score,
-
-                $assessment->practice_score,
-
-                $assessment->exam_score,
-
-                $assessment->work_score,
+                $assessment->operate_score,
+                $assessment->assign_score,
+                $assessment->observe_score,
 
                 $assessment->total_score.'%',
 
-                $result
+                $pass,
+                $fail,
+
+                ''
             ];
         }
 
@@ -176,7 +209,7 @@ class PersonalAssessmentDetailExport implements
             |--------------------------------------------------------------------------
             */
 
-            $sheet->mergeCells('A1:J1');
+            $sheet->mergeCells('A1:L1');
 
             /*
             |--------------------------------------------------------------------------
@@ -184,9 +217,24 @@ class PersonalAssessmentDetailExport implements
             |--------------------------------------------------------------------------
             */
 
-            $sheet->mergeCells('B3:C3');
-            $sheet->mergeCells('E3:F3');
-            $sheet->mergeCells('H3:J3');
+
+            // Header
+            $sheet->mergeCells('A3:A4');
+            $sheet->mergeCells('B3:B4');
+            $sheet->mergeCells('C3:C4');
+            $sheet->mergeCells('D3:D4');
+
+            // วิธีการประเมิน E:H (4 ช่อง)
+            $sheet->mergeCells('E3:H3');
+
+            // คะแนน I
+            $sheet->mergeCells('I3:I4');
+
+            // ผลประเมิน J:K
+            $sheet->mergeCells('J3:K3');
+
+            // หมายเหตุ L
+            $sheet->mergeCells('L3:L4');
 
             /*
             |--------------------------------------------------------------------------
@@ -212,22 +260,18 @@ class PersonalAssessmentDetailExport implements
             |--------------------------------------------------------------------------
             */
 
-            $sheet->getStyle('A5:J5')
-                ->applyFromArray([
-
-                    'font' => [
-                        'bold' => true
-                    ],
-
-                    'fill' => [
-
-                        'fillType' => Fill::FILL_SOLID,
-
-                        'startColor' => [
-                            'rgb' => 'FFF200'
+            $sheet->getStyle('A5:L4')
+                    ->applyFromArray([
+                        'font' => [
+                            'bold' => true
+                        ],
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => [
+                                'rgb' => 'D9D9D9'
+                            ]
                         ]
-                    ]
-                ]);
+                    ]);
 
             /*
             |--------------------------------------------------------------------------
@@ -237,7 +281,7 @@ class PersonalAssessmentDetailExport implements
 
             $highestRow = $sheet->getHighestRow();
 
-            $sheet->getStyle('A3:J'.$highestRow)
+            $sheet->getStyle('A3:L'.$highestRow)
                 ->applyFromArray([
 
                     'borders' => [
@@ -256,13 +300,13 @@ class PersonalAssessmentDetailExport implements
             |--------------------------------------------------------------------------
             */
 
-            $sheet->getStyle('A1:J'.$highestRow)
+            $sheet->getStyle('A1:L'.$highestRow)
                 ->getAlignment()
                 ->setVertical(
                     \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
                 );
 
-            $sheet->getStyle('A5:J'.$highestRow)
+            $sheet->getStyle('A5:L'.$highestRow)
                 ->getAlignment()
                 ->setHorizontal(
                     \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
@@ -276,13 +320,30 @@ class PersonalAssessmentDetailExport implements
 
             $sheet->getRowDimension(1)->setRowHeight(30);
 
+            $sheet->getColumnDimension('A')->setWidth(8);
+            $sheet->getColumnDimension('B')->setWidth(18);
+            $sheet->getColumnDimension('C')->setWidth(30);
+            $sheet->getColumnDimension('D')->setWidth(14);
+
+            $sheet->getColumnDimension('E')->setWidth(10);
+            $sheet->getColumnDimension('F')->setWidth(10);
+            $sheet->getColumnDimension('G')->setWidth(10);
+            $sheet->getColumnDimension('H')->setWidth(10);
+            $sheet->getColumnDimension('I')->setWidth(10);
+
+            $sheet->getColumnDimension('J')->setWidth(10);
+
+            $sheet->getColumnDimension('K')->setWidth(8);
+            $sheet->getColumnDimension('L')->setWidth(8);
+
+
             /*
             |--------------------------------------------------------------------------
             | Freeze
             |--------------------------------------------------------------------------
             */
 
-            $sheet->freezePane('A6');
+            $sheet->freezePane('A7');
         }
         ];
     }

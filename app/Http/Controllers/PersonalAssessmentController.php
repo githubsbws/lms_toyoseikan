@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Users;
 use App\Models\Orgchart;
 use App\Models\Team;
-use App\Models\PersonalAssessment;
+use App\Models\Passcourse;
+use App\Models\ScoreAssessment;
+use App\Models\Course;
+
+use App\Helpers\ChildOrgHelper;
 
 class PersonalAssessmentController extends Controller
 {
@@ -32,7 +36,11 @@ class PersonalAssessmentController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $usersQuery = Users::join(
+            $usersQuery = Users::with([
+                    'Orgchart',
+                    'Team'
+                ])
+                ->join(
                     'profiles',
                     'profiles.user_id',
                     '=',
@@ -44,7 +52,13 @@ class PersonalAssessmentController extends Controller
                     '=',
                     'users.org_id'
                 )
-                ->where('users.status',1);
+                ->leftJoin(
+                    'team',
+                    'team.id',
+                    '=',
+                    'users.team_id'
+                )
+                ->where('users.status', 1);
 
             /*
             |--------------------------------------------------------------------------
@@ -54,16 +68,14 @@ class PersonalAssessmentController extends Controller
 
             if($section_id){
 
-                $lineIds = Orgchart::where(
-                        'parent_id',
-                        (string)$section_id
-                    )
-                    ->where('active','y')
-                    ->pluck('id');
+                $orgIds = collect([$section_id])
+                    ->merge(
+                        ChildOrgHelper::getAllChildOrgIds([$section_id])
+                    );
 
                 $usersQuery->whereIn(
                     'users.org_id',
-                    $lineIds
+                    $orgIds
                 );
             }
 
@@ -75,9 +87,14 @@ class PersonalAssessmentController extends Controller
 
             if($line_id){
 
-                $usersQuery->where(
+                $orgIds = collect([$line_id])
+                    ->merge(
+                        ChildOrgHelper::getAllChildOrgIds([$line_id])
+                    );
+
+                $usersQuery->whereIn(
                     'users.org_id',
-                    $line_id
+                    $orgIds
                 );
             }
 
@@ -90,7 +107,7 @@ class PersonalAssessmentController extends Controller
             if($team_id){
 
                 $usersQuery->where(
-                    'orgchart.team_id',
+                    'users.team_id',
                     $team_id
                 );
             }
@@ -103,12 +120,11 @@ class PersonalAssessmentController extends Controller
 
             $users = $usersQuery
                 ->select(
-                    'users.id',
-                    'users.staff_id',
+                    'users.*',
                     'profiles.firstname',
                     'profiles.lastname'
                 )
-                ->orderBy('users.id','DESC')
+                ->orderBy('users.id', 'DESC')
                 ->get();
 
             /*
@@ -166,12 +182,10 @@ class PersonalAssessmentController extends Controller
                 'admin.report.personalassessment.index',
                 compact(
                     'users',
-
                     'departments',
                     'sections',
                     'lines',
                     'teams',
-
                     'line_id',
                     'section_id',
                     'team_id'
@@ -200,16 +214,156 @@ class PersonalAssessmentController extends Controller
 
             $user = Users::with([
                     'Profiles',
-                    'Orgchart'
+                    'Orgchart',
+                    'Department'
                 ])
                 ->findOrFail($id);
 
-            $assessments = PersonalAssessment::with([
-                    'topic'
-                ])
-                ->where('user_id',$id)
-                ->orderBy('assessment_date')
+            /*
+            |--------------------------------------------------------------------------
+            | Pass Course
+            |--------------------------------------------------------------------------
+            */
+
+            $passCourses = Passcourse::where(
+                    'passcours_user',
+                    $id
+                )
+                ->where(
+                    'passcours_status',
+                    'pass'
+                )
+                ->orderBy('passcours_id')
                 ->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Courses
+            |--------------------------------------------------------------------------
+            */
+
+            $courses = Course::whereIn(
+                    'course_id',
+                    $passCourses->pluck('passcours_cours')
+                )
+                ->get()
+                ->keyBy('course_id');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Score Assessment
+            |--------------------------------------------------------------------------
+            */
+
+            $scoreAssessments = ScoreAssessment::whereIn(
+                    'passcours_id',
+                    $passCourses->pluck('passcours_id')
+                )
+                ->where(
+                    'active',
+                    'y'
+                )
+                ->get()
+                ->groupBy('passcours_id');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Build Assessment
+            |--------------------------------------------------------------------------
+            */
+
+            $assessments = collect();
+
+            foreach($passCourses as $pass){
+
+                $course = $courses[
+                    $pass->passcours_cours
+                ] ?? null;
+
+                if(!$course){
+                    continue;
+                }
+
+                $scores = $scoreAssessments->get(
+                    $pass->passcours_id,
+                    collect()
+                );
+
+                $qaScore = $scores
+                    ->where('type_course_score_weight', 1)
+                    ->sum(function($item){
+                        return (float)$item->score;
+                    });
+
+                $operateScore = $scores
+                    ->where('type_course_score_weight', 2)
+                    ->sum(function($item){
+                        return (float)$item->score;
+                    });
+
+                $assignScore = $scores
+                    ->where('type_course_score_weight', 3)
+                    ->sum(function($item){
+                        return (float)$item->score;
+                    });
+
+                $observeScore = $scores
+                    ->where('type_course_score_weight', 4)
+                    ->sum(function($item){
+                        return (float)$item->score;
+                    });
+
+                $totalScore =
+                    $qaScore +
+                    $operateScore +
+                    $assignScore +
+                    $observeScore;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Skill Matrix
+                |--------------------------------------------------------------------------
+                */
+
+                if($totalScore >= 80){
+                    $level = 3;
+                }
+                elseif($totalScore >= 60){
+                    $level = 2;
+                }
+                else{
+                    $level = 1;
+                }
+
+                $assessments->push((object)[
+
+                    'course_name' => $course->course_title,
+
+                    'assessment_date' =>
+                        $pass->create_date,
+
+                    'training_hours' =>
+                        $course->course_point ?? '-',
+
+                    'qa_score' =>
+                        $qaScore,
+
+                    'operate_score' =>
+                        $operateScore,
+
+                    'assign_score' =>
+                        $assignScore,
+
+                    'observe_score' =>
+                        $observeScore,
+
+                    'total_score' =>
+                        $totalScore,
+
+                    'level' =>
+                        $level
+                ]);
+            }
 
             return view(
                 'admin.report.personalassessment.detail',
