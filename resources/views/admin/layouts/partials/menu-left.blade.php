@@ -610,7 +610,7 @@ use App\Helpers\PermissionHelper;
                     </ul>
                 </li>
                 @endcanmenu
-                @canmenu(22)
+                {{-- @canmenu(22)
                 <li class="nav-item {{ request()->is('imgslide*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('imgslide*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-bullhorn"></i>
@@ -632,7 +632,7 @@ use App\Helpers\PermissionHelper;
                         </li>
                     </ul>
                 </li>
-                @endcanmenu
+                @endcanmenu --}}
                 @canmenu(23)
                 <li class="nav-item {{ request()->is('report*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->is('report*') ? 'active' : '' }}">
