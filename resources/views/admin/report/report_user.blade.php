@@ -242,15 +242,31 @@ th.rotate > div {
 												? \Carbon\Carbon::parse($user->work_start)->format('d F Y')
 												: '-' }}
 										</td>
-										@php
-											$userLearns = $learns[$user->id] ?? collect();
-											$courseMap = $userLearns->keyBy('course_id');
-										@endphp
 										@foreach($courses as $course)
 												@php
 
-													$percent = $courseMap[$course->course_id]->score ?? null;
-													$level = is_null($percent) ? 0 : getSkillLevel($percent);
+													$key = $user->id . '_' . $course->course_id;
+
+													$passCourse = $passCourses->get($key);
+
+													$percent = null;
+
+													if($passCourse){
+
+														$scores = $assessmentScores
+															->get($passCourse->passcours_id, collect());
+
+														// รวมคะแนน
+														$percent = $scores
+															->sum(function($item){
+																return (float)$item->score;
+															});
+													}
+
+													$level = is_null($percent)
+														? 0
+														: getSkillLevel($percent);
+													
 												@endphp
 
 												<td class="text-center">
