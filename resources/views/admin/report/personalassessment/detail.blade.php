@@ -154,7 +154,7 @@ th.rotate > div {
                                 </th>
 
                                 <td width="15%">
-                                    {{ $user->staff_id }}
+                                    {{ $user->username }}
                                 </td>
 
                                 <th width="10%">
@@ -163,6 +163,14 @@ th.rotate > div {
 
                                 <td width="15%">
                                     {{ $user->Orgchart->title ?? '-' }}
+                                </td>
+
+                                <th width="10%">
+                                    แผนก
+                                </th>
+
+                                <td width="15%">
+                                    {{ $user->Department->title ?? '-' }}
                                 </td>
 
                             </tr>
@@ -179,8 +187,6 @@ th.rotate > div {
                                     <th>หัวข้ออบรม</th>
 
                                     <th>วันที่</th>
-
-                                    <th>ชั่วโมง</th>
 
                                     <th>ถาม-ตอบ</th>
 
@@ -209,31 +215,29 @@ th.rotate > div {
                                             </td>
 
                                             <td>
-                                                {{ $assessment->topic->topic_name ?? '-' }}
+                                                {{ $assessment->course_name ?? '-' }}
                                             </td>
 
                                             <td class="center">
                                                 {{ $assessment->assessment_date }}
                                             </td>
 
-                                            <td class="center">
-                                                {{ $assessment->training_hours }}
-                                            </td>
+                                            
 
                                             <td class="center">
                                                 {{ $assessment->qa_score }}
                                             </td>
 
                                             <td class="center">
-                                                {{ $assessment->practice_score }}
+                                                {{ $assessment->operate_score }}
                                             </td>
 
                                             <td class="center">
-                                                {{ $assessment->exam_score }}
+                                                {{ $assessment->assign_score }}
                                             </td>
 
                                             <td class="center">
-                                                {{ $assessment->work_score }}
+                                                {{ $assessment->observe_score }}
                                             </td>
 
                                             <td class="center">

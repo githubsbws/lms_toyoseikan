@@ -213,10 +213,11 @@ th.rotate > div {
 								 <thead>
 									<tr>
 										<th rowspan="2">No.</th>
-										<th rowspan="2">Name</th>
-										<th rowspan="2">Emp Code</th>
-										<th rowspan="2">Position</th>
-										<th rowspan="2">Period</th>
+										<th rowspan="2">ชื่อ - สกุล</th>
+										<th rowspan="2">รหัสพนักงาน</th>
+										<th rowspan="2">ตำแหน่ง</th>
+										<th rowspan="2">ทีม</th>
+										<th rowspan="2">วันที่เริ่มงาน</th>
 
 										<th colspan="{{ $courses->count() }}" class="group-header">
 											{{ $categories->where('cate_id', $cate_id)->first()->cate_title ?? '-' }}
@@ -236,8 +237,9 @@ th.rotate > div {
 									<tr>
 										<td>{{ $index+1 }}</td>
 										<td>{{ $user->firstname }} {{ $user->lastname }}</td>
-										<td>{{ $user->staff_id }}</td>
+										<td>{{ $user->username }}</td>
 										<td>{{ $user->Orgchart->title ?? '-' }}</td>
+										<td>{{ $user->Team->name ?? '-' }}</td>
 										<td>{{ $user->work_start
 												? \Carbon\Carbon::parse($user->work_start)->format('d F Y')
 												: '-' }}

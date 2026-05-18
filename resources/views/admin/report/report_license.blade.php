@@ -248,10 +248,10 @@ th.rotate > div {
 
 									<tr>
 										<th rowspan="2">No.</th>
-										<th rowspan="2">Name</th>
-										<th rowspan="2">Emp Code</th>
-										<th rowspan="2">Position</th>
-
+										<th rowspan="2">ชื่อ - สกุล</th>
+										<th rowspan="2">รหัสพนักงาน</th>
+										<th rowspan="2">ตำแหน่ง</th>
+										<th rowspan="2">ทีม</th>
 										<th colspan="{{ count($operateMachines) }}">
 											Operate Machine
 										</th>
@@ -290,8 +290,9 @@ th.rotate > div {
 									<tr>
 										<td>{{ $index+1 }}</td>
 										<td>{{ $user->firstname }} {{ $user->lastname }}</td>
-										<td>{{ $user->staff_id }}</td>
+										<td>{{ $user->username }}</td>
 										<td>{{ $user->Orgchart->title ?? '-' }}</td>
+										<td>{{ $user->Team->name ?? '-' }}</td>
 
 											@foreach($operateMachines as $machine)
 
