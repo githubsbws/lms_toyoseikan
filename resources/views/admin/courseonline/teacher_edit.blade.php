@@ -20,7 +20,7 @@
                         </div>
                     </div>
                 </div>
-            </div>   
+            </div>
             <div class="container mt-5">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
@@ -46,12 +46,12 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="summernote">รูปภาพ</label>
                                 <div class="fileupload fileupload-new" data-provides="fileupload">
                                     <div class="input-append">
                                         <div class="uneditable-input span3">
-                                            <i class="icon-file fileupload-exists"></i> 
+                                            <i class="icon-file fileupload-exists"></i>
                                             <span class="fileupload-preview"></span>
                                         </div>
                                         <img id="previewImage" src="#" alt="Preview Image" style="display: none;">
@@ -62,18 +62,18 @@
                                             <input name="image" id="imageInput"  type="file" >
                                         </span>
                                         <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
-                                        {{-- <input type="file" id="imageInput" name="image"> --}}
+                                        <input type="file" id="imageInput" name="image">
 
                                     </div>
                                     <script>
                                         document.addEventListener('DOMContentLoaded', function() {
                                             var imageInput = document.getElementById('imageInput');
                                             var previewImage = document.getElementById('previewImage');
-                                
+
                                             imageInput.addEventListener('change', function() {
                                                 previewImageFile(this);
                                             });
-                                
+
                                             function previewImageFile(input) {
                                                 var file = input.files[0];
                                                 if (file) {
@@ -94,7 +94,7 @@
                                 <font color="#990000">
                                     รูปภาพควรมีขนาด 250x180(แนวนอน) หรือ ขนาด 250x(xxx) (แนวยาว)
                                 </font>
-                            </div>
+                            </div> --}}
 
                             <div class="card-footer">
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
