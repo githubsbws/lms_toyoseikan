@@ -26,6 +26,7 @@ class ReportExcelController extends Controller
 {
     public function export(Request $request)
     {
+        $cate_id = $request->cate_id;
         $line_id = $request->line_id;
         $section_id = $request->section_id;
         $team_id = $request->team_id;
@@ -56,13 +57,22 @@ class ReportExcelController extends Controller
             ->orderBy('users.id', 'DESC')
             ->get();
 
-        $courses = Course::join(
+        $coursesQuery = Course::join(
                 'category',
                 'category.cate_id',
                 '=',
                 'course_online.cate_id'
             )
-            ->where('course_online.active','y')
+            ->where('course_online.active','y');
+
+        if($cate_id){
+            $coursesQuery->where(
+                'course_online.cate_id',
+                $cate_id
+            );
+        }
+
+        $courses = $coursesQuery
             ->select(
                 'course_online.course_id',
                 'course_online.course_title',
