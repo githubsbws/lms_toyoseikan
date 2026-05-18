@@ -1,21 +1,28 @@
+<style>
+    .login-page {
+        margin-top: 4rem;
+        margin-bottom: 4rem;
+    }
+</style>
+
 <section class="footer-section">
     <div class="container">
-        <div class="row">
-            <div class="col-sm-6 col-md-2">
+        <div class="row ">
+            <!--  <div class="col-sm-6 col-md-2">
                 <h4 class="text-headline text-light" style="font-size: 24px;">Corporate</h4>
                 <ul class="list-unstyled" style="font-size: 1.4rem;">
                     <li><a href="{{route('about')}}">เกี่ยวกับบริษัท</a></li>
                     <li><a href="{{route('conditions')}}">เงื่อนไขการใช้งาน</a></li>
                     <li><a href="{{route('contactus_f')}}">ติดต่อเรา</a></li>
                 </ul>
-            </div>
-            <div class="col-sm-6 col-md-2">
+            </div> -->
+            <div class="col-lg-4">
                 <h4 class="text-headline text-light" style="font-size: 24px;">เกี่ยวกับการเรียน</h4>
                 <ul class="list-unstyled" style="font-size: 1.4rem;">
                     <li><a href="{{route('course')}}">หลักสูตร</a></li>
                 </ul>
             </div>
-            <div class="col-xs-12 col-md-3">
+            <div class="col-lg-4">
                 <!-- Histats.com  START  (standard)-->
                 <h4 class="text-headline text-light" style="font-size: 24px;">สถิติการเข้าชมเว็บไซต์</h4>
                 <!-- Histats.com  START  (standard)-->
@@ -35,7 +42,7 @@
                 <noscript><a href="http://www.histats.com" target="_blank"><img src="http://sstatic1.histats.com/0.gif?3337735&101" alt="" border="0"></a></noscript>
                 <!-- Histats.com  END  -->
             </div>
-            <div class="col-xs-12 col-md-5">
+            <div class="col-lg-4">
                 <h4 class="text-headline text-light" style="font-size: 24px;">ติดต่อเรา</h4>
                 <p>บริษัท โตโย ไซกัน (ประเทศไทย) จำกัด (สำนักงานใหญ่)</p>
                 <p>95 หมู่ 3, สวนอุตสาหกรรมโรจนะ 2,

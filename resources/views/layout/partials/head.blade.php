@@ -26,10 +26,37 @@ if (empty($_SESSION['lang']) || $_SESSION['lang'] == 1) {
     $gallery = 'Gallery';
     $contactus = 'Contact us ';
 }
+
 use App\Models\Usability;
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
+<style>
+    .nav-header .navbar {
+        position: relative !important;
+        padding: 0 20px;
+    }
+
+    .navbar-right {
+        border: none !important;
+
+
+    }
+
+    .navbar-right .btn-primary {
+        color: #fff;
+        background-color: #093880 !important;
+        border-color: #093880 !important;
+        border-radius: 26px !important;
+    }
+
+    .navbar-right a {
+        display: flex;
+        align-items: center;
+        column-gap: 6px;
+    }
+</style>
 
 <head>
     <meta charset="UTF-8">
@@ -42,6 +69,9 @@ use App\Models\Usability;
     <link rel="stylesheet" href="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.min.css')}}">
     {{-- <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.js')}}"></script> --}}
     <script src="{{asset('asset_admin/plugins/sweetalert2/sweetalert2.all.min.js')}}"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     {{-- <link rel="stylesheet" href="{{asset('assets/bootstrap5.0.2/css/bootstrap.min.css')}}">
     <script src="{{asset('assets/bootstrap5.0.2/js/bootstrap.min.js')}}"></script> --}}
     {{-- <link href="themes/bws/css/vendor.min.css" rel="stylesheet">
@@ -91,7 +121,7 @@ use App\Models\Usability;
 
 <section class="nav-header">
     <div class="navbar navbar-default navbar-fixed-top navbar-size-large paper-shadow navbar-size-xlarge" data-z="0" data-animated="" role="navigation">
-        <div class="container">
+        <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-nav">
                     <span class="sr-only">Toggle navigation</span>
@@ -101,7 +131,7 @@ use App\Models\Usability;
                 </button>
                 <div class="navbar-brand navbar-brand-logo">
                     <a href="{{url('index')}}">
-                        <img src="{{ asset('themes/bws/images/toyologo.jpg') }}"class="logonav" style="width: 80px !important; height: auto !important;">
+                        <img src="{{ asset('themes/bws/images/toyologo.jpg') }}" class="logonav" style="width: 80px !important; height: auto !important;">
                     </a>
                 </div>
             </div>
@@ -128,7 +158,7 @@ use App\Models\Usability;
                     </li>
 
                     @endif
-                    <li class="dropdown">
+                    <!--  <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">วิธีการใช้งาน <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             @php
@@ -140,22 +170,26 @@ use App\Models\Usability;
                             </li>
                             @endforeach
                         </ul>
-                    </li>
-                    <li class="dropdown">
+                    </li> -->
+                    <!--     <li class="dropdown">
                         <a href="{{ url('faq_f') }}">คำถามที่พบบ่อย</a>
-                    </li>
+                    </li> -->
                     @if(Auth::check())
-                    <li class="dropdown">
+                    <!-- <li class="dropdown">
 
                         <a href="{{url('virtualclassroom')}}">ห้องเรียน</a>
 
-                    </li>
+                    </li> -->
                     <li class="dropdown">
 
                         <a href="{{url('dashboard')}}">แดชบอร์ด</a>
 
                     </li>
                     @endif
+
+                    <li class="dropdown">
+                        <a href="{{ url('contact') }}">ติดต่อเรา</a>
+                    </li>
 
                     <!--                    <li class="dropdown--><!--">-->
                     <!--                        <a href="-->
@@ -174,7 +208,7 @@ use App\Models\Usability;
                     <ul class="nav navbar-nav navbar-nav-bordered">
                         <!-- user -->
                         <li class="dropdown user" style="border-right-color: #fff;">
-                            <a href="#" class="dropdown-toggle ripple" data-toggle="dropdown" aria-expanded="false"><span class="ink animate" style="height: 177px; width: 177px; top: -52.5px; left: -8.07501px;"></span>
+                            <a href="#" class="dropdown-toggle ripple" data-toggle="dropdown" aria-expanded="false"><span class="ink animate"></span>
 
                                 <img class="img-circle" style="height:30px;" src="{{ asset('themes/bws/images/default-avatar.png') }}" alt="No Image"> {{Auth::user()->username}} <span class="caret"></span>
 
@@ -190,7 +224,7 @@ use App\Models\Usability;
                                         @csrf
 
                                     </form>
-                                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" ><i class="fa fa-sign-out"></i>
+                                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fa fa-sign-out"></i>
                                         ออกจากระบบ
                                     </a>
                                 </li>
@@ -201,12 +235,14 @@ use App\Models\Usability;
 
                 @else
                 <!-- No login -->
-                <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
-                    <a href="{{ url('logins') }}" class="navbar-btn btn btn-primary"><i class="fa fa-fw fa-user"></i> เข้าสู่ระบบ</a>
-                </div>
+                <div class="navmenu">
+                    <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
+                        <a href="{{ url('logins') }}" class="navbar-btn btn btn-primary"><i class="fa fa-fw fa-user"></i> เข้าสู่ระบบ</a>
+                    </div>
 
-                <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
-                    <a href="{{ url('registers') }}" class="navbar-btn btn btn-primary"><i class="fa fa-fw fa-user"></i> สมัครสมาชิก</a>
+                    <div class="navbar-right" style="border-left: 1px solid rgb(216, 216, 216); padding-left: 15px; padding-right: 15px; border-right: 1px solid rgb(216, 216, 216);">
+                        <a href="{{ url('registers') }}" class="navbar-btn btn btn-primary"><i class="fa-solid fa-registered"></i> สมัครสมาชิก</a>
+                    </div>
                 </div>
                 @endif
             </div>
