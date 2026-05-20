@@ -1,6 +1,21 @@
 @extends('admin/layouts/mainlayout')
 @section('title', 'Admin')
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+    .ts-dropdown {
+        background-color: #ffffff !important; /* ถมสีขาวทึบ 100% ป้องกันการมองทะลุ */
+        border: 1px solid #ced4da !important;  /* ตัดขอบให้คมชัดสไตล์ Bootstrap */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175) !important; /* เติมเงาละมุน ๆ ให้ดูมีมิติสมเป็นดร็อปดาวน์ */
+        z-index: 9999 !important; /* ดันให้ลอยอยู่เหนือตัวหนังสือหรืออินพุตตัวอื่นเด็ดขาด */
+    }
+
+    /* แถม: แต่งตอนที่ยูสเซอร์เลื่อนเมาส์ไปชี้ (Hover) ไฮไลต์ให้สีเด่นอ่านง่าย */
+    .ts-dropdown .active {
+        background-color: #e9ecef !important; /* สีเทาอ่อนตอนไฮไลต์เลือกข้อความ */
+        color: #1e2125 !important;
+    }
+</style>
 <body>
     <div id="wrapper">
         <div class="content-wrapper">
@@ -142,8 +157,8 @@
                             <div class="form-group">
                                 <label for=""><u>ผลกระทบต่อ License Person</u></label>
                                 <div class="col-4 ml-2">
-                                    <label for="">Operating Machine</label>
-                                    <select class="form-control" name="op_mac_id" id="">
+                                    <label for="">License User</label>
+                                    <select class="form-control searchable-dropdown" name="op_mac_id" id="">
                                         <option value="">--ไม่มีรายการนี้--</option>
                                         @forelse ($licenseOperation as $operate)
                                             <option value="{{ $operate->id }}">{{ $operate->operation_name }}</option>
@@ -154,8 +169,8 @@
                                 </div>
 
                                 <div class="col-4 m-2">
-                                    <label for="">Parameter Setting</label>
-                                    <select class="form-control" name="par_st_id" id="">
+                                    <label for="">License Authorized</label>
+                                    <select class="form-control searchable-dropdown" name="par_st_id" id="">
                                         <option value="">--ไม่มีรายการนี้--</option>
                                         @forelse ($licenseParameter as $parameter)
                                             <option value="{{ $parameter->id }}">{{ $parameter->parameter_name }}</option>
@@ -295,7 +310,19 @@
         </div>
     </div>
     <div class="clearfix"></div>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // 🧙‍♂️ เรียกใช้ Tom Select ครอบไอดีดร็อปดาวน์ที่เราตั้งไว้
+        document.querySelectorAll('.searchable-dropdown').forEach(el => {
+            new TomSelect(el, {
+                create: false,
+                sortField: { field: "text", direction: "asc" }
+            });
+        });
+
+    });
     $(document).ready(function() {
         $('#summernote').summernote();
         });

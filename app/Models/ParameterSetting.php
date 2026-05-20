@@ -12,11 +12,16 @@ class ParameterSetting extends Model
     protected $table = 'parameter_setting';
 
     protected $primaryKey = 'id';
+
+    protected $casts = [
+        'line' => 'array', // 🔥 คาถาเสกให้ Laravel แปลง JSON ในเบส ออกมาเป็น Array ของ PHP อัตโนมัติ
+    ];
+
     public $timestamps = false;
 
     protected $fillable = [
         'parameter_name',
         'active',
-        'parameter_code',
+        'line',
     ];
 }

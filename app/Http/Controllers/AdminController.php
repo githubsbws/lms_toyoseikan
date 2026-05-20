@@ -1232,8 +1232,10 @@ class AdminController extends Controller
             $course_detail = Course::with(['courseWeight'])->where('course_id', $id)->first();
             $category = DB::table('category')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->get();
-            $licenseOperation = OperationMachine::where('active','y')->get();
-            $licenseParameter = ParameterSetting::where('active','y')->get();
+            $userLine = auth()->user()->Orgchart->line->title;
+
+            $licenseOperation = OperationMachine::where('active','y')->whereJsonContains('line', $userLine)->get();
+            $licenseParameter = ParameterSetting::where('active','y')->whereJsonContains('line', $userLine)->get();
             // 2. แยก Logic การหา Selected IDs
             if ($course_detail->is_onboarding) {
                 // --- กรณีเป็นพนักงานใหม่ (Onboarding) ---
@@ -1435,8 +1437,11 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $category = DB::table('category')->where('active','y')->pluck('cate_title', 'cate_id');
             $teacher = Teacher::where('active','y')->where('department_org_id',auth()->user()->department_org_id)->get();
-            $licenseOperation = OperationMachine::where('active','y')->get();
-            $licenseParameter = ParameterSetting::where('active','y')->get();
+
+            $userLine = auth()->user()->Orgchart->line->title;
+
+            $licenseOperation = OperationMachine::where('active','y')->whereJsonContains('line', $userLine)->get();
+            $licenseParameter = ParameterSetting::where('active','y')->whereJsonContains('line', $userLine)->get();
             // 3. รวม ID ทั้งหมด (สาขา + แผนก + ลูกหลานทุกชั้น)
             $targetIds = $this->getMergeOrg();
 
