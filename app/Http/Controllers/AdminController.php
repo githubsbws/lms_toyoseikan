@@ -1950,7 +1950,7 @@ class AdminController extends Controller
                     'time_test'=>'nullable',
                     'content'=>'nullable',
                     // 'filename.*' => 'nullable|mimes:mp3,mp4',
-                    'doc.*' => 'nullable|mimes:pdf,docx,pptx',
+                    'doc.*' => 'nullable|mimes:pdf',//docx,pptx (ล็อคไว้ก่อน)
                     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
 
                 ]);
@@ -2121,7 +2121,7 @@ class AdminController extends Controller
                 'description' => 'required|string',
                 'content' => 'required',
                 // 'filename.*' => 'nullable|mimes:mp3,mp4',
-                'doc.*' => 'nullable|mimes:pdf,docx,pptx',
+                'doc.*' => 'nullable|mimes:pdf',//docx,pptx (ล็อคไว้ก่อน)
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
             ]);
 
