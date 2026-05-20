@@ -26,7 +26,7 @@ class CourseExamService
             'groupTesting' => function ($q) {
                 $q->where('active',self::STATUS_ACTIVE)
                 ->with([
-                    'questions' => fn($q) => $q->where('ques_type',2)
+                    'questions' => fn($q) => $q->where('ques_type',2)->where('active','y')
                     ->with(['choices'])
                     ]);
             },
