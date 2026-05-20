@@ -168,10 +168,10 @@ class ReportPotentialService
 
     private function getGradeData($score, $isEval)
     {
-        if (!$isEval) return ['grade' => 0, 'icon' => 'none'];
+        if (!$isEval) return ['grade' => 0];
 
-        if ($score >= 80) return ['grade' => 3, 'class' => 'text-success', 'icon' => 'far fa-check-square'];
-        if ($score >= 60) return ['grade' => 2, 'class' => 'text-warning', 'icon' => 'fas fa-exclamation-triangle'];
-        return ['grade' => 1, 'class' => 'text-danger', 'icon' => 'far fa-window-close'];
+        if ($score >= 80) return ['grade' => 3];
+        if ($score >= 60) return ['grade' => 2];
+        return ['grade' => 1];
     }
 }

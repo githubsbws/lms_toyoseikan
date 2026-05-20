@@ -129,7 +129,7 @@
                                                         @foreach ($userData->display_evals as $eval)
                                                             <td class="text-center">
                                                                 @if ($eval['grade'] > 0)
-                                                                    <i class="{{ $eval['icon'] }} {{ $eval['class'] }}" style="font-size: 18px;"></i>
+                                                                    <i style="font-size: 18px;"></i>
                                                                     {{ $eval['grade'] }}
                                                                 @else
                                                                     0

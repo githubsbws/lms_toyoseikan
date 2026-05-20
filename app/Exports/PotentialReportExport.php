@@ -167,11 +167,17 @@ class PotentialReportExport implements FromArray, WithEvents, ShouldAutoSize
                     foreach ($course->passcourse as $userData) {
                         foreach (['F', 'G', 'H', 'I', 'J'] as $col) {
                             $cellValue = $sheet->getCell("{$col}{$dataStartRow}")->getValue();
-                            $color = match(true) {
-                                str_contains((string)$cellValue, '✓') => '00AA00',
-                                str_contains((string)$cellValue, '△') => 'FF8800',
-                                str_contains((string)$cellValue, '✗') => 'CC0000',
-                                default => '000000'
+                            // $color = match(true) {
+                            //     str_contains((string)$cellValue, '✓') => '00AA00',
+                            //     str_contains((string)$cellValue, '△') => 'FF8800',
+                            //     str_contains((string)$cellValue, '✗') => 'CC0000',
+                            //     default => '000000'
+                            // };
+                            $color = match((string)$cellValue) {
+                                '3'     => '00AA00', // สีเขียว (เดิมเช็ก ✓)
+                                '2'     => 'FF8800', // สีส้ม/เหลือง (เดิมเช็ก △)
+                                '1'     => 'CC0000', // สีแดง (เดิมเช็ก ✗)
+                                default => '000000'  // สีดำปกติสำหรับเกรด 0 หรือค่าว่าง
                             };
                             $sheet->getStyle("{$col}{$dataStartRow}")->getFont()->getColor()->setRGB($color);
                         }
@@ -220,10 +226,11 @@ class PotentialReportExport implements FromArray, WithEvents, ShouldAutoSize
     private function gradeSymbol(array $eval): string
     {
         return match($eval['grade']) {
-            3 => '✓ 3',
-            2 => '△ 2',
-            1 => '✗ 1',
+
+            3 => '3', // ตัวเดิม: '✓ 3'
+            2 => '2', // ตัวเดิม: '△ 2'
+            1 => '1', // ตัวเดิม: '✗ 1'
             default => '0'
-        };
+    };
     }
 }
