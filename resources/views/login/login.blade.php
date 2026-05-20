@@ -54,7 +54,7 @@
                                                 name="UserLogin[password]" id="UserLogin_password" type="password">
                                         </div>
                                     </div><br>
-                                    
+
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" style="padding: 0;">
                                             <p class="hint">

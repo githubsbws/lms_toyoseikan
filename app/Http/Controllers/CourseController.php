@@ -154,19 +154,49 @@ class CourseController extends Controller
     }
 
     // 2. download อย่างเดียว ไม่บันทึก
-    public function downloadfile(Request $request)
+    // public function downloadfile(Request $request)
+    // {
+    //     if (!auth()->check()) {
+    //         return response()->json(['status' => 'error'], 401);
+    //     }
+
+    //     $file = FileDoc::where('id', $request->query('file_doc_id'))->first();
+    //     if (!$file) return response()->json(['error' => 'File not found'], 404);
+
+    //     $file_path = public_path('images/uploads/filedoc' . DIRECTORY_SEPARATOR . $file->filename);
+    //     if (!file_exists($file_path)) return response()->json(['error' => 'File not found on server'], 404);
+
+    //     return response()->download($file_path, $file->original_filename);
+    // }
+
+    public function viewfile(Request $request)
     {
-        if (!auth()->check()) {
-            return response()->json(['status' => 'error'], 401);
-        }
+        if (!auth()->check()) abort(401);
 
         $file = FileDoc::where('id', $request->query('file_doc_id'))->first();
-        if (!$file) return response()->json(['error' => 'File not found'], 404);
+        if (!$file) abort(404);
+
+        $pdfUrl   = route('course.pdfstream', ['file_doc_id' => $file->id]);
+        $fileName = $file->original_filename;
+
+        return view('course.pdf-viewer', compact('pdfUrl', 'fileName'));
+    }
+
+    // endpoint stream PDF ให้ PDF.js ดึงครับ
+    public function pdfStream(Request $request)
+    {
+        if (!auth()->check()) abort(401);
+
+        $file = FileDoc::where('id', $request->query('file_doc_id'))->first();
+        if (!$file) abort(404);
 
         $file_path = public_path('images/uploads/filedoc' . DIRECTORY_SEPARATOR . $file->filename);
-        if (!file_exists($file_path)) return response()->json(['error' => 'File not found on server'], 404);
 
-        return response()->download($file_path, $file->original_filename);
+        return response()->file($file_path, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline',
+            'Cache-Control'       => 'no-store, no-cache',
+        ]);
     }
 
     public function courseComplete(Request $request, int $course_id)
@@ -175,7 +205,19 @@ class CourseController extends Controller
         {
             $this->courseService->completeCourse(auth()->id(), $course_id);
             $page = $request->input('from_page', 1);
-            return redirect()->route('course.course',['page' => $page])
+            return redirect()->route('course',['page' => $page])
+                            ->with('success', 'สำเร็จการเรียนเรียบร้อยแล้ว')
+                            ->withFragment('course-' . $course_id);
+        }
+    }
+
+    public function courseReset(Request $request, int $course_id)
+    {
+        if(auth()->check())
+        {
+            $this->courseService->resetCourseLearn(auth()->id(), $course_id);
+            $page = $request->input('from_page', 1);
+            return redirect()->route('course',['page' => $page])
                             ->with('success', 'สำเร็จการเรียนเรียบร้อยแล้ว')
                             ->withFragment('course-' . $course_id);
         }

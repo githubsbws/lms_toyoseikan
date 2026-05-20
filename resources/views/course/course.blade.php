@@ -76,9 +76,9 @@
                                         @foreach ($course_detail as $key => $item)
                                             @php
                                                 $isLocked = $item->is_locked ?? false;
-
+                                                $allowedStatuses = ['pass', 'wait'];
                                                 $isPassed = $item->passcourse
-                                                    ->where('passcours_status', 'pass')
+                                                    ->whereIn('passcours_status', $allowedStatuses)
                                                     ->isNotEmpty();
 
                                                 $isLearning = !$isLocked && !$isPassed;
@@ -120,12 +120,16 @@
                                                                 ];
                                                             @endphp
                                                             <strong style="display: block; font-size: 24px;">
-                                                                {{ $milestoneLabel[$item->milestone_days] ?? '-' }} :
+                                                                {{ ($milestoneLabel[$item->milestone_days]?? null) ? $milestoneLabel[$item->milestone_days] . ' :' : '' }}
                                                                 {{ $item->course_title }}
                                                             </strong>
 
                                                             <small>
                                                                 {!! strip_tags(html_entity_decode($item->course_short_title), '<b><strong><i><em><u>') !!}
+                                                            </small>
+                                                            <br>
+                                                            <small>
+                                                                {{ !($milestoneLabel[$item->milestone_days] ?? null) ? 'วันปิดหลักสูตร: ' . date('d/m/Y', strtotime($item->end_date)) : '' }}
                                                             </small>
                                                         </div>
                                                     </div>
@@ -345,16 +349,16 @@
                                                                                     class="fa fa-file-pdf-o text-danger me-2"></i>
                                                                                 {{ $doc->file_name_display ?? 'เอกสารประกอบ' }}
                                                                             </span>
-                                                                            <a href="{{ route('course.downloadfile', [
+                                                                            <a href="{{ route('course.viewfile', [
                                                                                 'file_doc_id' => $doc->id,
                                                                                 'lesson_id' => $lessons->id,
                                                                                 'course_id' => $lessons->course_id,
                                                                             ]) }}"
-                                                                                class="btn btn-secondary btn-sm btn-download-doc"
+                                                                                class="btn btn-secondary btn-sm btn-view-doc"
                                                                                 data-course-id="course-{{ $lessons->course_id }}"
                                                                                 data-doc-id="{{ $doc->id }}"
                                                                                 data-lesson-id="{{ $lessons->id }}">
-                                                                                <i class="fa fa-download"></i> ดาวน์โหลด
+                                                                                <i class="fa fa-eye"></i> ดูเอกสาร
                                                                             </a>
                                                                         </div>
                                                                     @endforeach
@@ -431,11 +435,25 @@
                                                                                         รอแอดมินตรวจข้อสอบ
                                                                                     </button>
                                                                                 @else
-                                                                                    <button class="btn btn-danger"
-                                                                                        style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;"
-                                                                                        disabled>
-                                                                                        {{ $item->exam_attempts >= $item->exam_max_attempts ? 'หมดสิทธิ์สอบ' : 'ต้องเรียนให้ครบก่อน' }}
-                                                                                    </button>
+                                                                                    @if($item->exam_attempts >= $item->exam_max_attempts && !$item->exam_has_passed)
+                                                                                        {{-- หมดสิทธิ์สอบและยังไม่ผ่าน → ปุ่มขอรีเซต --}}
+                                                                                        <form id="reset-form-{{ $item->course_id }}" action="{{ route('course.reset',[$item->course_id]) }}" method="POST" style="display:inline;">
+                                                                                            @csrf
+                                                                                            {{-- <input type="hidden" name="course_id" value="{{ $item->course_id }}"> --}}
+                                                                                            <input type="hidden" name="from_page" value="{{ request()->query('page', 1) }}">
+                                                                                            <button type="button" class="btn btn-danger" onclick="confirmReset('{{ $item->course_id }}')"
+                                                                                                    style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px;">
+                                                                                                <i class="fa fa-refresh mr-2"></i> รีเซตการเรียนทั้งหมด
+                                                                                            </button>
+                                                                                        </form>
+                                                                                    @else
+                                                                                        {{-- ยังเรียนไม่ครบ --}}
+                                                                                        <button class="btn btn-danger"
+                                                                                                style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;"
+                                                                                                disabled>
+                                                                                            ต้องเรียนให้ครบก่อน
+                                                                                        </button>
+                                                                                    @endif
                                                                                 @endif
                                                                             </div>
                                                                         </div>
@@ -560,7 +578,7 @@
                     var courseId = hash.replace('#course-', '');
 
                     // 2. สั่งให้ Bootstrap Tab ของคอร์สนั้นทำงาน
-                    // เราอ้างอิงจาก ID ของปุ่ม v-pills-tab-{{ $item->course_id }}
+
                     var targetTab = $('#v-pills-tab-' + courseId);
 
                     if (targetTab.length > 0) {
@@ -576,11 +594,11 @@
                 }
             });
             document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.btn-download-doc').forEach(btn => {
+                document.querySelectorAll('.btn-view-doc').forEach(btn => {
                     btn.addEventListener('click', async function(e) {
                         e.preventDefault();
 
-                        const downloadUrl = this.getAttribute('href');
+                        const viewUrl   = this.getAttribute('href');
                         const courseId = this.getAttribute('data-course-id');
                         const docId = this.getAttribute('data-doc-id');
                         const lessonId = this.getAttribute('data-lesson-id');
@@ -615,9 +633,8 @@
                                 })
                             });
 
-                            // 3. สั่ง Download ไฟล์
-                            // ใช้ท่าสร้าง iframe หรือเปิดลิ้งก์ใหม่แบบไม่ย้ายหน้า เพื่อไม่ให้รบกวน JS หลัก
-                            window.location.href = downloadUrl;
+                            // 2. เปิด PDF viewer แยก tab
+                            window.open(viewUrl, '_blank');
 
                             // 4. รอสักพักให้ไฟล์เริ่มโหลด แล้วทำการรีโหลดหน้าเว็บ
                             setTimeout(() => {
@@ -637,6 +654,36 @@
                     });
                 });
             });
+
+            function confirmReset(courseId) {
+            Swal.fire({
+                title: 'ยืนยันการรีเซต?',
+                text: "ระบบจะทำการรีเซตการเรียนของท่านทั้งหมดในหลักสูตรนี้",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33', // สีแดง
+                cancelButtonColor: '#3085d6', // สีน้ำเงิน
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก',
+                backdrop: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ⏳ แสดง Loading เพื่อไม่ให้ User กดปุ่มซ้ำระหว่างที่หลังบ้านกวาด 6 ตาราง
+                    Swal.fire({
+                        title: 'กำลังจัดการข้อมูล...',
+                        text: 'โปรดรอสักครู่ ระบบกำลังทำการรีเซตบทเรียน',
+                        backdrop: false,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // 🚀 สั่งสั่ง Submit Form ตัวที่เราต้องการยิงไปหา Controller
+                    document.getElementById('reset-form-' + courseId).submit();
+                }
+            });
+        }
         </script>
     </body>
     {{-- เก็บไว้ตอนทำคะแนน --}}

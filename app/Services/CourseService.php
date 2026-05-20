@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class CourseService
 {
     const STATUS_ACTIVE = 'y';
+    const FAIL_STATUS = 'fail';
     // app/Services/CourseService.php
     public function getCoursesForUser(Users $user)
     {
@@ -80,9 +81,10 @@ class CourseService
         ->get();
 
         // 2. ดึง course ที่ผ่านแล้วของ user ปีนี้
+        $allowedStatuses = ['pass', 'wait'];
         $passedCourseIds = Passcourse::where('passcours_user', $user->id)
             ->where('academic_year', now()->year)
-            ->where('passcours_status',LessonStatus::Success->value)
+            ->whereIn('passcours_status',$allowedStatuses)
             ->pluck('passcours_cours');
 
         // 3. คำนวณวันที่ทำงานมาแล้ว
@@ -259,4 +261,49 @@ class CourseService
             ]);
         });
     }
+
+    public function resetCourseLearn(int $userId, int $courseId): void
+    {
+        // มัดรวมกระบวนการลบทั้งหมดไว้ใน Transaction เดียว หากมีตารางไหนพัง จะไม่ลบค้างคา
+        DB::transaction(function () use ($userId, $courseId) {
+
+            $currentYear = now()->year;
+
+            // 1. หาข้อมูลในตาราง learn ที่ตรงกับ user, course และปีปัจจุบัน
+            $learnIds = DB::table('learn') // เปลี่ยนเป็นชื่อตารางจริงของน้อง เช่น tbl_learn หรือ learns
+                ->where('user_id', $userId)
+                ->where('course_id', $courseId)
+                ->where('pass_year', $currentYear)
+                ->pluck('learn_id'); // ดึงมาเฉพาะ ID เป็น Array เพื่อเอาไปลบตารางลูกต่อ
+
+            if ($learnIds->isNotEmpty()) {
+
+                // 2. นำ learn_id ทั้งหมดที่เจอ ไปไล่ลบตารางย่อย (learn_file และ learn_file_doc)
+                DB::table('learn_file')
+                    ->whereIn('learn_id', $learnIds)
+                    ->where('pass_year', $currentYear)
+                    ->delete();
+
+                DB::table('learn_file_doc')
+                    ->whereIn('learn_id', $learnIds)
+                    ->where('pass_year', $currentYear)
+                    ->delete();
+
+                // ลบตารางหลัก (learn) ออกหลังจากลบตารางลูกเสร็จแล้ว
+                DB::table('learn')
+                    ->whereIn('learn_id', $learnIds)
+                    ->delete();
+            }
+
+            // 3. ไปที่ตาราง coursescore หาข้อมูลที่ตรงกับ user, course, ปีปัจจุบัน และสถานะเป็น fail แล้วลบทิ้งทั้งหมด
+            DB::table('coursescore') // เปลี่ยนเป็นชื่อตารางจริงของน้อง เช่น tbl_coursescore
+                ->where('user_id', $userId)
+                ->where('course_id', $courseId)
+                ->where('pass_year', $currentYear)
+                ->where('score_status', self::FAIL_STATUS) // ดักลบเฉพาะพวกที่เป็น fail ตามโจทย์
+                ->delete();
+
+        });
+    }
+
 }

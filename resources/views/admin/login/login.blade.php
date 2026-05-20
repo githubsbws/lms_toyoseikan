@@ -12,21 +12,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
-    
+
     <!-- Bootstrap -->
 	<link href="{{asset('Adminkit/bootstrap/css/bootstrap.css')}}" rel="stylesheet" />
 	<link href="{{asset('Adminkit/bootstrap/css/responsive.css')}}" rel="stylesheet" />
-	
+
 	<!-- Glyphicons Font Icons -->
 	<link href="{{asset('Adminkit/theme/css/glyphicons.css')}}" rel="stylesheet" />
-	
+
 	<!-- Uniform Pretty Checkboxes -->
 	<link href="{{asset('Adminkit/theme/scripts/plugins/forms/pixelmatrix-uniform/css/uniform.default.css')}}" rel="stylesheet" />
-	
+
 	<!-- Main Theme Stylesheet :: CSS -->
 	<link href="{{asset('Adminkit/theme/css/style.min.css')}}" rel="stylesheet" />
-	
-	
+
+
 	<script src="{{asset('Adminkit/theme/scripts/plugins/system/jquery.min.js')}}"></script>
 
     <script src="{{asset('Adminkit/theme/scripts/plugins/system/jquery-ui/js/jquery-ui-1.9.2.custom.min.js')}}"></script>
@@ -44,8 +44,8 @@
     <script src="{{asset('Adminkit/theme/scripts/plugins/other/holder/holder.js')}}"></script>
 
     <script src="{{asset('Adminkit/theme/scripts/plugins/forms/pixelmatrix-uniform/jquery.uniform.min.js')}}"></script>
-    
-    
+
+
 </head>
 <style>
     .input-error {
@@ -55,6 +55,9 @@
         margin-top: 5px;
         border-radius: 3px;
         display: inline-block;
+    }
+    .data-input{
+        border-radius: 5px !important;
     }
 </style>
 <body class="login">
@@ -71,23 +74,23 @@
                 @csrf
             <div class="span7">
                 <div class="inner">
-                    
+
                     <div class="success">
-                        
+
                     </div>
                     <label class="strong">Username</label>
-                   <input type="text" name="username" placeholder="Your username">
-                       
-                        
+                   <input class="data-input" type="text" name="username" placeholder="Your username">
+
+
                         <label class="strong">Password</label>
-                       <input type="password" name="password" placeholder="Your password">
-                       
-                        <br><br>
+                       <input class="data-input" type="password" name="password" placeholder="Your password">
+
+                        {{-- <br><br>
                         <div class="g-recaptcha" data-sitekey="6Le3zv8pAAAAACNf85umY6OIKbJYQOJMzoLjR8ZK" data-action="LOGIN"></div>
-                        <br>
-                        
+                        <br> --}}
+
                         <div class="row-fluid">
-                            <div class="span5 center">
+                            <div class="span5 center" style="margin-top:10px">
                                 <button class="btn btn-block btn-primary"><i></i>เข้าสู่ระบบ</button>
                             </div>
                         </div>
@@ -101,11 +104,11 @@
                     </div>
             </div>
 
-            
+
         </div>
         <div class="ribbon-wrapper"><div class="ribbon primary">Admin</div></div>
     </div>
 </div>
-<script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
+{{-- <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script> --}}
 </body>
 </html>

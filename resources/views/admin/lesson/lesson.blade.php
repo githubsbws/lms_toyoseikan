@@ -30,7 +30,7 @@
                                     <tr>
                                         <th>หลักสูตรอบรมออนไลน์</th>
                                         <th>ชื่อบทเรียน</th>
-                                        <th>แบบสอบถาม</th>
+                                        {{-- <th>แบบสอบถาม</th> --}}
                                         <th>จัดการวิดีโอ</th>
 										{{-- <th>ก่อนเรียน</th>
 										<th>หลังเรียน</th> --}}
@@ -46,9 +46,9 @@
                                         <td class="text-center">
                                             {!! htmlspecialchars_decode($item->title) !!}
                                         </td>
-                                        <td class="text-center">
+                                        {{-- <td class="text-center">
 											<a class="btn btn-primary btn-icon" href="{{route('questionnaireout.plan',['id'=>$item->id])}}">เลือก</a>
-                                        </td>
+                                        </td> --}}
 										<td class="text-center">
                                             <a class="btn btn-primary btn-icon" href="{{ route('filemanagers', $item->file->isEmpty() ? [] : ['id' => $item->id]) }}">
 												จัดการวิดีโอ ({{ $item->file->where('active', 'y')->isEmpty() ? 0 : count($item->file) }})

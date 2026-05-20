@@ -154,9 +154,10 @@
                                 <div class="col-4 ml-2">
                                     <label for="">Operating Machine</label>
                                     <select class="form-control" name="op_mac_id" id="">
+                                        <option value="">--ไม่มีรายการนี้--</option>
                                         @forelse ($licenseOperation as $operate)
                                             <option value="{{ $operate->id }}"{{ $course_detail->op_mac_id == $operate->id ? 'selected' : '' }}>
-                                                                                {{ $operate->operation_name }}</option>
+                                                            {{ $operate->operation_name }}</option>
                                         @empty
                                             <option value="">ไม่มีข้อมูล</option>
                                         @endforelse
@@ -166,6 +167,7 @@
                                 <div class="col-4 m-2">
                                     <label for="">Parameter Setting</label>
                                     <select class="form-control" name="par_st_id" id="">
+                                        <option value="">--ไม่มีรายการนี้--</option>
                                         @forelse ($licenseParameter as $parameter)
                                             <option value="{{ $parameter->id }}"{{ $course_detail->par_st_id == $parameter->id ? 'selected' : '' }}>{{ $parameter->parameter_name }}</option>
                                         @empty

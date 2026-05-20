@@ -9,9 +9,19 @@
         border-radius: 3px;
         display: inline-block;
     }
+    .login-page{
+       min-height: 70vh;
+    }
+
+    .panel-default{
+        border-radius: 5px;
+        padding: 20px;
+    }
+    .data-input{
+        border-radius: 5px;
+    }
 </style>
 <body>
-
     <div class="container">
         <div class="page-section login-page">
             <div class="row">
@@ -33,10 +43,10 @@
                                     @csrf
                                     <div class="form-group">
                                         <label for="inputEmail3" class="col-sm-3 control-label"><label
-                                                for="UserLogin_username" class="required">Staff ID<span
+                                                for="UserLogin_username" class="required">รหัสพนักงาน<span
                                                     class="required">*</span></label></label>
                                         <div class="col-lg-8">
-                                            <input class="form-control" placeholder="Staff ID"
+                                            <input class="form-control data-input" placeholder="Staff ID"
                                                 name="username" id="username" type="text" value="{{ old('username') }}">
                                         </div>
                                     </div>
@@ -46,21 +56,15 @@
                                                     class="required">*</span></label></label>
 
                                         <div class="col-lg-8">
-                                            <input class="form-control" placeholder="Password"
+                                            <input class="form-control data-input" placeholder="Password"
                                                 name="password" id="password" type="password">
                                         </div>
                                     </div><br>
                                     {{-- เพิ่ม --}}
 
-                                    <div class="col-lg-3">
-
-                                    </div>
-
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" >
-                                            <p class="hint">
-                                                <a href="/forgot-pass">ลืมรหัสผ่าน?</a>
-                                            </p>
+                                            <span style="color: red">หากลืมรหัสผ่านกรุณาติดต่อ Admin</span>
                                         </div>
                                     </div>
                                     <!-- <div class="form-group">
@@ -79,16 +83,16 @@
                                             <span class="input-error">กรุณาเปลี่ยนรหัสผ่านก่อนเข้าใช้งาน 1 ครั้ง</span>
                                         </div>
                                     </div> --}}
-                                    <div class="form-group">
+                                    {{-- <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3" >
                                             <div class="g-recaptcha" data-sitekey="6Le3zv8pAAAAACNf85umY6OIKbJYQOJMzoLjR8ZK" data-action="LOGIN"></div>
                                         </div>
-                                    </div>
+                                    </div> --}}
 
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3 text-center" >
                                             <input class="btn btn-primary" type="submit" name="yt0"
-                                                value="เข้าสู่ระบบ">
+                                                value="เข้าสู่ระบบ" style="border-radius: 5px">
                                         </div>
                                     </div>
                                     @error('username')
@@ -107,6 +111,6 @@
             </div>
         </div>
     </div>
-    <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
+    {{-- <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script> --}}
 </body>
 @endsection
