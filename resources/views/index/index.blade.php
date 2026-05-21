@@ -1006,7 +1006,7 @@
                                             <div class="menu-card card-green" onclick="location.href='#'">
                                                 <img src="{{ asset('assets/images/check-list.png') }}"
                                                     alt="E-Learning Banner" class="hero-banner-img">
-                                                <span>สถานะการเรียน</span>
+                                                <span>แดชบอร์ด</span>
                                             </div>
                                         </a>
                                     </div>
