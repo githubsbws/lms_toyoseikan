@@ -78,7 +78,7 @@
                                     <tbody>
                                         @forelse($licenseParameter as $index => $item)
                                             <tr>
-                                                <td class="text-center">{{ $index + 1 }}</td>
+                                                <td class="text-center">{{ ($licenseParameter->currentPage() - 1) * $licenseParameter->perPage() + $loop->index + 1 }}</td>
                                                 <td>{{ $item->parameter_name }}</td>
                                                 <td>
                                                     {{-- 🎯 เช็กก่อนว่ามีข้อมูลในอาร์เรย์ไหม และต้องไม่ว่างเปล่า --}}
@@ -112,6 +112,10 @@
                                         @endforelse
                                     </tbody>
                                 </table>
+                                <div class="d-flex mt-4">
+                                    {{-- 🧙‍♂️ คาถาเสกปุ่มเปลี่ยนหน้าอัตโนมัติจาก Laravel --}}
+                                    {{ $licenseParameter->links('pagination::bootstrap-4') }}
+                                </div>
                             </div>
                         </div>
                     </div>

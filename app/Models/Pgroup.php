@@ -15,8 +15,9 @@ class Pgroup extends Model
     protected $fillable = [
         'group_name',
         'active',
-        'create_by',               
-        'update_by'
+        'create_by',
+        'update_by',
+        'is_superuser',
     ];
 
     const CREATED_AT = 'create_date'; // Custom created_at column

@@ -16,7 +16,7 @@ class LicensePersonController extends Controller
 {
     public function indexOperate(){
         if(AuthFacade::useradmin()){
-            $licenseOperate = OperationMachine::where('active','y')->get();
+            $licenseOperate = OperationMachine::where('active','y')->orderBy('id','ASC')->paginate(20);
             return view("admin.licenseperson.operate",compact('licenseOperate'));
         }
         return redirect()->route('login.admin');
@@ -24,7 +24,7 @@ class LicensePersonController extends Controller
 
     public function indexParameter(){
         if(AuthFacade::useradmin()){
-            $licenseParameter = ParameterSetting::where('active','y')->get();
+            $licenseParameter = ParameterSetting::where('active','y')->orderBy('id','ASC')->paginate(20);
             return view("admin.licenseperson.parameter",compact('licenseParameter'));
         }
         return redirect()->route('login.admin');

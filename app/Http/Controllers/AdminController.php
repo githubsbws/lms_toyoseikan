@@ -1234,8 +1234,8 @@ class AdminController extends Controller
             $teacher = Teacher::where('active','y')->get();
             $userLine = auth()->user()->Orgchart->line->title;
 
-            $licenseOperation = OperationMachine::where('active','y')->whereJsonContains('line', $userLine)->get();
-            $licenseParameter = ParameterSetting::where('active','y')->whereJsonContains('line', $userLine)->get();
+            $licenseOperation = OperationMachine::where('active','y')->whereJsonContains('line', $userLine)->orderBy('id','ASC')->get();
+            $licenseParameter = ParameterSetting::where('active','y')->whereJsonContains('line', $userLine)->orderBy('id','ASC')->get();
             // 2. แยก Logic การหา Selected IDs
             if ($course_detail->is_onboarding) {
                 // --- กรณีเป็นพนักงานใหม่ (Onboarding) ---
@@ -1440,8 +1440,8 @@ class AdminController extends Controller
 
             $userLine = auth()->user()->Orgchart->line->title;
 
-            $licenseOperation = OperationMachine::where('active','y')->whereJsonContains('line', $userLine)->get();
-            $licenseParameter = ParameterSetting::where('active','y')->whereJsonContains('line', $userLine)->get();
+            $licenseOperation = OperationMachine::where('active','y')->whereJsonContains('line', $userLine)->orderBy('id','ASC')->get();
+            $licenseParameter = ParameterSetting::where('active','y')->whereJsonContains('line', $userLine)->orderBy('id','ASC')->get();
             // 3. รวม ID ทั้งหมด (สาขา + แผนก + ลูกหลานทุกชั้น)
             $targetIds = $this->getMergeOrg();
 

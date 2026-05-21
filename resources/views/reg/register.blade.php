@@ -80,7 +80,7 @@
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label"><label for="UserLogin_password"
                                                 class="required">อีเมล <span
-                                                    class="text-danger">*</span></label></label>
+                                                    class="text-danger" style="font-size: 16px">(สำหรับหัวหน้าแผนกเพื่อรับEmail แจ้งเตือน)</span></label></label>
 
                                         <div class="col-sm-9">
                                             <input class="form-control" placeholder="Email"

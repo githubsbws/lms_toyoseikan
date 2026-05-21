@@ -38,7 +38,6 @@ class RegisterController extends Controller
             'password' => ['required','min:8'],
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email',
             'orgchart_id' => 'required',
             'team_id' => 'required',
             'work_start_date' => 'required',
@@ -50,7 +49,6 @@ class RegisterController extends Controller
             'password.min'   => 'รหัสผ่านต้องมีความยาวอย่างน้อย8หลัก',
             'firstname.required'   => 'กรุณาใส่ชื่อ',
             'lastname.required'   => 'กรุณาใส่นามสกุล',
-            'email.required'   => 'กรุณาใส่Email',
             'orgchart_id.required'   => 'กรุณาเลือกแผนกของท่าน',
             'team_id.required'   => 'กรุณาเลือกทีม',
             'work_start_date' => 'กรุณาเลือกวันที่เริ่มงาน'
