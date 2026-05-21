@@ -33,9 +33,11 @@
 <div class="lesson-container px-3">
     <div class="video-wrap mb-4">
         <video id="player" controls playsinline
-                data-course-id="{{ $lesson->course->course_id }}"
-               data-file-id="{{ $file->id }}"
-               data-lesson-id="{{ $lesson->id }}">
+            controlsList="nodownload"
+            oncontextmenu="return false;"
+            data-course-id="{{ $lesson->course->course_id }}"
+            data-file-id="{{ $file->id }}"
+            data-lesson-id="{{ $lesson->id }}">
             <source src="{{ route('course.videostream', $file->id) }}" type="video/mp4">
         </video>
     </div>
