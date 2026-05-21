@@ -174,6 +174,54 @@ class ReportLicenseExport implements
 
             $rows[] = $row;
         }
+        $dataRowCount = count($rows);
+        /*
+        |--------------------------------------------------------------------------
+        | REMARK
+        |--------------------------------------------------------------------------
+        */
+
+        $rows[] = []; // เว้นบรรทัด
+
+        $rows[] = [
+            'สัญลักษณ์',
+            'น้ำหนัก',
+            'ระดับ',
+            'คำอธิบาย (อังกฤษ)',
+            'คำอธิบาย (ไทย)'
+        ];
+
+        $rows[] = [
+            '✅',
+            '80-100%',
+            'LP3',
+            'Qualified',
+            'ผ่านเกณฑ์รับรองว่าสามารถปฏิบัติงานได้'
+        ];
+
+        $rows[] = [
+            '⚠️',
+            '60-79%',
+            'LP2',
+            'Under Supervision',
+            'ยังไม่ผ่านเกณฑ์ และสามารถปฏิบัติงานได้โดยที่มีผู้ควบคุมดูแล'
+        ];
+
+        $rows[] = [
+            '❌',
+            '0-60%',
+            'LP1',
+            'Not Qualified (In Training)',
+            'ยังต้องพัฒนาทักษะการทำงาน'
+        ];
+
+        $rows[] = [
+            '',
+            'N/A',
+            '-',
+            '-',
+            'ไม่เกี่ยวข้องกับหน้าที่รับผิดชอบ'
+        ];
 
         return $rows;
     }
@@ -268,6 +316,9 @@ class ReportLicenseExport implements
                 |--------------------------------------------------------------------------
                 */
 
+                $dataStartRow = 3;
+                $dataEndRow = count($this->users) + 2;
+
                 $sheet->getStyle(
                     'A1:'.$sheet->getHighestColumn().'2'
                 )->applyFromArray([
@@ -280,7 +331,7 @@ class ReportLicenseExport implements
                 ]);
 
                 $sheet->getStyle(
-                    'F3:'.$sheet->getHighestColumn().$sheet->getHighestRow()
+                    'F3:'.$this->columnLetter($parameterEnd).$dataEndRow
                 )->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -291,8 +342,6 @@ class ReportLicenseExport implements
                 ]);
 
 
-                $dataStartRow = 3;
-                $dataEndRow = $sheet->getHighestRow();
 
                 for($row = $dataStartRow; $row <= $dataEndRow; $row++){
 
@@ -351,6 +400,117 @@ class ReportLicenseExport implements
                 */
 
                 $sheet->freezePane('F3');
+
+                /*
+                |--------------------------------------------------------------------------
+                | REMARK STYLE
+                |--------------------------------------------------------------------------
+                */
+
+                $remarkStart = $sheet->getHighestRow() - 4;
+                $remarkEnd = $sheet->getHighestRow();
+
+                /*
+                |--------------------------------------------------------------------------
+                | Border
+                |--------------------------------------------------------------------------
+                */
+
+                $sheet->getStyle("A{$remarkStart}:E{$remarkEnd}")
+                    ->getBorders()
+                    ->getAllBorders()
+                    ->setBorderStyle(
+                        \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                    );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Header Color
+                |--------------------------------------------------------------------------
+                */
+
+                $sheet->getStyle("A{$remarkStart}:E{$remarkStart}")
+                    ->applyFromArray([
+
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => [
+                                'rgb' => 'E0E0E0'
+                            ]
+                        ],
+
+                        'font' => [
+                            'bold' => true
+                        ]
+                    ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Align
+                |--------------------------------------------------------------------------
+                */
+
+                $sheet->getStyle("A{$remarkStart}:E{$remarkEnd}")
+                    ->getAlignment()
+                    ->setVertical(
+                        \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                    );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Symbol Color
+                |--------------------------------------------------------------------------
+                */
+
+                for($row = $remarkStart + 1; $row <= $remarkEnd; $row++){
+
+                    $symbol = trim(
+                        (string)$sheet->getCell("A{$row}")->getValue()
+                    );
+
+                    $fontColor = '000000';
+                    $bgColor = 'FFFFFF';
+
+                    if($symbol == '✅'){
+
+                        $fontColor = '28A745';
+
+                    }elseif(str_contains($symbol, '⚠')){
+
+                        $fontColor = 'FFC107';
+
+                    }elseif($symbol == '❌'){
+
+                        $fontColor = 'DC3545';
+
+                    }else{
+
+                        // N/A
+                        $bgColor = 'BDBDBD';
+                    }
+
+                    $sheet->getStyle("A{$row}")->applyFromArray([
+
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => [
+                                'rgb' => $bgColor
+                            ]
+                        ],
+
+                        'font' => [
+                            'bold' => true,
+                            'color' => [
+                                'rgb' => $fontColor
+                            ]
+                        ],
+
+                        'alignment' => [
+                            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                            'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                        ]
+                    ]);
+                }
             }
         ];
     }

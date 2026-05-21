@@ -51,7 +51,7 @@ class ReportUserExport implements
     private function skillSymbol($skill)
     {
         if (is_null($skill)) {
-            return '○';
+            return '';
         }
 
         switch ((int)$skill) {
@@ -66,7 +66,7 @@ class ReportUserExport implements
             case 1:
                 return '◔';
             default:
-                return '○';
+                return '';
         }
     }
 
@@ -172,8 +172,25 @@ class ReportUserExport implements
             $rows[] = $row;
         }
 
+        $dataRowCount = count($rows);
+        /*
+        |--------------------------------------------------------------------------
+        | REMARK
+        |--------------------------------------------------------------------------
+        */
+
+        $rows[] = []; // เว้นบรรทัด
+
+        $rows[] = ['★', '100%', 'Skill 5', 'Expert Trainer', 'ชำนาญ สามารถปฏิบัติงานได้ และสามารถสอนงานผู้อื่นได้'];
+        $rows[] = ['●', '80-99%', 'Skill 4', 'Standard / Basic Troubleshoot', 'สามารถปฏิบัติงานได้ตามมาตรฐาน และแก้ไขปัญหาเบื้องต้นได้'];
+        $rows[] = ['◕', '60-79%', 'Skill 3', 'Under Supervision', 'สามารถปฏิบัติงานได้ โดยมีผู้ควบคุมดูแล และต้องพัฒนาทักษะเพิ่มเติมผ่านการฝึกอบรม'];
+        $rows[] = ['◑', '25-59%', 'Skill 2', 'Training', 'อยู่ระหว่างการพัฒนาทักษะจากการฝึกอบรม'];
+        $rows[] = ['◔', '0-24%', 'Skill 1', 'Beginner', 'พนักงานใหม่ / เริ่มต้น'];
+        $rows[] = ['', 'N/A', '-', '-', 'ไม่เกี่ยวข้องกับหน้าที่รับผิดชอบ'];
+
         return $rows;
     }
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -295,6 +312,78 @@ class ReportUserExport implements
 
                 /*
                 |--------------------------------------------------------------------------
+                | REMARK STYLE
+                |--------------------------------------------------------------------------
+                */
+
+                $remarkStart = $sheet->getHighestRow() - 5;
+
+                $sheet->getStyle("A{$remarkStart}:E".$sheet->getHighestRow())
+                    ->getBorders()
+                    ->getAllBorders()
+                    ->setBorderStyle(
+                        \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                    );
+
+                $sheet->getStyle("A{$remarkStart}:E".$sheet->getHighestRow())
+                    ->getAlignment()
+                    ->setVertical(
+                        \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                    );
+
+                foreach(range($remarkStart, $sheet->getHighestRow()) as $row){
+
+                    $symbol = $sheet->getCell("A{$row}")->getValue();
+
+                    $color = null;
+
+                    switch ($symbol) {
+                        case '★':
+                            $color = 'FFD700';
+                            break;
+                        case '●':
+                            $color = '333333';
+                            break;
+                        case '◕':
+                            $color = '666666';
+                            break;
+                        case '◑':
+                            $color = '999999';
+                            break;
+                        case '◔':
+                            $color = 'CCCCCC';
+                            break;
+                        case '':
+                            $color = 'EEEEEE';
+                            break;
+                    }
+
+                    if($color){
+
+                        $sheet->getStyle("A{$row}")->applyFromArray([
+
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'startColor' => [
+                                    'rgb' => $color
+                                ]
+                            ],
+
+                            'font' => [
+                                'bold' => true,
+                                'size' => 14
+                            ],
+
+                            'alignment' => [
+                                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                            ]
+                        ]);
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
                 | Auto Height
                 |--------------------------------------------------------------------------
                 */
@@ -305,11 +394,17 @@ class ReportUserExport implements
                 }
 
                 $startRow = 3; // data row เริ่ม
+                $dataEndRow = count($this->users) + 2;
                 $startCol = 7; // G
+                $endCol = 6;
 
-                for ($row = $startRow; $row <= $sheet->getHighestRow(); $row++) {
+                foreach($this->groupedCourses as $items){
+                    $endCol += count($items);
+                }
 
-                    for ($col = $startCol; $col <= \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($sheet->getHighestColumn()); $col++) {
+                for ($row = $startRow; $row <= $dataEndRow; $row++) {
+
+                    for ($col = $startCol; $col <= $endCol; $col++) {
 
                         $cell = $this->columnLetter($col).$row;
                         $value = $sheet->getCell($cell)->getValue();
@@ -332,14 +427,14 @@ class ReportUserExport implements
                             case '◔':
                                 $color = 'CCCCCC';
                                 break;
-                            case '○':
+                            case '':
                                 $color = 'EEEEEE'; 
                                 break;
                         }
 
                         if ($color) {
 
-                            $borderColor = ($value == '○')
+                            $borderColor = ($value == '')
                                 ? 'BFBFBF'
                                 : null;
 

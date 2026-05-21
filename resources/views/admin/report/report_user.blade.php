@@ -25,9 +25,9 @@ function getSkillLevel($percent) {
 .skill-icon {
     width: 22px;
     height: 22px;
-    border-radius: 50%;
     display: inline-block;
     border: 1px solid #999;
+    border-radius: 50%;
 }
 
 .group-header {
@@ -90,7 +90,10 @@ th.rotate > div {
 
 /* N/A */
 .skill-0 {
-    background: #ccc;
+    width: 100%;
+    height: 22px;
+    border-radius: 0;
+    border: none;
 }
 </style>
 <body class="">
