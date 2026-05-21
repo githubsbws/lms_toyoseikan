@@ -99,6 +99,10 @@ use App\Models\Usability;
             column-gap: 16px !important;
         }
     }
+
+    .navbar-brand.navbar-brand-logo img {
+        width: 340px !important;
+    }
 </style>
 
 <head>
@@ -174,7 +178,7 @@ use App\Models\Usability;
                 </button>
                 <div class="navbar-brand navbar-brand-logo">
                     <a href="{{url('index')}}">
-                        <img src="{{ asset('themes/bws/images/toyologo.jpg') }}" class="logonav" style="width: 74px !important; height: auto !important;">
+                        <img src="{{ asset('themes/bws/images/toyologo.jpg') }}" class="logonav" style="width: 340px !important; height: auto !important;">
                     </a>
                 </div>
             </div>

@@ -253,7 +253,8 @@
                 <div class="contact-info-container">
 
                     <div class="contact-image-box">
-                        <img src="https://www.toyoseikan.co.th/boffice/picdata/page/companyEGG9plant1.jpg" alt="Toyo Seikan Thailand Office">
+                        <img src="{{ asset('assets/images/toyocontact.png') }}" alt="E-Learning Banner" class="hero-banner-img"
+                            style="width: 100%;">
                     </div>
 
                     <div class="contact-card-box">
