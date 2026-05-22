@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\DB;
 class RoadmapController extends Controller
 {
     public function indexNewEmp(Request $request) {
-        $newEmpRoadmap = Roadmap::with('roadmapCourse')
+        $newEmpRoadmap = Roadmap::with(['roadmapCourse' => function($query) {
+                                    $query->where('active', 'y');
+                                }])
                                 ->where('department_org_id',Auth::user()->department_org_id)
                                 ->where('active','y')
                                 ->when($request->search, function($query, $search) {
