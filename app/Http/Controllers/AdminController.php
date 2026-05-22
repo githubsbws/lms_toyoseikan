@@ -1964,7 +1964,7 @@ class AdminController extends Controller
                     'content'=>'nullable',
                     // 'filename.*' => 'nullable|mimes:mp3,mp4',
                     'doc.*' => 'nullable|mimes:pdf',//docx,pptx (ล็อคไว้ก่อน)
-                    'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
+                    // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
 
                 ]);
 
@@ -2135,7 +2135,7 @@ class AdminController extends Controller
                 'content' => 'required',
                 // 'filename.*' => 'nullable|mimes:mp3,mp4',
                 'doc.*' => 'nullable|mimes:pdf',//docx,pptx (ล็อคไว้ก่อน)
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
+                // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
             ]);
 
             if ($validator->fails()) {

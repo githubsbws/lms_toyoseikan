@@ -108,7 +108,7 @@
 								<div id="fileListDoc"></div>
 							</div>
 
-							<div class="form-group">
+							{{-- <div class="form-group">
 								<label for="course_picture">ภาพประกอบ</label>
 								<div class="fileupload fileupload-new" data-provides="fileupload">
 									<div id="fileNameDisplay"></div>
@@ -118,7 +118,7 @@
 										<input type="file" name="image" id="imageInput" onchange="previewImageFile()">
 									</span>
 								</div>
-								{{-- <input type="file" name="image" id="imageInput" onchange="previewImageFile()"> --}}
+
 								<img id="previewImage" src="#" alt="Preview Image" style="display: none; width: 100px; margin-top: 10px;">
 							</div>
 
@@ -126,7 +126,8 @@
                                 <font color="#990000">
                                     รูปภาพควรมีขนาด 250x180(แนวนอน) หรือ ขนาด 250x(xxx) (แนวยาว)
                                 </font>
-                            </div>
+                            </div> --}}
+                            {{-- <input type="file" name="image" id="imageInput" onchange="previewImageFile()"> --}}
 
                             <button id="submitBtn" type="submit" class="btn btn-primary">
 								<i class="fas fa-save mr-1"></i> บันทึก
@@ -162,19 +163,19 @@
 		}
 
 		// แสดงตัวอย่างรูปภาพ
-		function previewImageFile() {
-			var input = document.getElementById('imageInput');
-			var previewImage = document.getElementById('previewImage');
+		// function previewImageFile() {
+		// 	var input = document.getElementById('imageInput');
+		// 	var previewImage = document.getElementById('previewImage');
 
-			if (input.files && input.files[0]) {
-				var reader = new FileReader();
-				reader.onload = function(e) {
-					previewImage.src = e.target.result;
-					previewImage.style.display = 'block';
-				};
-				reader.readAsDataURL(input.files[0]);
-			}
-		}
+		// 	if (input.files && input.files[0]) {
+		// 		var reader = new FileReader();
+		// 		reader.onload = function(e) {
+		// 			previewImage.src = e.target.result;
+		// 			previewImage.style.display = 'block';
+		// 		};
+		// 		reader.readAsDataURL(input.files[0]);
+		// 	}
+		// }
         document.addEventListener('DOMContentLoaded', function() {
             var uploadedCount = 0;
             var totalFiles    = 0;

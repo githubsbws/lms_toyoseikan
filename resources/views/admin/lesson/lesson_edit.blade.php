@@ -165,7 +165,7 @@
 								</div>
                             </div>
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <div id="picture_show" style="">
                                     ภาพประกอบ <br>
                                     @if($lesson->image !==null)
@@ -193,7 +193,7 @@
                                 <font color="#990000">
                                     รูปภาพควรมีขนาด 250x180(แนวนอน) หรือ ขนาด 250x(xxx) (แนวยาว)
                                 </font>
-                            </div>
+                            </div> --}}
 
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>บันทึก</button>
                         </form>
@@ -300,19 +300,19 @@
 		}
 
 		// แสดงตัวอย่างรูปภาพ
-		function previewImageFile() {
-			var input = document.getElementById('imageInput');
-			var previewImage = document.getElementById('previewImage');
-            console.log(previewImage);
-			if (input.files && input.files[0]) {
-				var reader = new FileReader();
-				reader.onload = function(e) {
-					previewImage.src = e.target.result;
-					previewImage.style.display = 'block';
-				};
-				reader.readAsDataURL(input.files[0]);
-			}
-		}
+		// function previewImageFile() {
+		// 	var input = document.getElementById('imageInput');
+		// 	var previewImage = document.getElementById('previewImage');
+        //     console.log(previewImage);
+		// 	if (input.files && input.files[0]) {
+		// 		var reader = new FileReader();
+		// 		reader.onload = function(e) {
+		// 			previewImage.src = e.target.result;
+		// 			previewImage.style.display = 'block';
+		// 		};
+		// 		reader.readAsDataURL(input.files[0]);
+		// 	}
+		// }
 
         document.addEventListener('DOMContentLoaded', function() {
             var uploadedCount = 0;
