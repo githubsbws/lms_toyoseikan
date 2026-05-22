@@ -1211,7 +1211,15 @@ class AdminController extends Controller
                 'active'=>'n'
             ];
             $courseonline = Course::findById($id);
+            if ($courseonline->is_onboarding == true) {
+
+                RoadmapCourse::where('course_id', $courseonline->course_id)
+                    ->where('active', 'y')
+                    ->update(['active' => 'n']);
+
+            }
             $courseonline->update($courseonline_del);
+
             return redirect()->route('courseonline');
         }else{
             return redirect()->route('login.admin');

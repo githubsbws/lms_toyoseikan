@@ -29,6 +29,7 @@ class RoadmapController extends Controller
 
     public function newEmpDetail(Request $request) {
         $roadmapCourse = Roadmap::with(['roadmapCourse'=> function($q) {
+                                $q->where('active','y');
                                 $q->orderBy('order', 'asc');
                                 }])->findOrFail($request->id);
         return view('admin.roadmap.newemp_detail',compact('roadmapCourse'));
