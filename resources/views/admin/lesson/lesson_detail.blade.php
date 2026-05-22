@@ -117,14 +117,14 @@
                                     @endif
                             </div>
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="picture_show">ภาพประกอบ</label>
                                     @if($lesson)
                                     <h3><img src="{{ asset('images/uploads/lesson/'.$lesson->id.'/original/'. $lesson->image) }}" alt="รูปภาพ"></h3>
                                     @else
                                     <h4>ไม่มีภาพประกอบ</h4>
                                     @endif
-                            </div>
+                            </div> --}}
                     </div>
                 </div>
             </div>
