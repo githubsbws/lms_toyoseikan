@@ -203,7 +203,7 @@
                                                     </div>
 
                                                     {{-- ส่วนคำอธิบายแบบย่อ (Short Title) --}}
-                                                    ลายละเอียดหลักสูตร
+                                                    รายละเอียดหลักสูตร
                                                     <div class="margin-t-15"
                                                         style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
                                                         {!! strip_tags(html_entity_decode($item->course_short_title)) !!}

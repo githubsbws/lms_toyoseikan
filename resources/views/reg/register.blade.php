@@ -51,7 +51,7 @@
                                                     class="text-danger">*</span></label></label>
 
                                         <div class="col-sm-9">
-                                            <input class="form-control" placeholder="Password"
+                                            <input class="form-control" placeholder="รหัสผ่านต้องประกอบด้วยตัวอักษรพิมพ์ใหญ่และพิมพ์เล็กอย่างน้อย 8 ตัว"
                                                 name="password" type="password">
                                             @error('password')
                                                 <span class="text-danger">{{ $message }}</span>
