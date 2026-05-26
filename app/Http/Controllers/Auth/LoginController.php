@@ -71,9 +71,14 @@ class LoginController extends Controller
         // สร้างข้อมูล credentials
         $credentials = ['username' => $usernameInput, 'password' => $request->input('password')];
 
+        // ตรวจสอบสถานะ del_status ของผู้ใช้ก่อนการพยายามยืนยันตัวตน
+        $existingUser = Users::where('username', $usernameInput)->first();
+        if ($existingUser && (int)$existingUser->del_status === 1) {
+            return back()->withErrors(['username' => 'บัญชีนี้ถูกระงับการใช้งานกรุณาติดต่อAdmin'])->withInput($request->only('username'));
+        }
 
         if (Auth::attempt($credentials)) {
-            // Authentication passed
+            // Authentication passe
             $user = Auth::user();
             $user->_token = $request->session()->get('_token'); // หรือดึงจาก $request->_token ตามที่ถูกต้อง
             $user->tokens()->delete();

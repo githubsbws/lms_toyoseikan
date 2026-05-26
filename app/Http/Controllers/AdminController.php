@@ -139,8 +139,15 @@ class AdminController extends Controller
             if ($validator->fails()) {
                 return back()->withErrors($validator)->withInput($request->only('username'));
             }
+
             // ตรวจสอบความถูกต้องของข้อมูลผู้ใช้งาน
+            $usernameInput = $request->input('username');
             $credentials = $request->only('username', 'password');
+
+            $existingUser = Users::where('username', $usernameInput)->first();
+            if ($existingUser && (int)$existingUser->del_status === 1) {
+                return back()->withErrors(['username' => 'บัญชีนี้ถูกระงับการใช้งานกรุณาติดต่อAdmin'])->withInput($request->only('username'));
+            }
             if (Auth::attempt($credentials)) {
                 // Authentication passed
 
@@ -4315,7 +4322,7 @@ class AdminController extends Controller
     function adminuser_delete($id){
         if(AuthFacade::useradmin()){
             $adminuser_delete=[
-                'status'=>'0'
+                'del_status'=>'1'
             ];
             DB::table('users')->where('id',$id)->update($adminuser_delete);
             return redirect()->route('adminuser');

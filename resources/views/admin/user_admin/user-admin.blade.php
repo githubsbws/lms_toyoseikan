@@ -34,7 +34,7 @@ use App\Models\Users;
 										<th>username</th>
 										<th>ชื่อ นามสกุล</th>
 
-										<th>Status</th>
+										{{-- <th>Status</th> --}}
 										<th>Create_at</th>
 										<th>Lastvisit_at</th>
 										<th>Last_ip</th>
@@ -52,7 +52,7 @@ use App\Models\Users;
                                         <td class="text-center">
                                             {{ $data->Profiles->firstname ?? '-' }} {{ $data->Profiles->lastname ?? '-' }}
                                         </td>
-										@if($data->status == 1)
+										{{-- @if($data->status == 1)
 										<td>
 											<a href="{{ route('user.toggle', $data->id) }}"
 											class="btn btn-success"
@@ -68,7 +68,7 @@ use App\Models\Users;
 												Inactive
 											</a>
 										</td>
-										@endif
+										@endif --}}
 										<td> {{ $data->create_at}}</td>
 										<td> {{ $data->lastvisit_at}}</td>
 										<td> {{ $data->last_ip }}</td>
