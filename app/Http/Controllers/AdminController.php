@@ -4231,7 +4231,8 @@ class AdminController extends Controller
 
             $userRole->update([
                 'group_id' => $request->group_role,
-                'teacher_status' => $request->has('supervisor_permission') ? 1 : 0
+                'teacher_status' => $request->has('supervisor_permission') ? 1 : 0,
+                'superuser' => $request->group_role == 1 ? 1 : 0,
             ]);
 
             $userRole->save();
