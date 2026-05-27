@@ -43,9 +43,20 @@ use App\Models\ASC;
 
                             <div class="form-group">
                                 <label for="password">Password</label>
-                                <input id="password" type="password" class="form-control" name="password"  autocomplete="new-password" oninput="checkPassword()" >
+                                <div class="input-group">
+                                    <input id="password" type="password" class="form-control" name="password" autocomplete="new-password" oninput="checkPassword()" >
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onmousedown="togglePasswordType('password', true)"
+                                            onmouseup="togglePasswordType('password', false)"
+                                            onmouseleave="togglePasswordType('password', false)"
+                                            ontouchstart="togglePasswordType('password', true)"
+                                            ontouchend="togglePasswordType('password', false)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                                 <input type="hidden" name="old_password" value="{{ $user->password }}">
-
                             </div>
                             <div class="form-group">
                                 <label for="password-length">รหัสผ่านต้องมีความยาวมากว่า 8 ตัว</label>
@@ -61,7 +72,19 @@ use App\Models\ASC;
                             </div> --}}
                             <div class="form-group">
                                 <label for="password-confirm">Confirm Password</label>
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation"  autocomplete="new-password">
+                                <div class="input-group">
+                                    <input id="password-confirm" type="password" class="form-control" name="password_confirmation" autocomplete="new-password">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onmousedown="togglePasswordType('password-confirm', true)"
+                                            onmouseup="togglePasswordType('password-confirm', false)"
+                                            onmouseleave="togglePasswordType('password-confirm', false)"
+                                            ontouchstart="togglePasswordType('password-confirm', true)"
+                                            ontouchend="togglePasswordType('password-confirm', false)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             @error('password')
                             <div class="form-group">
@@ -294,6 +317,12 @@ use App\Models\ASC;
 
     return true;
 }
+
+    function togglePasswordType(fieldId, show) {
+        var field = document.getElementById(fieldId);
+        if (!field) return;
+        field.type = show ? 'text' : 'password';
+    }
 </script>
 <script>
 $(document).ready(function() {

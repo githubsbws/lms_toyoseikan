@@ -38,95 +38,85 @@
                 </div>
             </div>
             <div class="container mt-5">
-                <div class="card">
+                <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
                         รายละเอียดบทเรียน
                     </div>
                     <div class="card-body">
-                            <div class="form-group">
-                                <label for="course_title">หลักสูตรอบรมออนไลน์</label>
-                                <h4>{{$lesson->course_title ?? '-'}}</h4>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="title">ชื่อบทเรียน</label>
-                                <h4>{{$lesson->title ?? '-'}}</h4>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="description">รายละเอียดย่อ</label>
-                                {!! htmlspecialchars_decode(htmlspecialchars_decode($lesson->description ?? '-')) !!}
-                            </div>
-
-                            <div class="form-group">
-                                <label for="view_all">สิทธิ์การดูบทเรียนนี้</label>
-                                <div>
-                                    @php
-                                        $checked = $lesson->view_all ?? '-' == 'y' ? 'checked' : '';
-                                    @endphp
-                                    <input type="checkbox" name="view_all" value="y" data-toggle="toggle" data-on="ดูได้ทั้งหมด" data-off="ดูได้เฉพาะกลุ่ม" data-onstyle="success" data-offstyle="danger" {{ $checked }} />
+                        <div class="row mb-2">
+                            <div class="col-12 mb-3">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-secondary mb-2"><u>หลักสูตรอบรมออนไลน์</u></h6>
+                                    <p class="mb-0 font-weight-bold">{{ $lesson->course_title ?? '-' }}</p>
                                 </div>
                             </div>
-
-                            <div class="form-group">
-                                <label for="cate_amount">จำนวนครั้งที่สามารถทำข้อสอบได้</label>
-                                <h4>{{$lesson->cate_amount ?? '-'}}</h4>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-12 mb-3">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-secondary mb-2"><u>ชื่อบทเรียน</u></h6>
+                                    <p class="mb-0 font-weight-bold">{{ $lesson->title ?? '-' }}</p>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="cate_amount">เวลาในการทำข้อสอบ</label>
-                                <h4>{{$lesson->time_test ?? '-'}}</h4>
+                        <div class="row mb-2">
+                            <div class="col-12 mb-3">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-secondary mb-2"><u>รายละเอียดย่อ</u></h6>
+                                    <div>{!! htmlspecialchars_decode(htmlspecialchars_decode($lesson->description ?? '-')) !!}</div>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="cms_short_title">เนื้อหา </label>
-                                {!! htmlspecialchars_decode(htmlspecialchars_decode($lesson->content ?? '-')) !!}
-                            </div>
-
-                            <div class="form-group">
-                                <label for="File_filename">ไฟล์บทเรียน (mp3,mp4)</label>
-                                    @if($file != null)
-                                    <div class="col-md-6">
-                                        <video id="example_video_1" class="video-js vjs-default-skin" controls="" preload="none" data-setup="{}" controlsList="nodownload">
-                                            {{-- <source src="/../images/storage/uploads/lesson/{{$lesson->filename}}" type="video/mp4"> --}}
-                                            <source src="{{asset('images/uploads/lesson/'.$file->filename)}}" type="video/mp4">
-                                            <!-- <source src="http://video-js.zencoder.com/oceans-clip.webm" type='video/webm' />
-                                                        <source src="http://video-js.zencoder.com/oceans-clip.ogv" type='video/ogg' /> -->
-                                            <!-- <track kind="captions" src="demo.captions.vtt" srclang="en" label="English"></track> -->
-                                            <!-- Tracks need an ending tag thanks to IE9 -->
-                                            <!-- <track kind="subtitles" src="demo.captions.vtt" srclang="en" label="English"></track> -->
-                                            <!-- Tracks need an ending tag thanks to IE9 -->
-                                            <p class="vjs-no-js">To view this video please
-                                                enable JavaScript, and consider upgrading to
-                                                a
-                                                web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-                                            </p>
-                                        </video>
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <div class="card border-secondary">
+                                    <div class="card-header bg-white font-weight-bold"><u>เนื้อหา</u></div>
+                                    <div class="card-body">
+                                        {!! htmlspecialchars_decode(htmlspecialchars_decode($lesson->content ?? '-')) !!}
                                     </div>
-                                    @else
-                                    <h4>ไม่มีวิดีโอ</h4>
-                                    @endif
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="FileDoc_doc">ไฟล์ประกอบบทเรียน (pdf,docx,pptx)</label>
-                                    @if($filedoc != null)
-                                    <a href="{{ route('lesson.downloadfile', ['id' => $filedoc->id]) }}" target="_blank" >{{ $filedoc->file_name}}</a>
-                                    @else
-                                    <h4>ไม่มีไฟล์ประกอบบทเรียน</h4>
-                                    @endif
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="card h-100 border-secondary">
+                                    <div class="card-header bg-white font-weight-bold"><u>ไฟล์บทเรียน (mp3, mp4)</u></div>
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                        @if($file != null)
+                                            <div class="w-100">
+                                                <video id="example_video_1" class="video-js vjs-default-skin w-100" controls preload="none" data-setup="{}" controlsList="nodownload">
+                                                    <source src="{{ asset('images/uploads/lesson/'.$file->filename) }}" type="video/mp4">
+                                                    <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+                                                </video>
+                                            </div>
+                                        @else
+                                            <div class="text-center text-muted py-4">ไม่มีวิดีโอ</div>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
+                        </div>
 
-                            {{-- <div class="form-group">
-                                <label for="picture_show">ภาพประกอบ</label>
-                                    @if($lesson)
-                                    <h3><img src="{{ asset('images/uploads/lesson/'.$lesson->id.'/original/'. $lesson->image) }}" alt="รูปภาพ"></h3>
-                                    @else
-                                    <h4>ไม่มีภาพประกอบ</h4>
-                                    @endif
-                            </div> --}}
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="card border-secondary">
+                                    <div class="card-header bg-white font-weight-bold"><u>ไฟล์ประกอบบทเรียน (pdf)</u></div>
+                                    <div class="card-body">
+                                        @if($filedoc != null)
+                                            <a href="{{ route('lesson.downloadfile', ['id' => $filedoc->id]) }}" target="_blank">{{ $filedoc->file_name }}</a>
+                                        @else
+                                            <div class="text-center text-muted py-4">ไม่มีไฟล์ประกอบบทเรียน</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
             </div>
             </div>
             <div class="clearfix"></div>
