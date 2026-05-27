@@ -20,32 +20,55 @@
                         </div>
                     </div>
                 </div>
-            </div>       
+            </div>
             <div class="container mt-5">
-                <div class="card">
+                <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
                         รายละเอียดหมวดหลักสูตร
                     </div>
                     <div class="card-body">
-                            <div class="form-group">
-                                <label for="cms_title">ชื่อหมวดหลักสูตร</label>
-                                <h4>{{ $category->cate_title}}</h4>
+                        <div class="row mb-3">
+                            <div class="col-12 mb-2">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-secondary mb-2">ชื่อหมวดหลักสูตร</h6>
+                                    <p class="mb-0 font-weight-bold">{{ $category->cate_title ?? '-' }}</p>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="cms_title">รายละเอียดย่อ</label>
-                                <h4>{{ $category->cate_short_detail }}</h4>
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-2">
+                                <div class="card border-secondary h-100">
+                                    <div class="card-header bg-white font-weight-bold">รายละเอียดย่อ</div>
+                                    <div class="card-body">
+                                        {!! htmlspecialchars_decode($category->cate_short_detail ?? '-') !!}
+                                    </div>
+                                </div>
                             </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="card border-secondary h-100">
+                                    <div class="card-header bg-white font-weight-bold">รายละเอียด</div>
+                                    <div class="card-body">
+                                        {!! htmlspecialchars_decode($category->cate_detail ?? '-') !!}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="cms_short_title">รายละเอียด </label>
-                                {!! htmlspecialchars_decode($category->cate_detail) !!}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-secondary">
+                                    <div class="card-header bg-white font-weight-bold">ภาพประกอบ</div>
+                                    <div class="card-body text-center">
+                                        @if(!empty($category->cate_image))
+                                            <img src="{{ asset('images/uploads/category/'.$category->cate_id.'/original/'. $category->cate_image) }}" alt="รูปภาพ" class="img-fluid" />
+                                        @else
+                                            <div class="text-muted py-4">ไม่มีภาพประกอบ</div>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
-
-                            <div class="form-group">
-                                <label for="cms_short_title">ภาพประกอบ </label>
-                                <h3><img src="{{ asset('images/uploads/category/'.$category->cate_id.'/original/'. $category->cate_image) }}" alt="รูปภาพ"></h3>
-                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

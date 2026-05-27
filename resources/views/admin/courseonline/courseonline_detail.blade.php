@@ -22,62 +22,82 @@
                 </div>
             </div>
             <div class="container mt-5">
-                <div class="card">
+                <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
                         รายละเอียดหลักสูตรนิสิต/นักศึกษา
                     </div>
                     <div class="card-body">
-                            <div class="form-group">
-                                <label for="cms_title">หมวดอบรมออนไลน์</label>
-                                <h4>{{ $course_online->cate_title}}</h4>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="cms_title">ชื่อวิยากร</label>
-                                <h4>{{ $course_online->teacher->teacher_name ?? '-' }}</h4>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="cms_short_title">ชื่อหลักสูตรอบรมออนไลน์ </label>
-                                <h4>{{ $course_online->course_title}}</h4>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="cms_short_title">รายละเอียดย่อ </label>
-                                {!! htmlspecialchars_decode($course_online->course_short_title) !!}
-                            </div>
-
-                            <div class="form-group">
-                                <label for="cms_short_title">รายละเอียด </label>
-                                {!! htmlspecialchars_decode(htmlspecialchars_decode($course_online->course_detail)) !!}
-                            </div>
-
-                            <div class="form-group">
-                                <label for="cms_short_title">ปักหมุดหลักสูตรแนะนำ </label>
-                                <div>
-                                    @php
-                                        $checked = $course_online->recommend == 'y' ? 'checked' : '';
-                                    @endphp
-                                    <input type="checkbox" name="recommend" value="y" data-toggle="toggle" data-on="แสดง" data-off="ไม่แสดง" data-onstyle="success" data-offstyle="danger" {{ $checked }} />
+                        <div class="row mb-2">
+                            <div class="col-md-6 mb-2">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-secondary mb-2">หมวดอบรมออนไลน์</h6>
+                                    <p class="mb-0 font-weight-bold">{{ $course_online->cate_title ?? '-' }}</p>
                                 </div>
                             </div>
-
-                            <div class="form-group">
-                                <label for="cms_short_title">หมายเหตุ </label>
-                                <h4>{{ $course_online->course_note}}</h4>
+                            <div class="col-md-6 mb-2">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-secondary mb-2">ชื่อวิยากร</h6>
+                                    <p class="mb-0 font-weight-bold">{{ $course_online->teacher->teacher_name ?? '-' }}</p>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="cms_short_title">ภาพประกอบ </label>
-                                <h3><img src="{{ asset('images/uploads/courseonline/'.$course_online->course_id.'/original/'. $course_online->course_picture) }}" alt="รูปภาพ"></h3>
+                        <div class="row mb-2">
+                            <div class="col-12 mb-2">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-secondary mb-2">ชื่อหลักสูตรอบรมออนไลน์</h6>
+                                    <p class="mb-0 font-weight-bold">{{ $course_online->course_title ?? '-' }}</p>
+                                </div>
                             </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-6 mb-2">
+                                <div class="card border-secondary h-100">
+                                    <div class="card-header bg-white font-weight-bold">รายละเอียดย่อ</div>
+                                    <div class="card-body">
+                                        {!! htmlspecialchars_decode($course_online->course_short_title ?? '-') !!}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="card border-secondary h-100">
+                                    <div class="card-header bg-white font-weight-bold">รายละเอียด</div>
+                                    <div class="card-body">
+                                        {!! htmlspecialchars_decode(htmlspecialchars_decode($course_online->course_detail ?? '-')) !!}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-12 mb-2">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-secondary mb-2">หมายเหตุ</h6>
+                                    <p class="mb-0">{{ $course_online->course_note ?? '-' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-secondary">
+                                    <div class="card-header bg-white font-weight-bold">ภาพประกอบ</div>
+                                    <div class="card-body text-center">
+                                        @if(!empty($course_online->course_picture))
+                                            <img src="{{ asset('images/uploads/courseonline/'.$course_online->course_id.'/original/'. $course_online->course_picture) }}" alt="รูปภาพ" class="img-fluid" />
+                                        @else
+                                            <div class="text-muted py-4">ไม่มีภาพประกอบ</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div id="sidebar">
-            </div><!-- sidebar -->
-        </div>
-    </div>
-    <div class="clearfix"></div>
+            </div>
+            </div>
+            <div class="clearfix"></div>
 </body>
 @endsection
