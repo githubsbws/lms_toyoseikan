@@ -2400,11 +2400,15 @@ class AdminController extends Controller
         if(AuthFacade::useradmin()){
             $id = $request->query('id');
             $type = $request->query('type');
-            if($id !== null && $type !== null ){
-                $grouptesting = Grouptesting::whereIn('active', ['y', 'w'])->where('create_by',auth()->user()->id)->orderBy('create_date','DESC')->get();
+            $query = Grouptesting::whereIn('active', ['y', 'w'])
+                ->when(auth()->user()->superuser == 0, function ($query) {
+                    return $query->where('create_by', auth()->id());
+                });
 
+            if($id !== null && $type !== null ){
+                $grouptesting = $query->orderBy('create_date','DESC')->get();
             } else {
-                $grouptesting = Grouptesting::whereIn('active', ['y', 'w'])->where('create_by',auth()->user()->id)->orderBy('create_date','DESC')->get();
+                $grouptesting = $query->orderBy('create_date','DESC')->get();
             }
 
             return view("admin.grouptesting.grouptesting",['grouptesting' => $grouptesting]);
