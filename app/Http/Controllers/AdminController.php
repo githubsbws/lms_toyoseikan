@@ -2068,9 +2068,10 @@ class AdminController extends Controller
                     // dd($doc_update->toArray());
                     if($doc_update == null){
                         $doc_new = new FileDoc;
-                        $doc_new->file_position = 1;
+                        $doc_new->lesson_id = $lesson_update->id;
                         $doc_new->file_name = $lesson->title;
                         $doc_new->filename = $doc_name;
+                        $doc_new->file_position = 1;
                         $doc_new->length = '2.00';
                         $doc_new->create_by = Auth::user()->id;
                         $doc_new->update_by = Auth::user()->id;
