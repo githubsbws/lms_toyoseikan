@@ -18,6 +18,7 @@ class Course extends Model
         'active',
         'recommend',
         'course_retest_amount',
+        'course_question_show',
         'cate_amount',
         'time_test',
         'lang_id',

@@ -85,11 +85,23 @@
                                 <textarea name="course_detail" id="summernote2" class="form-control"></textarea>
                             </div>
 
-                            <div class="form-group">
-                                <div class="col-4">
-                                    <label for="retest_amount"><u>จำนวนครั้งที่สามารถสอบซ่อมได้</u><span class="text-danger">*</span></label>
+                            <div class="form-group row">
+                                <div class="col-md-4">
+                                    <label for="question_amount">
+                                        <u>จำนวนข้อสอบ</u>
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" class="form-control" name="question_amount" min="1">
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label for="retest_amount">
+                                        <u>จำนวนครั้งที่สามารถสอบซ่อมได้</u>
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <input type="number" class="form-control" name="retest_amount">
                                 </div>
+
                             </div>
 
                             <hr class="my-4" style="border-top: 2px solid #eee;">

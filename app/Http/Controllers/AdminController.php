@@ -1293,6 +1293,7 @@ class AdminController extends Controller
                     'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'org_ids' => 'required',
                     'retest_amount' => 'required|integer',
+                    'question_amount' => 'required|integer',
 
                 ]);
                 // dd($validator);
@@ -1308,6 +1309,7 @@ class AdminController extends Controller
                 $course_update->course_short_title = htmlspecialchars($request->input('course_short_title'));
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
                 $course_update->course_retest_amount = $request->input('retest_amount');
+                $course_update->course_question_show = $request->input('question_amount');
                 $course_update->course_note = $request->input('course_note');
                 $course_update->update_by = Auth::user()->id;
                 $course_update->active = 'y';
@@ -1487,6 +1489,7 @@ class AdminController extends Controller
                     'course_detail'=>'required|string',
                     'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'retest_amount' => 'required|integer',
+                    'question_amount' => 'required|integer',
 
                 ]);
                 $teacher = Teacher::where('teacher_name',$request->input('teacher_name'))->first();
@@ -1505,6 +1508,7 @@ class AdminController extends Controller
                 $course_update->course_note = $request->input('course_note');
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
                 $course_update->course_retest_amount = $request->input('retest_amount');
+                $course_update->course_question_show = $request->input('question_amount');
                 $course_update->update_by = Auth::user()->id;
                 $course_update->create_by = Auth::user()->id;
                 $course_update->active = 'y';
