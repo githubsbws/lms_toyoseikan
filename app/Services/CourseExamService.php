@@ -21,12 +21,16 @@ class CourseExamService
     public function getMultipleChoiceExam(int $courseId)
     {
         $userId = Auth::id();
+        // ดึงจำนวนข้อสอบที่ต้องการจาก column course_question_show
+        $courseQuestionShow = Course::find($courseId)->course_question_show ?? 20;
+
         // 1. Eager Loading ดึงกลุ่มข้อสอบ คำถาม และช้อยส์ทั้งหมดรวดเดียว ดักสถานะ Active
         $course = Course::with([
-            'groupTesting' => function ($q) {
+            'groupTesting' => function ($q) use ($courseQuestionShow) {
                 $q->where('active',self::STATUS_ACTIVE)
                 ->with([
                     'questions' => fn($q) => $q->where('ques_type',2)->where('active','y')
+                    ->inRandomOrder()->take($courseQuestionShow)
                     ->with(['choices'])
                     ]);
             },
@@ -77,12 +81,15 @@ class CourseExamService
     public function getEssayExam(int $courseId)
     {
         $userId = Auth::id();
+        // ดึงจำนวนข้อสอบที่ต้องการจาก column course_question_show
+        $courseQuestionShow = Course::find($courseId)->course_question_show ?? 20;
 
         $course = Course::with([
-            'groupTesting' => function ($q) {
+            'groupTesting' => function ($q) use ($courseQuestionShow) {
                 $q->where('active',self::STATUS_ACTIVE)
                 ->with([
                     'questions' => fn($q) => $q->where('ques_type',3)
+                    ->inRandomOrder()->take($courseQuestionShow)
                     ->with(['images'])
                     ]);
             },
