@@ -1819,7 +1819,6 @@ use App\Models\Ques_ans;
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer"><a href="#" class="btn-footer-blue">ดูรายละเอียดทั้งหมด</a></div>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-sm-12 col-12">
@@ -1893,14 +1892,12 @@ use App\Models\Ques_ans;
 
                             </div>
                         </div>
-                        <div class="card-footer"><a href="#" class="btn-footer-blue">ดูแผนการเรียนทั้งหมด</a></div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5>บทเรียนที่ต้องเรียน / กำหนดเวลา</h5>
-                            <a href="#">ดูทั้งหมด</a>
                         </div>
                         <div class="card-body">
                             <div class="lesson-flex-list">
@@ -1958,7 +1955,6 @@ use App\Models\Ques_ans;
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer"><a href="#" class="btn-footer-blue">ดูแผนการเรียนทั้งหมด</a></div>
                     </div>
                 </div>
             </section>
@@ -2037,7 +2033,6 @@ use App\Models\Ques_ans;
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer"><a href="">ดูทั้งหมด</a></div>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-sm-6 col-12">
@@ -2084,7 +2079,6 @@ use App\Models\Ques_ans;
                             </div>
 
                         </div>
-                        <div class="card-footer"><a href="">ดูทั้งหมด</a></div>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-sm-6 col-12">
@@ -2093,7 +2087,6 @@ use App\Models\Ques_ans;
                             <h5>
                                 ผลประเมินล่าสุด
                             </h5>
-                            <a href="">ดูทั้งหมด</a>
                         </div>
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -2144,7 +2137,6 @@ use App\Models\Ques_ans;
                     <div class="card">
                         <div class="card-header">
                             <h5>ประกาศจากบริษัท</h5>
-                            <a href="">ดูทั้งหมด</a>
                         </div>
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column; gap:20px">
@@ -2190,7 +2182,6 @@ use App\Models\Ques_ans;
                     <div class="card">
                         <div class="card-header">
                             <h5>ประวัติการเรียนล่าสุด</h5>
-                            <a href="">ดูทั้งหมด</a>
                         </div>
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column;">
@@ -2231,7 +2222,7 @@ use App\Models\Ques_ans;
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                <!-- <div class="col-lg-4 col-md-6 col-sm-6 col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5>ติดต่อ / บุคคลที่เกี่ยวข้อง</h5>
@@ -2285,7 +2276,7 @@ use App\Models\Ques_ans;
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </section>
         </div>
     </div>
@@ -2293,7 +2284,7 @@ use App\Models\Ques_ans;
 
 
     <!-- New Employ -->
-   <!--  <div class="main-content">
+    <!-- <div class="main-content">
         <div class="container-fluid p-5">
 
             <div class="new-employ">
@@ -2449,14 +2440,6 @@ use App\Models\Ques_ans;
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footers" style="    margin-top: auto;    display: flex;    justify-content: center;    align-items: center;">
-                            <a href="#" class="btn-footer-blues" style=" border: 1px solid #1d71b8;  background-color: #ffffff; color: #1d71b8;        text-align: center;
-        padding: 8px 20px;
-        border-radius: 7px;
-        font-size: 14px;
-        font-weight: 600;
-        transition: background-color 0.2s;">ดูรายละเอียดทั้งหมด</a>
-                        </div>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12">
@@ -2504,7 +2487,6 @@ use App\Models\Ques_ans;
                     <div class="card h-100" style="min-height: 380px;">
                         <div class="card-header">
                             <h5>บทเรียนที่ต้องเรียน / กำหนดเวลา</h5>
-                            <a href="#">ดูทั้งหมด</a>
                         </div>
                         <div class="card-body">
                             <div class="lesson-flex-list">
@@ -2562,7 +2544,6 @@ use App\Models\Ques_ans;
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer"><a href="#" class="btn-footer-blue">ดูแผนการเรียนทั้งหมด</a></div>
                     </div>
                 </div>
             </section>
@@ -2630,7 +2611,6 @@ use App\Models\Ques_ans;
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer"><a href="">ดูทั้งหมด</a></div>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6 col-12">
@@ -2671,7 +2651,6 @@ use App\Models\Ques_ans;
                                 </div>
 
                             </div>
-                            <div class="card-footer"><a href="">ดูทั้งหมด</a></div>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6 col-12">
@@ -2680,7 +2659,6 @@ use App\Models\Ques_ans;
                                 <h5>
                                     ผลประเมินล่าสุด
                                 </h5>
-                                <a href="">ดูทั้งหมด</a>
                             </div>
                             <div class="card-body">
                                 <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -2728,7 +2706,6 @@ use App\Models\Ques_ans;
                         <div class="card">
                             <div class="card-header">
                                 <h5>ประกาศจากบริษัท</h5>
-                                <a href="">ดูทั้งหมด</a>
                             </div>
                             <div class="card-body">
                                 <div style="display: flex; flex-direction: column; gap:20px">
@@ -2765,7 +2742,6 @@ use App\Models\Ques_ans;
                         <div class="card">
                             <div class="card-header">
                                 <h5>ประวัติการเรียนล่าสุด</h5>
-                                <a href="">ดูทั้งหมด</a>
                             </div>
                             <div class="card-body">
                                 <div style="display: flex; flex-direction: column;">
@@ -2800,51 +2776,7 @@ use App\Models\Ques_ans;
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>ติดต่อ / บุคคลที่เกี่ยวข้อง</h5>
-                            </div>
-                            <div class="card-body">
-                                <div style="display: flex; flex-direction: column; gap:5px;">
-                                    <div style="display:flex; flex-direction:row; align-items: center; justify-content: space-between;">
-                                        <div style="display: flex; flex-direction: row; align-items: center; gap: 5px; width: 50%;">
-                                            <img src="https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?fm=jpg&amp;q=60&amp;w=3000&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.1.0&amp;ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D" alt="profile image" style="border-radius: 100%; width: 40px; height: 40px;">
-                                            <div style="display: flex; flex-direction: column;">
-                                                <span>หัวหน้างาน</span>
-                                                <h5 style="margin: 0;"><strong>คุณสมชาย ใจดี</strong></h5>
-                                            </div>
-                                        </div>
-                                        <span>02-123-4567</span>
-                                        <i class="fa-regular fa-comment-dots fa-xl" style="color: rgb(116, 192, 252);"></i>
-                                    </div>
-                                    <div style="display:flex; flex-direction:row; align-items: center; justify-content: space-between;">
-                                        <div style="display: flex; flex-direction: row; align-items: center; gap: 5px; width: 50%;">
-                                            <img src="https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?fm=jpg&amp;q=60&amp;w=3000&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.1.0&amp;ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D" alt="profile image" style="border-radius: 100%; width: 40px; height: 40px;">
-                                            <div style="display: flex; flex-direction: column;">
-                                                <span>ผู้ประสานงานอบรม</span>
-                                                <h5 style="margin: 0;"><strong>คุณวิภา รักการอบรม</strong></h5>
-                                            </div>
-                                        </div>
-                                        <span>02-234-5678</span>
-                                        <i class="fa-regular fa-comment-dots fa-xl" style="color: rgb(116, 192, 252);"></i>
-                                    </div>
-                                    <div style="display:flex; flex-direction:row; align-items: center; justify-content: space-between;">
-                                        <div style="display: flex; flex-direction: row; align-items: center; gap: 5px; width: 50%;">
-                                            <img src="https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?fm=jpg&amp;q=60&amp;w=3000&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.1.0&amp;ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D" alt="profile image" style="border-radius: 100%; width: 40px; height: 40px;">
-                                            <div style="display: flex; flex-direction: column;">
-                                                <span>ฝ่าย HR</span>
-                                                <h5 style="margin: 0;"><strong>คุณมณิวรรณ สุขใจ</strong></h5>
-                                            </div>
-                                        </div>
-                                        <span>02-345-6789</span>
-                                        <a href=""><i class="fa-regular fa-comment-dots fa-xl" style="color: rgb(116, 192, 252);"></i></a>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </section>
             </div>
         </div>
