@@ -898,7 +898,7 @@ use App\Models\Ques_ans;
             width: 130px;
             height: 130px;
             margin: 0 auto;
-            margin-top: -40px;
+            
         }
 
         .progress-circle-svg {
@@ -1674,16 +1674,87 @@ use App\Models\Ques_ans;
     <div class="main-content">
         <div class="container-fluid p-5" id="normal-employ">
 
-            <div class="normal-employ">
-                <h3>นาย พนักงานปกติ</h3>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">Operator A -Team A</li>
-                        <li class="breadcrumb-item">Line 1</li>
-                        <li class="breadcrumb-item">Filling</li>
-                    </ol>
-                </nav>
-            </div>
+            @if($dashboard['isNewEmployee'])
+
+                <div class="new-employ">
+
+                    <div class="group">
+
+                        <div>
+                            <h3>{{ $dashboard['employee']['name'] }}</h3>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+
+                                    @foreach($dashboard['employee']['department'] as $item)
+                                        <li class="breadcrumb-item">
+                                            {{ $item }}
+                                        </li>
+                                    @endforeach
+
+                                </ol>
+                            </nav>
+                        </div>
+
+
+                        <div class="date">
+
+                            <div class="wrap">
+
+                                <div>
+                                    <p>วันที่เริ่มงาน</p>
+                                    <p>
+                                        {{ Carbon\Carbon::parse($dashboard['employee']['user']->work_start)
+                                            ->translatedFormat('d M Y') }}
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <p>อายุงาน</p>
+                                    <p>
+                                        {{ $dashboard['employee']['serviceAge'] }}
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            @else
+
+
+                <div class="normal-employ">
+
+                    <h3>{{ $dashboard['employee']['name'] }}</h3>
+
+
+                    <nav aria-label="breadcrumb">
+
+                        <ol class="breadcrumb">
+
+                            @foreach($dashboard['employee']['department'] as $item)
+
+                                <li class="breadcrumb-item">
+                                    {{ $item }}
+                                </li>
+
+                            @endforeach
+
+                        </ol>
+
+                    </nav>
+
+                </div>
+
+
+            @endif
+            
 
             <section class="section-1 row">
                 <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 custom-5-col">
@@ -1692,8 +1763,8 @@ use App\Models\Ques_ans;
                         <div class="stat-content">
                             <div class="stat-title">ทั้งหมด</div>
                             <div class="stat-value-row">
-                                <span class="stat-qty">32</span>
-                                <span class="stat-unit">ดูบทเรียน</span>
+                                <span class="stat-qty">{{ $dashboard['totalCourse'] }}</span>
+                                <span class="stat-unit"><a href="{{route('course')}}">ดูบทเรียน</a></span>
                             </div>
                             <div class="stat-footer-text">ที่ต้องเรียนทั้งหมด</div>
                         </div>
@@ -1706,13 +1777,13 @@ use App\Models\Ques_ans;
                         <div class="stat-content">
                             <div class="stat-title">เรียนจบแล้ว</div>
                             <div class="stat-value-row">
-                                <span class="stat-qty2">18</span>
+                                <span class="stat-qty2">{{ $dashboard['completed'] }}</span>
                             </div>
                             <div class="stat-unit">
-                                ดูบทเรียน
+                               <a href="{{route('course')}}"> ดูบทเรียน </a>
                             </div>
                         </div>
-                        <span class="stat-badge">56%</span>
+                        <span class="stat-badge">{{ $dashboard['completedPercent'] }}%</span>
                     </div>
 
 
@@ -1724,13 +1795,13 @@ use App\Models\Ques_ans;
                         <div class="stat-content">
                             <div class="stat-title">กำลังเรียน</div>
                             <div class="stat-value-row">
-                                <span class="stat-qty3">6</span>
+                                <span class="stat-qty3">{{ $dashboard['inProgress'] }}</span>
                             </div>
                             <div class="stat-unit">
-                                ดูบทเรียน
+                                <a href="{{route('course')}}"> ดูบทเรียน </a>
                             </div>
                         </div>
-                        <span class="stat-badge">19%</span>
+                        <span class="stat-badge">{{ $dashboard['inProgressPercent'] }}%</span>
                     </div>
                 </div>
 
@@ -1740,13 +1811,13 @@ use App\Models\Ques_ans;
                         <div class="stat-content">
                             <div class="stat-title">ยังไม่เริ่ม</div>
                             <div class="stat-value-row">
-                                <span class="stat-qty4">6</span>
+                                <span class="stat-qty4">{{ $dashboard['notStarted'] }}</span>
                             </div>
                             <div class="stat-unit">
-                                ดูบทเรียน
+                                <a href="{{route('course')}}"> ดูบทเรียน </a>
                             </div>
                         </div>
-                        <span class="stat-badge">19%</span>
+                        <span class="stat-badge">{{ $dashboard['notStartedPercent'] }}%</span>
                     </div>
                 </div>
 
@@ -1756,13 +1827,13 @@ use App\Models\Ques_ans;
                         <div class="stat-content">
                             <div class="stat-title">ไม่ผ่าน/ต้องซ่อม</div>
                             <div class="stat-value-row">
-                                <span class="stat-qty5">2</span>
+                                <span class="stat-qty5">{{ $dashboard['failed'] }}</span>
                             </div>
                             <div class="stat-unit">
-                                ดูบทเรียน
+                               <a href="{{route('course')}}"> ดูบทเรียน </a>
                             </div>
                         </div>
-                        <span class="stat-badge">6%</span>
+                        <span class="stat-badge">{{ $dashboard['failedPercent'] }}%</span>
                     </div>
                 </div>
             </section>
@@ -1780,10 +1851,10 @@ use App\Models\Ques_ans;
                                         <svg class="progress-circle-svg" viewBox="0 0 100 100">
                                             <circle class="progress-circle-bg" cx="50" cy="50" r="45"></circle>
                                             <circle class="progress-circle-value" cx="50" cy="50" r="45"
-                                                stroke-dasharray="282.7" stroke-dashoffset="124.4"></circle>
+                                                stroke-dasharray="282.7" stroke-dashoffset="{{ $dashboard['progressOffset'] }}"></circle>
                                         </svg>
                                         <div class="progress-circle-text">
-                                            <span class="progress-circle-pct">56%</span>
+                                            <span class="progress-circle-pct"> {{ $dashboard['completedPercent'] }}%</span>
                                             <span class="progress-circle-label">ความคืบหน้า</span>
                                         </div>
                                     </div>
@@ -1791,36 +1862,78 @@ use App\Models\Ques_ans;
 
                                 <div class="progress-split-right">
                                     <ul class="progress-status-list">
+                                        @foreach($dashboard['progressByCategory'] as $item)
+
                                         <li class="status-item">
-                                            <div class="status-dot-title"><span
-                                                    class="status-dot green"></span>ความปลอดภัย (Safety)</div>
-                                            <span class="status-result-badge"><span class="bold-text">100%</span> <span
-                                                    class="text-green">ผ่าน</span></span>
+
+                                            <div class="status-dot-title">
+                                                <span class="status-dot {{ $item['color'] }}"></span>
+                                                {{ $item['name'] }}
+                                            </div>
+
+                                            <span class="status-result-badge">
+                                                <span class="bold-text">{{ $item['percent'] }}%</span>
+
+                                                <span class="text-{{ $item['color'] }}">
+                                                    {{ $item['status'] }}
+                                                </span>
+                                            </span>
+
                                         </li>
-                                        <li class="status-item">
-                                            <div class="status-dot-title"><span class="status-dot orange"></span>คุณภาพ
-                                                (Quality)</div>
-                                            <span class="status-result-badge"><span class="bold-text">75%</span> <span
-                                                    class="text-orange">กำลังเรียน</span></span>
-                                        </li>
-                                        <li class="status-item">
-                                            <div class="status-dot-title"><span
-                                                    class="status-dot orange"></span>การปฏิบัติงานเครื่องจักร</div>
-                                            <span class="status-result-badge"><span class="bold-text">40%</span> <span
-                                                    class="text-orange">กำลังเรียน</span></span>
-                                        </li>
-                                        <li class="status-item">
-                                            <div class="status-dot-title"><span
-                                                    class="status-dot grey"></span>การบำรุงรักษาเบื้องต้น (PM)</div>
-                                            <span class="status-result-badge"><span class="bold-text">0%</span> <span
-                                                    class="text-grey">ยังไม่เริ่ม</span></span>
-                                        </li>
+
+                                        @endforeach
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                @if($dashboard['isNewEmployee'])
+                <div class="col-lg-4 col-md-6 col-12">
+                    <div class="card h-100" style="min-height: 422px;">
+                        <div class="card-header">
+                            <h5>สำหรับพนักงานใหม่ <span style="font-size: 14px; font-weight: 400; color: #555;">(ทดลองงาน 120 วัน)</span></h5>
+                        </div>
+                        <div class="card-body" style="display: flex; flex-direction: column;">
+
+                            <div class="probation-timeline">
+                                @foreach($dashboard['newEmployeeTimeline'] as $item)
+
+                                    <div class="timeline-step">
+
+                                        <div class="circle-badge 
+                                            {{ $item['percent']==100?'green':'' }}">
+
+                                            {{ $item['day'] }} วัน
+
+                                        </div>
+
+
+                                        <div>
+                                            {{ $item['passed'] }}/{{ $item['total'] }}
+                                        </div>
+
+                                        <div>
+                                            {{ $item['percent'] }}%
+                                        </div>
+
+                                    </div>
+
+                                @endforeach
+                            </div>
+
+                            <div class="probation-alert">
+                                <i class="fa-solid fa-circle-plus"></i>
+                                <div class="probation-alert-text">
+                                    <span>คุณอยู่ในช่วง 30 วันแรก (01 ม.ค. 2567 - 30 ม.ค. 2567)</span>
+                                    <span>กรุณาเรียนให้ครบตามแผนเพื่อผ่านการประเมินในแต่ละรอบ</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                @else
                 <div class="col-lg-4 col-md-6 col-sm-12 col-12">
                     <div class="card">
                         <div class="card-header">
@@ -1830,70 +1943,50 @@ use App\Models\Ques_ans;
                         <div class="card-body">
                             <div class="linear-progress-group">
 
-                                <div class="linear-row-item">
-                                    <div class="linear-title-area">
-                                        <div class="icon-box icon-blue"><i class="fa-solid fa-shield-halved"></i></div>
-                                        <span>Mandatory Training</span>
-                                    </div>
-                                    <div class="linear-bar-wrapper">
-                                        <div class="linear-bar-fill" style="width: 90%; background-color: #2ecc71;">
-                                        </div>
-                                    </div>
-                                    <div class="linear-qty-area">
-                                        <span class="pct">90%</span>
-                                        <span class="fraction">9/10 บทเรียน</span>
-                                    </div>
-                                </div>
+                                @foreach($dashboard['learningPlan'] as $item)
 
-                                <div class="linear-row-item">
-                                    <div class="linear-title-area">
-                                        <div class="icon-box icon-green"><i class="fa-solid fa-gears"></i></div>
-                                        <span>Technical Skill</span>
-                                    </div>
-                                    <div class="linear-bar-wrapper">
-                                        <div class="linear-bar-fill" style="width: 78%; background-color: #2ecc71;">
-                                        </div>
-                                    </div>
-                                    <div class="linear-qty-area">
-                                        <span class="pct">78%</span>
-                                        <span class="fraction">7/9 บทเรียน</span>
-                                    </div>
-                                </div>
+                                    <div class="linear-row-item">
 
-                                <div class="linear-row-item">
-                                    <div class="linear-title-area">
-                                        <div class="icon-box icon-orange"><i class="fa-solid fa-star"></i></div>
-                                        <span>Soft Skill</span>
-                                    </div>
-                                    <div class="linear-bar-wrapper">
-                                        <div class="linear-bar-fill" style="width: 60%; background-color: #f39c12;">
-                                        </div>
-                                    </div>
-                                    <div class="linear-qty-area">
-                                        <span class="pct">60%</span>
-                                        <span class="fraction">6/10 บทเรียน</span>
-                                    </div>
-                                </div>
+                                        <div class="linear-title-area">
 
-                                <div class="linear-row-item">
-                                    <div class="linear-title-area">
-                                        <div class="icon-box icon-blue"><i class="fa-solid fa-book-bookmark"></i></div>
-                                        <span>Work Instruction</span>
-                                    </div>
-                                    <div class="linear-bar-wrapper">
-                                        <div class="linear-bar-fill" style="width: 45%; background-color: #f39c12;">
+                                            <div class="icon-box icon-blue">
+                                                <i class="fa-solid fa-book-bookmark"></i>
+                                            </div>
+
+                                            <span>{{ $item['title'] }}</span>
+
                                         </div>
+
+                                        <div class="linear-bar-wrapper">
+
+                                            <div class="linear-bar-fill"
+                                                style="width: {{ $item['percent'] }}%;
+                                                        background-color: {{ $item['color'] }};">
+                                            </div>
+
+                                        </div>
+
+                                        <div class="linear-qty-area">
+
+                                            <span class="pct">
+                                                {{ $item['percent'] }}%
+                                            </span>
+
+                                            <span class="fraction">
+                                                {{ $item['passed'] }}/{{ $item['total'] }} บทเรียน
+                                            </span>
+
+                                        </div>
+
                                     </div>
-                                    <div class="linear-qty-area">
-                                        <span class="pct">45%</span>
-                                        <span class="fraction">5/11 บทเรียน</span>
-                                    </div>
-                                </div>
+
+                                    @endforeach
 
                             </div>
                         </div>
                     </div>
                 </div>
+                @endif
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="card">
                         <div class="card-header">
@@ -1901,58 +1994,49 @@ use App\Models\Ques_ans;
                         </div>
                         <div class="card-body">
                             <div class="lesson-flex-list">
+                                @forelse($dashboard['deadlineCourses'] as $course)
 
-                                <div class="lesson-row-card">
-                                    <div class="lesson-info-left">
-                                        <div class="icon-box icon-blue">
-                                            <i class="fa-solid fa-book-open"></i>
-                                        </div>
-                                        <div class="lesson-name-sub">
-                                            <span class="lesson-main-name">GMP Refresher Training</span>
-                                            <span class="lesson-sub-name">ดูบทเรียน</span>
-                                        </div>
-                                    </div>
-                                    <div class="lesson-deadline-date"><span>ครบกำหนด</span>10 พ.ค. 67</div>
-                                </div>
+                                    <div class="lesson-row-card">
 
-                                <div class="lesson-row-card">
-                                    <div class="lesson-info-left">
-                                        <div class="icon-box icon-blue">
-                                            <i class="fa-solid fa-book-open"></i>
-                                        </div>
-                                        <div class="lesson-name-sub">
-                                            <span class="lesson-main-name">QC Basic </span>
-                                            <span class="lesson-sub-name">ดูบทเรียน</span>
-                                        </div>
-                                    </div>
-                                    <div class="lesson-deadline-date"><span>ครบกำหนด</span>15 พ.ค. 67</div>
-                                </div>
+                                        <div class="lesson-info-left">
 
-                                <div class="lesson-row-card">
-                                    <div class="lesson-info-left">
-                                        <div class="icon-box icon-blue">
-                                            <i class="fa-solid fa-book-open"></i>
-                                        </div>
-                                        <div class="lesson-name-sub">
-                                            <span class="lesson-main-name">Machine Setup </span>
-                                            <span class="lesson-sub-name">ดูบทเรียน</span>
-                                        </div>
-                                    </div>
-                                    <div class="lesson-deadline-date"><span>ครบกำหนด</span>20 พ.ค. 67</div>
-                                </div>
+                                            <div class="icon-box icon-blue">
+                                                <i class="fa-solid fa-book-open"></i>
+                                            </div>
 
-                                <div class="lesson-row-card">
-                                    <div class="lesson-info-left">
-                                        <div class="icon-box icon-blue">
-                                            <i class="fa-solid fa-book-open"></i>
+                                            <div class="lesson-name-sub">
+
+                                                <span class="lesson-main-name">
+                                                    {{ $course['course_title'] }}
+                                                </span>
+
+                                                <span class="lesson-sub-name">
+                                                    <a href="{{route('course')}}"> ดูบทเรียน </a>
+                                                </span>
+
+                                            </div>
+
                                         </div>
-                                        <div class="lesson-name-sub">
-                                            <span class="lesson-main-name">Machine Setup Basics</span>
-                                            <span class="lesson-sub-name">ดูบทเรียน</span>
+
+                                        <div class="lesson-deadline-date">
+
+                                            <span>ครบกำหนด</span>
+
+                                            {{ $course['deadline']
+                                                ? \Carbon\Carbon::parse($course['deadline'])->translatedFormat('d M y')
+                                                : '-' }}
+
                                         </div>
+
                                     </div>
-                                    <div class="lesson-deadline-date"><span>ครบกำหนด</span>20 พ.ค. 67</div>
-                                </div>
+
+                                    @empty
+
+                                    <div class="text-center text-muted py-3">
+                                        ไม่มีบทเรียนที่ต้องเรียน
+                                    </div>
+
+                                    @endforelse
                             </div>
                         </div>
                     </div>
@@ -1965,72 +2049,65 @@ use App\Models\Ques_ans;
                         <div class="card-header">
                             <h5>
                                 หลักสูตรที่ต้องเรียนต่อ
-                                <span class="badge" style="background-color: red; margin-left: 5px;">6</span>
+                                <span class="badge" style="background-color: red; margin-left: 5px;">{{ $dashboard['continueCount'] }}</span>
                             </h5>
                         </div>
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <div class="course-row-responsive"
-                                    style="padding-left: 10px; border-left: 5px solid #337ab7; display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
-                                    <div style="display: flex; flex-direction: column; width: 50%;">
-                                        <h5 style="font-weight: bold;">การตั้งค่าเครื่องจักรเบื้องต้น
-                                        </h5>
-                                        <span>Machine Setup Basics</span>
-                                    </div>
-                                    <div
-                                        style="width: 25%; display: flex; flex-direction: row; justify-content: center; align-items:center; gap: 1px;">
-                                        <div class="progress" style="width: 100%; height: 10px; margin: 0;">
-                                            <div class="progress-bar" role="progressbar" aria-valuenow="80"
-                                                aria-valuemin="0" aria-valuemax="100" style="width: 80%;">
-                                            </div>
+                                @foreach($dashboard['continueCourses'] as $course)
+
+                                    <div class="course-row-responsive"
+                                        style="padding-left:10px;
+                                                border-left:5px solid #337ab7;
+                                                display:flex;
+                                                align-items:center;
+                                                justify-content:space-between;">
+
+                                        <div style="width:50%;">
+
+                                            <h5 style="font-weight:bold;">
+                                                {{ $course['course_title'] }}
+                                            </h5>
+
+                                            <span>
+                                                {!! html_entity_decode($course['course_short_title']) !!}
+                                            </span>
 
                                         </div>
-                                        <span>80%</span>
-                                    </div>
 
-                                    <div style="width: 20%; display:flex; justify-content: center;"><a href="#"
-                                            class="btn btn-primary" role="button">ดูบทเรียน</a></div>
-                                </div>
-                                <div class="course-row-responsive"
-                                    style="padding-left: 10px; border-left: 5px solid #337ab7; display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
-                                    <div style="display: flex; flex-direction: column; width: 50%;">
-                                        <h5 style="font-weight: bold;">การควบคุมคุณภาพในการผลิต</h5>
-                                        <span>In-progress Quality Control</span>
-                                    </div>
-                                    <div
-                                        style="width: 25%; display: flex; flex-direction: row; justify-content: center; align-items:center; gap: 1px;">
-                                        <div class="progress" style="width: 100%; height: 10px; margin: 0;">
-                                            <div class="progress-bar" role="progressbar" aria-valuenow="40"
-                                                aria-valuemin="0" aria-valuemax="100" style="width: 40%;">
+                                        <div style="width:25%;
+                                                    display:flex;
+                                                    align-items:center;
+                                                    gap:8px;">
+
+                                            <div class="progress"
+                                                style="width:100%;height:10px;margin:0;">
+
+                                                <div class="progress-bar"
+                                                    role="progressbar"
+                                                    style="width:{{ $course['percent'] }}%;">
+                                                </div>
+
                                             </div>
 
-                                        </div>
-                                        <span>40%</span>
-                                    </div>
-
-                                    <div style="width: 20%; display:flex; justify-content: center;"><a href="#"
-                                            class="btn btn-primary" role="button">ดูบทเรียน</a></div>
-                                </div>
-                                <div class="course-row-responsive"
-                                    style="padding-left: 10px; border-left: 5px solid #337ab7; display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
-                                    <div style="display: flex; flex-direction: column; width: 50%;">
-                                        <h5 style="font-weight: bold;">การตรวจสอบ 5 ส</h5>
-                                        <span>$$ Inspection</span>
-                                    </div>
-                                    <div
-                                        style="width: 25%; display: flex; flex-direction: row; justify-content: center; align-items:center; gap: 1px;">
-                                        <div class="progress" style="width: 100%; height: 10px; margin: 0;">
-                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
-                                                aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                                            </div>
+                                            <span>{{ $course['percent'] }}%</span>
 
                                         </div>
-                                        <span>0%</span>
+
+                                        <div style="width:20%;text-align:center;">
+
+                                            <a href="{{ url('course/'.$course['course_id']) }}"
+                                            class="btn btn-primary">
+
+                                                ดูบทเรียน
+
+                                            </a>
+
+                                        </div>
+
                                     </div>
 
-                                    <div style="width: 20%; display:flex; justify-content: center;"><a href="#"
-                                            class="btn btn-primary" role="button">ดูบทเรียน</a></div>
-                                </div>
+                                    @endforeach
                             </div>
                         </div>
                     </div>
@@ -2040,42 +2117,64 @@ use App\Models\Ques_ans;
                         <div class="card-header">
                             <h5>
                                 หลักสูตรที่ไม่ผ่าน / ต้องซ่อม
-                                <span class="badge" style="background-color: red; margin-left: 5px;">2</span>
+                                <span class="badge" style="background-color: red; margin-left: 5px;">{{ $dashboard['failCount'] }}</span>
                             </h5>
                         </div>
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <div class="course-row-responsive"
-                                    style="padding-left: 10px; border-left: 5px solid red; display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
-                                    <div style="display: flex; flex-direction: column; width: 50%;">
-                                        <h5 style="font-weight: bold;">ความปลอดภัยในการทำงาน</h5>
-                                        <span>Safety at Work</span>
-                                    </div>
-                                    <div style="width: 25%;">
-                                        <h5>คะแนน <span style="font-weight: bold;">65%</span></h5>
-                                    </div>
-
-                                    <div style="width: 20%; display:flex; justify-content: center;"><a href="#"
-                                            class="btn" style="border: 1px solid red; color: red;"
-                                            role="button">ซ่อม</a></div>
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 5px;">
+                                @forelse($dashboard['failCourses'] as $course)
+                                
                                     <div class="course-row-responsive"
-                                        style="padding-left: 10px; border-left: 5px solid red; display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
-                                        <div style="display: flex; flex-direction: column; width: 50%;">
-                                            <h5 style="font-weight: bold;">ความรู้พื้นฐานคุณภาพ</h5>
-                                            <span>Quality Basics</span>
-                                        </div>
-                                        <div style="width: 25%;">
-                                            <h5>คะแนน <span style="font-weight: bold;">70%</span></h5>
+                                        style="padding-left:10px;
+                                                border-left:5px solid red;
+                                                display:flex;
+                                                justify-content:space-between;
+                                                align-items:center;">
+
+                                        <div style="width:50%;">
+
+                                            <h5 style="font-weight:bold;">
+                                                {{ $course['course_title'] }}
+                                            </h5>
+
+                                            <span>
+                                                {{ $course['course_short_title'] }}
+                                            </span>
+
                                         </div>
 
-                                        <div style="width: 20%; display:flex; justify-content: center;"><a href="#"
-                                                class="btn" style="border: 1px solid red; color: red;"
-                                                role="button">ซ่อม</a></div>
+                                        <div style="width:25%;">
+
+                                            <h5>
+                                                คะแนน
+                                                <span style="font-weight:bold;">
+                                                    {{ $course['percent'] }}%
+                                                </span>
+                                            </h5>
+
+                                        </div>
+
+                                        <div style="width:20%;text-align:center;">
+
+                                            <a href="{{ url('course/'.$course['course_id']) }}"
+                                            class="btn"
+                                            style="border:1px solid red;color:red;">
+
+                                                ซ่อม
+
+                                            </a>
+
+                                        </div>
+
                                     </div>
 
-                                </div>
+                                    @empty
+
+                                    <div class="text-center text-muted py-3">
+                                        ไม่มีหลักสูตรที่ต้องซ่อม
+                                    </div>
+
+                                    @endforelse
                             </div>
 
                         </div>
@@ -2090,41 +2189,72 @@ use App\Models\Ques_ans;
                         </div>
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <div style="display: flex; flex-direction: row; justify-content: space-between;">
-                                    <div style="display: flex; flex-direction: row; gap:10px">
-                                        <div style="padding-top: 10px;">
-                                            <i class="fa-solid fa-circle-check fa-2xl"
-                                                style="color: rgb(99, 230, 114);"></i>
-                                        </div>
-                                        <div style="display: flex; flex-direction: column;">
-                                            <h5 style="font-weight: bold; margin: 0;">การตรวจสอบ 5 ส</h5>
-                                            <span>5S Inspection</span>
-                                            <span>วันที่สอบ: 10/05/2024</span>
-                                        </div>
-                                    </div>
-                                    <div
-                                        style=" text-align: center; padding-inline: 20px; padding-block: 5px;">
-                                        <span>คะแนน</span>
-                                        <h4 style="font-weight: bolder; color: #63e672;">85%</h4>
-                                    </div>
-                                </div>
+                                <div style="display:flex; flex-direction:column; gap:20px;">
+                                    @forelse($dashboard['latestAssessments'] as $item)
 
-                                <div style="display: flex; flex-direction: row; justify-content: space-between;">
-                                    <div style="display: flex; flex-direction: row; gap:10px">
-                                        <div style="padding-top: 10px;">
-                                            <i class="fa-solid fa-circle-xmark fa-2xl"
-                                                style="color: rgb(230, 99, 99);"></i>
+                                        <div class="eval-row-item">
+
+                                            <div class="eval-info">
+
+                                                @if($item['pass'])
+                                                    <i class="fa-solid fa-circle-check text-green"></i>
+                                                @else
+                                                    <i class="fa-solid fa-circle-xmark text-red"></i>
+                                                @endif
+
+
+                                                <div class="text-group">
+
+                                                    <h5>
+                                                        {{ $item['title'] }}
+                                                    </h5>
+
+                                                    <span>
+                                                        {{ $item['short_title'] }}
+                                                    </span>
+
+                                                    <span>
+                                                        วันที่สอบ:
+                                                        {{ $item['date'] }}
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="eval-score-box">
+
+                                                <span>
+                                                    คะแนน
+                                                </span>
+
+                                                @if($item['pass'])
+
+                                                    <h4 class="text-green">
+                                                        {{ $item['score'] }}%
+                                                    </h4>
+
+                                                @else
+
+                                                    <h4 class="text-red">
+                                                        ไม่ผ่าน
+                                                    </h4>
+
+                                                @endif
+
+                                            </div>
+
                                         </div>
-                                        <div style="display: flex; flex-direction: column;">
-                                            <h5 style="font-weight: bold; margin: 0;">ความปลอดภัยในการทำงาน</h5>
-                                            <span>Safety at Work</span>
-                                            <span>วันที่สอบ: 10/05/2024</span>
+
+
+                                    @empty
+
+                                        <div class="text-center text-muted py-3">
+                                            ไม่มีผลประเมินล่าสุด
                                         </div>
-                                    </div>
-                                    <div style="text-align: center; padding-inline: 10px; padding-block: 5px;">
-                                        <span>คะแนน</span>
-                                        <h4 style="font-weight: bolder; color: red;">ไม่ผ่าน</h4>
-                                    </div>
+
+                                    @endforelse
                                 </div>
                             </div>
                         </div>
@@ -2185,39 +2315,39 @@ use App\Models\Ques_ans;
                         </div>
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column;">
-                                <div
-                                    style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                                    <div
-                                        style="display: flex; flex-direction: row; gap:5px; align-items: center; width: 50%;">
-                                        <i class="fa-solid fa-circle-check fa-xl" style="color: rgb(99, 230, 114);"></i>
-                                        <h5>GMP Refresher Training</h5>
+                                @foreach($dashboard['learningHistory'] as $item)
+
+                                    <div class="history-row">
+
+                                        <div class="history-info">
+
+                                            <i class="fa-solid {{ $item['icon'] }}"
+                                            style="color:{{ $item['color'] }}"></i>
+
+                                            <h5>
+                                                {{ $item['course_title'] }}
+                                            </h5>
+
+                                        </div>
+
+
+                                        <span>
+                                            {{ $item['status'] }}
+                                        </span>
+
+
+                                        <span>
+                                            {{ $item['date'] }}
+                                        </span>
+
+
+                                        <h4>
+                                            {{ $item['percent'] }}%
+                                        </h4>
+
                                     </div>
-                                    <span>เรียนจบ</span>
-                                    <span>10 พ.ค. 67</span>
-                                    <h4>85%</h4>
-                                </div>
-                                <div
-                                    style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                                    <div
-                                        style="display: flex; flex-direction: row; gap:5px; align-items: center; width: 50%;">
-                                        <i class="fa-solid fa-circle-check fa-xl" style="color: rgb(99, 230, 114);"></i>
-                                        <h5>QC Basic</h5>
-                                    </div>
-                                    <span>เรียนจบ</span>
-                                    <span>09 พ.ค. 67</span>
-                                    <h4>80%</h4>
-                                </div>
-                                <div
-                                    style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                                    <div
-                                        style="display: flex; flex-direction: row; gap:5px; align-items: center; width: 50%;">
-                                        <i class="fa-solid fa-circle-check fa-xl" style="color: rgb(99, 230, 114);"></i>
-                                        <h5>Machine Setup</h5>
-                                    </div>
-                                    <span>เรียนจบ</span>
-                                    <span>08 พ.ค. 67</span>
-                                    <h4>60%</h4>
-                                </div>
+
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -2276,7 +2406,7 @@ use App\Models\Ques_ans;
                             </div>
                         </div>
                     </div>
-                </div> -->
+                </div> 
             </section>
         </div>
     </div>
@@ -2284,7 +2414,7 @@ use App\Models\Ques_ans;
 
 
     <!-- New Employ -->
-    <!-- <div class="main-content">
+     {{-- <div class="main-content">
         <div class="container-fluid p-5">
 
             <div class="new-employ">
@@ -2780,7 +2910,7 @@ use App\Models\Ques_ans;
                 </section>
             </div>
         </div>
-    </div> -->
+    </div>  --}}
 
     <script>
         $(document).ready(function() {
