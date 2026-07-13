@@ -33,11 +33,11 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         @endif
-                        <form action="{{route('lesson.create')}}" enctype="multipart/form-data" method="post" id="uploadForm">
+                        <form action="{{ route('lesson.store',['type'=>$type]) }}" enctype="multipart/form-data" method="post" id="uploadForm">
                             @csrf
                             <div class="form-group">
                                 <label for="cate_id">หลักสูตรอบรมออนไลน์ <span class="required" style="color:red">*</span></label>
-                                <select class="form-control" name="course_id">
+                                <select class="form-control select2" name="course_id">
                                     <option value="">เลือกหลักสูตร</option>
                                     @foreach ($course_online as $course_id)
                                         <option value="{{ $course_id->course_id }}">
@@ -95,7 +95,7 @@
 							</div>
 
                             <div class="form-group">
-								<label for="FileDoc_doc">ไฟล์ประกอบบทเรียน (pdf)</label>
+								<label for="FileDoc_doc">ไฟล์ประกอบบทเรียน (pdf,jpg, png)</label>
 								<div class="fileupload fileupload-new" data-provides="fileupload">
 									<div id="fileNameDisplay"></div>
 									<span class="btn btn-default btn-file">
@@ -270,6 +270,14 @@
                 }
             });
 
+        });
+
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'กรุณาเลือกข้อมูล',
+                allowClear: true
+            });
         });
 </script>
 </body>

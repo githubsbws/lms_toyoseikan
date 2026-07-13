@@ -305,8 +305,8 @@ Route::get('lesson_search',[AdminController::class,'lesson'])->name('lesson.sear
 Route::get('lesson_edit/{id}',[AdminController::class,'lesson_edit'])->name('lesson.edit')->middleware('checkIdleTimeout');
 Route::post('lesson_edit/{id}',[AdminController::class,'lesson_edit'])->name('lesson.edit')->middleware('checkIdleTimeout');
 
-Route::get('lesson_create',[AdminController::class,'lesson_create'])->name('lesson.create')->middleware('checkIdleTimeout');
-Route::post('lesson_create',[AdminController::class,'lesson_create'])->name('lesson.create')->middleware('checkIdleTimeout');
+Route::get('lesson_create/{type}',[AdminController::class,'lesson_create'])->name('lesson.create');
+Route::post('lesson_create/{type}',[AdminController::class,'lesson_create'])->name('lesson.store');
 
 Route::get('lesson_detail/{id}',[AdminController::class,'lesson_detail'])->name('lesson.detail')->middleware('checkIdleTimeout');
 

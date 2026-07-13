@@ -47,7 +47,7 @@
                             @csrf
                             <div class="form-group">
                                 <label for="cate_id">หลักสูตรอบรมออนไลน์</label>
-                                <select class="form-control" name="course_id">
+                                <select class="form-control select2" name="course_id">
                                     <option value="">เลือกหลักสูตร</option>
                                     @foreach ($course_online as $course_id => $course_title)
                                         <option value="{{ $course_title->course_id }}"
@@ -408,6 +408,14 @@
                 }
             });
 
+        });
+
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'กรุณาเลือกข้อมูล',
+                allowClear: true
+            });
         });
 </script>
 </body>

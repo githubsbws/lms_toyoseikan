@@ -54,7 +54,7 @@
                             @csrf
                             <div class="form-group">
                                 <label for="cate_id"><u>หมวดอบรมออนไลน์<span class="text-danger">*</span></u></label>
-                                <select class="form-control" name="cate_id"  required>
+                                <select class="form-control select2" name="cate_id"  required>
                                     @foreach ($category as $cate_id => $cate_title)
                                         <option value="{{ $cate_id }}">{{ $cate_title }}</option>
                                     @endforeach
@@ -63,7 +63,7 @@
 
                             <div class="form-group">
                                 <label for="teacher_name"><u>ชื่อวิทยากร</u> <span class="text-danger">*</span></label>
-                                <select class="form-control" name="teacher_name" required>
+                                <select class="form-control select2" name="teacher_name" required>
                                     @foreach($teacher as $t)
                                     <option value="{{ $t->teacher_id }}">{{ $t->teacher_name}}</option>
                                     @endforeach
@@ -76,7 +76,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="summernote"><u>รายละเอียดย่อ</u></label>
+                                <label for="summernote"><u>รายละเอียดย่อ</u> <span class="text-danger">*</span></label>
                                 <textarea name="course_short_title" id="summernote" class="form-control"></textarea>
                             </div>
 
@@ -380,6 +380,14 @@
             })
             // console.log(leafNodes);
             $('#org_ids').val(leafNodes.join(','));
+        });
+    });
+
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: '100%',
+            placeholder: 'กรุณาเลือกข้อมูล',
+            allowClear: true
         });
     });
 
