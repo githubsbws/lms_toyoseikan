@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
+use App\Services\DashboardService;
 
 class DashboardController extends Controller
 {
@@ -83,4 +84,18 @@ class DashboardController extends Controller
 
         return view('auth.login');
     }
+
+    public function teamLearningAjax(Request $request, DashboardService $dashboardService)
+    {
+        $teamLearning = $dashboardService->getTeamLearningProgress(
+            Auth::user(),
+            $request->keyword
+        );
+
+        return view(
+            'admin.index.partials.team-learning',
+            compact('teamLearning')
+        );
+    }
+
 }
