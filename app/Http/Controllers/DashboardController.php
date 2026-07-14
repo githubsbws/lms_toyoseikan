@@ -32,4 +32,18 @@ class DashboardController extends Controller
             'dashboard' => $dashboard,
         ]);
     }
+
+    public function teamLearningAjax(Request $request, DashboardService $dashboardService)
+    {
+        $teamLearning = $dashboardService->getTeamLearningProgress(
+            Auth::user(),
+            $request->keyword
+        );
+
+        return view(
+            'admin.index.partials.team-learning',
+            compact('teamLearning')
+        );
+    }
+
 }

@@ -868,5 +868,8 @@ Route::middleware(['auth.admin'])->group(function(){
     Route::get('/roadmap/new-emp/course/{id}',[RoadmapController::class, 'newEmpDetail'])->name('roadmap.newemp.detail');
     Route::post('/roadmap/new-emp/course/order',[RoadmapController::class, 'updateOrder'])->name('admin.roadmap.updateOrder');
 });
+Route::get('/dashboard/team-learning/ajax',
+    [DashboardController::class,'teamLearningAjax'])
+    ->name('dashboard.team-learning.ajax');
 
 });

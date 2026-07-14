@@ -55,5 +55,9 @@ class User extends Authenticatable
         return $this->hasOne(Profiles::class, 'user_id', 'id');
     }
 
+        public function orgchart()
+    {
+        return $this->hasOne(Orgchart::class, 'id', 'org_id');
+    }
     
 }

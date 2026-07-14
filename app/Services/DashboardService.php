@@ -35,7 +35,7 @@ class DashboardService
 
 
         $department = $this->getBreadcrumb($user->department_org_id);
-        
+
 
         $serviceAge = '-';
 
@@ -82,7 +82,7 @@ class DashboardService
                     }
                 ])
                 ->first();
-            
+
 
         if (!$roadmap) {
             return [
@@ -118,7 +118,7 @@ class DashboardService
                     ->whereIn('course_id', $group->pluck('course_id'))
                     ->count();
 
-                
+
 
                 // สีของ Progress Bar
                 if ($percent >= 80) {
@@ -351,7 +351,7 @@ class DashboardService
                     'percent' => $percent,
                 ];
             });
-        
+
         $latestAssessments = DB::table('score_assessment as sa')
             ->join(
                 'passcours as pc',
@@ -514,7 +514,7 @@ class DashboardService
 
                     'failed' => $failed,
                     'failedPercent' => $failedPercent,
-                    
+
                     'progressOffset' => 282.7 - (($completedPercent / 100) * 282.7),
                     'progressByCategory' => $progressByCategory,
 

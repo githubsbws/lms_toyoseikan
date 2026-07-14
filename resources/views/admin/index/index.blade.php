@@ -96,7 +96,7 @@
 						</div>
 						<div style="display: flex; flex-direction: column;">
 							<strong>Dashboard หัวหน้างาน</strong>
-							<span style="font-size: smaller;">ภาพรวมการเรียนรู้ของทีม Team A - Line 1 (Filling)</span>
+							<span style="font-size: smaller;">ภาพรวมการเรียนรู้ของทีม Team {{ $user->team_id }} - {{ $user->orgchart->line->title ?? '' }}</span>
 						</div>
 					</div>
 
@@ -104,7 +104,7 @@
 				<div style="display: flex; flex-direction: column; gap: 5px;">
 					<div
 						style="display: flex; flex-direction: row; justify-content: end; align-items: center; gap: 40px; width: 100%;">
-						<div style="display: flex; align-items: center;">
+						{{-- <div style="display: flex; align-items: center;">
 							<a href="#" class="notification-link">
 								<span style="position: relative; display: inline-block;">
 									<i class="fa-regular fa-bell fa-xl"></i>
@@ -112,39 +112,39 @@
 										style="position: absolute; top: -6px; right: -10px; background-color: #dc3545; color: #fff; padding-inline: 3px; padding-block: 3px; font-size: smaller;">12</span>
 								</span>
 							</a>
-						</div>
-						<a href=""><i class="fa-regular fa-circle-question fa-xl"></i>
-						</a>
-						<div class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false" style="display: flex; flex-direction: row; align-items: center;">
+						</div> --}}
+						{{-- <a href=""><i class="fa-regular fa-circle-question fa-xl"></i>
+						</a> --}}
+						{{-- <div class="dropdown"> --}}
+							{{-- <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false" style="display: flex; flex-direction: row; align-items: center;"> --}}
 								<div style="display: flex; flex-direction: row; align-items: center; gap: 15px;">
-									<img src="https://img.magnific.com/free-photo/handsome-young-cheerful-man-with-arms-crossed_171337-1073.jpg?semt=ais_hybrid&w=740&q=80"
-										alt="" class="img-circle" style="width: 40px; height: 40px;">
+									{{-- <img src="https://img.magnific.com/free-photo/handsome-young-cheerful-man-with-arms-crossed_171337-1073.jpg?semt=ais_hybrid&w=740&q=80"
+										alt="" class="img-circle" style="width: 40px; height: 40px;"> --}}
 									<div style="display: flex; flex-direction: column; font-size: smaller;">
-										<strong>คุณธนกร นายสมมุติ</strong>
-										<span>หัวหน้าผ่ายผลิต</span>
+										<strong>คุณ {{ $user->Profiles->firstname }} {{ $user->Profiles->lastname }}</strong>
+										<span>{{ $user->orgchart->title ?? '' }}</span>
 									</div>
 								</div> <span class="caret"></span>
-							</a>
-							<ul class="dropdown-menu">
+							{{-- </a> --}}
+							{{-- <ul class="dropdown-menu">
 								<li><a href="#">Action</a></li>
 								<li><a href="#">Another action</a></li>
 								<li><a href="#">Something else here</a></li>
 								<li role="separator" class="divider"></li>
 								<li><a href="#">Separated link</a></li>
-							</ul>
-						</div>
+							</ul> --}}
+						{{-- </div> --}}
 					</div>
 					<form action="" style="display: flex; flex-direction: row; gap: 10px; width: 100%;">
-						<div class="input-group date-input">
+						{{-- <div class="input-group date-input">
 							<input type="text" id="dateRange" class="form-control" style="border-right: none;" />
 							<span class="input-group-addon" style="background:#fff;">
 								<i class="fa-regular fa-calendar"></i>
 							</span>
-						</div>
+						</div> --}}
 
-						<div class="dropdown">
+						{{-- <div class="dropdown">
 							<button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 								<i class="fa-solid fa-filter"></i><span>ตัวกรอง</span></button>
 							</button>
@@ -153,7 +153,7 @@
 								<a class="dropdown-item" href="#">Another action</a>
 								<a class="dropdown-item" href="#">Something else here</a>
 							</div>
-						</div>
+						</div> --}}
 					</form>
 				</div>
 			</nav>
@@ -179,9 +179,9 @@
 											<div class="summary-body">
 												<strong>พนักงานในทีมทั้งหมด</strong>
 												<strong>
-													<span style="font-size: x-large;">28</span> คน
+													<span style="font-size: x-large;">{{ $count_all_team }}</span> คน
 												</strong>
-												<span>ทั้งหมดในไลน์ 96 คน</span>
+												<span>ทั้งหมดในไลน์ {{ $count_all_line }} คน</span>
 											</div>
 										</div>
 									</div>
@@ -200,16 +200,16 @@
 											</div>
 											<div class="summary-body">
 												<strong>อัตราการเรียนครบ</strong>
-												<strong style="font-size: x-large;">82%</strong>
-												<span>23 จาก 28 คน</span>
+												<strong style="font-size: x-large;">{{ $course_user_roadmap['per_pass'] }} %</strong>
+												<span>{{ $course_user_roadmap['pass'] }} จาก {{ $course_user_roadmap['total_user'] }} คน</span>
 
 											</div>
 										</div>
 									</div>
-									<div class="card-footer-end" style="font-size: smaller;">
+									{{-- <div class="card-footer-end" style="font-size: smaller;">
 										<span><strong style="color: var(--success-color);"><i class="fa-solid fa-caret-up"></i>
 												8%</strong> จากเดือนที่แล้ว</span>
-									</div>
+									</div> --}}
 								</div>
 							</div>
 
@@ -227,9 +227,11 @@
 											<div class="summary-body">
 												<strong>หลักสูตรที่กำลังเรียน</strong>
 												<strong>
-													<span style="font-size: x-large;">15</span> หลักสูตร
+													<span style="font-size: x-large;">{{ $course_roadmap['count_course'] }}</span> หลักสูตร
 												</strong>
-												<span>กำลังเรียน 48 รายการ</span>
+												{{-- <span>กำลังเรียน 48 รายการ</span> --}}
+												{{-- <span>หลักสูตรที่เปิดอยู่ {{ $course_roadmap['open'] }} หลักสูตรที่ปิดอยู่ {{ $course_roadmap['close'] }} </span> --}}
+												<span> หลักสูตรที่ปิดอยู่ {{ $course_roadmap['close'] }} </span>
 											</div>
 										</div>
 									</div>
@@ -249,19 +251,19 @@
 											<div class="summary-body">
 												<strong>ผู้เรียนค้างกำหนด</strong>
 												<strong>
-													<span style="font-size: x-large;">5</span> คน
+													<span style="font-size: x-large;">{{ $course_user_roadmap['not_pass'] }}</span> คน
 												</strong>
-												<span>คิดเป็น 18% ของทีม</span>
+												<span>คิดเป็น {{ $course_user_roadmap['per_not'] }} % ของทีม</span>
 											</div>
 										</div>
 									</div>
-									<div class="card-footer-end" style="font-size: smaller;">
+									{{-- <div class="card-footer-end" style="font-size: smaller;">
 										<span><strong style="color: var(--danger-color);"><i class="fa-solid fa-caret-up"></i>
 												2 คน</strong> จากเดือนที่แล้ว</span>
-									</div>
+									</div> --}}
 								</div>
 							</div>
-							<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-3">
+							{{-- <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-3">
 								<div class="card">
 									<div class="card-body">
 										<div class="summary">
@@ -285,7 +287,7 @@
 												2.3 ชั่วโมง</strong> จากเดือนที่แล้ว</span>
 									</div>
 								</div>
-							</div>
+							</div> --}}
 							<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-3">
 								<div class="card">
 									<div class="card-body">
@@ -299,19 +301,70 @@
 											<div class="summary-body" style="min-width: 0;">
 												<strong>คะแนนเฉลี่ยแบบทดสอบ</strong>
 												<strong style="font-size: x-large;">
-													86%
+													{{ $avgPercent }}%
 												</strong>
 												<span>จากทุกหลักสูตร</span>
 											</div>
 										</div>
 									</div>
-									<div class="card-footer-end" style="font-size: smaller;">
+									{{-- <div class="card-footer-end" style="font-size: smaller;">
 										<span><strong style="color: var(--success-color);"><i class="fa-solid fa-caret-up"></i>
 												4%</strong> จากเดือนที่แล้ว</span>
+									</div> --}}
+								</div>
+							</div>
+							<div class="col-lg-9 col-md-12 col-sm-12 mb-3">
+								<div class="card">
+									<div class="card-header1" style="display:flex;justify-content:space-between;align-items:center;">
+
+										<strong>สถานะการเรียนรู้ของพนักงานในทีม</strong>
+
+										<div class="input-group" style="width:350px;">
+
+											<input
+												type="text"
+												id="keyword"
+												class="form-control"
+												placeholder="ค้นหาชื่อ - นามสกุล">
+
+										</div>
+
+									</div>
+									<div class="card-body">
+										<div class="space-between employee-header" style="margin-bottom: 5px;">
+										</div>
+									<div id="team-learning-wrapper" style="position:relative;">
+
+										<div id="loading-overlay"
+											style="
+												display:none;
+												position:absolute;
+												top:0;
+												left:0;
+												right:0;
+												bottom:0;
+												background:rgba(255,255,255,.6);
+												z-index:999;
+												align-items:center;
+												justify-content:center;">
+
+											<div class="text-center">
+												<i class="fa fa-spinner fa-spin fa-2x"></i>
+												<div style="margin-top:10px;">กำลังค้นหาข้อมูล...</div>
+											</div>
+
+										</div>
+
+										<div class="table-responsive" style="font-size:smaller;" id="team-learning-table">
+
+											@include('admin.index.partials.team-learning')
+
+										</div>
+
 									</div>
 								</div>
 							</div>
-							<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-3">
+							{{-- <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-3">
 								<div class="card">
 									<div class="card-body">
 										<div class="summary">
@@ -335,7 +388,7 @@
 										<span><strong style="color: var(--success-color);"><i class="fa-solid fa-caret-up"></i>
 												5%</strong> จากเดือนที่แล้ว</span>
 									</div>
-								</div>
+								</div> --}}
 							</div>
 						</div>
 					</section>
@@ -347,17 +400,17 @@
 								<div class="card">
 									<div class="card-header space-between">
 										<strong>แนวโน้มการเรียนรู้ของทีม</strong>
-										<select name="" id="" class="form-control"
+										{{-- <select name="" id="" class="form-control"
 											style="width: fit-content; font-size: smaller;">
 											<option value="" selected>อัตราการเรียนครบ (%)</option>
-										</select>
+										</select> --}}
 									</div>
 									<div class="card-body" style="flex: 1; min-height: fit-content;">
 										<div id="team-learning-trends" style="width: 100%; height: 100%;"></div>
 									</div>
 								</div>
 							</div>
-							<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 mb-3">
+							{{-- <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 mb-3">
 								<div class="card">
 									<div class="card-header">
 										<strong>สถานะการอบรมบังคับ (Mandatory)</strong>
@@ -370,7 +423,7 @@
 												</div>
 												<div
 													style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; font-size: large; display: flex; flex-direction: column; align-items: center;">
-													<strong>90%</strong><span style="font-size: smaller;">ครบถ้วน</span>
+													<strong>{{ $mandatorySummary['complete_percent'] ?? 0 }} %</strong><span style="font-size: smaller;">ครบถ้วน</span>
 												</div>
 											</div>
 											<div class="summary-body" style="width: 100%; justify-content: space-evenly;">
@@ -382,7 +435,7 @@
 														<strong>ครบถ้วน</strong>
 													</div>
 													<span>
-														<strong>25</strong> คน (90%)
+														<strong>{{ $mandatorySummary['complete'] ?? 0 }}</strong> คน ({{ $mandatorySummary['complete_percent'] ?? 0 }}%)
 													</span>
 												</div>
 												<div
@@ -393,7 +446,7 @@
 														<strong>ใกล้ครบกำหนด</strong>
 													</div>
 													<span>
-														<strong>2</strong> คน (7%)
+														<strong>{{ $mandatorySummary['warning'] ?? 0 }}</strong> คน ({{ $mandatorySummary['warning_percent'] ?? 0 }}%)
 													</span>
 												</div>
 												<div
@@ -404,7 +457,7 @@
 														<strong>ยังไม่ครบ</strong>
 													</div>
 													<span>
-														<strong>1</strong> คน (3%)
+														<strong>{{ $mandatorySummary['not_complete'] ?? 0 }}</strong> คน ({{ $mandatorySummary['not_complete_percent'] ?? 0 }}%)
 													</span>
 												</div>
 											</div>
@@ -415,80 +468,71 @@
 											style="background-color: var(--primary-color) !important;">ดูรายละเอียดทั้งหมด</a>
 									</div> -->
 								</div>
-							</div>
+							</div> --}}
 							<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 								<div class="card">
 									<div class="card-header space-between">
 										<strong>การอบรมใกล้หมดอายุ</strong>
 									</div>
-									<div class="card-body" style="height: 100%;">
-										<div
-											style="display: flex; flex-direction: column; justify-content: space-evenly; height: 100%;">
-											<div
-												style="display: flex; flex-direction: row; width: 100%; justify-content: space-between; align-items:center; border: 1px whitesmoke solid; border-radius:5px; padding: 5px;">
-												<div class="summary">
-													<div class="summary-header-center">
-														<div class="summary-icon"
-															style="background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);">
-															<i class="fa-solid fa-triangle-exclamation fa-xl"
-																style="color: var(--danger-color)"></i>
+
+									<div class="card-body" style="height:100%;">
+										<div style="display:flex; flex-direction:column; gap:10px;">
+
+											@forelse($nearExpireCourses as $course)
+
+												<div style="display:flex;
+															justify-content:space-between;
+															align-items:center;
+															border:1px whitesmoke solid;
+															border-radius:5px;
+															padding:8px;">
+
+													<div class="summary">
+														<div class="summary-header-center">
+															<div class="summary-icon"
+																style="background-color:color-mix(in srgb, var(--danger-color) 15%, transparent);">
+																<i class="fa-solid fa-triangle-exclamation fa-xl"
+																	style="color:var(--danger-color)"></i>
+															</div>
 														</div>
 
-													</div>
-													<div class="summary-body" style="gap:5px;">
-														<strong>GMP Refresher Training</strong>
-														<span style="color: var(--danger-color);">หมดอายุ 15 มิ.ย.
-															2567</span>
-													</div>
-												</div>
-												<span style="width: 10%;"><strong style="font-size: larger;">3</strong>
-													คน</span>
-											</div>
-											<div
-												style="display: flex; flex-direction: row; width: 100%; justify-content: space-between; align-items:center; border: 1px whitesmoke solid; border-radius:5px; padding: 5px;">
-												<div class="summary">
-													<div class="summary-header-center">
-														<div class="summary-icon"
-															style="background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);">
-															<i class="fa-solid fa-triangle-exclamation fa-xl"
-																style="color: var(--danger-color)"></i>
-														</div>
+														<div class="summary-body" style="gap:5px;">
+															<strong>{{ $course['course_name'] }}</strong>
 
-													</div>
-													<div class="summary-body">
-														<strong>Safety Training Annual 2024</strong>
-														<span style="color: var(--danger-color);">หมดอายุ 30 มิ.ย.
-															2567</span>
-													</div>
-												</div>
-												<span style="width: 10%;"><strong style="font-size: larger;">4</strong>
-													คน</span>
-											</div>
-											<div
-												style="display: flex; flex-direction: row; width: 100%; justify-content: space-between; align-items:center; border: 1px whitesmoke solid; border-radius:5px; padding: 5px;">
-												<div class="summary">
-													<div class="summary-header-center">
-														<div class="summary-icon"
-															style="background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);">
-															<i class="fa-solid fa-triangle-exclamation fa-xl"
-																style="color: var(--danger-color)"></i>
+															<span style="color:var(--danger-color);">
+																หมดอายุ
+																{{
+																	\Carbon\Carbon::parse($course['end_date'])
+																		->locale('th')
+																		->translatedFormat('d M')
+																}}
+																{{ \Carbon\Carbon::parse($course['end_date'])->year + 543 }}
+															</span>
 														</div>
+													</div>
 
-													</div>
-													<div class="summary-body">
-														<strong>HACCP Awareness</strong>
-														<span style="color: var(--danger-color);">หมดอายุ 10 ก.ค.
-															2567</span>
-													</div>
+													<span style="min-width:70px;text-align:right;">
+														<strong style="font-size:larger;">
+															{{ $course['unfinished'] }}
+														</strong>
+														คน
+													</span>
+
 												</div>
-												<span style="width: 10%;"><strong style="font-size: larger;">2</strong>
-													คน</span>
-											</div>
+
+											@empty
+
+												<div class="text-center text-muted py-5">
+													ไม่มีหลักสูตรใกล้หมดอายุ
+												</div>
+
+											@endforelse
+
 										</div>
 									</div>
 								</div>
 							</div>
-							<div class="col-lg-6 col-md-6 col-sm-12">
+							{{-- <div class="col-lg-6 col-md-6 col-sm-12">
 								<div class="card">
 									<div class="card-header">
 										<i class="fa-solid fa-bell" style="color: var(--purple-color)"></i> <strong>Pedding
@@ -535,265 +579,13 @@
 									</div> -->
 								</div>
 							</div>
-						</div>
+						</div> --}}
 					</section>
 
 					<!-- SECTION 3 -->
 					<section>
 						<div class="row row-eq-height custom-row-gap">
-							<div class="col-lg-8 col-md-12 col-sm-12 mb-3">
-								<div class="card">
-									<div class="card-header"><strong>สถานะการเรียนรู้ของพนักงานในทีม</strong></div>
-									<div class="card-body">
-										<div class="space-between employee-header" style="margin-bottom: 5px;">
-											<div class="tags"
-												style="display:flex; flex-direction: row; gap:2px; align-items: center;">
-												<div
-													style="display: flex; flex-direction: row; align-items: center; background-color:var(--primary-color); gap: 2px; padding-left: 5px; border-radius: 5px; padding-right:1px; padding-block: 3px;">
-													<strong style="color: white;">ทั้งหมด</strong>
-													<div style="background-color: white; border-radius: 5px;">
-														<div
-															style="padding-inline: 5px; color: var(--primary-color); background-color: var(--primary-color-transparent); border-radius: 5px;">
-															<strong>25</strong>
-														</div>
-													</div>
-												</div>
-												<div
-													style="display: flex; flex-direction: row; align-items: center; background-color:whitesmoke; gap: 2px; padding-left: 5px; border-radius: 5px; padding-right:1px; padding-block: 5px;">
-													<strong>เรียนครบ</strong>
-													<div style="background-color: white; border-radius: 5px;">
-														<div
-															style="padding-inline: 5px; color: var(--success-color); background-color: var(--success-color-transparent); border-radius: 5px;">
-															<strong>23</strong>
-														</div>
-													</div>
-												</div>
-												<div
-													style="display: flex; flex-direction: row; align-items: center; gap: 2px; padding-left: 5px; border-radius: 5px; padding-right:1px; padding-block: 3px;">
-													<strong>ใกล้ครบกำหนด</strong>
-													<div
-														style="padding-inline: 5px; color: var(--warning-color); background-color: var(--warning-color-transparent); border-radius: 5px;">
-														<strong>2</strong>
-													</div>
-												</div>
-												<div
-													style="display: flex; flex-direction: row; align-items: center; gap: 2px; padding-left: 5px; border-radius: 5px; padding-right:1px; padding-block: 3px;">
-													<strong>เกินกำหนด</strong>
-													<div
-														style="padding-inline: 5px; color: var(--danger-color); background-color: var(--danger-color-transparent); border-radius: 5px;">
-														<strong>3</strong>
-													</div>
-												</div>
-											</div>
-											<div class="search" style="display:flex; flex-direction:row; width: 35%; gap:5px;">
-												<input type="search" name="" id="" class="form-control"
-													placeholder="🔍︎ ค้นหาพนักงาน">
-												<button class="btn btn-default" type="button"><i
-														class="fa-solid fa-filter"></i></button>
-											</div>
-										</div>
-										<div class="table-responsive" style="font-size: smaller;">
-											<table class="table table-bordered" style="font-size: smaller;">
-												<thead>
-													<tr class="active">
-														<th>#</th>
-														<th>ชื่อ-นามสกุล</th>
-														<th>ต่ำแหน่ง</th>
-														<th>ความคืมหน้า</th>
-														<th>หลักสูตรที่กำลังเรียน</th>
-														<th>กำหนดเสร็จ</th>
-														<th>สถานะ</th>
-														<th>วันค้างเกินกำหนด</th>
-													</tr>
-												</thead>
-												<tbody>
-													<tr>
-														<th>1</th>
-														<td>
-															<div
-																style="display: flex; flex-direction: row; align-items: center;">
-																<img src="https://static.vecteezy.com/system/resources/thumbnails/004/607/791/small_2x/man-face-emotive-icon-smiling-male-character-in-blue-shirt-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg"
-																	alt="" class="img-responsive img-circle"
-																	style="max-height: 15px;">นายธนพล ใจดี
-															</div>
-														</td>
-														<td>ผนักงานผลิต</td>
-														<td>
-															<div style="display: flex; flex-direction: row; gap:1px;">
-																<div class="progress"
-																	style="height: 10px; width: 80%; margin:0;">
-																	<div class="progress-bar" role="progressbar"
-																		aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-																		style="width: 90%;">
-																	</div>
-																</div>
-																<span>90%</span>
-															</div>
-														</td>
-														<td>GMP Refresher</td>
-														<td>10 พ.ค. 2567</td>
-														<td><span
-																style="padding-inline: 2px; padding-block:1px; color:var(--success-color);background-color: var(--success-color-transparent); border-radius:5px;">เรียนครบ</span>
-														</td>
-														<td>10 พ.ค. 2567</td>
-													</tr>
-													<tr>
-														<th>1</th>
-														<td>
-															<div
-																style="display: flex; flex-direction: row; align-items: center;">
-																<img src="https://static.vecteezy.com/system/resources/thumbnails/004/607/791/small_2x/man-face-emotive-icon-smiling-male-character-in-blue-shirt-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg"
-																	alt="" class="img-responsive img-circle"
-																	style="max-height: 15px;">นายธนพล ใจดี
-															</div>
-														</td>
-														<td>ผนักงานผลิต</td>
-														<td>
-															<div style="display: flex; flex-direction: row; gap:1px;">
-																<div class="progress"
-																	style="height: 10px; width: 80%; margin:0;">
-																	<div class="progress-bar" role="progressbar"
-																		aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-																		style="width: 90%;">
-																	</div>
-																</div>
-																<span>90%</span>
-															</div>
-														</td>
-														<td>GMP Refresher</td>
-														<td>10 พ.ค. 2567</td>
-														<td><span
-																style="padding-inline: 2px; padding-block:1px; color:var(--success-color);background-color: var(--success-color-transparent); border-radius:5px;">เรียนครบ</span>
-														</td>
-														<td>10 พ.ค. 2567</td>
-													</tr>
-													<tr>
-														<th>1</th>
-														<td>
-															<div
-																style="display: flex; flex-direction: row; align-items: center;">
-																<img src="https://static.vecteezy.com/system/resources/thumbnails/004/607/791/small_2x/man-face-emotive-icon-smiling-male-character-in-blue-shirt-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg"
-																	alt="" class="img-responsive img-circle"
-																	style="max-height: 15px;">นายธนพล ใจดี
-															</div>
-														</td>
-														<td>ผนักงานผลิต</td>
-														<td>
-															<div style="display: flex; flex-direction: row; gap:1px;">
-																<div class="progress"
-																	style="height: 10px; width: 80%; margin:0;">
-																	<div class="progress-bar" role="progressbar"
-																		aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-																		style="width: 90%;">
-																	</div>
-																</div>
-																<span>90%</span>
-															</div>
-														</td>
-														<td>GMP Refresher</td>
-														<td>10 พ.ค. 2567</td>
-														<td><span
-																style="padding-inline: 2px; padding-block:1px; color:var(--success-color);background-color: var(--success-color-transparent); border-radius:5px;">เรียนครบ</span>
-														</td>
-														<td>10 พ.ค. 2567</td>
-													</tr>
-													<tr>
-														<th>1</th>
-														<td>
-															<div
-																style="display: flex; flex-direction: row; align-items: center;">
-																<img src="https://static.vecteezy.com/system/resources/thumbnails/004/607/791/small_2x/man-face-emotive-icon-smiling-male-character-in-blue-shirt-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg"
-																	alt="" class="img-responsive img-circle"
-																	style="max-height: 15px;">นายธนพล ใจดี
-															</div>
-														</td>
-														<td>ผนักงานผลิต</td>
-														<td>
-															<div style="display: flex; flex-direction: row; gap:1px;">
-																<div class="progress"
-																	style="height: 10px; width: 80%; margin:0;">
-																	<div class="progress-bar" role="progressbar"
-																		aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-																		style="width: 90%;">
-																	</div>
-																</div>
-																<span>90%</span>
-															</div>
-														</td>
-														<td>GMP Refresher</td>
-														<td>10 พ.ค. 2567</td>
-														<td><span
-																style="padding-inline: 2px; padding-block:1px; color:var(--success-color);background-color: var(--success-color-transparent); border-radius:5px;">เรียนครบ</span>
-														</td>
-														<td>10 พ.ค. 2567</td>
-													</tr>
-													<tr>
-														<th>1</th>
-														<td>
-															<div
-																style="display: flex; flex-direction: row; align-items: center;">
-																<img src="https://static.vecteezy.com/system/resources/thumbnails/004/607/791/small_2x/man-face-emotive-icon-smiling-male-character-in-blue-shirt-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg"
-																	alt="" class="img-responsive img-circle"
-																	style="max-height: 15px;">นายธนพล ใจดี
-															</div>
-														</td>
-														<td>ผนักงานผลิต</td>
-														<td>
-															<div style="display: flex; flex-direction: row; gap:1px;">
-																<div class="progress"
-																	style="height: 10px; width: 80%; margin:0;">
-																	<div class="progress-bar" role="progressbar"
-																		aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-																		style="width: 90%;">
-																	</div>
-																</div>
-																<span>90%</span>
-															</div>
-														</td>
-														<td>GMP Refresher</td>
-														<td>10 พ.ค. 2567</td>
-														<td><span
-																style="padding-inline: 2px; padding-block:1px; color:var(--success-color);background-color: var(--success-color-transparent); border-radius:5px;">เรียนครบ</span>
-														</td>
-														<td>10 พ.ค. 2567</td>
-													</tr>
-													<tr>
-														<th>1</th>
-														<td>
-															<div
-																style="display: flex; flex-direction: row; align-items: center;">
-																<img src="https://static.vecteezy.com/system/resources/thumbnails/004/607/791/small_2x/man-face-emotive-icon-smiling-male-character-in-blue-shirt-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg"
-																	alt="" class="img-responsive img-circle"
-																	style="max-height: 15px;">นายธนพล ใจดี
-															</div>
-														</td>
-														<td>ผนักงานผลิต</td>
-														<td>
-															<div style="display: flex; flex-direction: row; gap:1px;">
-																<div class="progress"
-																	style="height: 10px; width: 80%; margin:0;">
-																	<div class="progress-bar" role="progressbar"
-																		aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-																		style="width: 90%;">
-																	</div>
-																</div>
-																<span>90%</span>
-															</div>
-														</td>
-														<td>GMP Refresher</td>
-														<td>10 พ.ค. 2567</td>
-														<td><span
-																style="padding-inline: 2px; padding-block:1px; color:var(--success-color);background-color: var(--success-color-transparent); border-radius:5px;">เรียนครบ</span>
-														</td>
-														<td>10 พ.ค. 2567</td>
-													</tr>
-												</tbody>
-											</table>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+							{{-- <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
 								<div class="card">
 									<div class="card-header space-between">
 										<strong>เปรียนเทียบทีมในแผนกเดียวกัน</strong>
@@ -805,8 +597,8 @@
 										<div id="teamChart" style="width: 100%; height: 250px;"></div>
 									</div>
 								</div>
-							</div>
-							<div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+							</div> --}}
+							{{-- <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
 								<div class="card">
 									<div class="card-header space-between"><strong>หลักสูตรที่มีผู้ไม่ผ่านมากที่สุด</strong>
 									</div>
@@ -895,8 +687,8 @@
 										</div>
 									</div>
 								</div>
-							</div>
-							<div class="col-lg-6 col-md-12 col-sm-12 mb-3">
+							</div> --}}
+							{{-- <div class="col-lg-6 col-md-12 col-sm-12 mb-3">
 								<div class="card">
 									<div class="card-header space-between">
 										<strong>การแจ้งเตือนและความเสี่ยง</strong>
@@ -951,6 +743,7 @@
 									</div>
 								</div>
 							</div>
+						</div> --}}
 						</div>
 					</section>
 
@@ -958,7 +751,7 @@
 					<section>
 						<div class="row row-eq-height custom-row-gap">
 
-							<div class="col-lg-6 col-md-6 col-sm-12">
+							{{-- <div class="col-lg-6 col-md-6 col-sm-12">
 								<div class="card">
 									<div class="card-header space-between">
 										<strong>แผนการเรียน (Team Roadmap)</strong>
@@ -1034,55 +827,92 @@
 										</div>
 									</div>
 								</div>
-							</div>
+							</div> --}}
 							<div class="col-lg-6 col-md-6 col-sm-12">
 								<div class="card">
+
 									<div class="card-header space-between">
 										<strong>Activity ล่าสุดของทีม</strong>
 									</div>
+
 									<div class="card-body">
-										<div style="display: flex; flex-direction:column;">
-											<div class="table-responsive">
-												<table class="table table-no-border" style="font-size: smaller;">
-													<tbody>
+
+										<div class="table-responsive">
+
+											<table class="table table-no-border table-hover" style="font-size:smaller;">
+
+												<tbody>
+
+													@forelse($teamLatestActivity as $item)
+
 														<tr>
-															<td><img src="https://img.magnific.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80"
-																	alt="" class="img-circle" style="height: 20px;"></td>
-															<td>นายธนพล ใจดี</td>
-															<td>เรียนจบ GMP Refresher Training</td>
-															<td>10 พ.ค. 2567</td>
-															<td>10:30</td>
+
+															{{-- <td width="40">
+
+																<img
+																	src="{{ $item['pic_user']
+																			? asset('images/uploads/user/'.$item['pic_user'])
+																			: asset('images/avatar-default.png') }}"
+																	class="img-circle"
+																	style="height:28px;width:28px;object-fit:cover;">
+
+															</td> --}}
+
+															<td>
+
+																<strong>{{ $item['fullname'] }}</strong>
+
+															</td>
+
+															<td>
+
+																เรียนจบ {{ $item['course_name'] }}
+
+															</td>
+
+															<td>
+
+																@php
+																	$date = \Carbon\Carbon::parse($item['date']);
+																@endphp
+
+																{{ $date->locale('th')->translatedFormat('d M') }}
+																{{ $date->year + 543 }}
+
+															</td>
+
+															<td>
+
+																{{ $item['time'] }}
+
+															</td>
+
 														</tr>
+
+													@empty
+
 														<tr>
-															<td><img src="https://img.magnific.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80"
-																	alt="" class="img-circle" style="height: 20px;"></td>
-															<td>นายธนพล ใจดี</td>
-															<td>เรียนจบ GMP Refresher Training</td>
-															<td>10 พ.ค. 2567</td>
-															<td>10:30</td>
+
+															<td colspan="5" class="text-center text-muted">
+
+																ยังไม่พบข้อมูล Activity
+
+															</td>
+
 														</tr>
-														<tr>
-															<td><img src="https://img.magnific.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80"
-																	alt="" class="img-circle" style="height: 20px;"></td>
-															<td>นายธนพล ใจดี</td>
-															<td>เรียนจบ GMP Refresher Training</td>
-															<td>10 พ.ค. 2567</td>
-															<td>10:30</td>
-														</tr>
-														<tr>
-															<td><img src="https://img.magnific.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80"
-																	alt="" class="img-circle" style="height: 20px;"></td>
-															<td>นายธนพล ใจดี</td>
-															<td>เรียนจบ GMP Refresher Training</td>
-															<td>10 พ.ค. 2567</td>
-															<td>10:30</td>
-														</tr>
-													</tbody>
-												</table>
-											</div>
+
+													@endforelse
+
+												</tbody>
+
+											</table>
+
 										</div>
+
 									</div>
+
 								</div>
+
 							</div>
 						</div>
 					</section>
@@ -2317,22 +2147,112 @@
 
 	<!-- Admin-Manager -->
 	<script type="text/javascript">
+
+let typingTimer;
+
+function loadTable(page = 1){
+
+    $.ajax({
+
+        url: "{{ route('dashboard.team-learning.ajax') }}",
+        type: "GET",
+
+        data:{
+            keyword: $('#keyword').val(),
+            page: page
+        },
+
+        beforeSend:function(){
+
+            $('#loading-overlay').css('display','flex');
+
+            $('#team-learning-table').css({
+                opacity:.4,
+                pointerEvents:'none'
+            });
+
+        },
+
+        success:function(res){
+
+            $('#team-learning-table').html(res);
+
+        },
+
+        complete:function(){
+
+            $('#loading-overlay').hide();
+
+            $('#team-learning-table').css({
+                opacity:1,
+                pointerEvents:'auto'
+            });
+
+        },
+
+        error:function(){
+
+            alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+
+        }
+
+    });
+
+}
+
+$('#keyword').on('input', function(){
+
+    clearTimeout(typingTimer);
+
+    typingTimer = setTimeout(function(){
+
+        loadTable(1);
+
+    },300);
+
+});
+
+$(document).on('click','.pagination a',function(e){
+
+    e.preventDefault();
+
+    let page = new URL($(this).attr('href')).searchParams.get('page');
+
+    loadTable(page);
+
+});
+
+			
+
+
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+
+
 		google.charts.load('current', {
 			packages: ['corechart']
 		});
 		google.charts.setOnLoadCallback(drawChart);
 		google.charts.setOnLoadCallback(drawDonutChart);
 
-		function drawChart() {
-			const data = google.visualization.arrayToDataTable([
-				['Month', 'Percent'],
-				['ธ.ค. 66', 58],
-				['ม.ค. 67', 62],
-				['ก.พ. 67', 67],
-				['มี.ค. 67', 72],
-				['เม.ย. 67', 74],
-				['พ.ค. 67', 82]
+		const roadmapMonthly = @json($roadmapMonthly);
+		const mandatorySummary = @json($mandatorySummary);
+
+		const chartData = [
+			['Month', 'Percent']
+		];
+
+		roadmapMonthly.forEach(item => {
+			chartData.push([
+				item.month,
+				item.percent
 			]);
+		});
+
+		function drawChart() {
+
+			const data = google.visualization.arrayToDataTable(chartData);
 
 			const options = {
 				legend: 'none',
@@ -2359,19 +2279,23 @@
 				}
 			};
 
-			const chart = new google.visualization.AreaChart(document.getElementById('team-learning-trends'));
+			const chart = new google.visualization.AreaChart(
+				document.getElementById('team-learning-trends')
+			);
+
 			chart.draw(data, options);
 		}
 
 		function drawDonutChart() {
 
 			var data = google.visualization.arrayToDataTable([
-				['Effort', 'Amount given'],
-				['Success', 90],
-				["Near", 7],
-				["Unfinished", 3]
+				['Status', 'Percent'],
+				['Success', mandatorySummary.complete_percent],
+				['Near', mandatorySummary.warning_percent],
+				['Unfinished', mandatorySummary.not_complete_percent]
 			]);
 
+			
 			var options = {
 				pieHole: 0.7,
 				pieSliceText: 'none',
