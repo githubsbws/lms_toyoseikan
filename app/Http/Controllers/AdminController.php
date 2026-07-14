@@ -117,17 +117,17 @@ use App\Helpers\ChildOrgHelper;
 
 use App\Services\RoadmapService;
 use Google\LongRunning\Operation;
-use App\Services\ManagertDashboardService;
+use App\Services\ManagerDashboardService;
 
 class AdminController extends Controller
 {
     //
     public int $limit = 100;
-    function admin(ManagertDashboardService $ManagertDashboardService){
+    function admin(ManagerDashboardService $ManagerDashboardService){
         if(AuthFacade::useradmin()){
             $user = Auth::user();
 
-            $roadmapMonthly = $ManagertDashboardService->getRoadmapMonthly($user);
+            $roadmapMonthly = $ManagerDashboardService->getRoadmapMonthly($user);
 
             // return view('admin.index.index', compact('roadmapMonthly'));
 
@@ -274,7 +274,7 @@ class AdminController extends Controller
             $avgPercent = count($courseScoreSummary) > 0
                 ? round($totalPercent / count($courseScoreSummary), 2)
                 : 0;
-                
+
             // เปอเซ็นต์เฉลี่ยของผู้ใช้งานที่เรียนครบตามหลักสูตรใน Roadmap ของผู้ใช้งานปัจจุบัน
 
             $user_team = User::with(['orgchart.line'])
@@ -291,16 +291,16 @@ class AdminController extends Controller
                     ];
                 });
 
-                $mandatorySummary = $ManagertDashboardService->getMandatorySummary($user);
+                $mandatorySummary = $ManagerDashboardService->getMandatorySummary($user);
 
-                $nearExpireCourses = $ManagertDashboardService->getNearExpireCourses($user);
+                $nearExpireCourses = $ManagerDashboardService->getNearExpireCourses($user);
 
-                $teamLearning = $ManagertDashboardService->getTeamLearningProgress(
+                $teamLearning = $ManagerDashboardService->getTeamLearningProgress(
                                     $user,
                                     request('keyword')
                                 );
-                $teamLatestActivity = $ManagertDashboardService->getTeamLatestActivity($user);
-                
+                $teamLatestActivity = $ManagerDashboardService->getTeamLatestActivity($user);
+
 
             // dd($mandatorySummary);
 
@@ -2338,7 +2338,7 @@ class AdminController extends Controller
             ->where('is_onboarding', $is_onboarding)
             ->orderBy('course_id', 'desc')
             ->get();
-        
+
 
         if ($request->isMethod('post')) {
             // ✅ ตรวจสอบข้อมูลที่ส่งมา
