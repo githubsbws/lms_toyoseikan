@@ -342,12 +342,24 @@
                                                                 @endif
                                                                 @if ($lessons->filedoc->count() > 0)
                                                                     @foreach ($lessons->filedoc as $doc)
+                                                                        @php
+                                                                            $extension = strtolower(pathinfo($doc->filename, PATHINFO_EXTENSION));
+                                                                            $iconClass = 'fa fa-file'; // default icon
+                                                                            $iconColor = 'text-secondary';
+
+                                                                            if ($extension === 'pdf') {
+                                                                                $iconClass = 'fa fa-file-pdf-o';
+                                                                                $iconColor = 'text-danger';
+                                                                            } elseif (in_array($extension, ['jpg', 'png'])) {
+                                                                                $iconClass = 'fa fa-file-image-o';
+                                                                                $iconColor = 'text-primary';
+                                                                            }
+                                                                        @endphp
                                                                         <div class="lesson-item d-flex justify-content-between align-items-center mb-2"
                                                                             style="padding: 10px; background: rgba(255,255,255,0.3); border-radius: 8px;">
                                                                             <span>
-                                                                                <i
-                                                                                    class="fa fa-file-pdf-o text-danger me-2"></i>
-                                                                                {{ $doc->file_name_display ?? 'เอกสารประกอบ' }}
+                                                                                <i class="{{ $iconClass }} {{ $iconColor }} me-2"></i>
+                                                                                {{ $doc->filename ?? 'เอกสารประกอบ' }}
                                                                             </span>
                                                                             <a href="{{ route('course.viewfile', [
                                                                                 'file_doc_id' => $doc->id,

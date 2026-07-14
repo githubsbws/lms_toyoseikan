@@ -314,6 +314,8 @@ Route::post('lesson_delete/{id}',[AdminController::class,'lesson_delete'])->name
 
 Route::post('lesson_delete_video/{id}',[AdminController::class,'lesson_delete_video'])->name('lesson_video.delete')->middleware('checkIdleTimeout');
 
+Route::post('lesson_delete_doc/{id}',[AdminController::class,'lesson_delete_doc'])->name('lesson_doc.delete')->middleware('checkIdleTimeout');
+
 Route::post('lesson_move',[AdminController::class,'lesson_move'])->name('lesson.move')->middleware('checkIdleTimeout');
 
 Route::get('downloadlesson/{id}',[AdminController::class,'downloadfile'])->name('lesson.downloadfile')->middleware('checkIdleTimeout');
