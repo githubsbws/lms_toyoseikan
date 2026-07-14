@@ -117,17 +117,17 @@ use App\Helpers\ChildOrgHelper;
 
 use App\Services\RoadmapService;
 use Google\LongRunning\Operation;
-use App\Services\DashboardService;
+use App\Services\ManagertDashboardService;
 
 class AdminController extends Controller
 {
     //
     public int $limit = 100;
-    function admin(DashboardService $dashboardService){
+    function admin(ManagertDashboardService $ManagertDashboardService){
         if(AuthFacade::useradmin()){
             $user = Auth::user();
 
-            $roadmapMonthly = $dashboardService->getRoadmapMonthly($user);
+            $roadmapMonthly = $ManagertDashboardService->getRoadmapMonthly($user);
 
             // return view('admin.index.index', compact('roadmapMonthly'));
 
@@ -291,15 +291,15 @@ class AdminController extends Controller
                     ];
                 });
 
-                $mandatorySummary = $dashboardService->getMandatorySummary($user);
+                $mandatorySummary = $ManagertDashboardService->getMandatorySummary($user);
 
-                $nearExpireCourses = $dashboardService->getNearExpireCourses($user);
+                $nearExpireCourses = $ManagertDashboardService->getNearExpireCourses($user);
 
-                $teamLearning = $dashboardService->getTeamLearningProgress(
+                $teamLearning = $ManagertDashboardService->getTeamLearningProgress(
                                     $user,
                                     request('keyword')
                                 );
-                $teamLatestActivity = $dashboardService->getTeamLatestActivity($user);
+                $teamLatestActivity = $ManagertDashboardService->getTeamLatestActivity($user);
                 
 
             // dd($mandatorySummary);
