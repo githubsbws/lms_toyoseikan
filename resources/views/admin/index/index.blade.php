@@ -5,7 +5,7 @@
 <head>
 	<!-- Google Charts -->
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
+    <link rel="stylesheet" href="{{asset('asset_admin/includes/css/style.css')}}">
 	<!-- Date Picker -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 	<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
