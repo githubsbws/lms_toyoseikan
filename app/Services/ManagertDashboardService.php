@@ -13,7 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 
-class DashboardService
+class ManagertDashboardService
 {
     public function getRoadmapMonthly(Users $loginUser)
     {
@@ -433,7 +433,7 @@ private function calculateNearExpireCourses(
 
         $result->push([
             'course_id'   => $courseId,
-            'course_name' => $courseOnline[$courseId]->course_name,
+            'course_name' => $courseOnline[$courseId]->course_title,
             'end_date'    => $courseOnline[$courseId]->end_date,
             'unfinished'  => $unfinished,
         ]);
