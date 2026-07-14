@@ -259,8 +259,16 @@ use App\Helpers\PermissionHelper;
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{url('lesson_create')}}" class="nav-link {{ request()->is('lesson_create') ? 'active' : '' }}">
-                                <p>เพิ่มบทเรียน (ภาษา US)</p>
+                            <a href="{{ route('lesson.create',['type'=>'general']) }}" 
+                            class="nav-link {{ request()->is('lesson_create/general') ? 'active' : '' }}">
+                                <p>เพิ่มบทเรียนพนักงานทั่วไป (ภาษา US)</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('lesson.create',['type'=>'onboarding']) }}" 
+                            class="nav-link {{ request()->is('lesson_create/onboarding') ? 'active' : '' }}">
+                                <p>เพิ่มบทเรียนพนักงานใหม่ (ภาษา US)</p>
                             </a>
                         </li>
                         <li class="nav-item">

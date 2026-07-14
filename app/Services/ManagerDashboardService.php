@@ -13,7 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 
-class ManagertDashboardService
+class ManagerDashboardService
 {
     public function getRoadmapMonthly(Users $loginUser)
     {

@@ -56,7 +56,7 @@
                             @csrf
                             <div class="form-group">
                                 <label for="cate_id"><u>หมวดอบรมออนไลน์</u></label>
-                                <select class="form-control" name="cate_id">
+                                <select class="form-control select2" name="cate_id">
                                     <option value="">ทั้งหมด</option>
                                     @foreach ($category as $cate_id => $cate_title)
                                         <option value="{{ $cate_id }}"
@@ -69,10 +69,13 @@
 
                             <div class="form-group">
                                 <label for="teacher_name"><u>ชื่อวิยากร</u></label>
-                                <select class="form-control" name="teacher_name">
-                                    <option value="{{ $course_detail->teacher->teacher_id ?? '-' }}">{{ $course_detail->teacher->teacher_name ?? '-'}}</option>
+                                <select class="form-control select2" name="teacher_name">
+                                    <option value="">ทั้งหมด</option>
                                     @foreach($teacher as $t)
-                                    <option value="{{ $t->teacher_id }}">{{ $t->teacher_name}}</option>
+                                        <option value="{{ $t->teacher_id }}"
+                                            {{ optional($course_detail->teacher)->teacher_id == $t->teacher_id ? 'selected' : '' }}>
+                                            {{ $t->teacher_name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -400,6 +403,14 @@
             })
             // console.log(leafNodes);
             $('#org_ids').val(leafNodes.join(','));
+        });
+    });
+
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: '100%',
+            placeholder: 'กรุณาเลือกข้อมูล',
+            allowClear: true
         });
     });
 </script>

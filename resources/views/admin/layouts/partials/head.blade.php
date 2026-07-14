@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="{{asset('asset_admin/plugins/fontawesome-free/css/all.min.css')}}">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="stylesheet" href="{{asset('asset_admin/dist/css/adminlte.min.css')}}">
-    <link rel="stylesheet" href="{{asset('asset_admin/includes/css/style.css')}}">
 
     <link rel="stylesheet" href="{{asset('asset_admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css')}}">
     <link rel="stylesheet" href="{{asset('asset_admin/plugins/datatables-responsive/css/responsive.bootstrap4.min.css')}}">
     <link rel="stylesheet" href="{{asset('asset_admin/plugins/datatables-buttons/css/buttons.bootstrap4.min.css')}}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <script src="{{asset('asset_admin/plugins/jquery/jquery.min.js')}}"></script>
     <script src="{{asset('asset_admin/plugins/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
@@ -65,4 +65,6 @@
 
     <link rel="stylesheet" href="{{asset('jstree/dist/themes/default/style.css')}}">
     <script src="{{asset('jstree/dist/jstree.js')}}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>

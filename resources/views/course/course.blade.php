@@ -605,7 +605,7 @@
 
                         // 1. แสดง Swal ทันทีที่กด (แบบไม่มีปุ่มตกลง)
                         Swal.fire({
-                            title: 'กำลังบันทึกและดาวน์โหลด...',
+                            title: 'กำลังบันทึกข้อมูล...',
                             text: 'กรุณารอสักครู่',
                             icon: 'success',
                             showConfirmButton: false,

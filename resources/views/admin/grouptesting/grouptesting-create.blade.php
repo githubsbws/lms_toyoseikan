@@ -33,7 +33,7 @@
                             @csrf
                             <div class="form-group">
                                 <label for="cate_id">ชื่อหลักสูตรออนไลน์ <span class="text-danger">*</span></label>
-                                <select  class="form-control" name="lesson_id">
+                                <select  class="form-control select2" name="lesson_id">
 									<option value="">--- กรุณาเลือกหลักสูตร ---</option>
 									@foreach ($lesson as $item)
 									<option value="{{ $item->course_id}}">{{$item->course_title}}</option>
@@ -58,5 +58,14 @@
 		</div>
 	</div>
 	<div class="clearfix"></div>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'กรุณาเลือกข้อมูล',
+                allowClear: true
+            });
+        });
+    </script>
 </body>
 @endsection

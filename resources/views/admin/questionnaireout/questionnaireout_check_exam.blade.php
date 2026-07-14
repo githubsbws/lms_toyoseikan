@@ -33,7 +33,7 @@
 
                             <div class="col-md-4">
                                 <label>หลักสูตร</label>
-                                <select id="course_id" class="form-control">
+                                <select id="course_id" class="form-control select2">
                                     <option value="">-- เลือกหลักสูตร --</option>
                                     @foreach($courses as $course)
                                         <option value="{{ $course->course_id }}">
@@ -256,5 +256,11 @@ $(document).on('click', '#saveExamScore', function () {
     });
 
 });
-
+$(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'เลือกหลักสูตร',
+                allowClear: true
+            });
+        });
 </script>

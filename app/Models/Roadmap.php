@@ -25,9 +25,14 @@ class Roadmap extends Model
 
     public function courses()
     {
-        return $this->belongsToMany(Course::class, 'roadmap_course', 'roadmap_id', 'course_id')
-                    ->withPivot(['order','mandatory','active'])
-                    ->orderBy('pivot_order', 'asc');
+       return $this->belongsToMany(
+            Course::class,
+            'roadmap_course',
+            'roadmap_id',
+            'course_id'
+        )
+        ->withPivot(['order', 'active', 'milestone_days'])
+        ->orderBy('pivot_order', 'asc');
     }
 
     public function roadmapCourse()
