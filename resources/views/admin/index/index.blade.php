@@ -159,13 +159,21 @@
 			</nav>
 
 			<!-- Admin manager -->
-			@include('admin.index.adminmanager')
-
+            @if (auth()->user()->group_id == '5')
+			    @include('admin.index.adminmanager')
 			<!-- Admin Management -->
-			@include('admin.index.adminmanagement')
-
+            @elseif (auth()->user()->group_id == '3')
+			    @include('admin.index.adminmanagement')
 			<!-- Admin Dashboard -->
-			@include('admin.index.admindashboard')
+            @elseif (in_array(auth()->user()->group_id, ['1', '2']))
+			    @include('admin.index.admindashboard')
+            @else
+                {{-- Fallback: กรณีมี group_id อื่นๆ --}}
+                <div class="alert alert-warning">
+                    <i class="fa fa-warning"></i> ไม่พบสิทธิ์การเข้าถึง Dashboard
+                </div>
+            @endif
+
 
 		</div>
 
@@ -250,7 +258,7 @@ $(document).on('click','.pagination a',function(e){
 
 });
 
-			
+
 
 
 		$(function () {
@@ -323,7 +331,7 @@ $(document).on('click','.pagination a',function(e){
 				['Unfinished', mandatorySummary.not_complete_percent]
 			]);
 
-			
+
 			var options = {
 				pieHole: 0.7,
 				pieSliceText: 'none',
