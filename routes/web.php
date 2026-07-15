@@ -170,6 +170,8 @@ Route::post('course/doc/progress', [CourseController::class, 'markDocProgress'])
 Route::get('/course/viewfile', [CourseController::class, 'viewfile'])->name('course.viewfile')->middleware('checkIdleTimeout');
 // stream PDF ให้ PDF.js
 Route::get('/course/pdf-stream', [CourseController::class, 'pdfStream'])->name('course.pdfstream')->middleware('checkIdleTimeout');
+// stream ไฟล์ทั่วไป (รูปภาพ, PDF)
+Route::get('/course/file-stream', [CourseController::class, 'fileStream'])->name('course.filestream')->middleware('checkIdleTimeout');
 Route::post('course/reset/{course_id}', [CourseController::class, 'courseReset'])->name('course.reset')->middleware('checkIdleTimeout');
 // choice
 Route::post('/choiceAnswer/{id}',[ChoiceController::class,'choiceAnswer'])->name('choice.Answer')->middleware('checkIdleTimeout');

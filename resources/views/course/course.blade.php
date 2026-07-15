@@ -34,7 +34,7 @@
                 icon: 'error',
                 title: 'เกิดข้อผิดพลาด',
                 text: '{{ session('
-                        error ') }}',
+                                        error ') }}',
                 confirmButtonText: 'ตกลง',
                 backdrop: false
             });
@@ -120,7 +120,7 @@
                                                                 ];
                                                             @endphp
                                                             <strong style="display: block; font-size: 24px;">
-                                                                {{ ($milestoneLabel[$item->milestone_days]?? null) ? $milestoneLabel[$item->milestone_days] . ' :' : '' }}
+                                                                {{ $milestoneLabel[$item->milestone_days] ?? null ? $milestoneLabel[$item->milestone_days] . ' :' : '' }}
                                                                 {{ $item->course_title }}
                                                             </strong>
 
@@ -343,33 +343,45 @@
                                                                 @if ($lessons->filedoc->count() > 0)
                                                                     @foreach ($lessons->filedoc as $doc)
                                                                         @php
-                                                                            $extension = strtolower(pathinfo($doc->filename, PATHINFO_EXTENSION));
+                                                                            $extension = strtolower(
+                                                                                pathinfo(
+                                                                                    $doc->filename,
+                                                                                    PATHINFO_EXTENSION,
+                                                                                ),
+                                                                            );
                                                                             $iconClass = 'fa fa-file'; // default icon
                                                                             $iconColor = 'text-secondary';
 
                                                                             if ($extension === 'pdf') {
                                                                                 $iconClass = 'fa fa-file-pdf-o';
                                                                                 $iconColor = 'text-danger';
-                                                                            } elseif (in_array($extension, ['jpg', 'png'])) {
+                                                                            } elseif (
+                                                                                in_array($extension, ['jpg', 'png'])
+                                                                            ) {
                                                                                 $iconClass = 'fa fa-file-image-o';
                                                                                 $iconColor = 'text-primary';
                                                                             }
                                                                         @endphp
-                                                                        <div class="lesson-item d-flex justify-content-between align-items-center mb-2"
-                                                                            style="padding: 10px; background: rgba(255,255,255,0.3); border-radius: 8px;">
-                                                                            <span>
-                                                                                <i class="{{ $iconClass }} {{ $iconColor }} me-2"></i>
-                                                                                {{ $doc->filename ?? 'เอกสารประกอบ' }}
-                                                                            </span>
+                                                                        <div
+                                                                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; width: 100%;">
+                                                                            <div
+                                                                                style="display: flex; align-items: center; gap: 20px;">
+                                                                                <i class="{{ $iconClass }} {{ $iconColor }}"
+                                                                                    style="font-size: 1.2rem; padding-right: 10px;"></i>
+                                                                                <span style="font-size: 20px;">เอกสาร:
+                                                                                    {{ $doc->filename ?? 'เอกสารประกอบ' }}</span>
+                                                                            </div>
                                                                             <a href="{{ route('course.viewfile', [
                                                                                 'file_doc_id' => $doc->id,
                                                                                 'lesson_id' => $lessons->id,
                                                                                 'course_id' => $lessons->course_id,
+                                                                                'extension' => $extension,
                                                                             ]) }}"
                                                                                 class="btn btn-secondary btn-sm btn-view-doc"
                                                                                 data-course-id="course-{{ $lessons->course_id }}"
                                                                                 data-doc-id="{{ $doc->id }}"
-                                                                                data-lesson-id="{{ $lessons->id }}">
+                                                                                data-lesson-id="{{ $lessons->id }}"
+                                                                                >
                                                                                 <i class="fa fa-eye"></i> ดูเอกสาร
                                                                             </a>
                                                                         </div>
@@ -447,22 +459,32 @@
                                                                                         รอแอดมินตรวจข้อสอบ
                                                                                     </button>
                                                                                 @else
-                                                                                    @if($item->exam_attempts >= $item->exam_max_attempts && !$item->exam_has_passed)
+                                                                                    @if ($item->exam_attempts >= $item->exam_max_attempts && !$item->exam_has_passed)
                                                                                         {{-- หมดสิทธิ์สอบและยังไม่ผ่าน → ปุ่มขอรีเซต --}}
-                                                                                        <form id="reset-form-{{ $item->course_id }}" action="{{ route('course.reset',[$item->course_id]) }}" method="POST" style="display:inline;">
+                                                                                        <form
+                                                                                            id="reset-form-{{ $item->course_id }}"
+                                                                                            action="{{ route('course.reset', [$item->course_id]) }}"
+                                                                                            method="POST"
+                                                                                            style="display:inline;">
                                                                                             @csrf
                                                                                             {{-- <input type="hidden" name="course_id" value="{{ $item->course_id }}"> --}}
-                                                                                            <input type="hidden" name="from_page" value="{{ request()->query('page', 1) }}">
-                                                                                            <button type="button" class="btn btn-danger" onclick="confirmReset('{{ $item->course_id }}')"
-                                                                                                    style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px;">
-                                                                                                <i class="fa fa-refresh mr-2"></i> รีเซตการเรียนทั้งหมด
+                                                                                            <input type="hidden"
+                                                                                                name="from_page"
+                                                                                                value="{{ request()->query('page', 1) }}">
+                                                                                            <button type="button"
+                                                                                                class="btn btn-danger"
+                                                                                                onclick="confirmReset('{{ $item->course_id }}')"
+                                                                                                style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px;">
+                                                                                                <i
+                                                                                                    class="fa fa-refresh mr-2"></i>
+                                                                                                รีเซตการเรียนทั้งหมด
                                                                                             </button>
                                                                                         </form>
                                                                                     @else
                                                                                         {{-- ยังเรียนไม่ครบ --}}
                                                                                         <button class="btn btn-danger"
-                                                                                                style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;"
-                                                                                                disabled>
+                                                                                            style="font-size: 18px; font-weight: bold; border-radius: 8px; padding: 8px 30px; opacity: 0.8;"
+                                                                                            disabled>
                                                                                             ต้องเรียนให้ครบก่อน
                                                                                         </button>
                                                                                     @endif
@@ -610,7 +632,7 @@
                     btn.addEventListener('click', async function(e) {
                         e.preventDefault();
 
-                        const viewUrl   = this.getAttribute('href');
+                        const viewUrl = this.getAttribute('href');
                         const courseId = this.getAttribute('data-course-id');
                         const docId = this.getAttribute('data-doc-id');
                         const lessonId = this.getAttribute('data-lesson-id');
@@ -625,7 +647,7 @@
                             backdrop: false,
                             didOpen: () => {
                                 Swal
-                            .showLoading(); // แสดงไอคอนหมุนๆ ให้ดูว่ากำลังประมวลผล
+                                    .showLoading(); // แสดงไอคอนหมุนๆ ให้ดูว่ากำลังประมวลผล
                             }
                         });
 
@@ -668,34 +690,34 @@
             });
 
             function confirmReset(courseId) {
-            Swal.fire({
-                title: 'ยืนยันการรีเซต?',
-                text: "ระบบจะทำการรีเซตการเรียนของท่านทั้งหมดในหลักสูตรนี้",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33', // สีแดง
-                cancelButtonColor: '#3085d6', // สีน้ำเงิน
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก',
-                backdrop: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // ⏳ แสดง Loading เพื่อไม่ให้ User กดปุ่มซ้ำระหว่างที่หลังบ้านกวาด 6 ตาราง
-                    Swal.fire({
-                        title: 'กำลังจัดการข้อมูล...',
-                        text: 'โปรดรอสักครู่ ระบบกำลังทำการรีเซตบทเรียน',
-                        backdrop: false,
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
+                Swal.fire({
+                    title: 'ยืนยันการรีเซต?',
+                    text: "ระบบจะทำการรีเซตการเรียนของท่านทั้งหมดในหลักสูตรนี้",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33', // สีแดง
+                    cancelButtonColor: '#3085d6', // สีน้ำเงิน
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    backdrop: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // ⏳ แสดง Loading เพื่อไม่ให้ User กดปุ่มซ้ำระหว่างที่หลังบ้านกวาด 6 ตาราง
+                        Swal.fire({
+                            title: 'กำลังจัดการข้อมูล...',
+                            text: 'โปรดรอสักครู่ ระบบกำลังทำการรีเซตบทเรียน',
+                            backdrop: false,
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
 
-                    // 🚀 สั่งสั่ง Submit Form ตัวที่เราต้องการยิงไปหา Controller
-                    document.getElementById('reset-form-' + courseId).submit();
-                }
-            });
-        }
+                        // 🚀 สั่งสั่ง Submit Form ตัวที่เราต้องการยิงไปหา Controller
+                        document.getElementById('reset-form-' + courseId).submit();
+                    }
+                });
+            }
         </script>
     </body>
     {{-- เก็บไว้ตอนทำคะแนน --}}
