@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Users;
 use App\Models\Roadmap;
 use App\Models\RoadmapCourse;
-use App\Models\PassCourse;
+use App\Models\Passcourse;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Learn;
@@ -105,7 +105,7 @@ class ManagerDashboardService
 
     private function buildPassCourseMap($users)
     {
-        $passCourses = PassCourse::whereIn(
+        $passCourses = Passcourse::whereIn(
                 'passcours_user',
                 $users->pluck('id')
             )
@@ -568,7 +568,7 @@ private function buildLearnMap($userIds)
 
 private function buildPassCourseDateMap($userIds)
 {
-    $passes = PassCourse::whereIn('passcours_user', $userIds)
+    $passes = Passcourse::whereIn('passcours_user', $userIds)
         ->where('passcours_status', 'pass')
         ->select(
             'passcours_user',
@@ -722,7 +722,7 @@ public function getTeamLatestActivity($loginUser)
 
     $userIds = $teamUsers->pluck('id');
 
-    return PassCourse::query()
+    return Passcourse::query()
         ->join('users as u', 'passcours.passcours_user', '=', 'u.id')
         ->leftJoin('profiles as p', 'u.id', '=', 'p.user_id')
         ->leftJoin('course_online as c', 'passcours.passcours_cours', '=', 'c.course_id')
