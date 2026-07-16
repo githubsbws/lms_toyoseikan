@@ -95,6 +95,7 @@ use App\Models\OrgchartUser;
 use App\Models\OcrFile;
 use App\Models\OcrFilePage;
 use App\Models\Team;
+use App\Models\CourseScore;
 
 
 use App\Models\AdminMenu;
@@ -116,14 +117,206 @@ use App\Helpers\ChildOrgHelper;
 
 use App\Services\RoadmapService;
 use Google\LongRunning\Operation;
+use App\Services\ManagerDashboardService;
 
 class AdminController extends Controller
 {
     //
     public int $limit = 100;
-    function admin(){
+    function admin(ManagerDashboardService $ManagerDashboardService){
         if(AuthFacade::useradmin()){
-            return view("admin.index.index");
+            $user = Auth::user();
+
+            $roadmapMonthly = $ManagerDashboardService->getRoadmapMonthly($user);
+
+            // return view('admin.index.index', compact('roadmapMonthly'));
+
+        //     $user = Auth::user();
+
+            $teamUserIds = User::with(['orgchart.line'])
+                ->whereHas('orgchart', function ($q) use ($user) {
+                    $q->where('parent_id', $user->orgchart->parent_id);
+                })
+                ->where('status', '1')
+                ->get()
+                ->mapWithKeys(function ($user) {
+                    return [
+                        $user->id => [
+                            'org_id'             => $user->org_id,
+                            'department_org_id'  => $user->department_org_id,
+                            'line'               => optional($user->orgchart->line)->id,
+                        ]
+                    ];
+                });
+
+            $count_all_line = $teamUserIds->count();
+
+            $count_all_team = User::where('team_id', $user->team_id)
+                                ->where('status', '1')
+                                ->count();
+
+            //นับจำนวนผู้ใช้งานทั้งหมดในทีมและสายงานของผู้ใช้งานปัจจุบัน
+
+
+            $roadmap = Roadmap::where([
+                'org_id'            => $user->org_id,
+                'department_org_id' => $user->department_org_id,
+                'line_id'              => optional($user->orgchart->line)->id,
+                'active'            => 'y',
+            ])->first();
+
+            $countCourse = 0;
+            $list_course_roadmap = collect();
+
+            if ($roadmap) {
+                $roadmapCourses = RoadmapCourse::where('roadmap_id', $roadmap->id)
+                    ->where('active', 'y')
+                    ->get();
+
+                $countCourse = $roadmapCourses->count();
+
+                $list_course_roadmap = $roadmapCourses->pluck('course_id');
+            }
+
+           $passCourses = PassCourse::whereIn('passcours_user', $teamUserIds->keys())
+                ->whereIn('passcours_cours', $list_course_roadmap)
+                ->where('passcours_status', 'pass')
+                ->select('passcours_user', 'passcours_cours')
+                ->get()
+                ->groupBy('passcours_user');
+
+            $totalCourse = $list_course_roadmap->count();
+
+            $pass = 0;
+            $notPass = 0;
+
+            foreach ($teamUserIds as $userId => $data) {
+
+                $userPass = isset($passCourses[$userId])
+                    ? $passCourses[$userId]->pluck('passcours_cours')->unique()->count()
+                    : 0;
+
+                if ($userPass == $totalCourse) {
+                    $pass++;
+                } else {
+                    $notPass++;
+                }
+            }
+
+            $totalUser = $pass + $notPass;
+
+            $course_user_roadmap = [
+                'pass' => $pass,
+                'not_pass' => $notPass,
+                'per_pass' => $totalUser > 0
+                    ? round(($pass / $totalUser) * 100, 2)
+                    : 0,
+                'per_not' => $totalUser > 0
+                    ? round(($notPass / $totalUser) * 100, 2)
+                    : 0,
+                'total_user' => $totalUser,
+            ];
+
+            $now = Carbon::now();
+
+            // คอร์สที่ยังไม่หมดอายุ
+            $validCourses = Course::whereIn('course_id', $list_course_roadmap)
+                ->where('active', 'y')
+                ->where('end_date', '>=', $now);
+
+            $openCourse = (clone $validCourses)
+                ->where('start_date', '<=', $now)
+                ->count();
+
+            $closeCourse = (clone $validCourses)
+                ->where('start_date', '>', $now)
+                ->count();
+
+            $course_roadmap = [
+                'count_course' => $countCourse,
+                'open'         => $openCourse,
+                'close'        => $closeCourse,
+            ];
+            // นับจำนวนผู้ใช้งานที่เรียนครบตามหลักสูตรใน Roadmap ของผู้ใช้งานปัจจุบัน
+
+            $courseScores = CourseScore::whereIn('user_id', $teamUserIds->keys())
+                            ->whereIn('course_id', $list_course_roadmap)
+                            ->where('score_status', 'pass')
+                            ->where('active', 'y')
+                            ->select('user_id', 'course_id')
+                            ->get()
+                            ->groupBy('course_id');
+
+            $courseScoreSummary = [];
+            $totalPercent = 0;
+
+            foreach ($list_course_roadmap as $courseId) {
+
+                $pass = isset($courseScores[$courseId])
+                    ? $courseScores[$courseId]->pluck('user_id')->unique()->count()
+                    : 0;
+
+                $notPass = $totalUser - $pass;
+
+                $percent = $totalUser > 0
+                    ? round(($pass / $totalUser) * 100, 2)
+                    : 0;
+
+                $courseScoreSummary[$courseId] = [
+                    'pass' => $pass,
+                    'not_pass' => $notPass,
+                    'percent' => $percent,
+                ];
+
+                $totalPercent += $percent;
+            }
+
+            $avgPercent = count($courseScoreSummary) > 0
+                ? round($totalPercent / count($courseScoreSummary), 2)
+                : 0;
+
+            // เปอเซ็นต์เฉลี่ยของผู้ใช้งานที่เรียนครบตามหลักสูตรใน Roadmap ของผู้ใช้งานปัจจุบัน
+
+            $user_team = User::with(['orgchart.line'])
+                ->where('team_id', $user->team_id)
+                ->where('status', '1')
+                ->get()
+                ->mapWithKeys(function ($user) {
+                    return [
+                        $user->id => [
+                            'org_id'            => $user->org_id,
+                            'department_org_id' => $user->department_org_id,
+                            'line'              => optional($user->orgchart->line)->id,
+                        ]
+                    ];
+                });
+
+                $mandatorySummary = $ManagerDashboardService->getMandatorySummary($user);
+
+                $nearExpireCourses = $ManagerDashboardService->getNearExpireCourses($user);
+
+                $teamLearning = $ManagerDashboardService->getTeamLearningProgress(
+                                    $user,
+                                    request('keyword')
+                                );
+                $teamLatestActivity = $ManagerDashboardService->getTeamLatestActivity($user);
+
+
+            // dd($mandatorySummary);
+
+            return view("admin.index.index", compact(
+                        'user',
+                        'count_all_team',
+                        'count_all_line',
+                        'course_user_roadmap',
+                        'course_roadmap',
+                        'avgPercent',
+                        'roadmapMonthly',
+                        'mandatorySummary',
+                        'nearExpireCourses',
+                        'teamLearning',
+                         'teamLatestActivity'
+                    ));
         }
         return redirect()->route('login.admin');
     }
@@ -1955,12 +2148,30 @@ class AdminController extends Controller
         }
     }
 
+    function lesson_delete_doc($id){
+        if(AuthFacade::useradmin()){
+            $filedoc = FileDoc::findOrFail($id);
+            $filedoc->active = 'n';
+            $filedoc->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'ลบไฟล์สำเร็จ'
+            ]);
+        }else{
+            return response()->json([
+                'status' => 'error',
+                'message' => 'ไม่มีสิทธิ์เข้าถึง'
+            ], 403);
+        }
+    }
+
     function lesson_edit(Request $request,$id){
         if(AuthFacade::useradmin()){
             $course_online = Course::where('course_online.active', 'y')->orderBy('course_id', 'desc')->get();
             $lesson = Lesson::join('course_online','course_online.course_id','=','lesson.course_id')->where('lesson.id',$id)->first();
             $file = File::where('lesson_id',$id)->where('active','y')->first();
-            $filedoc = FileDoc::where('lesson_id',$id)->where('active','y')->first();
+            $filedoc = FileDoc::where('lesson_id',$id)->where('active','y')->get(); // เปลี่ยนเป็น get() เพื่อดึงหลายไฟล์
 
             if ($request->isMethod('post')) {
                 // dd($request->all());
@@ -1974,7 +2185,7 @@ class AdminController extends Controller
                     'time_test'=>'nullable',
                     'content'=>'nullable',
                     // 'filename.*' => 'nullable|mimes:mp3,mp4',
-                    'doc.*' => 'nullable|mimes:pdf',//docx,pptx (ล็อคไว้ก่อน)
+                    'doc.*' => 'nullable|mimes:pdf,jpg,png',//docx,pptx (ล็อคไว้ก่อน)
                     // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
 
                 ]);
@@ -2062,60 +2273,44 @@ class AdminController extends Controller
                 // }
 
                 if($request->hasFile('doc')){
-                    $doc = $request->file('doc');
-                    $doc_name = $doc->getClientOriginalName();
-                    // dd($doc_name);
-                    if(!$doc_name){
-                        return redirect()->back()->withErrors($validator)->withInput();
-                    }
-                    $doc_update = FileDoc::where('lesson_id',$id)->first();
-                    // dd($doc_update->toArray());
-                    if($doc_update == null){
-                        $doc_new = new FileDoc;
-                        $doc_new->lesson_id = $lesson_update->id;
-                        $doc_new->file_name = $lesson->title;
-                        $doc_new->filename = $doc_name;
-                        $doc_new->file_position = 1;
-                        $doc_new->length = '2.00';
-                        $doc_new->create_by = Auth::user()->id;
-                        $doc_new->update_by = Auth::user()->id;
-                        $doc_new->active = 'y';
-                        $doc_new->save();
+                    foreach($request->file('doc') as $doc){
+                        $doc_name = time() . "_" . $doc->getClientOriginalName(); // เพิ่ม timestamp เพื่อป้องกันชื่อซ้ำ
+
+                        // สร้างใหม่ทุกครั้ง (ไม่แทนที่ไฟล์เดิม)
+                        FileDoc::create([
+                            'lesson_id' => $lesson_update->id,
+                            'file_name' => $lesson_update->title,
+                            'filename' => $doc_name,
+                            'file_position' => 1,
+                            'length' => '2.00',
+                            'create_by' => Auth::user()->id,
+                            'update_by' => Auth::user()->id,
+                            'active' => 'y'
+                        ]);
 
                         $idFolder = public_path('images/uploads/filedoc/');
                         if (!FileStore::isDirectory($idFolder)) {
-                            FileStore::makeDirectory($idFolder, 0777, true,true);
-                        }
-                        $doc->move($idFolder, $doc_name);
-                    }else{
-                        $doc_update->file_position = 1;
-                        $doc_update->filename = $doc_name;
-                        $doc_update->update_by = Auth::user()->id;
-                        $doc_update->save();
-
-                        $idFolder = public_path('images/uploads/filedoc/');
-                        if (!FileStore::isDirectory($idFolder)) {
-                            FileStore::makeDirectory($idFolder, 0777, true,true);
+                            FileStore::makeDirectory($idFolder, 0777, true, true);
                         }
                         $doc->move($idFolder, $doc_name);
                     }
                 }
 
-                if($request->file('image')){
-                    $image = $request->file('image');
+                // if($request->file('image')){
+                //     $image = $request->file('image');
 
-                    $idFolder2 = public_path('images/uploads/lesson/'.$id.'/original/');
-                    if (!FileStore::isDirectory($idFolder2)) {
-                            FileStore::makeDirectory($idFolder2, 0777, true,true);
-                        }
+                //     $idFolder2 = public_path('images/uploads/lesson/'.$id.'/original/');
+                //     if (!FileStore::isDirectory($idFolder2)) {
+                //             FileStore::makeDirectory($idFolder2, 0777, true,true);
+                //         }
 
-                    // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
-                    $imageName = $image->getClientOriginalName();
-                    $image->move($idFolder2, $imageName);
+                //     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
+                //     $imageName = $image->getClientOriginalName();
+                //     $image->move($idFolder2, $imageName);
 
-                    $lesson_update->image = $imageName;
+                //     $lesson_update->image = $imageName;
 
-                }
+                // }
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
 
                 $lesson_update->save();
@@ -2136,8 +2331,8 @@ class AdminController extends Controller
         }
 
         $is_onboarding = match($type){
-            'general' => true,
-            'onboarding' => false,
+            'general' => false,
+            'onboarding' => true,
             default => abort(404)
         };
 
@@ -2145,7 +2340,7 @@ class AdminController extends Controller
             ->where('is_onboarding', $is_onboarding)
             ->orderBy('course_id', 'desc')
             ->get();
-        
+
 
         if ($request->isMethod('post')) {
             // ✅ ตรวจสอบข้อมูลที่ส่งมา
@@ -2268,22 +2463,22 @@ class AdminController extends Controller
                     }
                 }
 
-                // 📌 **อัปโหลดภาพประกอบ**
-                if ($request->hasFile('image')) {
-                    $image = $request->file('image');
-                    $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
-                    $imageName = time() . "." . $image->getClientOriginalExtension();
-                    if (!FileStore::isDirectory($Folder_pic)) {
-                        FileStore::makeDirectory($Folder_pic, 0777, true,true);
-                    }
+                // // 📌 **อัปโหลดภาพประกอบ**
+                // if ($request->hasFile('image')) {
+                //     $image = $request->file('image');
+                //     $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
+                //     $imageName = time() . "." . $image->getClientOriginalExtension();
+                //     if (!FileStore::isDirectory($Folder_pic)) {
+                //         FileStore::makeDirectory($Folder_pic, 0777, true,true);
+                //     }
 
-                    $image->move($Folder_pic, $imageName);
+                //     $image->move($Folder_pic, $imageName);
 
-                    $lesson_create->image = $imageName;
-                    $lesson_create->save();
-                }
+                //     $lesson_create->image = $imageName;
+                //     $lesson_create->save();
+                // }
 
-                // 🔥 **ตั้งค่าการเรียงลำดับ**s
+                // // 🔥 **ตั้งค่าการเรียงลำดับ**s
                 $lesson_create->sort_lesson = $lesson_create->id;
                 $lesson_create->save();
 

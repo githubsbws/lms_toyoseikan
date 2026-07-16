@@ -133,7 +133,7 @@ class DashboardService
                     }
                 ])
                 ->first();
-            
+
 
         if (!$roadmap) {
             return [
@@ -228,7 +228,7 @@ class DashboardService
                     ->whereIn('course_id', $group->pluck('course_id'))
                     ->count();
 
-                
+
 
                 // สีของ Progress Bar
                 if ($percent >= 80) {
@@ -499,7 +499,7 @@ class DashboardService
                     'percent' => $percent,
                 ];
             });
-        
+
         $latestAssessments = DB::table('score_assessment as sa')
             ->join(
                 'passcours as pc',

@@ -170,6 +170,8 @@ Route::post('course/doc/progress', [CourseController::class, 'markDocProgress'])
 Route::get('/course/viewfile', [CourseController::class, 'viewfile'])->name('course.viewfile')->middleware('checkIdleTimeout');
 // stream PDF ให้ PDF.js
 Route::get('/course/pdf-stream', [CourseController::class, 'pdfStream'])->name('course.pdfstream')->middleware('checkIdleTimeout');
+// stream ไฟล์ทั่วไป (รูปภาพ, PDF)
+Route::get('/course/file-stream', [CourseController::class, 'fileStream'])->name('course.filestream')->middleware('checkIdleTimeout');
 Route::post('course/reset/{course_id}', [CourseController::class, 'courseReset'])->name('course.reset')->middleware('checkIdleTimeout');
 // choice
 Route::post('/choiceAnswer/{id}',[ChoiceController::class,'choiceAnswer'])->name('choice.Answer')->middleware('checkIdleTimeout');
@@ -313,6 +315,8 @@ Route::get('lesson_detail/{id}',[AdminController::class,'lesson_detail'])->name(
 Route::post('lesson_delete/{id}',[AdminController::class,'lesson_delete'])->name('lesson.delete')->middleware('checkIdleTimeout');
 
 Route::post('lesson_delete_video/{id}',[AdminController::class,'lesson_delete_video'])->name('lesson_video.delete')->middleware('checkIdleTimeout');
+
+Route::post('lesson_delete_doc/{id}',[AdminController::class,'lesson_delete_doc'])->name('lesson_doc.delete')->middleware('checkIdleTimeout');
 
 Route::post('lesson_move',[AdminController::class,'lesson_move'])->name('lesson.move')->middleware('checkIdleTimeout');
 
@@ -868,5 +872,8 @@ Route::middleware(['auth.admin'])->group(function(){
     Route::get('/roadmap/new-emp/course/{id}',[RoadmapController::class, 'newEmpDetail'])->name('roadmap.newemp.detail');
     Route::post('/roadmap/new-emp/course/order',[RoadmapController::class, 'updateOrder'])->name('admin.roadmap.updateOrder');
 });
+Route::get('/dashboard/team-learning/ajax',
+    [DashboardController::class,'teamLearningAjax'])
+    ->name('dashboard.team-learning.ajax');
 
 });

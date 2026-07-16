@@ -50,8 +50,8 @@
         transition: all .2s ease;
     }
 
-    .select2-container--default 
-    .select2-selection--single 
+    .select2-container--default
+    .select2-selection--single
     .select2-selection__rendered {
         line-height: 42px !important;
         padding-left: 14px !important;
@@ -59,8 +59,8 @@
         font-size: 15px;
     }
 
-    .select2-container--default 
-    .select2-selection--single 
+    .select2-container--default
+    .select2-selection--single
     .select2-selection__arrow {
         height: 42px !important;
         right: 10px !important;
@@ -68,7 +68,7 @@
 
 
     /* ตอนกดเลือก */
-    .select2-container--default.select2-container--focus 
+    .select2-container--default.select2-container--focus
     .select2-selection--single {
         border-color: #80bdff !important;
         box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
@@ -76,7 +76,7 @@
 
 
     /* Dropdown */
-    .select2-container--default 
+    .select2-container--default
     .select2-results__option {
         padding: 10px 14px;
         font-size: 15px;
@@ -84,7 +84,7 @@
 
 
     /* Hover รายการ */
-    .select2-container--default 
+    .select2-container--default
     .select2-results__option--highlighted[aria-selected] {
         background-color: #007bff;
     }

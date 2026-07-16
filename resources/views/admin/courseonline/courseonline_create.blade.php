@@ -93,7 +93,7 @@
                                     </label>
                                     <input type="number" class="form-control" name="question_amount" min="1">
                                 </div>
-                                
+
                                 <div class="col-md-4">
                                     <label for="retest_amount">
                                         <u>จำนวนครั้งที่สามารถสอบซ่อมได้</u>
