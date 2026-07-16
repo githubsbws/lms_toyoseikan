@@ -1748,13 +1748,23 @@ use App\Models\Ques_ans;
 
                         <ol class="breadcrumb">
 
-                            @foreach($dashboard['employee']['department'] as $item)
+                            <li class="breadcrumb-item">
 
-                                <li class="breadcrumb-item">
-                                    {{ $item }}
-                                </li>
+                                {{ $dashboard['employee']['position']['position'] }}
 
-                            @endforeach
+                                @if($dashboard['employee']['position']['team'])
+                                    - {{ $dashboard['employee']['position']['team'] }}
+                                @endif
+
+                                @if($dashboard['employee']['position']['line'])
+                                    / {{ $dashboard['employee']['position']['line'] }}
+                                @endif
+
+                                @if($dashboard['employee']['position']['department'])
+                                    / {{ $dashboard['employee']['position']['department'] }}
+                                @endif
+
+                            </li>
 
                         </ol>
 
