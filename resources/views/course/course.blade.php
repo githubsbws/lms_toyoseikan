@@ -100,7 +100,7 @@
 
                                             <div class="road-item" style="margin-bottom: 15px;"
                                                 id="course-{{ $item->course_id }}">
-                                                <button class="nav-link btn {{ $btnClass }}"
+                                                <button class="nav-link btn {{ $btnClass }} {{ request('course_id') == $item->course_id ? 'active' : '' }}"
                                                     id="v-pills-tab-{{ $item->course_id }}" data-toggle="tab"
                                                     href="#v-pills-content-{{ $item->course_id }}"
                                                     @if ($isLocked) disabled @endif
@@ -161,7 +161,7 @@
                                         // เช็คอีกรอบเพื่อความชัวร์ หรือจะดึงจากข้างบนมาก็ได้
                                         $isLockedInContent = $item->is_locked ?? false;
                                     @endphp
-                                    <div class="tab-pane fade in {{ $loop->first && !$isLockedInContent ? 'active' : '' }}"
+                                    <div class="tab-pane fade in {{ request('course_id') == $item->course_id || (!request('course_id') && $loop->first && !$isLockedInContent) ? 'active' : '' }}"
                                         id="v-pills-content-{{ $item->course_id }}"
                                         style="border-radius: 12px;background: transparent">
 
@@ -684,6 +684,56 @@
                 }
             });
         }
+        $(document).ready(function(){
+
+            let courseId = "{{ request('course_id') }}";
+
+
+            if(courseId){
+
+                let target = $('#course-' + courseId);
+
+
+                if(target.length){
+
+                    $('html, body').animate({
+                        scrollTop: target.offset().top - 100
+                    },500);
+
+
+                    target.css({
+                        'border':'3px solid #337ab7'
+                    });
+
+
+                    setTimeout(function(){
+
+                        target.css({
+                            'border':''
+                        });
+
+                    },3000);
+
+                }
+
+            }
+
+        });
+        $(document).ready(function(){
+
+            let courseId = "{{ request('course_id') }}";
+
+            if(courseId){
+
+                $('#v-pills-tab-' + courseId).tab('show');
+
+                $('html, body').animate({
+                    scrollTop: $('#v-pills-tab-' + courseId).offset().top - 100
+                },500);
+
+            }
+
+        });
         </script>
     </body>
     {{-- เก็บไว้ตอนทำคะแนน --}}

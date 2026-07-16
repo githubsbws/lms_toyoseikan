@@ -10,7 +10,7 @@ use App\Models\OrgchartUser;
 use App\Models\Roadmap;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\News;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
@@ -27,9 +27,15 @@ class DashboardController extends Controller
 
         $dashboard = $dashboardService->getEmployeeDashboard(Auth::user());
 
+        $news = News::where('active', 'y')
+                ->orderBy('create_date', 'desc')
+                ->limit(3)
+                ->get();
+
 
         return view('dashboard.dashboard', [
             'dashboard' => $dashboard,
+            'news' => $news
         ]);
     }
 }

@@ -50,7 +50,9 @@ class CourseController extends Controller
         if(Auth::check()){
             $course_detail = $this->courseService->getCoursesForUser(Auth::user());
 
-            return view("course.course",compact('course_detail'));
+            $selectedCourse = $request->course_id;
+
+            return view("course.course",compact('course_detail','selectedCourse'));
         }else{
             return redirect()->route('index');
         }

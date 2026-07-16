@@ -1685,13 +1685,23 @@ use App\Models\Ques_ans;
 
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
 
-                                    @foreach($dashboard['employee']['department'] as $item)
-                                        <li class="breadcrumb-item">
-                                            {{ $item }}
-                                        </li>
-                                    @endforeach
+                                        {{ $dashboard['employee']['position']['position'] }}
 
+                                        @if($dashboard['employee']['position']['team'])
+                                            - {{ $dashboard['employee']['position']['team'] }}
+                                        @endif
+
+                                        @if($dashboard['employee']['position']['line'])
+                                            / {{ $dashboard['employee']['position']['line'] }}
+                                        @endif
+
+                                        @if($dashboard['employee']['position']['department'])
+                                            / {{ $dashboard['employee']['position']['department'] }}
+                                        @endif
+
+                                    </li>
                                 </ol>
                             </nav>
                         </div>
@@ -1783,7 +1793,9 @@ use App\Models\Ques_ans;
                                <a href="{{route('course')}}"> ดูบทเรียน </a>
                             </div>
                         </div>
-                        <span class="stat-badge">{{ $dashboard['completedPercent'] }}%</span>
+                            <span class="stat-badge">
+                                {{ $dashboard['completedPercent'] }}%
+                            </span>
                     </div>
 
 
@@ -1801,7 +1813,7 @@ use App\Models\Ques_ans;
                                 <a href="{{route('course')}}"> ดูบทเรียน </a>
                             </div>
                         </div>
-                        <span class="stat-badge">{{ $dashboard['inProgressPercent'] }}%</span>
+                        <span class="stat-badge">{{ $dashboard['learningProgressPercent'] }}%</span>
                     </div>
                 </div>
 
@@ -1854,7 +1866,7 @@ use App\Models\Ques_ans;
                                                 stroke-dasharray="282.7" stroke-dashoffset="{{ $dashboard['progressOffset'] }}"></circle>
                                         </svg>
                                         <div class="progress-circle-text">
-                                            <span class="progress-circle-pct"> {{ $dashboard['completedPercent'] }}%</span>
+                                            <span class="progress-circle-pct"> {{ $dashboard['overallProgress'] }}%</span>
                                             <span class="progress-circle-label">ความคืบหน้า</span>
                                         </div>
                                     </div>
@@ -1922,12 +1934,51 @@ use App\Models\Ques_ans;
                                 @endforeach
                             </div>
 
-                            <div class="probation-alert">
-                                <i class="fa-solid fa-circle-plus"></i>
+                           <div class="probation-alert">
+
+                                <i class="fa-solid fa-circle-plus"
+                                    data-toggle="collapse"
+                                    data-target="#probationCourses">
+                                </i>
+
                                 <div class="probation-alert-text">
-                                    <span>คุณอยู่ในช่วง 30 วันแรก (01 ม.ค. 2567 - 30 ม.ค. 2567)</span>
-                                    <span>กรุณาเรียนให้ครบตามแผนเพื่อผ่านการประเมินในแต่ละรอบ</span>
+
+                                    @if($dashboard['probationPeriod'])
+
+                                        <span>
+                                            คุณอยู่ในช่วง {{ $dashboard['probationPeriod']['day'] }} วันแรก
+                                            ({{ $dashboard['probationPeriod']['start'] }}
+                                            -
+                                            {{ $dashboard['probationPeriod']['end'] }})
+                                        </span>
+
+                                        <span>
+                                            กรุณาเรียนให้ครบตามแผนเพื่อผ่านการประเมินในแต่ละรอบ
+                                        </span>
+
+                                    @endif
+
                                 </div>
+
+                            </div>
+
+                            <div class="collapse mt-3" id="probationCourses">
+
+                                <div class="d-flex flex-column align-items-center">
+
+                                    @foreach($dashboard['probationCourses'] as $course)
+
+                                        <div class="border rounded p-2 mb-2 w-75 text-center">
+
+                                            <i class="fa-solid fa-book-open"></i>
+                                            {{ $course['title'] }}
+
+                                        </div>
+
+                                    @endforeach
+
+                                </div>
+
                             </div>
 
                         </div>
@@ -2096,11 +2147,9 @@ use App\Models\Ques_ans;
 
                                         <div style="width:20%;text-align:center;">
 
-                                            <a href="{{ url('course/'.$course['course_id']) }}"
+                                            <a href="{{ route('course', ['course_id' => $course['course_id']]) }}"
                                             class="btn btn-primary">
-
                                                 ดูบทเรียน
-
                                             </a>
 
                                         </div>
@@ -2267,43 +2316,24 @@ use App\Models\Ques_ans;
                     <div class="card">
                         <div class="card-header">
                             <h5>ประกาศจากบริษัท</h5>
+                            <a href="{{ route('new') }}" class="text-decoration-none">
+                                ดูทั้งหมด
+                            </a>
                         </div>
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column; gap:20px">
+                                @foreach($news as $ns)
                                 <div
                                     style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
                                     <div
                                         style="display: flex; flex-direction: row; align-items: center; width: 80%; gap: 10px;">
                                         <i class="fa-solid fa-bullhorn fa-xl" style="color: rgb(116, 192, 252);"></i>
                                         <span
-                                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%;">แจ้งเปลี่ยนแปลงเวลาอบรม
-                                            Safety Training
-                                            ประจำเดือน พ.ศ. 2567</span>
+                                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%;">{{ $ns->cms_title }}</span>
                                     </div>
-                                    <span style="width: 20%; text-align: end;">08 พ.ค. 67</span>
+                                    <span style="width: 20%; text-align: end;">{{ \Carbon\Carbon::parse($ns->create_date)->addYears(543)->locale('th')->translatedFormat('j M y') }}</span>
                                 </div>
-                                <div
-                                    style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                                    <div
-                                        style="display: flex; flex-direction: row; align-items: center; width: 80%; gap: 10px;">
-                                        <i class="fa-solid fa-bullhorn fa-xl" style="color: rgb(116, 192, 252);"></i>
-                                        <span
-                                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%;">ขอเชิญเข้าร่วมกิจกรรม
-                                            5ส Big Cleaning Day</span>
-                                    </div>
-                                    <span style="width: 20%; text-align: end;">05 พ.ค. 67</span>
-                                </div>
-                                <div
-                                    style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                                    <div
-                                        style="display: flex; flex-direction: row; align-items: center; width: 80%; gap: 10px;">
-                                        <i class="fa-solid fa-bullhorn fa-xl" style="color: rgb(116, 192, 252);"></i>
-                                        <span
-                                            style=" white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%;">อัปเดตเอกสาร
-                                            Work Instruction Line 1</span>
-                                    </div>
-                                    <span style="width: 20%; text-align: end;">02 พ.ค. 67</span>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -2937,6 +2967,17 @@ use App\Models\Ques_ans;
                     }
                 });
             }, 200);
+        });
+        $('#probationCourses').on('show.bs.collapse', function () {
+            $('.probation-alert i')
+                .removeClass('fa-circle-plus')
+                .addClass('fa-circle-minus');
+        });
+
+        $('#probationCourses').on('hide.bs.collapse', function () {
+            $('.probation-alert i')
+                .removeClass('fa-circle-minus')
+                .addClass('fa-circle-plus');
         });
     </script>
 </body>

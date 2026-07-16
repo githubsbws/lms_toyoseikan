@@ -5,28 +5,67 @@ namespace App\Services;
 use App\Models\Roadmap;
 use App\Models\Users;
 use App\Models\Orgchart;
+use App\Models\Team;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
-    private function getBreadcrumb($orgId)
+    private function getEmployeePosition($user)
     {
-        $breadcrumbs = [];
+        $position = null;
+        $team = null;
+        $line = null;
+        $department = null;
 
-        $org = Orgchart::find($orgId);
+        $org = Orgchart::find($user->org_id);
 
         while ($org) {
-            array_unshift($breadcrumbs, $org->title);
 
-            if (empty($org->parent_id)) {
+            switch ((int)$org->level) {
+
+                case 6:
+                    $position = $org->title;
+                    break;
+
+                case 5:
+                    $line = $org->title;
+                    break;
+
+                case 4:
+                    $team = $org->title;
+                    break;
+
+                case 3:
+                    $department = $org->title;
+                    break;
+            }
+
+            if (!$org->parent_id) {
                 break;
             }
 
-            $org = Orgchart::find($org->parent_id);
+            $org = Orgchart::find((int)$org->parent_id);
         }
 
-        return $breadcrumbs;
+
+        // team จาก table team
+        if ($user->team_id) {
+
+            $teamData = Team::find($user->team_id);
+
+            if ($teamData) {
+                $team = $teamData->name;
+            }
+        }
+
+
+        return [
+                    'position' => $position,
+                    'team' => $team,
+                    'line' => $line,
+                    'department' => $department,
+                ];
     }
 
     public function getEmployeeDashboard($user)
@@ -34,7 +73,7 @@ class DashboardService
         $name = optional($user->profile)->fullname ?? $user->username;
 
 
-        $department = $this->getBreadcrumb($user->department_org_id);
+        $employeePosition = $this->getEmployeePosition($user);
         
 
         $serviceAge = '-';
@@ -46,6 +85,8 @@ class DashboardService
                 ->format('%m เดือน %d วัน');
 
         }
+        $isNewEmployee = $user->team_id === Users::TEAM_NEWEMP;
+
         if ($user->team_id === Users::TEAM_NEWEMP) {
 
             $roadmapQuery = Roadmap::where(
@@ -60,7 +101,7 @@ class DashboardService
                 $user->department_org_id
             );
         }
-        $isNewEmployee = $user->team_id === Users::TEAM_NEWEMP;
+        
 
         $roadmap = $roadmapQuery
                 ->where('active','y')
@@ -73,7 +114,17 @@ class DashboardService
                         ]);
                     },
                     'courses.category',
-                    'courses.lesson.learn',
+                    'courses.lesson' => function($q) {
+
+                        $q->where('active','y');
+
+                    },
+                    'courses.lesson.learn' => function($q) use ($user){
+
+                        $q->where('user_id',$user->id)
+                        ->where('pass_year',now()->year);
+
+                    },
                     'courses.groupTesting.questions',
                     'courses.courseScore' => function($q) use ($user){
                         $q->where('user_id',$user->id)
@@ -96,6 +147,65 @@ class DashboardService
         }
 
         $courses = $roadmap->courses;
+
+
+        $probationPeriod = null;
+
+        if ($user->work_start && $isNewEmployee) {
+
+            $startDate = Carbon::parse($user->work_start);
+
+            $currentDay = $startDate->diffInDays(now());
+
+
+            $milestones = $courses
+                ->pluck('pivot.milestone_days')
+                ->unique()
+                ->sort()
+                ->values();
+
+
+            $currentMilestone = $milestones
+                    ->first(function($day) use ($currentDay){
+
+                        return $currentDay <= $day;
+
+                    });
+
+
+                if (!$currentMilestone) {
+
+                    $currentMilestone = $milestones->last();
+
+                }
+
+
+            if ($currentMilestone) {
+
+                $previousMilestone = $milestones
+                    ->filter(fn($day) => $day < $currentMilestone)
+                    ->last();
+
+
+                $probationPeriod = [
+                    'day' => $currentMilestone,
+
+                    'start' => ($previousMilestone
+                            ? $startDate->copy()->addDays($previousMilestone)
+                            : $startDate
+                        )
+                        ->locale('th')
+                        ->translatedFormat('d M y'),
+
+
+                    'end' => $startDate
+                        ->copy()
+                        ->addDays($currentMilestone - 1)
+                        ->locale('th')
+                        ->translatedFormat('d M y'),
+                ];
+            }
+        }
 
         $learningPlan = $courses
             ->groupBy('cate_id')
@@ -148,42 +258,44 @@ class DashboardService
 
         foreach ($courses as $course) {
 
+            $progress = $this->calculateCourseProgress($course,$user);
+
+
             $score = $course->courseScore
                 ->sortByDesc('attempt')
                 ->first();
 
-            if ($score) {
 
-                if ($score->score_status == 'pass') {
-                    $completed++;
-                    continue;
-                }
+            // ผ่านแล้ว
+            if ($score && $score->score_status == 'pass') {
 
-                if ($score->score_status == 'fail') {
-                    $failed++;
-                    continue;
-                }
+                $completed++;
+                continue;
+
             }
 
 
-            $hasLearn = $course->lesson
-                ->contains(function($lesson) use ($user){
+            // สอบตก
+            if ($score && $score->score_status == 'fail') {
 
-                    return $lesson->learn
-                        ->where('user_id',$user->id)
-                        ->where('lesson_status','pass')
-                        ->isNotEmpty();
+                $failed++;
+                continue;
 
-                });
+            }
 
 
-            if ($hasLearn) {
+            // เริ่มเรียนแล้ว
+            if ($progress > 0) {
+
                 $inProgress++;
+
             } else {
+
                 $notStarted++;
+
             }
-            }
-        $totalCourse = $courses->count();
+
+        }
 
         $totalProgress = $courses->sum(function($course)  use ($user){
 
@@ -191,20 +303,29 @@ class DashboardService
 
         });
 
-        $completedPercent = $courses->count() > 0
-            ? round($totalProgress / $courses->count())
+        $totalCourse = $courses->count();
+
+        $completedPercent = $totalCourse > 0
+            ? round(($completed / $totalCourse) * 100)
             : 0;
+
 
         $inProgressPercent = $totalCourse > 0
             ? round(($inProgress / $totalCourse) * 100)
             : 0;
 
+
         $notStartedPercent = $totalCourse > 0
             ? round(($notStarted / $totalCourse) * 100)
             : 0;
 
+
         $failedPercent = $totalCourse > 0
             ? round(($failed / $totalCourse) * 100)
+            : 0;
+        
+        $overallProgress = $totalCourse > 0
+            ? round($totalProgress / $totalCourse)
             : 0;
         $progressByCategory = $courses
             ->groupBy('cate_id')
@@ -239,6 +360,33 @@ class DashboardService
                 'color' => $color,
             ];
         })->values();
+        $learningProgressPercent = 0;
+
+        if($inProgress > 0){
+
+            $learningProgressPercent = $courses
+                ->filter(function($course) use ($user){
+
+                    $score = $course->courseScore
+                        ->sortByDesc('attempt')
+                        ->first();
+
+                    if($score?->score_status == 'pass'){
+                        return false;
+                    }
+
+                    return $this->calculateCourseProgress($course,$user) > 0;
+
+                })
+                ->avg(function($course) use ($user){
+
+                    return $this->calculateCourseProgress($course,$user);
+
+                });
+
+
+            $learningProgressPercent = round($learningProgressPercent);
+        }
 
         $deadlineCourses = collect();
 
@@ -494,11 +642,40 @@ class DashboardService
             })
             ->values();
 
+
+        $currentMilestoneCourses = collect();
+
+        if ($probationPeriod) {
+
+            $currentMilestoneCourses = $courses
+                ->filter(function($course) use ($probationPeriod, $user){
+
+                    return $course->pivot->milestone_days 
+                        == $probationPeriod['day']
+                        &&
+                        !$course->courseScore
+                            ->where('score_status','pass')
+                            ->isNotEmpty();
+
+                })
+                ->map(function($course){
+
+                    return [
+                        'course_id' => $course->course_id,
+                        'title' => $course->course_title,
+                        'short_title' => $course->course_short_title,
+                        'milestone_days' => $course->pivot->milestone_days,
+                    ];
+
+                })
+                ->values();
+        }
+
         return [
                     'employee' => [
                         'user' => $user,
                         'name' => $name,
-                        'department' => $department,
+                        'position' => $employeePosition,
                         'serviceAge' => $serviceAge,
                     ],
                     'totalCourse' => $totalCourse,
@@ -515,8 +692,10 @@ class DashboardService
                     'failed' => $failed,
                     'failedPercent' => $failedPercent,
                     
-                    'progressOffset' => 282.7 - (($completedPercent / 100) * 282.7),
+                    'progressOffset' => 282.7 - (($overallProgress / 100) * 282.7),
                     'progressByCategory' => $progressByCategory,
+                    'learningProgressPercent'=>$learningProgressPercent,
+                    'overallProgress'=>$overallProgress,
 
                     'courses' => $courses,
                     'learningPlan'=>$isNewEmployee
@@ -536,6 +715,8 @@ class DashboardService
                     'newEmployeeTimeline'=>$isNewEmployee
                             ? $newEmployeeTimeline
                             : collect(),
+                    'probationPeriod' => $probationPeriod,
+                    'probationCourses' => $currentMilestoneCourses,
                 ];
     }
 
@@ -571,9 +752,12 @@ class DashboardService
         if($totalSteps == 0){
             return 0;
         }
+        
 
        return round(
             (($passedLessons + $examPassed) / $totalSteps) * 100
         );
+
+        
     }
 }

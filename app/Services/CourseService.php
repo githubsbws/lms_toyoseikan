@@ -17,6 +17,7 @@ class CourseService
     // app/Services/CourseService.php
     public function getCoursesForUser(Users $user)
     {
+        
         // 1. Base Query พร้อม Eager Loading ที่สะอาดขึ้น
         $query = Course::with([
             'lesson' => function($q) use ($user) {
@@ -58,6 +59,7 @@ class CourseService
         if ($user->team_id === Users::TEAM_NEWEMP) {
             return $this->applyRoadmapCriteria($query, $user);
         }
+        
 
         return $this->applyOrgCriteria($query, $user);
     }
@@ -240,6 +242,7 @@ class CourseService
             $examType = $course->groupTesting?->questions->first()?->ques_type;
             $course->exam_type = $examType; // 2=ปรนัย, 3=อัตนัย
         });
+        
     }
 
     public function completeCourse(int $userId, int $courseId): void
