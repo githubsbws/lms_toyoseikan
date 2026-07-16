@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Orgcourse;
 use App\Models\Passcourse;
 use App\Models\Users;
+use App\Models\RoadmapCourse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -307,6 +308,39 @@ class CourseService
                 ->delete();
 
         });
+    }
+
+    public function findCoursePage(Users $user, $courseId): int
+    {
+        $query = Course::query()
+            ->where('course_online.active', self::STATUS_ACTIVE);
+
+        if ($user->team_id === Users::TEAM_NEWEMP) {
+
+            $courseIds = RoadmapCourse::query()
+                ->join('roadmap', 'roadmap.id', '=', 'roadmap_course.roadmap_id')
+                ->where('roadmap.line_id', $user->Orgchart?->line?->id)
+                ->where('roadmap.active', 'y')
+                ->orderBy('roadmap_course.order')
+                ->pluck('roadmap_course.course_id');
+
+        } else {
+
+            $courseIds = Orgcourse::where('orgchart_id', $user->org_id)
+                ->pluck('course_id');
+        }
+
+        $orderedIds = $courseIds->values();
+
+        $index = $orderedIds->search($courseId);
+
+        if ($index === false) {
+            return 1;
+        }
+
+        $perPage = 5; // ให้ตรงกับ paginate()
+
+        return (int) floor($index / $perPage) ;
     }
 
 }

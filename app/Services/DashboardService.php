@@ -9,6 +9,7 @@ use App\Models\Team;
 use App\Models\Course;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DashboardService
 {
@@ -107,8 +108,10 @@ class DashboardService
         $roadmap = $roadmapQuery
                 ->where('active','y')
                 ->with([
-                    'courses' => function($q) {
-                        $q->where('course_online.active','y')
+                    'courses' => function ($q) use ($isNewEmployee) {
+
+                        $q->where('course_online.active', 'y')
+                        ->where('is_onboarding', $isNewEmployee ? true : false)
                         ->withPivot([
                             'milestone_days',
                             'order'
@@ -263,7 +266,7 @@ class DashboardService
 
 
             $score = $course->courseScore
-                ->sortByDesc('attempt')
+                ->sortByDesc('create_date')
                 ->first();
 
 
@@ -331,6 +334,25 @@ class DashboardService
         $progressByCategory = $courses
             ->groupBy('cate_id')
             ->map(function ($group) use ($user) {
+            
+            $totalLessons = $group->sum(function ($course) {
+                return $course->lesson->count();
+            });
+
+            $learnLessons = $group->sum(function ($course) use ($user) {
+
+                return $course->lesson
+                    ->filter(function ($lesson) use ($user) {
+
+                        return $lesson->learn
+                            ->where('user_id', $user->id)
+                            ->where('lesson_status', 'pass')
+                            ->isNotEmpty();
+
+                    })
+                    ->count();
+
+            });
 
             $total = $group->count();
 
@@ -359,6 +381,9 @@ class DashboardService
                 'percent' => $percent,
                 'status' => $status,
                 'color' => $color,
+
+                'learnLessons' => $learnLessons,
+                'totalLessons' => $totalLessons,
             ];
         })->values();
         $learningProgressPercent = 0;
@@ -420,7 +445,21 @@ class DashboardService
 
         $deadlineCourses = $deadlineCourses
             ->sortBy('deadline')
-            ->take(5);
+            ->values();
+
+        $page = request()->get('deadline_page', 1);
+        $perPage = 5;
+
+        $deadlineCourses = new LengthAwarePaginator(
+            $deadlineCourses->forPage($page, $perPage),
+            $deadlineCourses->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'pageName' => 'deadline_page',
+            ]
+        );
 
         $continueCourses = collect();
 
@@ -487,9 +526,9 @@ class DashboardService
         $failCourses = $courses
                 ->map(function ($course) {
 
-                    // เอา attempt ล่าสุดเท่านั้น
+                    // attempt เป็น 1 หมด เลยต้องใช้วันที่แทน
                     $latest = $course->courseScore
-                        ->sortByDesc('attempt')
+                        ->sortByDesc('create_date')
                         ->first();
 
                     // ถ้าไม่มีคะแนน หรือ attempt ล่าสุดไม่ใช่ fail => ไม่แสดง
@@ -517,7 +556,7 @@ class DashboardService
                 ->map(function ($course) use ($user) {
 
                     $latestScore = $course->courseScore
-                        ->sortByDesc('attempt')
+                        ->sortByDesc('create_date')
                         ->first();
 
                     // ไม่มีผลสอบ หรือยังรอประเมิน ไม่ต้องแสดง

@@ -48,6 +48,20 @@ class CourseController extends Controller
     function course(Request $request)
     {
         if(Auth::check()){
+            if ($request->filled('course_id') && !$request->filled('page')) {
+
+                $page = $this->courseService->findCoursePage(
+                    Auth::user(),
+                    $request->course_id
+                );
+
+                if ($page > 1) {
+                    return redirect()->route('course', [
+                        'page' => $page,
+                        'course_id' => $request->course_id,
+                    ]);
+                }
+            }
             $course_detail = $this->courseService->getCoursesForUser(Auth::user());
 
             $selectedCourse = $request->course_id;

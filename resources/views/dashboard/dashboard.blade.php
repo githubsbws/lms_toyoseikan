@@ -1748,13 +1748,23 @@ use App\Models\Ques_ans;
 
                         <ol class="breadcrumb">
 
-                            @foreach($dashboard['employee']['department'] as $item)
+                            <li class="breadcrumb-item">
 
-                                <li class="breadcrumb-item">
-                                    {{ $item }}
-                                </li>
+                                {{ $dashboard['employee']['position']['position'] }}
 
-                            @endforeach
+                                @if($dashboard['employee']['position']['team'])
+                                    - {{ $dashboard['employee']['position']['team'] }}
+                                @endif
+
+                                @if($dashboard['employee']['position']['line'])
+                                    / {{ $dashboard['employee']['position']['line'] }}
+                                @endif
+
+                                @if($dashboard['employee']['position']['department'])
+                                    / {{ $dashboard['employee']['position']['department'] }}
+                                @endif
+
+                            </li>
 
                         </ol>
 
@@ -1886,6 +1896,10 @@ use App\Models\Ques_ans;
                                             <span class="status-result-badge">
                                                 <span class="bold-text">{{ $item['percent'] }}%</span>
 
+                                                <span class="text-muted">
+                                                    ({{ $item['learnLessons'] }}/{{ $item['totalLessons'] }} บทเรียน)
+                                                </span>
+
                                                 <span class="text-{{ $item['color'] }}">
                                                     {{ $item['status'] }}
                                                 </span>
@@ -1936,10 +1950,10 @@ use App\Models\Ques_ans;
 
                            <div class="probation-alert">
 
-                                <i class="fa-solid fa-circle-plus"
+                                {{-- <i class="fa-solid fa-circle-plus"
                                     data-toggle="collapse"
                                     data-target="#probationCourses">
-                                </i>
+                                </i> --}}
 
                                 <div class="probation-alert-text">
 
@@ -2080,14 +2094,15 @@ use App\Models\Ques_ans;
                                         </div>
 
                                     </div>
-
                                     @empty
+                                    
 
                                     <div class="text-center text-muted py-3">
                                         ไม่มีบทเรียนที่ต้องเรียน
                                     </div>
 
                                     @endforelse
+                                    {{ $dashboard['deadlineCourses']->links('pagination::bootstrap-4') }}
                             </div>
                         </div>
                     </div>
@@ -2187,7 +2202,7 @@ use App\Models\Ques_ans;
                                             </h5>
 
                                             <span>
-                                                {{ $course['course_short_title'] }}
+                                                {!! html_entity_decode($course['course_short_title']) !!}
                                             </span>
 
                                         </div>
