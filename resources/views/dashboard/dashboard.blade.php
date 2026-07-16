@@ -2062,7 +2062,7 @@ use App\Models\Ques_ans;
                                                 </span>
 
                                                 <span class="lesson-sub-name">
-                                                    <a href="{{route('course')}}"> ดูบทเรียน </a>
+                                                    <a href="{{ route('course', ['course_id' => $course['course_id']]) }}"> ดูบทเรียน </a>
                                                 </span>
 
                                             </div>
@@ -2095,7 +2095,7 @@ use App\Models\Ques_ans;
             </section>
 
             <section class="section-3 row row-eq-height">
-                <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12 col-12">
+                {{-- <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12 col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5>
@@ -2160,8 +2160,8 @@ use App\Models\Ques_ans;
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                </div> --}}
+                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5>
@@ -2229,7 +2229,7 @@ use App\Models\Ques_ans;
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5>
@@ -2259,7 +2259,7 @@ use App\Models\Ques_ans;
                                                     </h5>
 
                                                     <span>
-                                                        {{ $item['short_title'] }}
+                                                        {!! html_entity_decode($item['short_title']) !!}
                                                     </span>
 
                                                     <span>
@@ -2312,7 +2312,7 @@ use App\Models\Ques_ans;
             </section>
 
             <section class="section-4 row row-eq-height">
-                <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12 col-12">
+                <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5>ประกาศจากบริษัท</h5>
@@ -2338,7 +2338,7 @@ use App\Models\Ques_ans;
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5>ประวัติการเรียนล่าสุด</h5>

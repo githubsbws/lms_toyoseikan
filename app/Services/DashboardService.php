@@ -6,6 +6,7 @@ use App\Models\Roadmap;
 use App\Models\Users;
 use App\Models\Orgchart;
 use App\Models\Team;
+use App\Models\Course;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -425,9 +426,14 @@ class DashboardService
 
             foreach ($courses as $course) {
 
-                $pass = $course->courseScore
-                    ->where('score_status','pass')
-                    ->isNotEmpty();
+                // $pass = $course->courseScore
+                //     ->where('score_status','pass')
+                //     ->isNotEmpty();
+                $latestScore = $course->courseScore
+                    ->sortByDesc('attempt')
+                    ->first();
+
+                $pass = $latestScore?->score_status === 'pass';
 
                 if ($pass) {
                     continue;
@@ -450,102 +456,108 @@ class DashboardService
 
                 $percent = $this->calculateCourseProgress($course,$user);
 
+                $days = $course->pivot->milestone_days ?? 0;
+
+                $deadline = null;
+
+                if ($user->work_start) {
+                    $deadline = Carbon::parse($user->work_start)
+                        ->addDays($days);
+                }
+
                 $continueCourses->push([
                     'course_id' => $course->course_id,
                     'course_title' => $course->course_title,
                     'course_short_title' => $course->course_short_title,
-                    'percent' => $percent,
+                    'deadline' => $deadline,
                     'learnLesson' => $learnLesson,
                     'totalLesson' => $totalLesson,
                 ]);
             }
 
             $continueCourses = $continueCourses
-                ->sortByDesc('percent')
-                ->values();
+                    ->sortBy(function ($course) {
+                        return $course['deadline'] ?? Carbon::maxValue();
+                    })
+                    ->values();
 
         $courseIds = $courses->pluck('course_id');
 
 
-        $failCourses = DB::table('coursescore as cs')
-            ->join('course_online as c', 'c.course_id', '=', 'cs.course_id')
-            ->where('cs.user_id', $user->id)
-            ->where('cs.active', 'y')
-            ->where('cs.score_status', 'fail')
-            ->whereIn('cs.course_id',$courseIds)
-            ->select(
-                'cs.course_id',
-                'c.course_title',
-                'c.course_short_title',
-                'cs.score_number',
-                'cs.score_total'
-            )
-            ->orderByDesc('cs.update_date')
-            ->get()
-            ->map(function ($item) {
+        $failCourses = $courses
+                ->map(function ($course) {
 
-                $percent = 0;
+                    // เอา attempt ล่าสุดเท่านั้น
+                    $latest = $course->courseScore
+                        ->sortByDesc('attempt')
+                        ->first();
 
-                if ($item->score_total > 0) {
-                    $percent = round(($item->score_number / $item->score_total) * 100);
-                }
+                    // ถ้าไม่มีคะแนน หรือ attempt ล่าสุดไม่ใช่ fail => ไม่แสดง
+                    if (!$latest || $latest->score_status !== 'fail') {
+                        return null;
+                    }
 
-                return [
-                    'course_id' => $item->course_id,
-                    'course_title' => $item->course_title,
-                    'course_short_title' => strip_tags($item->course_short_title),
-                    'score' => $item->score_number,
-                    'total' => $item->score_total,
-                    'percent' => $percent,
-                ];
-            });
+                    $percent = $latest->score_total > 0
+                        ? round(($latest->score_number / $latest->score_total) * 100)
+                        : 0;
 
-        $latestAssessments = DB::table('score_assessment as sa')
-            ->join(
-                'passcours as pc',
-                'pc.passcours_id',
-                '=',
-                'sa.passcours_id'
-            )
-            ->join(
-                'course_score_weight as csw',
-                'csw.id',
-                '=',
-                'sa.id_course_score_weight'
-            )
-            ->join(
-                'course_online as c',
-                'c.course_id',
-                '=',
-                'csw.course_id'
-            )
-            ->where('pc.passcours_user',$user->id)
-            ->where('sa.active','y')
-            ->select(
-                'c.course_title',
-                'c.course_short_title',
-                'sa.score',
-                'pc.passcours_status',
-                'pc.passcours_date'
-            )
-            ->orderByDesc('pc.passcours_date')
-            ->limit(5)
-            ->get()
-            ->map(function($item){
+                    return [
+                        'course_id' => $course->course_id,
+                        'course_title' => $course->course_title,
+                        'course_short_title' => strip_tags($course->course_short_title),
+                        'score' => $latest->score_number,
+                        'total' => $latest->score_total,
+                        'percent' => $percent,
+                    ];
+                })
+                ->filter()
+                ->values();
 
-                return [
-                    'title' => $item->course_title,
-                    'short_title' => strip_tags($item->course_short_title),
+        $latestAssessments = $courses
+                ->map(function ($course) use ($user) {
 
-                    'score' => $item->score,
+                    $latestScore = $course->courseScore
+                        ->sortByDesc('attempt')
+                        ->first();
 
-                    'pass' => $item->passcours_status == 'pass',
+                    // ไม่มีผลสอบ หรือยังรอประเมิน ไม่ต้องแสดง
+                    if (
+                        !$latestScore ||
+                        $latestScore->score_status === 'wait'
+                    ) {
+                        return null;
+                    }
 
-                    'date' => Carbon::parse($item->passcours_date)
-                        ->format('d/m/Y')
-                ];
+                    return [
 
-            });
+                        'course_id'   => $course->course_id,
+
+                        'title'       => $course->course_title,
+
+                        'short_title' => strip_tags($course->course_short_title),
+
+                        'score'       => $this->calculateFinalScore(
+                            $course,
+                            $user
+                        ),
+
+                        'pass'        => $latestScore->score_status === 'pass',
+
+                        'date'        => Carbon::parse(
+                            $latestScore->update_date
+                            ?? $latestScore->create_date
+                        )->format('d/m/Y'),
+
+                        'sort_date'   => $latestScore->update_date
+                            ?? $latestScore->create_date,
+
+                    ];
+
+                })
+                ->filter()
+                ->sortByDesc('sort_date')
+                ->take(5)
+                ->values();
 
         $learningHistory = $courses
             ->map(function($course) use ($user){
@@ -759,5 +771,51 @@ class DashboardService
         );
 
         
+    }
+
+    private function calculateFinalScore(Course $course, Users $user): int
+    {
+        $weight = $course->courseWeight;
+
+        if (!$weight) {
+            return 0;
+        }
+
+        // คะแนนสอบในระบบ
+        $courseScore = $course->courseScore
+            ->where('user_id', $user->id)
+            ->where('active', 'y')
+            ->sortByDesc('attempt')
+            ->first();
+
+        $examScore = 0;
+
+        if (
+            $courseScore &&
+            $courseScore->score_total > 0 &&
+            $weight->exam_weight > 0
+        ) {
+            $examScore =
+                ($courseScore->score_number / $courseScore->score_total)
+                * $weight->exam_weight;
+        }
+
+        // คะแนน Assessment
+        $assessmentScore = $weight->assessments
+            ->filter(function ($assessment) use ($user) {
+
+                return $assessment->active == 'y'
+                    && $assessment->passcourse
+                    && $assessment->passcourse->passcours_user == $user->id;
+
+            })
+            ->sum(function ($assessment) {
+
+                return (int) $assessment->score;
+
+            });
+            
+
+        return round($examScore + $assessmentScore);
     }
 }

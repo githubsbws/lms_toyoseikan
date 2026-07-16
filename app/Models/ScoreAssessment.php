@@ -25,4 +25,13 @@ class ScoreAssessment extends Model
         'updated_at',
         'pass_year',
     ];
+
+    public function passcourse()
+    {
+        return $this->belongsTo(
+            Passcourse::class,
+            'passcours_id',
+            'passcours_id'
+        );
+    }
 }

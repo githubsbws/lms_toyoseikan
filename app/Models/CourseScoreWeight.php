@@ -27,4 +27,13 @@ class CourseScoreWeight extends Model
         'eval_problem_solv',
         'eval_awareness',
     ];
+
+    public function assessments()
+    {
+        return $this->hasMany(
+            ScoreAssessment::class,
+            'id_course_score_weight',
+            'id'
+        );
+    }
 }
