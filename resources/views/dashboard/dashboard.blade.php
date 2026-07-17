@@ -1861,7 +1861,11 @@ use App\Models\Ques_ans;
             </section>
 
             <section class="section-2 row row-eq-height">
+                @if($dashboard['isNewEmployee'])
                 <div class="col-lg-5 col-md-12 col-sm-12 col-12">
+                @else
+                <div class="col-lg-6 col-md-12 col-sm-12 col-12">
+                @endif
                     <div class="card">
                         <div class="card-header">
                             <h5>ความก้าวหน้าการเรียนของฉัน</h5>
@@ -1998,7 +2002,7 @@ use App\Models\Ques_ans;
                         </div>
                     </div>
                 </div>
-                @else
+                {{-- @else
                 <div class="col-lg-4 col-md-6 col-sm-12 col-12">
                     <div class="card">
                         <div class="card-header">
@@ -2050,9 +2054,13 @@ use App\Models\Ques_ans;
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 @endif
+                @if($dashboard['isNewEmployee'])
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
+                @else
+                <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                @endif
                     <div class="card">
                         <div class="card-header">
                             <h5>บทเรียนที่ต้องเรียน / กำหนดเวลา</h5>

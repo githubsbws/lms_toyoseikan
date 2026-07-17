@@ -304,7 +304,7 @@ class AdminController extends Controller
 
             // dd($mandatorySummary);
 
-            return view("admin.index.index", compact(
+            return view("admin.index.index_hide_dashboard", compact(
                         'user',
                         'count_all_team',
                         'count_all_line',

@@ -103,9 +103,10 @@ class DashboardService
                 $user->department_org_id
             );
         }
-        
+                
+        if ($isNewEmployee) {
 
-        $roadmap = $roadmapQuery
+             $roadmap = $roadmapQuery
                 ->where('active','y')
                 ->with([
                     'courses' => function ($q) use ($isNewEmployee) {
@@ -137,20 +138,43 @@ class DashboardService
                     }
                 ])
                 ->first();
+            if (!$roadmap) {
+                return [
+                    'totalCourse' => 0,
+                    'completed' => 0,
+                    'failed' => 0,
+                    'inProgress' => 0,
+                    'notStarted' => 0,
+                    'courses' => collect(),
+                ];
+            }
 
+            $courses = $roadmap?->courses ?? collect();
 
-        if (!$roadmap) {
-            return [
-                'totalCourse' => 0,
-                'completed' => 0,
-                'failed' => 0,
-                'inProgress' => 0,
-                'notStarted' => 0,
-                'courses' => collect(),
-            ];
+        } else {
+
+            $courses = Course::where('active', 'y')
+                ->where('is_onboarding', false)
+                ->whereDate('start_date', '<=', today())
+                ->whereDate('end_date', '>=', today())
+                ->with([
+                    'category',
+                    'lesson' => function ($q) {
+                        $q->where('active', 'y');
+                    },
+                    'lesson.learn' => function ($q) use ($user) {
+                        $q->where('user_id', $user->id)
+                        ->where('pass_year', now()->year);
+                    },
+                    'groupTesting.questions',
+                    'courseScore' => function ($q) use ($user) {
+                        $q->where('user_id', $user->id)
+                        ->where('active', 'y')
+                        ->where('pass_year', now()->year);
+                    },
+                ])
+                ->get();
         }
-
-        $courses = $roadmap->courses;
 
 
         $probationPeriod = null;
@@ -426,13 +450,22 @@ class DashboardService
                 continue;
             }
 
-            $days = $course->pivot->milestone_days ?? 0;
+            if ($isNewEmployee) {
 
-            $deadline = null;
+                $days = $course->pivot->milestone_days ?? 0;
 
-            if ($user->work_start) {
-                $deadline = Carbon::parse($user->work_start)
-                    ->addDays($days);
+                $deadline = $user->work_start
+                    ? Carbon::parse($user->work_start)->addDays($days)
+                    : null;
+
+            } else {
+
+                $days = null;
+
+                $deadline = $course->end_date
+                    ? Carbon::parse($course->end_date)
+                    : null;
+
             }
 
             $deadlineCourses->push([
@@ -495,14 +528,22 @@ class DashboardService
 
                 $percent = $this->calculateCourseProgress($course,$user);
 
-                $days = $course->pivot->milestone_days ?? 0;
+                if ($isNewEmployee) {
 
-                $deadline = null;
+                    $days = $course->pivot->milestone_days ?? 0;
 
-                if ($user->work_start) {
-                    $deadline = Carbon::parse($user->work_start)
-                        ->addDays($days);
+                    $deadline = $user->work_start
+                        ? Carbon::parse($user->work_start)->addDays($days)
+                        : null;
+
+                } else {
+
+                    $deadline = $course->end_date
+                        ? Carbon::parse($course->end_date)
+                        : null;
+
                 }
+
 
                 $continueCourses->push([
                     'course_id' => $course->course_id,
@@ -657,7 +698,8 @@ class DashboardService
             ->sortByDesc('date')
             ->take(5)
             ->values();
-
+        $newEmployeeTimeline = collect();
+        if ($isNewEmployee){
         $newEmployeeTimeline = $courses
             ->groupBy(function($course){
 
@@ -692,11 +734,11 @@ class DashboardService
 
             })
             ->values();
-
+        }
 
         $currentMilestoneCourses = collect();
 
-        if ($probationPeriod) {
+        if ($isNewEmployee && $probationPeriod) {
 
             $currentMilestoneCourses = $courses
                 ->filter(function($course) use ($probationPeriod, $user){
