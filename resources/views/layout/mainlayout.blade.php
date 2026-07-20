@@ -8,12 +8,16 @@
 
 </head>
 
-<body>
+
+<body class="d-flex flex-column min-vh-100">
 
 
     @include('layout.partials.headerscript')
 
+
+    <main class="flex-grow-1">
     @yield('content')
+    </main>
 
     @include('layout.partials.footer')
 

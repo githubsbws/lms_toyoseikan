@@ -142,22 +142,40 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="FileDoc_doc">ไฟล์ประกอบบทเรียน (pdf)</label>
-                                @if($filedoc !== null)
-                                <h5>{{ $filedoc->file_name}}</h5>
+                                <label for="FileDoc_doc">ไฟล์ประกอบบทเรียน (pdf,jpg, png)</label>
 
+                                @if($filedoc->count() > 0)
+                                    <div class="row mb-3">
+                                        @foreach($filedoc as $doc)
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card">
+                                                    <div class="card-body d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <i class="fas fa-file-pdf text-danger mr-2"></i>
+                                                            <a href="{{ asset('images/uploads/filedoc/'.$doc->filename) }}" target="_blank">
+                                                                {{ $doc->filename }}
+                                                            </a>
+                                                        </div>
+                                                        <button type="button" class="btn btn-danger btn-sm delete-doc-button" data-id="{{ $doc->id }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 @else
-                                <h5>ไม่มีไฟล์</h5>
+                                    <h5 class="text-muted mb-3">ไม่มีไฟล์</h5>
                                 @endif
+
                                 <div id="docqueue"></div>
                                 <div class="form-group">
-									<label for="filedoc_name">ไฟล์ประกอบบทเรียน</label>
 									<div class="fileupload fileupload-new" data-provides="fileupload">
                                         <div id="fileNameDisplay"></div>
                                         <span class="btn btn-default btn-file">
                                             <span class="fileupload-new">Select file</span>
                                             <span class="fileupload-exists">Change</span>
-                                            <input type="file" name="doc" id="docInput" multiple onchange="displayFileNames('docInput', 'fileListDoc')">
+                                            <input type="file" name="doc[]" id="docInput" multiple onchange="displayFileNames('docInput', 'fileListDoc')">
                                         </span>
                                     </div>
                                     {{-- <input type="file" name="doc[]" id="docInput" multiple onchange="displayFileNames('docInput', 'fileListDoc')"> --}}
@@ -232,7 +250,7 @@
 				// ตรวจสอบว่าโค้ดนี้ทำงานจริงไหม
 				console.log("Delete button script loaded");
 
-				// ใช้ Event Delegation เผื่อปุ่มถูกโหลดใหม่
+				// ลบวิดีโอ - ใช้ Event Delegation เผื่อปุ่มถูกโหลดใหม่
 				$(document).on("click", ".delete-button", function(e) {
 					e.preventDefault();
 
@@ -271,6 +289,56 @@
 									Swal.fire(
 										"เกิดข้อผิดพลาด!",
 										xhr.responseJSON?.message || "ไม่สามารถลบข้อมูลได้",
+										"error"
+									);
+								}
+							});
+						}
+					});
+				});
+
+				// ลบไฟล์ Doc - เพิ่มใหม่
+				$(document).on("click", ".delete-doc-button", function(e) {
+					e.preventDefault();
+
+					var id = $(this).data("id");
+					var url = "/lesson_delete_doc/" + id;
+					var $card = $(this).closest('.col-md-6');
+
+					console.log("Clicked delete doc button with ID:", id);
+
+					Swal.fire({
+						title: "คุณแน่ใจหรือไม่?",
+						text: "ไฟล์นี้จะถูกลบออก!",
+						icon: "warning",
+						showCancelButton: true,
+						confirmButtonColor: "#3085d6",
+						cancelButtonColor: "#d33",
+						confirmButtonText: "ใช่, ลบเลย!",
+						cancelButtonText: "ยกเลิก"
+					}).then((result) => {
+						if (result.isConfirmed) {
+							$.ajax({
+								url: url,
+								type: "POST",
+								success: function(response) {
+									console.log("Success:", response);
+									Swal.fire({
+										title: "สำเร็จ!",
+										text: response.message || "ลบไฟล์สำเร็จ",
+										icon: "success",
+										confirmButtonText: "OK"
+									}).then(() => {
+										$card.fadeOut(300, function() {
+											$(this).remove();
+										});
+									});
+								},
+								error: function(xhr) {
+									console.error("Error:", xhr);
+									Swal.fire(
+										"เกิดข้อผิดพลาด!",
+										xhr.responseJSON?.message || "ไม่สามารถลบไฟล์ได้",
 										"error"
 									);
 								}

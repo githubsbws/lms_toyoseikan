@@ -31,4 +31,13 @@ class Orgchart extends Model
     {
         return $this->belongsTo(Orgchart::class, 'parent_id', 'id');
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(
+            Orgchart::class,
+            'parent_id'
+        );
+    }
+
 }

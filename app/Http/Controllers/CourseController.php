@@ -48,9 +48,25 @@ class CourseController extends Controller
     function course(Request $request)
     {
         if(Auth::check()){
+            if ($request->filled('course_id') && !$request->filled('page')) {
+
+                $page = $this->courseService->findCoursePage(
+                    Auth::user(),
+                    $request->course_id
+                );
+
+                if ($page > 1) {
+                    return redirect()->route('course', [
+                        'page' => $page,
+                        'course_id' => $request->course_id,
+                    ]);
+                }
+            }
             $course_detail = $this->courseService->getCoursesForUser(Auth::user());
 
-            return view("course.course",compact('course_detail'));
+            $selectedCourse = $request->course_id;
+
+            return view("course.course",compact('course_detail','selectedCourse'));
         }else{
             return redirect()->route('index');
         }
@@ -176,10 +192,23 @@ class CourseController extends Controller
         $file = FileDoc::where('id', $request->query('file_doc_id'))->first();
         if (!$file) abort(404);
 
-        $pdfUrl   = route('course.pdfstream', ['file_doc_id' => $file->id]);
-        $fileName = $file->original_filename;
+        // รับค่า extension จาก query string (ถ้าไม่มีค่อยคำนวณเอง)
+        $extension = $request->query('extension')
+            ?? strtolower(pathinfo($file->filename, PATHINFO_EXTENSION));
 
-        return view('course.pdf-viewer', compact('pdfUrl', 'fileName'));
+        $imageExtensions = ['jpg','png'];
+
+        if (in_array($extension, $imageExtensions)) {
+            // กรณีเป็นรูปภาพ → ใช้ image-viewer
+            $imageUrl = route('course.filestream', ['file_doc_id' => $file->id]);
+            $fileName = $file->original_filename ?? $file->filename;
+            return view('course.image-viewer', compact('imageUrl', 'fileName'));
+        } else {
+            // กรณีเป็น PDF → ใช้ pdf-viewer
+            $pdfUrl   = route('course.pdfstream', ['file_doc_id' => $file->id]);
+            $fileName = $file->original_filename ?? $file->filename;
+            return view('course.pdf-viewer', compact('pdfUrl', 'fileName'));
+        }
     }
 
     // endpoint stream PDF ให้ PDF.js ดึงครับ
@@ -194,6 +223,38 @@ class CourseController extends Controller
 
         return response()->file($file_path, [
             'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline',
+            'Cache-Control'       => 'no-store, no-cache',
+        ]);
+    }
+
+    // endpoint stream ไฟล์ทั่วไป (รูปภาพ, PDF, etc.)
+    public function fileStream(Request $request)
+    {
+        if (!auth()->check()) abort(401);
+
+        $file = FileDoc::where('id', $request->query('file_doc_id'))->first();
+        if (!$file) abort(404);
+
+        $file_path = public_path('images/uploads/filedoc' . DIRECTORY_SEPARATOR . $file->filename);
+
+        if (!file_exists($file_path)) {
+            abort(404, 'ไม่พบไฟล์');
+        }
+
+        // กำหนด Content-Type ตามสกุลไฟล์
+        $extension = strtolower(pathinfo($file->filename, PATHINFO_EXTENSION));
+        $contentTypes = [
+            'pdf'  => 'application/pdf',
+            'jpg'  => 'image/jpeg',
+            'png'  => 'image/png',
+
+        ];
+
+        $contentType = $contentTypes[$extension] ?? 'application/octet-stream';
+
+        return response()->file($file_path, [
+            'Content-Type'        => $contentType,
             'Content-Disposition' => 'inline',
             'Cache-Control'       => 'no-store, no-cache',
         ]);

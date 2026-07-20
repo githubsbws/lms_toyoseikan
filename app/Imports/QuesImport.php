@@ -52,12 +52,14 @@ class QuesImport implements ToCollection
 
             foreach ($lines as $line) {
 
-                if (preg_match('/^[A-D]\./', trim($line))) {
+                if (preg_match('/^[A-D][\.\)]/', trim($line))) {
 
-                    $choiceText = trim(substr($line, 2));
+                    $choiceKey = substr($line, 0, 1);
+
+                    $choiceText = preg_replace('/^[A-D][\.\)]\s*/', '', trim($line));
 
                     // เช็คคำตอบ
-                    $isAnswer = str_contains($answer, substr($line, 0, 1));
+                    $isAnswer = str_contains($answer, $choiceKey);
 
                     Choice::create([
                         'ques_id'       => $question->ques_id,

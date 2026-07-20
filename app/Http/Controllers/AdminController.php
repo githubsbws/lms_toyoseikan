@@ -304,7 +304,7 @@ class AdminController extends Controller
 
             // dd($mandatorySummary);
 
-            return view("admin.index.index", compact(
+            return view("admin.index.index_hide_dashboard", compact(
                         'user',
                         'count_all_team',
                         'count_all_line',
@@ -2148,12 +2148,30 @@ class AdminController extends Controller
         }
     }
 
+    function lesson_delete_doc($id){
+        if(AuthFacade::useradmin()){
+            $filedoc = FileDoc::findOrFail($id);
+            $filedoc->active = 'n';
+            $filedoc->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'ลบไฟล์สำเร็จ'
+            ]);
+        }else{
+            return response()->json([
+                'status' => 'error',
+                'message' => 'ไม่มีสิทธิ์เข้าถึง'
+            ], 403);
+        }
+    }
+
     function lesson_edit(Request $request,$id){
         if(AuthFacade::useradmin()){
             $course_online = Course::where('course_online.active', 'y')->orderBy('course_id', 'desc')->get();
             $lesson = Lesson::join('course_online','course_online.course_id','=','lesson.course_id')->where('lesson.id',$id)->first();
             $file = File::where('lesson_id',$id)->where('active','y')->first();
-            $filedoc = FileDoc::where('lesson_id',$id)->where('active','y')->first();
+            $filedoc = FileDoc::where('lesson_id',$id)->where('active','y')->get(); // เปลี่ยนเป็น get() เพื่อดึงหลายไฟล์
 
             if ($request->isMethod('post')) {
                 // dd($request->all());
@@ -2167,7 +2185,7 @@ class AdminController extends Controller
                     'time_test'=>'nullable',
                     'content'=>'nullable',
                     // 'filename.*' => 'nullable|mimes:mp3,mp4',
-                    'doc.*' => 'nullable|mimes:pdf',//docx,pptx (ล็อคไว้ก่อน)
+                    'doc.*' => 'nullable|mimes:pdf,jpg,png',//docx,pptx (ล็อคไว้ก่อน)
                     // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'
 
                 ]);
@@ -2255,60 +2273,44 @@ class AdminController extends Controller
                 // }
 
                 if($request->hasFile('doc')){
-                    $doc = $request->file('doc');
-                    $doc_name = $doc->getClientOriginalName();
-                    // dd($doc_name);
-                    if(!$doc_name){
-                        return redirect()->back()->withErrors($validator)->withInput();
-                    }
-                    $doc_update = FileDoc::where('lesson_id',$id)->first();
-                    // dd($doc_update->toArray());
-                    if($doc_update == null){
-                        $doc_new = new FileDoc;
-                        $doc_new->lesson_id = $lesson_update->id;
-                        $doc_new->file_name = $lesson->title;
-                        $doc_new->filename = $doc_name;
-                        $doc_new->file_position = 1;
-                        $doc_new->length = '2.00';
-                        $doc_new->create_by = Auth::user()->id;
-                        $doc_new->update_by = Auth::user()->id;
-                        $doc_new->active = 'y';
-                        $doc_new->save();
+                    foreach($request->file('doc') as $doc){
+                        $doc_name = time() . "_" . $doc->getClientOriginalName(); // เพิ่ม timestamp เพื่อป้องกันชื่อซ้ำ
+
+                        // สร้างใหม่ทุกครั้ง (ไม่แทนที่ไฟล์เดิม)
+                        FileDoc::create([
+                            'lesson_id' => $lesson_update->id,
+                            'file_name' => $lesson_update->title,
+                            'filename' => $doc_name,
+                            'file_position' => 1,
+                            'length' => '2.00',
+                            'create_by' => Auth::user()->id,
+                            'update_by' => Auth::user()->id,
+                            'active' => 'y'
+                        ]);
 
                         $idFolder = public_path('images/uploads/filedoc/');
                         if (!FileStore::isDirectory($idFolder)) {
-                            FileStore::makeDirectory($idFolder, 0777, true,true);
-                        }
-                        $doc->move($idFolder, $doc_name);
-                    }else{
-                        $doc_update->file_position = 1;
-                        $doc_update->filename = $doc_name;
-                        $doc_update->update_by = Auth::user()->id;
-                        $doc_update->save();
-
-                        $idFolder = public_path('images/uploads/filedoc/');
-                        if (!FileStore::isDirectory($idFolder)) {
-                            FileStore::makeDirectory($idFolder, 0777, true,true);
+                            FileStore::makeDirectory($idFolder, 0777, true, true);
                         }
                         $doc->move($idFolder, $doc_name);
                     }
                 }
 
-                if($request->file('image')){
-                    $image = $request->file('image');
+                // if($request->file('image')){
+                //     $image = $request->file('image');
 
-                    $idFolder2 = public_path('images/uploads/lesson/'.$id.'/original/');
-                    if (!FileStore::isDirectory($idFolder2)) {
-                            FileStore::makeDirectory($idFolder2, 0777, true,true);
-                        }
+                //     $idFolder2 = public_path('images/uploads/lesson/'.$id.'/original/');
+                //     if (!FileStore::isDirectory($idFolder2)) {
+                //             FileStore::makeDirectory($idFolder2, 0777, true,true);
+                //         }
 
-                    // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
-                    $imageName = $image->getClientOriginalName();
-                    $image->move($idFolder2, $imageName);
+                //     // ย้ายไฟล์ภาพไปยังโฟลเดอร์ใหม่
+                //     $imageName = $image->getClientOriginalName();
+                //     $image->move($idFolder2, $imageName);
 
-                    $lesson_update->image = $imageName;
+                //     $lesson_update->image = $imageName;
 
-                }
+                // }
                 // เพิ่มข้อมูลอื่น ๆ ที่ต้องการอัปเดต
 
                 $lesson_update->save();
@@ -2329,8 +2331,8 @@ class AdminController extends Controller
         }
 
         $is_onboarding = match($type){
-            'general' => true,
-            'onboarding' => false,
+            'general' => false,
+            'onboarding' => true,
             default => abort(404)
         };
 
@@ -2461,22 +2463,22 @@ class AdminController extends Controller
                     }
                 }
 
-                // 📌 **อัปโหลดภาพประกอบ**
-                if ($request->hasFile('image')) {
-                    $image = $request->file('image');
-                    $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
-                    $imageName = time() . "." . $image->getClientOriginalExtension();
-                    if (!FileStore::isDirectory($Folder_pic)) {
-                        FileStore::makeDirectory($Folder_pic, 0777, true,true);
-                    }
+                // // 📌 **อัปโหลดภาพประกอบ**
+                // if ($request->hasFile('image')) {
+                //     $image = $request->file('image');
+                //     $Folder_pic = public_path("images/uploads/lesson/".$lesson_create->id."/original");
+                //     $imageName = time() . "." . $image->getClientOriginalExtension();
+                //     if (!FileStore::isDirectory($Folder_pic)) {
+                //         FileStore::makeDirectory($Folder_pic, 0777, true,true);
+                //     }
 
-                    $image->move($Folder_pic, $imageName);
+                //     $image->move($Folder_pic, $imageName);
 
-                    $lesson_create->image = $imageName;
-                    $lesson_create->save();
-                }
+                //     $lesson_create->image = $imageName;
+                //     $lesson_create->save();
+                // }
 
-                // 🔥 **ตั้งค่าการเรียงลำดับ**s
+                // // 🔥 **ตั้งค่าการเรียงลำดับ**s
                 $lesson_create->sort_lesson = $lesson_create->id;
                 $lesson_create->save();
 
