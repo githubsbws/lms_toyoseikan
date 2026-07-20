@@ -123,203 +123,235 @@ class AdminController extends Controller
 {
     //
     public int $limit = 100;
-    function admin(ManagerDashboardService $ManagerDashboardService){
-        if(AuthFacade::useradmin()){
-            $user = Auth::user();
-
-            $roadmapMonthly = $ManagerDashboardService->getRoadmapMonthly($user);
-
-            // return view('admin.index.index', compact('roadmapMonthly'));
-
-        //     $user = Auth::user();
-
-            $teamUserIds = User::with(['orgchart.line'])
-                ->whereHas('orgchart', function ($q) use ($user) {
-                    $q->where('parent_id', $user->orgchart->parent_id);
-                })
-                ->where('status', '1')
-                ->get()
-                ->mapWithKeys(function ($user) {
-                    return [
-                        $user->id => [
-                            'org_id'             => $user->org_id,
-                            'department_org_id'  => $user->department_org_id,
-                            'line'               => optional($user->orgchart->line)->id,
-                        ]
-                    ];
-                });
-
-            $count_all_line = $teamUserIds->count();
-
-            $count_all_team = User::where('team_id', $user->team_id)
-                                ->where('status', '1')
-                                ->count();
-
-            //นับจำนวนผู้ใช้งานทั้งหมดในทีมและสายงานของผู้ใช้งานปัจจุบัน
-
-
-            $roadmap = Roadmap::where([
-                'org_id'            => $user->org_id,
-                'department_org_id' => $user->department_org_id,
-                'line_id'              => optional($user->orgchart->line)->id,
-                'active'            => 'y',
-            ])->first();
-
-            $countCourse = 0;
-            $list_course_roadmap = collect();
-
-            if ($roadmap) {
-                $roadmapCourses = RoadmapCourse::where('roadmap_id', $roadmap->id)
-                    ->where('active', 'y')
-                    ->get();
-
-                $countCourse = $roadmapCourses->count();
-
-                $list_course_roadmap = $roadmapCourses->pluck('course_id');
-            }
-
-           $passCourses = PassCourse::whereIn('passcours_user', $teamUserIds->keys())
-                ->whereIn('passcours_cours', $list_course_roadmap)
-                ->where('passcours_status', 'pass')
-                ->select('passcours_user', 'passcours_cours')
-                ->get()
-                ->groupBy('passcours_user');
-
-            $totalCourse = $list_course_roadmap->count();
-
-            $pass = 0;
-            $notPass = 0;
-
-            foreach ($teamUserIds as $userId => $data) {
-
-                $userPass = isset($passCourses[$userId])
-                    ? $passCourses[$userId]->pluck('passcours_cours')->unique()->count()
-                    : 0;
-
-                if ($userPass == $totalCourse) {
-                    $pass++;
-                } else {
-                    $notPass++;
-                }
-            }
-
-            $totalUser = $pass + $notPass;
-
-            $course_user_roadmap = [
-                'pass' => $pass,
-                'not_pass' => $notPass,
-                'per_pass' => $totalUser > 0
-                    ? round(($pass / $totalUser) * 100, 2)
-                    : 0,
-                'per_not' => $totalUser > 0
-                    ? round(($notPass / $totalUser) * 100, 2)
-                    : 0,
-                'total_user' => $totalUser,
-            ];
-
-            $now = Carbon::now();
-
-            // คอร์สที่ยังไม่หมดอายุ
-            $validCourses = Course::whereIn('course_id', $list_course_roadmap)
-                ->where('active', 'y')
-                ->where('end_date', '>=', $now);
-
-            $openCourse = (clone $validCourses)
-                ->where('start_date', '<=', $now)
-                ->count();
-
-            $closeCourse = (clone $validCourses)
-                ->where('start_date', '>', $now)
-                ->count();
-
-            $course_roadmap = [
-                'count_course' => $countCourse,
-                'open'         => $openCourse,
-                'close'        => $closeCourse,
-            ];
-            // นับจำนวนผู้ใช้งานที่เรียนครบตามหลักสูตรใน Roadmap ของผู้ใช้งานปัจจุบัน
-
-            $courseScores = CourseScore::whereIn('user_id', $teamUserIds->keys())
-                            ->whereIn('course_id', $list_course_roadmap)
-                            ->where('score_status', 'pass')
-                            ->where('active', 'y')
-                            ->select('user_id', 'course_id')
-                            ->get()
-                            ->groupBy('course_id');
-
-            $courseScoreSummary = [];
-            $totalPercent = 0;
-
-            foreach ($list_course_roadmap as $courseId) {
-
-                $pass = isset($courseScores[$courseId])
-                    ? $courseScores[$courseId]->pluck('user_id')->unique()->count()
-                    : 0;
-
-                $notPass = $totalUser - $pass;
-
-                $percent = $totalUser > 0
-                    ? round(($pass / $totalUser) * 100, 2)
-                    : 0;
-
-                $courseScoreSummary[$courseId] = [
-                    'pass' => $pass,
-                    'not_pass' => $notPass,
-                    'percent' => $percent,
-                ];
-
-                $totalPercent += $percent;
-            }
-
-            $avgPercent = count($courseScoreSummary) > 0
-                ? round($totalPercent / count($courseScoreSummary), 2)
-                : 0;
-
-            // เปอเซ็นต์เฉลี่ยของผู้ใช้งานที่เรียนครบตามหลักสูตรใน Roadmap ของผู้ใช้งานปัจจุบัน
-
-            $user_team = User::with(['orgchart.line'])
-                ->where('team_id', $user->team_id)
-                ->where('status', '1')
-                ->get()
-                ->mapWithKeys(function ($user) {
-                    return [
-                        $user->id => [
-                            'org_id'            => $user->org_id,
-                            'department_org_id' => $user->department_org_id,
-                            'line'              => optional($user->orgchart->line)->id,
-                        ]
-                    ];
-                });
-
-                $mandatorySummary = $ManagerDashboardService->getMandatorySummary($user);
-
-                $nearExpireCourses = $ManagerDashboardService->getNearExpireCourses($user);
-
-                $teamLearning = $ManagerDashboardService->getTeamLearningProgress(
-                                    $user,
-                                    request('keyword')
-                                );
-                $teamLatestActivity = $ManagerDashboardService->getTeamLatestActivity($user);
-
-
-            // dd($mandatorySummary);
-
-            return view("admin.index.index_hide_dashboard", compact(
-                        'user',
-                        'count_all_team',
-                        'count_all_line',
-                        'course_user_roadmap',
-                        'course_roadmap',
-                        'avgPercent',
-                        'roadmapMonthly',
-                        'mandatorySummary',
-                        'nearExpireCourses',
-                        'teamLearning',
-                         'teamLatestActivity'
-                    ));
+    public function indexDashboard(
+        ManagerDashboardService $managerService,
+        // ManagementDashboardService $managementService,
+        // UserDashboardService $userService
+    ) {
+        // 1. เช็ค Authentication
+        if (!AuthFacade::useradmin()) {
+            return redirect()->route('login.admin');
         }
-        return redirect()->route('login.admin');
+
+        $user = Auth::user();
+        $groupId = $user->group_id;
+
+        // 2. เรียก Service ตาม group_id
+        if ($groupId == '5') {
+            $data = $managerService->getDashboardData($user);
+            return view('admin.index.adminmanager', $data);
+        }
+
+        // if ($groupId == '3') {
+        //     $data = $managementService->getDashboardData($user);
+        //     return view('admin.index.adminmanagement', $data);
+        // }
+
+        // if (in_array($groupId, ['1', '2'])) {
+        //     $data = $userService->getDashboardData($user);
+        //     return view('admin.index.admindashboard', $data);
+        // }
+
+        abort(403, 'ไม่พบสิทธิ์การเข้าถึง Dashboard');
     }
+    // function admin(ManagerDashboardService $ManagerDashboardService){
+    //     if(AuthFacade::useradmin()){
+    //         $user = Auth::user();
+
+    //         $roadmapMonthly = $ManagerDashboardService->getRoadmapMonthly($user);
+
+    //         // return view('admin.index.index', compact('roadmapMonthly'));
+
+    //     //     $user = Auth::user();
+
+    //         $teamUserIds = User::with(['orgchart.line'])
+    //             ->whereHas('orgchart', function ($q) use ($user) {
+    //                 $q->where('parent_id', $user->orgchart->parent_id);
+    //             })
+    //             ->where('status', '1')
+    //             ->get()
+    //             ->mapWithKeys(function ($user) {
+    //                 return [
+    //                     $user->id => [
+    //                         'org_id'             => $user->org_id,
+    //                         'department_org_id'  => $user->department_org_id,
+    //                         'line'               => optional($user->orgchart->line)->id,
+    //                     ]
+    //                 ];
+    //             });
+
+    //         $count_all_line = $teamUserIds->count();
+
+    //         $count_all_team = User::where('team_id', $user->team_id)
+    //                             ->where('status', '1')
+    //                             ->count();
+
+    //         //นับจำนวนผู้ใช้งานทั้งหมดในทีมและสายงานของผู้ใช้งานปัจจุบัน
+
+
+    //         $roadmap = Roadmap::where([
+    //             'org_id'            => $user->org_id,
+    //             'department_org_id' => $user->department_org_id,
+    //             'line_id'              => optional($user->orgchart->line)->id,
+    //             'active'            => 'y',
+    //         ])->first();
+
+    //         $countCourse = 0;
+    //         $list_course_roadmap = collect();
+
+    //         if ($roadmap) {
+    //             $roadmapCourses = RoadmapCourse::where('roadmap_id', $roadmap->id)
+    //                 ->where('active', 'y')
+    //                 ->get();
+
+    //             $countCourse = $roadmapCourses->count();
+
+    //             $list_course_roadmap = $roadmapCourses->pluck('course_id');
+    //         }
+
+    //        $passCourses = PassCourse::whereIn('passcours_user', $teamUserIds->keys())
+    //             ->whereIn('passcours_cours', $list_course_roadmap)
+    //             ->where('passcours_status', 'pass')
+    //             ->select('passcours_user', 'passcours_cours')
+    //             ->get()
+    //             ->groupBy('passcours_user');
+
+    //         $totalCourse = $list_course_roadmap->count();
+
+    //         $pass = 0;
+    //         $notPass = 0;
+
+    //         foreach ($teamUserIds as $userId => $data) {
+
+    //             $userPass = isset($passCourses[$userId])
+    //                 ? $passCourses[$userId]->pluck('passcours_cours')->unique()->count()
+    //                 : 0;
+
+    //             if ($userPass == $totalCourse) {
+    //                 $pass++;
+    //             } else {
+    //                 $notPass++;
+    //             }
+    //         }
+
+    //         $totalUser = $pass + $notPass;
+
+    //         $course_user_roadmap = [
+    //             'pass' => $pass,
+    //             'not_pass' => $notPass,
+    //             'per_pass' => $totalUser > 0
+    //                 ? round(($pass / $totalUser) * 100, 2)
+    //                 : 0,
+    //             'per_not' => $totalUser > 0
+    //                 ? round(($notPass / $totalUser) * 100, 2)
+    //                 : 0,
+    //             'total_user' => $totalUser,
+    //         ];
+
+    //         $now = Carbon::now();
+
+    //         // คอร์สที่ยังไม่หมดอายุ
+    //         $validCourses = Course::whereIn('course_id', $list_course_roadmap)
+    //             ->where('active', 'y')
+    //             ->where('end_date', '>=', $now);
+
+    //         $openCourse = (clone $validCourses)
+    //             ->where('start_date', '<=', $now)
+    //             ->count();
+
+    //         $closeCourse = (clone $validCourses)
+    //             ->where('start_date', '>', $now)
+    //             ->count();
+
+    //         $course_roadmap = [
+    //             'count_course' => $countCourse,
+    //             'open'         => $openCourse,
+    //             'close'        => $closeCourse,
+    //         ];
+    //         // นับจำนวนผู้ใช้งานที่เรียนครบตามหลักสูตรใน Roadmap ของผู้ใช้งานปัจจุบัน
+
+    //         $courseScores = CourseScore::whereIn('user_id', $teamUserIds->keys())
+    //                         ->whereIn('course_id', $list_course_roadmap)
+    //                         ->where('score_status', 'pass')
+    //                         ->where('active', 'y')
+    //                         ->select('user_id', 'course_id')
+    //                         ->get()
+    //                         ->groupBy('course_id');
+
+    //         $courseScoreSummary = [];
+    //         $totalPercent = 0;
+
+    //         foreach ($list_course_roadmap as $courseId) {
+
+    //             $pass = isset($courseScores[$courseId])
+    //                 ? $courseScores[$courseId]->pluck('user_id')->unique()->count()
+    //                 : 0;
+
+    //             $notPass = $totalUser - $pass;
+
+    //             $percent = $totalUser > 0
+    //                 ? round(($pass / $totalUser) * 100, 2)
+    //                 : 0;
+
+    //             $courseScoreSummary[$courseId] = [
+    //                 'pass' => $pass,
+    //                 'not_pass' => $notPass,
+    //                 'percent' => $percent,
+    //             ];
+
+    //             $totalPercent += $percent;
+    //         }
+
+    //         $avgPercent = count($courseScoreSummary) > 0
+    //             ? round($totalPercent / count($courseScoreSummary), 2)
+    //             : 0;
+
+    //         // เปอเซ็นต์เฉลี่ยของผู้ใช้งานที่เรียนครบตามหลักสูตรใน Roadmap ของผู้ใช้งานปัจจุบัน
+
+    //         $user_team = User::with(['orgchart.line'])
+    //             ->where('team_id', $user->team_id)
+    //             ->where('status', '1')
+    //             ->get()
+    //             ->mapWithKeys(function ($user) {
+    //                 return [
+    //                     $user->id => [
+    //                         'org_id'            => $user->org_id,
+    //                         'department_org_id' => $user->department_org_id,
+    //                         'line'              => optional($user->orgchart->line)->id,
+    //                     ]
+    //                 ];
+    //             });
+
+    //             $mandatorySummary = $ManagerDashboardService->getMandatorySummary($user);
+
+    //             $nearExpireCourses = $ManagerDashboardService->getNearExpireCourses($user);
+
+    //             $teamLearning = $ManagerDashboardService->getTeamLearningProgress(
+    //                                 $user,
+    //                                 request('keyword')
+    //                             );
+    //             $teamLatestActivity = $ManagerDashboardService->getTeamLatestActivity($user);
+
+
+    //         // dd($mandatorySummary);
+
+    //         return view("admin.index.index", compact(
+    //                     'user',
+    //                     'count_all_team',
+    //                     'count_all_line',
+    //                     'course_user_roadmap',
+    //                     'course_roadmap',
+    //                     'avgPercent',
+    //                     'roadmapMonthly',
+    //                     'mandatorySummary',
+    //                     'nearExpireCourses',
+    //                     'teamLearning',
+    //                      'teamLatestActivity'
+    //                 ));
+    //     }
+    //     return redirect()->route('login.admin');
+    // }
+
     function loginadmin(Request $request){
         if ($request->isMethod('post')) {
             $validator = Validator::make($request->all(), [
