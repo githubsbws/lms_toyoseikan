@@ -215,7 +215,7 @@ Route::get('/ocr/file/{ocrFileId}', [OcrSearchController::class, 'showPdf']);
 
 // ----- admin src
 Route::middleware([CheckTokenValidityAdmin::class])->group(function () {
-Route::get('admin',[AdminController::class,'admin'])->name('admin')->middleware('checkIdleTimeout');
+Route::get('admin',[AdminController::class,'indexDashboard'])->name('admin')->middleware('checkIdleTimeout');
 Route::get('loginadmin',[AdminController::class,'loginadmin'])->name('login.admin');
 Route::post('loginadmin',[AdminController::class,'loginadmin'])->name('login.admin');
 // Route::post('loginadmin',[AdminController::class,'loginadmin'])->name('login.admin')->middleware('recaptcha');
