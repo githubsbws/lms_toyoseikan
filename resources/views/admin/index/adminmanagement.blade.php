@@ -1,7 +1,3 @@
-@extends('admin.layouts.dashboard-layout')
-
-@section('dashboard-content')
-<div class="main-content admin-management">
 			<div class="container-fluid">
 
 				<section class="section-1 row">
@@ -458,14 +454,3 @@
 					</div>
 				</section>
 			</div>
-
->
-</div>
-
-@endsection
-
-@push('scripts')
-<script type="text/javascript">
-// Scripts เฉพาะหน้า Management Dashboard (ถ้ามี)
-</script>
-@endpush
