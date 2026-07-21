@@ -147,10 +147,11 @@ class AdminController extends Controller
         //     return view('admin.index.adminmanagement', $data);
         // }
 
-        // if (in_array($groupId, ['1', '2'])) {
-        //     $data = $userService->getDashboardData($user);
-        //     return view('admin.index.admindashboard', $data);
-        // }
+        if (in_array($groupId, ['1', '2'])) {
+            $data = [];
+            // $data = $userService->getDashboardData($user);
+            return view('admin.index.admindashboard', $data);
+        }
 
         abort(403, 'ไม่พบสิทธิ์การเข้าถึง Dashboard');
     }
