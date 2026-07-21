@@ -247,8 +247,10 @@
 											<option value="" selected>อัตราการเรียนครบ (%)</option>
 										</select> --}}
 									</div>
-									<div class="card-body" style="flex: 1; min-height: fit-content;">
-										<div id="team-learning-trends" style="width: 100%; height: 100%;"></div>
+									<div class="card-body">
+										<div id="team-learning-trends"
+											style="width:100%;height:280px;">
+										</div>
 									</div>
 								</div>
 							</div>
@@ -848,15 +850,18 @@ function drawLineChart() {
     data.addColumn('string', 'Month');
     data.addColumn('number', 'Complete (%)');
 
-    @php
-        $chartData = [];
-        foreach($roadmapMonthly as $item) {
-            $chartData[] = [
-                \Carbon\Carbon::parse($item['month'])->locale('th')->translatedFormat('M'),
-                (float) $item['complete_percent']
-            ];
-        }
-    @endphp
+	@php
+		$chartData = [];
+
+		foreach($roadmapMonthly as $item){
+
+			$chartData[] = [
+				$item['label'],
+				(float)$item['percent']
+			];
+
+		}
+	@endphp
 
     data.addRows(@json($chartData));
 
@@ -864,7 +869,7 @@ function drawLineChart() {
         chartArea: {width: '85%', height: '70%'},
         legend: {position: 'none'},
         hAxis: {
-            title: ''
+            title: '',
         },
         vAxis: {
             title: 'Complete (%)',

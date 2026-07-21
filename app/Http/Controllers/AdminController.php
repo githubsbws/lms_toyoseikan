@@ -124,7 +124,7 @@ class AdminController extends Controller
     //
     public int $limit = 100;
     public function indexDashboard(
-        ManagerDashboardService $managerService,
+        ManagerDashboardService $ManagerDashboardService,
         // ManagementDashboardService $managementService,
         // UserDashboardService $userService
     ) {
@@ -137,9 +137,49 @@ class AdminController extends Controller
         $groupId = $user->group_id;
 
         // 2. เรียก Service ตาม group_id
-        if ($groupId == '5') {
-            $data = $managerService->getDashboardData($user);
-            return view('admin.index.adminmanager', $data);
+    if ($groupId == '5') {
+            $dashboardTitle = 'Dashboard หัวหน้าพนักงาน';
+
+            $dashboardSector = $user->orgchart->line->title ?? 'ไม่พบข้อมูลสายงาน';
+
+            $roadmapMonthly = $ManagerDashboardService->getRoadmapMonthly($user);
+
+            $count_all_team  = $ManagerDashboardService->CountTeamUsers($user);
+
+            $count_all_line  = $ManagerDashboardService->CountLineUsers($user);
+
+            $roadmapSummary = $ManagerDashboardService->getRoadmapSummary($user);
+
+            $course_user_roadmap = $roadmapSummary['course_user_roadmap'];
+            $course_roadmap      = $roadmapSummary['course_roadmap'];
+            $avgPercent          = $roadmapSummary['avgPercent'];
+
+            $mandatorySummary = $ManagerDashboardService->getMandatorySummary($user);
+
+            $nearExpireCourses = $ManagerDashboardService->getNearExpireCourses($user);
+
+            $teamLearning = $ManagerDashboardService->getTeamLearningProgress(
+                                    $user,
+                                    request('keyword')
+                                );
+            $teamLatestActivity = $ManagerDashboardService->getTeamLatestActivity($user);
+
+
+            return view('admin.index.adminmanager', compact(
+                'roadmapMonthly',
+                'count_all_team',
+                'count_all_line',
+                'course_user_roadmap',
+                'course_user_roadmap',
+                'course_roadmap',
+                'avgPercent',
+                'mandatorySummary',
+                'nearExpireCourses',
+                'teamLearning',
+                'teamLatestActivity',
+                'user',
+                'dashboardTitle',
+                'dashboardSector'));
         }
 
         // if ($groupId == '3') {

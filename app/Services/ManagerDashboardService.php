@@ -6,6 +6,7 @@ use App\Models\Users;
 use App\Models\Roadmap;
 use App\Models\RoadmapCourse;
 use App\Models\Passcourse;
+use App\Models\CourseScore;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Learn;
@@ -47,6 +48,35 @@ class ManagerDashboardService
         ->get();
     }
 
+    public function CountTeamUsers($loginUser)
+    {
+        return Users::where('team_id', $loginUser->team_id)
+                                ->where('status', '1')
+                                ->count();
+    }
+
+    public function CountLineUsers($loginUser)
+    {
+        $lineUserIds = Users::with(['orgchart.line'])
+            ->whereHas('orgchart', function ($q) use ($loginUser) {
+                $q->where('parent_id', $loginUser->orgchart->parent_id);
+            })
+            ->where('status', '1')
+            ->get()
+            ->mapWithKeys(function ($user) {
+                return [
+                    $user->id => [
+                        'org_id'             => $user->org_id,
+                        'department_org_id'  => $user->department_org_id,
+                        'line'               => optional($user->orgchart->line)->id,
+                    ]
+                ];
+            });
+
+        return $lineUserIds->count();
+        
+    }
+
     private function getRoadmaps()
     {
         return Roadmap::where('active', 'y')->get();
@@ -57,16 +87,183 @@ class ManagerDashboardService
         return RoadmapCourse::where('active', 'y')->get();
     }
 
-    private function getPassCourses($users)
-    {
-        return PassCourse::whereIn('passcours_user', $users->pluck('id'))
-            ->where('passcours_status', 'pass')
-            ->whereBetween('passcours_date', [
-                Carbon::now()->subMonths(5)->startOfMonth(),
-                Carbon::now()->endOfMonth()
-            ])
+public function getRoadmapSummary($loginUser)
+{
+    // ==========================
+    // Team User
+    // ==========================
+    $teamUserIds = Users::with(['orgchart.line'])
+        ->whereHas('orgchart', function ($q) use ($loginUser) {
+            $q->where('parent_id', $loginUser->orgchart->parent_id);
+        })
+        ->where('status', '1')
+        ->get()
+        ->mapWithKeys(function ($user) {
+            return [
+                $user->id => [
+                    'org_id'            => $user->org_id,
+                    'department_org_id' => $user->department_org_id,
+                    'line'              => optional($user->orgchart->line)->id,
+                ]
+            ];
+        });
+
+    // ==========================
+    // Roadmap
+    // ==========================
+    $roadmap = Roadmap::where([
+        'org_id'            => $loginUser->org_id,
+        'department_org_id' => $loginUser->department_org_id,
+        'line_id'           => optional($loginUser->orgchart->line)->id,
+        'active'            => 'y',
+    ])->first();
+
+    $countCourse = 0;
+    $list_course_roadmap = collect();
+
+    if ($roadmap) {
+
+        $roadmapCourses = RoadmapCourse::where('roadmap_id', $roadmap->id)
+            ->where('active', 'y')
             ->get();
+
+        $countCourse = $roadmapCourses->count();
+
+        $list_course_roadmap = $roadmapCourses->pluck('course_id');
     }
+
+    // ==========================
+    // Pass Course
+    // ==========================
+    $passCourses = PassCourse::whereIn('passcours_user', $teamUserIds->keys())
+        ->whereIn('passcours_cours', $list_course_roadmap)
+        ->where('passcours_status', 'pass')
+        ->select('passcours_user', 'passcours_cours')
+        ->get()
+        ->groupBy('passcours_user');
+
+    $totalCourse = $list_course_roadmap->count();
+
+    $pass = 0;
+    $notPass = 0;
+
+    foreach ($teamUserIds as $userId => $data) {
+
+        $userPass = isset($passCourses[$userId])
+            ? $passCourses[$userId]->pluck('passcours_cours')->unique()->count()
+            : 0;
+
+        if ($userPass == $totalCourse) {
+            $pass++;
+        } else {
+            $notPass++;
+        }
+    }
+
+    $totalUser = $pass + $notPass;
+
+    $course_user_roadmap = [
+
+        'pass'       => $pass,
+
+        'not_pass'   => $notPass,
+
+        'per_pass'   => $totalUser > 0
+            ? round(($pass / $totalUser) * 100, 2)
+            : 0,
+
+        'per_not'    => $totalUser > 0
+            ? round(($notPass / $totalUser) * 100, 2)
+            : 0,
+
+        'total_user' => $totalUser,
+
+    ];
+
+    // ==========================
+    // Course Roadmap
+    // ==========================
+    $now = Carbon::now();
+
+    $validCourses = Course::whereIn('course_id', $list_course_roadmap)
+        ->where('active', 'y')
+        ->where('end_date', '>=', $now);
+
+    $openCourse = (clone $validCourses)
+        ->where('start_date', '<=', $now)
+        ->count();
+
+    $closeCourse = (clone $validCourses)
+        ->where('start_date', '>', $now)
+        ->count();
+
+    $course_roadmap = [
+
+        'count_course' => $countCourse,
+
+        'open'         => $openCourse,
+
+        'close'        => $closeCourse,
+
+    ];
+
+    // ==========================
+    // Average Percent
+    // ==========================
+    $courseScores = CourseScore::whereIn('user_id', $teamUserIds->keys())
+        ->whereIn('course_id', $list_course_roadmap)
+        ->where('score_status', 'pass')
+        ->where('active', 'y')
+        ->select('user_id', 'course_id')
+        ->get()
+        ->groupBy('course_id');
+
+    $courseScoreSummary = [];
+
+    $totalPercent = 0;
+
+    foreach ($list_course_roadmap as $courseId) {
+
+        $pass = isset($courseScores[$courseId])
+            ? $courseScores[$courseId]->pluck('user_id')->unique()->count()
+            : 0;
+
+        $notPass = $totalUser - $pass;
+
+        $percent = $totalUser > 0
+            ? round(($pass / $totalUser) * 100, 2)
+            : 0;
+
+        $courseScoreSummary[$courseId] = [
+
+            'pass'      => $pass,
+
+            'not_pass'  => $notPass,
+
+            'percent'   => $percent,
+
+        ];
+
+        $totalPercent += $percent;
+    }
+
+    $avgPercent = count($courseScoreSummary) > 0
+        ? round($totalPercent / count($courseScoreSummary), 2)
+        : 0;
+
+    // ==========================
+    // Return
+    // ==========================
+    return [
+
+        'course_user_roadmap' => $course_user_roadmap,
+
+        'course_roadmap'      => $course_roadmap,
+
+        'avgPercent'          => $avgPercent,
+
+    ];
+}
 
     private function buildRoadmapMap()
     {
@@ -218,11 +415,17 @@ class ManagerDashboardService
                         ];
 
             $result[] = [
-                'month' => $thaiMonths[$month->month] . ' ' . ($month->year + 543),
+
+                'month' => $month->format('Y-m'),
+
+                'label' => $thaiMonths[$month->month] . ' ' . ($month->year + 543),
+
                 'pass' => $pass,
+
                 'percent' => $totalUser > 0
                     ? round(($pass / $totalUser) * 100, 2)
                     : 0,
+
             ];
 
         }
