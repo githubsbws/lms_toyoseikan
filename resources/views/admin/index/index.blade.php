@@ -81,11 +81,7 @@
 
 <body class="">
 	<div id="wrapper">
-
-
-
 		<div class="content-wrapper">
-
 			<nav style="width: 100%; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding-inline: 20px; padding-block: 5px; margin-bottom: 20px; background-color: #fff;"
 				class="custom-navbar">
 				<a href="#" style=" font-size: larger;">
@@ -104,76 +100,31 @@
 				<div style="display: flex; flex-direction: column; gap: 5px;">
 					<div
 						style="display: flex; flex-direction: row; justify-content: end; align-items: center; gap: 40px; width: 100%;">
-						{{-- <div style="display: flex; align-items: center;">
-							<a href="#" class="notification-link">
-								<span style="position: relative; display: inline-block;">
-									<i class="fa-regular fa-bell fa-xl"></i>
-									<span class="badge"
-										style="position: absolute; top: -6px; right: -10px; background-color: #dc3545; color: #fff; padding-inline: 3px; padding-block: 3px; font-size: smaller;">12</span>
-								</span>
-							</a>
-						</div> --}}
-						{{-- <a href=""><i class="fa-regular fa-circle-question fa-xl"></i>
-						</a> --}}
-						{{-- <div class="dropdown"> --}}
-							{{-- <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false" style="display: flex; flex-direction: row; align-items: center;"> --}}
 								<div style="display: flex; flex-direction: row; align-items: center; gap: 15px;">
-									{{-- <img src="https://img.magnific.com/free-photo/handsome-young-cheerful-man-with-arms-crossed_171337-1073.jpg?semt=ais_hybrid&w=740&q=80"
-										alt="" class="img-circle" style="width: 40px; height: 40px;"> --}}
 									<div style="display: flex; flex-direction: column; font-size: smaller;">
 										<strong>คุณ {{ $user->Profiles->firstname }} {{ $user->Profiles->lastname }}</strong>
 										<span>{{ $user->orgchart->title ?? '' }}</span>
 									</div>
 								</div> <span class="caret"></span>
-							{{-- </a> --}}
-							{{-- <ul class="dropdown-menu">
-								<li><a href="#">Action</a></li>
-								<li><a href="#">Another action</a></li>
-								<li><a href="#">Something else here</a></li>
-								<li role="separator" class="divider"></li>
-								<li><a href="#">Separated link</a></li>
-							</ul> --}}
-						{{-- </div> --}}
 					</div>
-					<form action="" style="display: flex; flex-direction: row; gap: 10px; width: 100%;">
-						{{-- <div class="input-group date-input">
-							<input type="text" id="dateRange" class="form-control" style="border-right: none;" />
-							<span class="input-group-addon" style="background:#fff;">
-								<i class="fa-regular fa-calendar"></i>
-							</span>
-						</div> --}}
-
-						{{-- <div class="dropdown">
-							<button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-								<i class="fa-solid fa-filter"></i><span>ตัวกรอง</span></button>
-							</button>
-							<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-								<a class="dropdown-item" href="#">Action</a>
-								<a class="dropdown-item" href="#">Another action</a>
-								<a class="dropdown-item" href="#">Something else here</a>
-							</div>
-						</div> --}}
-					</form>
 				</div>
 			</nav>
 
-			<!-- Admin manager -->
-            @if (auth()->user()->group_id == '5')
+
+            {{-- @if (auth()->user()->group_id == '5')
 			    @include('admin.index.adminmanager')
-			<!-- Admin Management -->
+
             @elseif (auth()->user()->group_id == '3')
 			    @include('admin.index.adminmanagement')
-			<!-- Admin Dashboard -->
+
             @elseif (in_array(auth()->user()->group_id, ['1', '2']))
 			    @include('admin.index.admindashboard')
             @else
-                {{-- Fallback: กรณีมี group_id อื่นๆ --}}
+
                 <div class="alert alert-warning">
                     <i class="fa fa-warning"></i> ไม่พบสิทธิ์การเข้าถึง Dashboard
                 </div>
-            @endif
-
+            @endif --}}
 
 		</div>
 

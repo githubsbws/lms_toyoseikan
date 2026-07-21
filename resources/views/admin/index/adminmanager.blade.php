@@ -1,4 +1,7 @@
-		<div class="main-content admin-manager">
+@extends('admin.layouts.dashboard-layout')
+
+@section('dashboard-content')
+<div class="main-content admin-manager">
 
 				<div class="container-fluid">
 
@@ -758,3 +761,125 @@
 				</div>
 
 			</div>
+
+>
+
+@endsection
+
+@push('scripts')
+<script type="text/javascript">
+
+let typingTimer;
+
+function loadTable(page = 1){
+
+    $.ajax({
+
+        url: "{{ route('dashboard.team-learning.ajax') }}",
+        type: "GET",
+
+        data:{
+            keyword: $('#keyword').val(),
+            page: page
+        },
+
+        beforeSend:function(){
+
+            $('#loading-overlay').css('display','flex');
+
+            $('#team-learning-table').css({
+                opacity:.4,
+                'pointer-events':'none'
+            });
+
+        },
+
+        success:function(res){
+
+            $('#team-learning-table').html(res);
+
+        },
+
+        error:function(err){
+            console.error(err);
+        },
+
+        complete:function(){
+
+            $('#loading-overlay').css('display','none');
+
+            $('#team-learning-table').css({
+                opacity:1,
+                'pointer-events':'auto'
+            });
+
+        }
+
+    });
+
+}
+
+$('#keyword').on('keyup',function(){
+
+    clearTimeout(typingTimer);
+
+    typingTimer = setTimeout(function(){
+
+        loadTable(1);
+
+    }, 500);
+
+});
+
+$(document).on('click','.pagination a',function(e){
+
+    e.preventDefault();
+
+    let url = $(this).attr('href');
+    let page = new URL(url).searchParams.get('page');
+
+    loadTable(page);
+
+});
+
+// Team Learning Trends Chart
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawLineChart);
+
+function drawLineChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Month');
+    data.addColumn('number', 'Complete (%)');
+
+    @php
+        $chartData = [];
+        foreach($roadmapMonthly as $item) {
+            $chartData[] = [
+                \Carbon\Carbon::parse($item['month'])->locale('th')->translatedFormat('M'),
+                (float) $item['complete_percent']
+            ];
+        }
+    @endphp
+
+    data.addRows(@json($chartData));
+
+    var options = {
+        chartArea: {width: '85%', height: '70%'},
+        legend: {position: 'none'},
+        hAxis: {
+            title: ''
+        },
+        vAxis: {
+            title: 'Complete (%)',
+            minValue: 0,
+            maxValue: 100
+        },
+        colors: ['#007bff']
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('team-learning-trends'));
+    chart.draw(data, options);
+}
+
+</script>
+@endpush

@@ -1,4 +1,7 @@
-			<div class="container-fluid">
+@extends('admin.layouts.dashboard-layout')
+
+@section('dashboard-content')
+            <div class="container-fluid">
 				<!-- SECTION 1 -->
 				<section>
 					<div class="row row-eq-height row-filter">
@@ -757,3 +760,10 @@
 					</div>
 				</section>
 			</div>
+@endsection
+
+@push('scripts')
+<script type="text/javascript">
+// Scripts เฉพาะหน้า User Dashboard (ถ้ามี)
+</script>
+@endpush
