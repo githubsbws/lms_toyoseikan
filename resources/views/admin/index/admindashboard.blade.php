@@ -764,6 +764,26 @@
 
 @push('scripts')
 <script type="text/javascript">
-// Scripts เฉพาะหน้า User Dashboard (ถ้ามี)
-</script>
+		$(function() {
+			$('#dateSec3').daterangepicker({
+				autoUpdateInput: true,
+				locale: {
+					format: 'DD/MM/YYYY',
+					separator: ' - ',
+					applyLabel: 'เลือก',
+					cancelLabel: 'ล้าง',
+					fromLabel: 'จาก',
+					toLabel: 'ถึง',
+					customRangeLabel: 'กำหนดเอง',
+					weekLabel: 'W',
+					daysOfWeek: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
+					monthNames: [
+						'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+						'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+					],
+					firstDay: 1
+				}
+			});
+		});
+	</script>
 @endpush
