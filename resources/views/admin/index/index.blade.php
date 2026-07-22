@@ -573,29 +573,7 @@ $(document).on('click','.pagination a',function(e){
 	</script>
 
 	<!-- Admin Dashboard -->
-	<script>
-		$(function() {
-			$('#dateSec3').daterangepicker({
-				autoUpdateInput: true,
-				locale: {
-					format: 'DD/MM/YYYY',
-					separator: ' - ',
-					applyLabel: 'เลือก',
-					cancelLabel: 'ล้าง',
-					fromLabel: 'จาก',
-					toLabel: 'ถึง',
-					customRangeLabel: 'กำหนดเอง',
-					weekLabel: 'W',
-					daysOfWeek: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
-					monthNames: [
-						'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-						'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-					],
-					firstDay: 1
-				}
-			});
-		});
-	</script>
+
 
 </body>
 @endsection

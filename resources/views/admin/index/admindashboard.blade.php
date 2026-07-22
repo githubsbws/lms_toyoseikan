@@ -1,6 +1,7 @@
 @extends('admin.layouts.dashboard-layout')
 
 @section('dashboard-content')
+<div class="main-content admin-dashboard" style="max-width: 1400px; margin: 0 auto; padding: 0 20px;">
             <div class="container-fluid">
 				<!-- SECTION 1 -->
 				<section>
@@ -110,29 +111,17 @@
 							</div>
 						</div>
 						<div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
-							<div class="card" style="color: #ffc107;">
+							<div class="card">
 								<div class="summary">
 									<div class="summary-header">
-										<div style="background-color: color-mix(in srgb, #ffc107 15%, transparent);">
-											<i class="fa-solid fa-clipboard-list fa-2xl"></i>
+										<div style="padding: 10px; background-color: color-mix(in srgb, #ffc107 15%, transparent);">
+											<i class="fa-solid fa-user-clock fa-xl" style="color: #ffc107;"></i>
 										</div>
 									</div>
 									<div class="summary-body">
-										<span>แบบทดสอบทั้งหมด</span><strong>342</strong><span>ข้อ</span>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
-							<div class="card" style="color: #000000;">
-								<div class="summary">
-									<div class="summary-header">
-										<div style="background-color: color-mix(in srgb, #000000 15%, transparent);">
-											<i class="fa-regular fa-rectangle-list fa-2xl"></i>
-										</div>
-									</div>
-									<div class="summary-body">
-										<span>บันทึกการใช้งาน (Logs)</span><strong>2,853</strong><span>รายการ</span>
+										<strong style="font-size: large;">การอนุมัติที่รออยู่</strong>
+										<h5><span style="color: #ffc107; font-weight:bold; font-size: large;">7</span>
+											รายการ</h5>
 									</div>
 								</div>
 							</div>
@@ -144,60 +133,6 @@
 				<!-- SECTION 3 -->
 				<section class="section3">
 					<div class="row row-eq-height custom-row-gap">
-						<div class="col-lg-4 col-md-12 col-sm-12">
-							<div class="card">
-								<div class="card-header"><strong>การอัปโหลดเนื้อหาล่าสุด</strong></div>
-								<div class="card-body" style="font-size: smaller;">
-									<div class="table-responsive">
-										<table class="table table-no-border">
-											<tbody>
-												<tr style="color: gray;">
-													<td><i class="fa-regular fa-file-lines" style="color: #dc3545;"></i>
-													</td>
-													<td style="color:#000000;">คู่มือการตั้งค่าเครื่องจักร รุ่นใหม่</td>
-													<td>PDF</td>
-													<td>15/05/2024 10:30</td>
-													<td>Admin</td>
-												</tr>
-												<tr style="color: gray;">
-													<td><i class="fa-regular fa-file-lines" style="color: #198754;"></i>
-													</td>
-													<td style="color:#000000;">แนวทางการควบคุมคุณภาพ</td>
-													<td style="color:#198754;">PPTX</td>
-													<td>15/05/2024 09:15</td>
-													<td>Trainer01</td>
-												</tr>
-												<tr style="color: gray;">
-													<td><i class="fa-regular fa-file-video" style="color: #0d6efd;"></i>
-													</td>
-													<td style="color:#000000;">คลิปการบำรุงรักษาเครื่องจักร</td>
-													<td style="color:#198754;">Video</td>
-													<td>14/05/2024 16:45</td>
-													<td>Trainer02</td>
-												</tr>
-												<tr style="color: gray;">
-													<td><i class="fa-regular fa-file-excel" style="color: #198754;"></i>
-													</td>
-													<td style="color:#000000;">แบบฟอร์มตรวจสุขภาพ</td>
-													<td style="color:#198754;">Excel</td>
-													<td>15/05/2024 14:30</td>
-													<td>Admin</td>
-												</tr>
-												<tr style="color: gray;">
-													<td><i class="fa-regular fa-file-image" style="color: #0d6efd;"></i>
-													</td>
-													<td style="color:#000000;">ภาพขั้นตอนงานไลน์</td>
-													<td style="color:#198754;">Image</td>
-													<td>14/05/2024 10:15</td>
-													<td>Admin</td>
-												</tr>
-											</tbody>
-
-										</table>
-									</div>
-								</div>
-							</div>
-						</div>
 						<div class="col-lg-4 col-md-12 col-sm-12">
 							<div class="card">
 								<div class="card-header"><strong>คอร์สที่ต้องติดตาม (Overdue)</strong></div>
@@ -306,30 +241,7 @@
 																				</g>
 																				<g></g>
 																			</svg>
-																			<div aria-label="A tabular representation of the data in the chart." style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">
-																				<table>
-																					<thead>
-																						<tr>
-																							<th>Effort</th>
-																							<th>Amount given</th>
-																						</tr>
-																					</thead>
-																					<tbody>
-																						<tr>
-																							<td>Success</td>
-																							<td>70</td>
-																						</tr>
-																						<tr>
-																							<td>Bonus</td>
-																							<td>8</td>
-																						</tr>
-																						<tr>
-																							<td>Unfinished</td>
-																							<td>22</td>
-																						</tr>
-																					</tbody>
-																				</table>
-																			</div>
+
 																		</div>
 																	</div>
 																	<div aria-hidden="true" style="display: none; position: absolute; top: 80px; left: 80px; white-space: nowrap; font-family: Arial; font-size: 7px;"></div>
@@ -342,8 +254,7 @@
 														<div class="summary-body">
 															<h3 style="margin: 0; color: #198754; font-weight: bold;">78%
 															</h3>
-															<div><span style="color: #198754;">+6%</span> จากเดือนก่อน
-															</div>
+
 														</div>
 													</div>
 												</div>
@@ -351,7 +262,7 @@
 										</div>
 										<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 											<div class="card" style="padding: 10px;">
-												<div class="card-header">อัตตราการเข้าเรียน</div>
+												<div class="card-header">อัตราการเข้าเรียน</div>
 												<div class="card-body" style="display: flex; align-items: center; height: 100%;">
 													<div class="summary">
 														<div class="summary-header">
@@ -363,49 +274,7 @@
 															<div style="display: flex; flex-direction: row; gap:5px; align-items: end;">
 																<h3 style="margin: 0; font-weight: bold;">356</h3>คน
 															</div>
-															<div><span style="color: #198754;">+8%</span> จากเดือนก่อน</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class="row row-eq-height custom-row-gap">
-										<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-											<div class="card" style="padding: 10px;">
-												<div class="card-header">เวลาเรียนรวม</div>
-												<div class="card-body" style="display: flex; align-items: center; height: 100%;">
-													<div class="summary">
-														<div class="summary-header" style="display: flex; align-items: center;">
-															<i class="fa-regular fa-clock fa-2xl" style="color: #000;"></i>
-														</div>
-														<div class="summary-body">
-															<div style="display: flex; flex-direction: row; gap:5px; align-items: end;">
-																<h3 style="margin: 0; font-weight: bold;">1,248</h3>ชม.
-															</div>
-															<div><span style="color: #198754;">+120 ชม.</span> จากเดือนก่อน
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-										<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-											<div class="card" style="padding: 10px;">
-												<div class="card-header">การเรียนรู้ต่อคน (เฉลี่ย)</div>
-												<div class="card-body" style="display: flex; align-items: center; height: 100%;">
-													<div class="summary">
-														<div class="summary-header">
-															<div style="background-color: color-mix(in srgb, #ffc107 15%, transparent); padding-inline: 10px; border-radius: 50%;">
-																<i class="fa-regular fa-user fa-lg" style="color:#ffc107;"></i>
-															</div>
-														</div>
-														<div class="summary-body">
-															<div style="display: flex; flex-direction: row; gap:5px; align-items: end;">
-																<h3 style="margin: 0; font-weight: bold;">2.4</h3>หลักสูตร
-															</div>
-															<div><span style="color: #198754;">+0.3%</span> จากเดือนก่อน
-															</div>
+
 														</div>
 													</div>
 												</div>
@@ -413,9 +282,46 @@
 										</div>
 									</div>
 								</div>
-								<!--  <div class="card-footer">
-                                <a href="">ดูรายงานฉบับเต็ม<i class="fa-solid fa-angle-right"></i></a>
-                            </div> -->
+							</div>
+						</div>
+                        <div class="col-lg-3 col-md-6 col-sm-12">
+							<div class="card">
+								<div class="card-header"><strong>สถานะระบบ</strong></div>
+								<div class="card-body">
+									<div style="display: flex; flex-direction: column; gap: 5px;">
+										<div style="display: flex; flex-direction: row; width: 100%; justify-content: space-between; align-items: end;">
+											<div style="display: flex; flex-direction: column; width: 90%;">
+												<div style="display: flex; flex-direction: row; justify-content: space-between;">
+													<span>พื้นที่จัดเก็บ</span>
+													<span>266 GB / 1 TB</span>
+												</div>
+												<div class="progress" style="height: 15px; width: 100%; margin: 2px;">
+													<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 25%;">
+													</div>
+												</div>
+											</div>
+											<span>25%</span>
+										</div>
+										<div class="card">
+											<div style="display: flex; flex-direction: row; justify-content: space-between;">
+												<span>ผู้ใช้งานออนไลน์</span>
+												<div style="display: flex; flex-direction:row; gap: 5px; align-items:center;">
+													<strong>45 คน</strong>
+
+												</div>
+											</div>
+										</div>
+										<div class="card">
+											<div style="display: flex; flex-direction: row; justify-content: space-between;">
+												<span>การใช้งานวันนี้</span>
+												<div style="display: flex; flex-direction:row; gap: 5px; align-items:center;">
+													<strong>1,246 ครั้ง</strong>
+
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -629,137 +535,12 @@
 
 							</div>
 						</div>
-						<div class="col-lg-3 col-md-6 col-sm-12">
-							<div class="card">
-								<div class="card-header"><strong>สถานะระบบ</strong></div>
-								<div class="card-body">
-									<div style="display: flex; flex-direction: column; gap: 5px;">
-										<div style="display: flex; flex-direction: row; width: 100%; justify-content: space-between; align-items: end;">
-											<div style="display: flex; flex-direction: column; width: 90%;">
-												<div style="display: flex; flex-direction: row; justify-content: space-between;">
-													<span>พื้นที่จัดเก็บ</span>
-													<span>266 GB / 1 TB</span>
-												</div>
-												<div class="progress" style="height: 15px; width: 100%; margin: 2px;">
-													<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 25%;">
-													</div>
-												</div>
-											</div>
-											<span>25%</span>
-										</div>
-										<div class="card">
-											<div style="display: flex; flex-direction: row; justify-content: space-between;">
-												<span>ผู้ใช้งานออนไลน์</span>
-												<div style="display: flex; flex-direction:row; gap: 5px; align-items:center;">
-													<strong>45 คน</strong>
-													<i class="fa-solid fa-angle-down"></i>
-												</div>
-											</div>
-										</div>
-										<div class="card">
-											<div style="display: flex; flex-direction: row; justify-content: space-between;">
-												<span>การใช้งานวันนี้</span>
-												<div style="display: flex; flex-direction:row; gap: 5px; align-items:center;">
-													<strong>1,246 ครั้ง</strong>
-													<i class="fa-solid fa-angle-down"></i>
-												</div>
-											</div>
-										</div>
-										<div class="card">
-											<div style="display: flex; flex-direction: row; justify-content: space-between;">
-												<span>Backup ล่าสุด</span>
-												<div style="display: flex; flex-direction:row; gap: 5px; align-items:center;">
-													<strong>15/05/2024 02:00</strong>
-													<i class="fa-solid fa-angle-down"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer"><span style="color: #198754;"><i class="fa-solid fa-circle-check"></i> ทำงานปกติ</span></div>
-							</div>
-						</div>
-					</div>
-				</section>
 
-				<!-- SECTION 5 -->
-				<section>
-					<div class="row row-eq-height custom-row-gap">
-						<div class="col-lg-5 col-md-12 col-sm-12">
-							<div class="card">
-								<div class="card-header"><strong>ประกาศจากผู้ดูแลระบบ</strong></div>
-								<div class="card-body">
-									<div class="summary">
-										<div class="summary-header">
-											<div style="background-color: color-mix(in srgb, #0d6efd 15%, transparent); padding-inline: 10px;">
-												<i class="fa-solid fa-bullhorn fa-lg" style="color: #0d6efd;"></i>
-											</div>
-										</div>
-										<div style="display: flex; flex-direction: column; gap:5px;">
-											<strong>ระบบจะปิดปรับปรูงในวันที่ 25 พฤษภาคม 2567 เวลา 22:00 - 02:00 น.</strong>
-											<span>อาจไม่สามารถใช้งานระบบในช่วงเวลาดังกล่าว ขออภัยในความไม่สดวก</span>
-										</div>
-									</div>
-								</div>
-
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-6 col-sm-12">
-							<div class="card">
-								<div class="card-header"><strong>นโยบายและกำหนดการสำคัญ</strong></div>
-								<div class="card-body">
-									<div style="display: flex; flex-direction:column; gap:5px;">
-										<div style="display: flex; flex-direction:row; justify-content: space-between; align-items: center;">
-											<div class="summary">
-												<div class="summary-header">
-													<div style="background-color: color-mix(in srgb, #0d6efd 15%, transparent); padding-inline: 10px;">
-														<i class="fa-regular fa-file-lines fa-lg" style="color: #0d6efd;"></i>
-													</div>
-												</div>
-												<div style="display: flex; flex-direction: column; gap:5px;">
-													<strong>นโยบายความปลอดภัยในการทำงาน</strong>
-													<span>อัปเดตล่าสุด 01/05/2024</span>
-												</div>
-											</div>
-											<a href="" class="btn btn-default" style="color:#0d6efd; border:#0d6efd 1px solid;">ดูเอกสาร</a>
-										</div>
-										<div style="display: flex; flex-direction:row; justify-content: space-between; align-items: center;">
-											<div class="summary">
-												<div class="summary-header">
-													<div style="background-color: color-mix(in srgb, #198754 15%, transparent); padding-inline: 10px;">
-														<i class="fa-regular fa-file-lines fa-lg" style="color: #198754;"></i>
-													</div>
-												</div>
-												<div style="display: flex; flex-direction: column; gap:5px;">
-													<strong>แผนการอบรมประจำปี 2567</strong>
-													<span>อัปเดตล่าสุด 01/01/2024</span>
-												</div>
-											</div>
-											<a href="" class="btn btn-default" style="color:#0d6efd; border:#0d6efd 1px solid;">ดูเอกสาร</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-3 col-md-6 col-sm-12">
-							<div class="card">
-								<div class="summary">
-									<div class="summary-header">
-										<div style="padding: 10px; background-color: color-mix(in srgb, #ffc107 15%, transparent);">
-											<i class="fa-solid fa-user-clock fa-xl" style="color: #ffc107;"></i>
-										</div>
-									</div>
-									<div class="summary-body">
-										<strong style="font-size: large;">การอนุมัติที่รออยู่</strong>
-										<h5><span style="color: #ffc107; font-weight:bold; font-size: large;">7</span>
-											รายการ</h5>
-									</div>
-								</div>
-							</div>
-						</div>
 					</div>
 				</section>
 			</div>
+</div>
+
 @endsection
 
 @push('scripts')
