@@ -118,6 +118,7 @@ use App\Helpers\ChildOrgHelper;
 use App\Services\RoadmapService;
 use Google\LongRunning\Operation;
 use App\Services\ManagerDashboardService;
+use App\Services\AdminDashboardService;
 
 class AdminController extends Controller
 {
@@ -126,7 +127,7 @@ class AdminController extends Controller
     public function indexDashboard(
         ManagerDashboardService $ManagerDashboardService,
         // ManagementDashboardService $managementService,
-        // UserDashboardService $userService
+        AdminDashboardService $adminService
     ) {
         // 1. เช็ค Authentication
         if (!AuthFacade::useradmin()) {
@@ -188,9 +189,19 @@ class AdminController extends Controller
         // }
 
         if (in_array($groupId, ['1', '2'])) {
-            $data = [];
-            // $data = $userService->getDashboardData($user);
-            return view('admin.index.admindashboard', $data);
+            $dashboardTitle = 'Dashboard ผู้ดูแลระบบ';
+            $dashboardSector = 'ทุกแผนก';
+
+            // แถบค้นหาบนสุด (แผนก/ส่วนงาน/ไลน์/ทีม/ช่วงเวลา/keyword) จะต่อสายเข้า $filters
+            // ตอนทำแถบค้นหา ยังไม่ต้องแก้ signature ของ service
+            $filters = request()->only([
+                'department_id', 'section_id', 'line_id', 'team_id',
+                'date_from', 'date_to', 'search',
+            ]);
+
+            $dashboard = $adminService->getDashboardData($filters);
+
+            return view('admin.index.admindashboard', compact('dashboard','dashboardTitle','dashboardSector'));
         }
 
         abort(403, 'ไม่พบสิทธิ์การเข้าถึง Dashboard');
