@@ -196,16 +196,44 @@ class AdminController extends Controller
             // ตอนทำแถบค้นหา ยังไม่ต้องแก้ signature ของ service
             $filters = request()->only([
                 'department_id', 'section_id', 'line_id', 'team_id',
-                'date_from', 'date_to', 'search',
+                'date_from', 'date_to',
             ]);
 
+            $dept = $adminService->getDepartment();
+            $team = $adminService->getTeam();
             $dashboard = $adminService->getDashboardData($filters);
 
-            return view('admin.index.admindashboard', compact('dashboard','dashboardTitle','dashboardSector'));
+            return view('admin.index.admindashboard', compact('dept','team','dashboard','dashboardTitle','dashboardSector'));
         }
 
         abort(403, 'ไม่พบสิทธิ์การเข้าถึง Dashboard');
     }
+
+    /**
+     * AJAX: คืนลูกของ orgchart node ที่เลือก (ใช้กับแถบ filter แบบ dynamic dropdown
+     * department -> section -> line ในหน้า admindashboard)
+     *
+     * ฝั่ง frontend ส่ง parent_id มา จะได้ลูกกลับไปพร้อม level ของแต่ละตัว
+     * เผื่อกรณีบางแผนกไม่มี "ไลน์" (level 5) แล้วกระโดดไป "ตำแหน่ง" (level 6) เลย
+     * frontend เช็ค level ที่ได้กลับมาเพื่อรู้ว่าจะ render dropdown ไหนต่อ
+     */
+    public function getOrgChildren(Request $request, AdminDashboardService $adminService)
+    {
+        if (!AuthFacade::useradmin()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $parentId = $request->query('parent_id');
+
+        if (empty($parentId)) {
+            return response()->json([]);
+        }
+
+        $children = $adminService->getOrgChildren($parentId);
+
+        return response()->json($children);
+    }
+
     // function admin(ManagerDashboardService $ManagerDashboardService){
     //     if(AuthFacade::useradmin()){
     //         $user = Auth::user();

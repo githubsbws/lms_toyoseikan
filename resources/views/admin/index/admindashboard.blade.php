@@ -5,12 +5,13 @@
             <div class="container-fluid">
 				<!-- SECTION 1 -->
 				<section>
+					<form method="GET" action="{{ route('admin') }}" id="dashboardFilterForm">
 					<div class="row row-eq-height row-filter">
 						<div class="col-lg-2 col-md-4 col-sm-6 col-xs-12">
 							<div style="margin-top: auto; width: 100%;">
 								<span>ช่วงเวลา</span>
 								<div class="input-group date-input">
-									<input type="text" id="dateSec3" class="form-control" style="border-right: none;">
+									<input type="text" id="dateSec3" name="date_range" class="form-control" style="border-right: none;">
 									<span class="input-group-addon" style="background:#fff;">
 										<i class="fa-regular fa-calendar"></i>
 									</span>
@@ -21,8 +22,11 @@
 							<div class="card" style="border: rgb(62, 31, 146) 2px solid; padding: 10px !important;">
 								<strong class="card-header">แผนก</strong>
 								<div class="card-body">
-									<select name="" id="" class="form-control">
-										<option value="#" selected="">ทั้งหมด</option>
+									<select name="department_id" id="filterDepartment" class="form-control">
+										<option value="" @selected(!request('department_id'))>ทั้งหมด</option>
+                                        @foreach ( $dept as $depts)
+                                            <option value="{{ $depts->id }}" @selected(request('department_id') == $depts->id)>{{ $depts->title }}</option>
+                                        @endforeach
 									</select>
 								</div>
 							</div>
@@ -31,8 +35,8 @@
 							<div class="card" style="border: rgb(62, 31, 146) 2px solid; padding: 10px !important;">
 								<strong class="card-header">ส่วนงาน</strong>
 								<div class="card-body">
-									<select name="" id="" class="form-control">
-										<option value="#" selected="">ทั้งหมด</option>
+									<select name="section_id" id="filterSection" class="form-control" {{ request('department_id') ? '' : 'disabled' }}>
+										<option value="" selected>ทั้งหมด</option>
 									</select>
 								</div>
 							</div>
@@ -41,9 +45,10 @@
 							<div class="card" style="border: rgb(62, 31, 146) 2px solid; padding: 10px !important;">
 								<strong class="card-header">ไลน์ผลิต</strong>
 								<div class="card-body">
-									<select name="" id="" class="form-control">
-										<option value="#" selected="">ทั้งหมด</option>
+									<select name="line_id" id="filterLine" class="form-control" {{ request('section_id') ? '' : 'disabled' }}>
+										<option value="" selected>ทั้งหมด</option>
 									</select>
+									<small class="text-muted" id="filterLineNote" style="display:none;">แผนกนี้ไม่มีไลน์ผลิต</small>
 								</div>
 							</div>
 						</div>
@@ -51,8 +56,11 @@
 							<div class="card" style="border: rgb(62, 31, 146) 2px solid; padding: 10px !important;">
 								<strong class="card-header">ทีม</strong>
 								<div class="card-body">
-									<select name="" id="" class="form-control">
-										<option value="#" selected="">ทั้งหมด</option>
+									<select name="team_id" id="filterTeam" class="form-control">
+										<option value="" @selected(!request('team_id'))>ทั้งหมด</option>
+                                        @foreach ( $team as $teams)
+                                            <option value="{{ $teams->id }}" @selected(request('team_id') == $teams->id)>{{ $teams->name }}</option>
+                                        @endforeach
 									</select>
 								</div>
 							</div>
@@ -63,6 +71,7 @@
 							</div>
 						</div>
 					</div>
+					</form>
 				</section>
 
 				<!-- SECTION 2 -->
@@ -283,31 +292,32 @@
 								<div class="card-header"><strong>การเรียนรู้ตามแผนก</strong></div>
 								<div class="card-body" style="font-size: smaller;">
 									<div class="table-responsive">
-										{{-- <table class="table table-condensed table-no-border">
+										<table class="table table-condensed table-no-border">
 											<thead>
 												<tr>
 													<th>แผนก</th>
 													<th>ผู้เรียน (คน)</th>
-													<th colspan="2">Completion Rate</th>
-													<th colspan="2">Pass Rate</th>
-													<th>คอร์สที่กำลังเรียน</th>
+													<th>คอร์สที่ต้องเรียน</th>
+													<th>ผ่านแล้ว (รวม)</th>
+													<th>Completion Rate</th>
 												</tr>
 											</thead>
 											<tbody>
 												@forelse ($dashboard['departmentLearning'] as $dept)
 												<tr>
-													<td>{{ $dept->department }}</td>
-													<td>{{ $dept->learner_count }}</td>
-													Completion Rate / Pass Rate / คอร์สที่กำลังเรียน: รอ confirm สูตรคำนวณ
-													<td colspan="4" class="text-muted">รอสูตรคำนวณ</td>
+													<td>{{ $dept['department'] }}</td>
+													<td>{{ $dept['learner_count'] }}</td>
+													<td>{{ $dept['total_courses'] }}</td>
+													<td>{{ $dept['passed_count'] }}</td>
+													<td>{{ $dept['completion_rate'] }}%</td>
 												</tr>
 												@empty
 												<tr>
-													<td colspan="6" class="text-center text-muted">ไม่มีข้อมูล</td>
+													<td colspan="5" class="text-center text-muted">ไม่มีข้อมูล</td>
 												</tr>
 												@endforelse
 											</tbody>
-										</table> --}}
+										</table>
 									</div>
 								</div>
 
@@ -355,26 +365,165 @@
 
 @push('scripts')
 <script type="text/javascript">
-		$(function() {
-			$('#dateSec3').daterangepicker({
-				autoUpdateInput: true,
-				locale: {
-					format: 'DD/MM/YYYY',
-					separator: ' - ',
-					applyLabel: 'เลือก',
-					cancelLabel: 'ล้าง',
-					fromLabel: 'จาก',
-					toLabel: 'ถึง',
-					customRangeLabel: 'กำหนดเอง',
-					weekLabel: 'W',
-					daysOfWeek: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
-					monthNames: [
-						'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-						'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-					],
-					firstDay: 1
-				}
-			});
-		});
-	</script>
+    $(function() {
+        const LINE_LEVEL = '{{ \App\Services\AdminDashboardService::LINE_LEVEL }}';
+        const POSITION_LEVEL = '{{ \App\Services\AdminDashboardService::POSITION_LEVEL }}';
+        const orgChildrenUrl = "{{ route('admin.org_children') }}";
+
+        const $department = $('#filterDepartment');
+        const $section = $('#filterSection');
+        const $line = $('#filterLine');
+        const $lineNote = $('#filterLineNote');
+
+        // เติม option ให้ select ตัวใดตัวหนึ่ง แล้วคืนค่า option แรกไว้เป็น "ทั้งหมด" เสมอ
+        function fillSelect($select, items, placeholder) {
+            $select.empty();
+            $select.append($('<option>', { value: '', text: placeholder, selected: true }));
+            items.forEach(function (item) {
+                $select.append($('<option>', { value: item.id, text: item.title }));
+            });
+        }
+
+        // ดึงลูกของ orgchart node จาก server (department -> section, section -> line/position)
+        function fetchOrgChildren(parentId) {
+            return $.getJSON(orgChildrenUrl, { parent_id: parentId });
+        }
+
+        // เมื่อเลือกแผนก: โหลด "ส่วนงาน" ใหม่ แล้วรีเซ็ต "ไลน์" ทิ้ง (เพราะขึ้นกับส่วนงานที่เลือก)
+        $department.on('change', function () {
+            const deptId = $(this).val();
+
+            fillSelect($section, [], 'ทั้งหมด');
+            fillSelect($line, [], 'ทั้งหมด');
+            $line.prop('disabled', true);
+            $lineNote.hide();
+
+            if (!deptId) {
+                $section.prop('disabled', true);
+                $dashboardFilterForm_submit();
+                return;
+            }
+
+            fetchOrgChildren(deptId).done(function (sections) {
+                fillSelect($section, sections, 'ทั้งหมด');
+                $section.prop('disabled', false);
+            });
+
+            $dashboardFilterForm_submit();
+        });
+
+        // เมื่อเลือกส่วนงาน: โหลดลูกของส่วนงานนี้ อาจได้ "ไลน์" (level 5) หรือถ้าแผนกนี้
+        // ไม่มีไลน์ ก็จะได้ "ตำแหน่ง" (level 6) มาตรง ๆ เลย — filter ตอนนี้ยังไม่รองรับ
+        // ระดับตำแหน่ง จึงแค่ปิดดรอปดาวน์ไลน์ไว้และโชว์ข้อความแจ้งว่าไม่มีไลน์
+        $section.on('change', function () {
+            const sectionId = $(this).val();
+
+            fillSelect($line, [], 'ทั้งหมด');
+            $lineNote.hide();
+
+            if (!sectionId) {
+                $line.prop('disabled', true);
+                $dashboardFilterForm_submit();
+                return;
+            }
+
+            fetchOrgChildren(sectionId).done(function (children) {
+                const hasLine = children.length > 0 && String(children[0].level) === LINE_LEVEL;
+                const hasPosition = children.length > 0 && String(children[0].level) === POSITION_LEVEL;
+
+                if (hasLine) {
+                    fillSelect($line, children, 'ทั้งหมด');
+                    $line.prop('disabled', false);
+                    $lineNote.hide();
+                } else if (hasPosition) {
+                    // แผนกนี้ไม่มีไลน์ผลิต ข้ามไปที่ตำแหน่งเลย - filter ยังไม่รองรับ
+                    // ตำแหน่งในรอบนี้ จึงปิดดรอปดาวน์ไลน์ไว้และแจ้งผู้ใช้
+                    $line.prop('disabled', true);
+                    $lineNote.show();
+                } else {
+                    $line.prop('disabled', true);
+                }
+            });
+
+            $dashboardFilterForm_submit();
+        });
+
+        $line.on('change', function () {
+            $dashboardFilterForm_submit();
+        });
+
+        $('#filterTeam').on('change', function () {
+            $dashboardFilterForm_submit();
+        });
+
+        function $dashboardFilterForm_submit() {
+            $('#dashboardFilterForm').trigger('submit');
+        }
+
+        // ค่าที่เลือกไว้จากรอบก่อน (มาจาก query string ตอน reload หน้า) ใช้ตอน init
+        // เพื่อเติม dropdown ส่วนงาน/ไลน์ ให้ตรงกับที่เคยเลือกไว้
+        const selectedDeptId = '{{ request('department_id') }}';
+        const selectedSectionId = '{{ request('section_id') }}';
+        const selectedLineId = '{{ request('line_id') }}';
+
+        function initFilterDropdowns() {
+            if (!selectedDeptId) {
+                return;
+            }
+
+            fetchOrgChildren(selectedDeptId).done(function (sections) {
+                fillSelect($section, sections, 'ทั้งหมด');
+                $section.prop('disabled', false);
+
+                if (selectedSectionId) {
+                    $section.val(selectedSectionId);
+                }
+
+                if (!selectedSectionId) {
+                    return;
+                }
+
+                fetchOrgChildren(selectedSectionId).done(function (children) {
+                    const hasLine = children.length > 0 && String(children[0].level) === LINE_LEVEL;
+                    const hasPosition = children.length > 0 && String(children[0].level) === POSITION_LEVEL;
+
+                    if (hasLine) {
+                        fillSelect($line, children, 'ทั้งหมด');
+                        $line.prop('disabled', false);
+
+                        if (selectedLineId) {
+                            $line.val(selectedLineId);
+                        }
+                    } else if (hasPosition) {
+                        $line.prop('disabled', true);
+                        $lineNote.show();
+                    }
+                });
+            });
+        }
+
+        initFilterDropdowns();
+
+        $('#dateSec3').daterangepicker({
+            autoUpdateInput: true,
+            locale: {
+                format: 'DD/MM/YYYY',
+                separator: ' - ',
+                applyLabel: 'เลือก',
+                cancelLabel: 'ล้าง',
+                fromLabel: 'จาก',
+                toLabel: 'ถึง',
+                customRangeLabel: 'กำหนดเอง',
+                weekLabel: 'W',
+                daysOfWeek: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
+                monthNames: [
+                    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+                ],
+                firstDay: 1
+            }
+        });
+    });
+
+</script>
 @endpush
