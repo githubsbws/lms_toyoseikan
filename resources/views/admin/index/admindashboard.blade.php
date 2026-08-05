@@ -66,8 +66,13 @@
 							</div>
 						</div>
 						<div class="col-lg-2 col-md-4 col-sm-6 col-xs-12 fix-export">
-							<div style="width: 100%; display:flex; ">
-								<button type="button" class="btn btn-default w-100" style="border: rgb(62, 31, 146) 2px solid; display: flex; flex-direction: row; gap: 5px; align-items: center; color: rgb(62, 31, 146); justify-content: center;"><i class="fa-solid fa-download fa-xl" style="color: rgb(62, 31, 146);"></i><strong>Export</strong></button>
+							<div style="width: 100%; display:flex; gap: 5px;">
+								<button type="submit" class="btn btn-primary w-50" style="border: rgb(62, 31, 146) 2px solid; background: rgb(62, 31, 146); color: white;">
+									<i class="fa-solid fa-filter"></i> <strong>ค้นหา</strong>
+								</button>
+								<button type="button" class="btn btn-default w-50" style="border: rgb(62, 31, 146) 2px solid; color: rgb(62, 31, 146);">
+									<i class="fa-solid fa-download"></i> <strong>Export</strong>
+								</button>
 							</div>
 						</div>
 					</div>
@@ -375,134 +380,109 @@
         const $line = $('#filterLine');
         const $lineNote = $('#filterLineNote');
 
-        // เติม option ให้ select ตัวใดตัวหนึ่ง แล้วคืนค่า option แรกไว้เป็น "ทั้งหมด" เสมอ
-        function fillSelect($select, items, placeholder) {
+        // เติม option ให้ select ตัวใดตัวหนึ่ง
+        function fillSelect($select, items, placeholder = 'ทั้งหมด') {
             $select.empty();
-            $select.append($('<option>', { value: '', text: placeholder, selected: true }));
+            $select.append($('<option>', { value: '', text: placeholder }));
             items.forEach(function (item) {
                 $select.append($('<option>', { value: item.id, text: item.title }));
             });
         }
 
-        // ดึงลูกของ orgchart node จาก server (department -> section, section -> line/position)
+        // ดึงลูกของ orgchart node จาก server
         function fetchOrgChildren(parentId) {
             return $.getJSON(orgChildrenUrl, { parent_id: parentId });
         }
 
-        // เมื่อเลือกแผนก: โหลด "ส่วนงาน" ใหม่ แล้วรีเซ็ต "ไลน์" ทิ้ง (เพราะขึ้นกับส่วนงานที่เลือก)
+        // เมื่อเลือกแผนก: โหลดส่วนงาน แล้วรีเซ็ตไลน์
         $department.on('change', function () {
             const deptId = $(this).val();
 
-            fillSelect($section, [], 'ทั้งหมด');
-            fillSelect($line, [], 'ทั้งหมด');
+            fillSelect($section, []);
+            fillSelect($line, []);
+            $section.prop('disabled', true);
             $line.prop('disabled', true);
             $lineNote.hide();
 
             if (!deptId) {
-                $section.prop('disabled', true);
-                $dashboardFilterForm_submit();
                 return;
             }
 
             fetchOrgChildren(deptId).done(function (sections) {
-                fillSelect($section, sections, 'ทั้งหมด');
-                $section.prop('disabled', false);
+                if (sections.length > 0) {
+                    fillSelect($section, sections);
+                    $section.prop('disabled', false);
+                }
             });
-
-            $dashboardFilterForm_submit();
         });
 
-        // เมื่อเลือกส่วนงาน: โหลดลูกของส่วนงานนี้ อาจได้ "ไลน์" (level 5) หรือถ้าแผนกนี้
-        // ไม่มีไลน์ ก็จะได้ "ตำแหน่ง" (level 6) มาตรง ๆ เลย — filter ตอนนี้ยังไม่รองรับ
-        // ระดับตำแหน่ง จึงแค่ปิดดรอปดาวน์ไลน์ไว้และโชว์ข้อความแจ้งว่าไม่มีไลน์
+        // เมื่อเลือกส่วนงาน: โหลดไลน์ (หรืออาจได้ตำแหน่งมาตรงถ้าไม่มีไลน์)
         $section.on('change', function () {
             const sectionId = $(this).val();
 
-            fillSelect($line, [], 'ทั้งหมด');
+            fillSelect($line, []);
+            $line.prop('disabled', true);
             $lineNote.hide();
 
             if (!sectionId) {
-                $line.prop('disabled', true);
-                $dashboardFilterForm_submit();
                 return;
             }
 
             fetchOrgChildren(sectionId).done(function (children) {
-                const hasLine = children.length > 0 && String(children[0].level) === LINE_LEVEL;
-                const hasPosition = children.length > 0 && String(children[0].level) === POSITION_LEVEL;
+                if (children.length === 0) {
+                    return;
+                }
 
-                if (hasLine) {
-                    fillSelect($line, children, 'ทั้งหมด');
+                const firstLevel = String(children[0].level);
+
+                if (firstLevel === LINE_LEVEL) {
+                    // แผนกนี้มีไลน์ผลิต
+                    fillSelect($line, children);
                     $line.prop('disabled', false);
                     $lineNote.hide();
-                } else if (hasPosition) {
-                    // แผนกนี้ไม่มีไลน์ผลิต ข้ามไปที่ตำแหน่งเลย - filter ยังไม่รองรับ
-                    // ตำแหน่งในรอบนี้ จึงปิดดรอปดาวน์ไลน์ไว้และแจ้งผู้ใช้
+                } else if (firstLevel === POSITION_LEVEL) {
+                    // แผนกนี้ไม่มีไลน์ ข้ามไปตำแหน่งเลย (filter ยังไม่รองรับ position)
                     $line.prop('disabled', true);
                     $lineNote.show();
-                } else {
-                    $line.prop('disabled', true);
                 }
             });
-
-            $dashboardFilterForm_submit();
         });
 
-        $line.on('change', function () {
-            $dashboardFilterForm_submit();
-        });
-
-        $('#filterTeam').on('change', function () {
-            $dashboardFilterForm_submit();
-        });
-
-        function $dashboardFilterForm_submit() {
-            $('#dashboardFilterForm').trigger('submit');
-        }
-
-        // ค่าที่เลือกไว้จากรอบก่อน (มาจาก query string ตอน reload หน้า) ใช้ตอน init
-        // เพื่อเติม dropdown ส่วนงาน/ไลน์ ให้ตรงกับที่เคยเลือกไว้
+        // Init: ถ้ามีค่า department_id จาก query string ให้โหลด section/line กลับมา
         const selectedDeptId = '{{ request('department_id') }}';
         const selectedSectionId = '{{ request('section_id') }}';
         const selectedLineId = '{{ request('line_id') }}';
 
-        function initFilterDropdowns() {
-            if (!selectedDeptId) {
-                return;
-            }
-
+        if (selectedDeptId) {
             fetchOrgChildren(selectedDeptId).done(function (sections) {
-                fillSelect($section, sections, 'ทั้งหมด');
-                $section.prop('disabled', false);
+                if (sections.length > 0) {
+                    fillSelect($section, sections);
+                    $section.prop('disabled', false);
 
-                if (selectedSectionId) {
-                    $section.val(selectedSectionId);
-                }
+                    if (selectedSectionId) {
+                        $section.val(selectedSectionId);
 
-                if (!selectedSectionId) {
-                    return;
-                }
+                        fetchOrgChildren(selectedSectionId).done(function (children) {
+                            if (children.length === 0) return;
 
-                fetchOrgChildren(selectedSectionId).done(function (children) {
-                    const hasLine = children.length > 0 && String(children[0].level) === LINE_LEVEL;
-                    const hasPosition = children.length > 0 && String(children[0].level) === POSITION_LEVEL;
+                            const firstLevel = String(children[0].level);
 
-                    if (hasLine) {
-                        fillSelect($line, children, 'ทั้งหมด');
-                        $line.prop('disabled', false);
+                            if (firstLevel === LINE_LEVEL) {
+                                fillSelect($line, children);
+                                $line.prop('disabled', false);
 
-                        if (selectedLineId) {
-                            $line.val(selectedLineId);
-                        }
-                    } else if (hasPosition) {
-                        $line.prop('disabled', true);
-                        $lineNote.show();
+                                if (selectedLineId) {
+                                    $line.val(selectedLineId);
+                                }
+                            } else if (firstLevel === POSITION_LEVEL) {
+                                $line.prop('disabled', true);
+                                $lineNote.show();
+                            }
+                        });
                     }
-                });
+                }
             });
         }
-
-        initFilterDropdowns();
 
         $('#dateSec3').daterangepicker({
             autoUpdateInput: true,

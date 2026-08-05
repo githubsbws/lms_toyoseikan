@@ -119,25 +119,120 @@ class AdminDashboardService
     /**
      * แถวที่ 1 (4 การ์ด): คอร์สทั้งหมด / เนื้อหาทั้งหมด / ผู้ใช้ทั้งหมด / รออนุมัติ
      *
-     * ใช้ DB::table()->count() แทน raw SQL string เพราะ connection 'pgsql'
-     * ตั้ง prefix ('tbl_') ไว้ใน config/database.php — query builder/Eloquent
-     * จะเติม prefix ให้เองตอน compile แต่ raw SQL string ไม่ผ่านการเติม prefix นี้
-     * (นี่คือสาเหตุของ error "relation course_online does not exist" ก่อนหน้านี้)
+     * ตอนนี้ apply filter แล้ว เพื่อให้การ์ดสอดคล้องกับข้อมูลด้านล่าง:
+     * 1. total_courses — กรอง org ผ่าน applyOrgFilterToQuery()
+     * 2. total_files — join file->lesson->course แล้วกรอง org
+     * 3. total_users — กรอง "คน" ตาม org hierarchy ผ่าน applyOrgFilterToUsers()
+     * 4. pending_approvals — join log_approve->users แล้วกรอง org
      *
-     * แลกกับ 4 round-trip แทน 1 แต่ปลอดภัยกว่าและ apply filter ต่อได้ง่ายกว่า raw SQL
-     *
-     * NOTE: ยังไม่ apply $filters ที่นี่ เพราะการ์ดสรุประดับบนสุดมักหมายถึง
-     * "ทั้งระบบ" — ถ้าต้องการให้ตัวเลขนี้ไหวตามแผนก/ทีมที่เลือกด้วย
-     * ต้องเพิ่ม WHERE ตามคีย์ที่เกี่ยวข้องในแต่ละ query (แจ้งได้ ผมจะเติมให้)
+     * Trade-off: ถ้า filter หนัก (เช่น เลือก line เล็ก ๆ) ตัวเลขการ์ดจะเล็กลง
+     * แต่ถูกต้องตามหลักการ (แสดงเฉพาะข้อมูลที่เลือก)
      */
     private function getOverviewStats(array $filters): array
     {
+        // 1. total_courses
+        $coursesQuery = DB::table('course_online')
+            ->where('active', 'y');
+        $coursesQuery = $this->applyOrgFilterToQuery($coursesQuery, $filters);
+        $totalCourses = $coursesQuery->count();
+
+        // 2. total_files (join file->lesson->course)
+        $filesQuery = DB::table('file')
+            ->join('lesson', 'file.lesson_id', '=', 'lesson.id')
+            ->join('course_online', 'lesson.course_id', '=', 'course_online.course_id')
+            ->where('file.active', 'y')
+            ->where('course_online.active', 'y');
+        $filesQuery = $this->applyOrgFilterToQuery($filesQuery, $filters);
+        $totalFiles = $filesQuery->count('file.id');
+
+        // 3. total_users (กรอง org_id ของคน ไม่ใช่คอร์ส)
+        $usersQuery = DB::table('users')
+            ->where('status', '1');
+        $usersQuery = $this->applyOrgFilterToUsers($usersQuery, $filters);
+        $totalUsers = $usersQuery->count();
+
+        // 4. pending_approvals (join users)
+        $approvalsQuery = DB::table('log_approve')
+            ->join('users', 'log_approve.user_id', '=', 'users.id')
+            ->where('users.status', '1');
+        $approvalsQuery = $this->applyOrgFilterToUsers($approvalsQuery, $filters, 'users');
+        $pendingApprovals = $approvalsQuery->count('log_approve.id');
+
         return [
-            'total_courses'     => DB::table('course_online')->where('active', 'y')->count(),
-            'total_files'       => DB::table('file')->where('active', 'y')->count(),
-            'total_users'       => DB::table('users')->where('status', '1')->count(),
-            'pending_approvals' => DB::table('log_approve')->count(),
+            'total_courses'     => $totalCourses,
+            'total_files'       => $totalFiles,
+            'total_users'       => $totalUsers,
+            'pending_approvals' => $pendingApprovals,
         ];
+    }
+
+    /**
+     * Apply org filter ให้ query ที่มี course_online (DB::table builder)
+     * เหมือน applyOrgFilter() แต่รองรับ DB::table() ที่ไม่มี Eloquent relations
+     */
+    private function applyOrgFilterToQuery($query, array $filters)
+    {
+        $deepOrgId = $filters['line_id'] ?? $filters['section_id'] ?? null;
+
+        if (!empty($deepOrgId)) {
+            $courseIds = DB::table('org_course')
+                ->where('orgchart_id', $deepOrgId)
+                ->pluck('course_id');
+            $query->whereIn('course_online.course_id', $courseIds);
+        } elseif (!empty($filters['department_id'])) {
+            $query->where('course_online.department_org_id', $filters['department_id']);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Apply org filter ให้ query ที่มี users (กรอง "คน" ตาม org hierarchy)
+     *
+     * users.org_id เก็บตำแหน่ง (level ลึกสุด) ถ้าเลือก department/section/line
+     * ต้องหา descendant org_id ทั้งหมด (รวมลูกหลานทุกชั้น) แล้ว whereIn
+     *
+     * $tableAlias: ถ้า join users ใช้ alias (เช่น 'users') ถ้าไม่ join ใช้ ''
+     */
+    private function applyOrgFilterToUsers($query, array $filters, string $tableAlias = '')
+    {
+        $prefix = $tableAlias ? $tableAlias . '.' : '';
+
+        $selectedOrgId = $filters['line_id'] ?? $filters['section_id'] ?? $filters['department_id'] ?? null;
+
+        if (!empty($selectedOrgId)) {
+            $descendantIds = $this->getDescendantOrgIds($selectedOrgId);
+            $query->whereIn($prefix . 'org_id', $descendantIds);
+        }
+
+        if (!empty($filters['team_id'])) {
+            $query->where($prefix . 'team_id', $filters['team_id']);
+        }
+
+        return $query;
+    }
+
+    /**
+     * หา org_id ทั้งหมดใน subtree ของ $parentId (รวมตัวมันเองด้วย)
+     * ใช้กับการกรอง users ที่ org_id ลึกกว่า department/section/line ที่เลือก
+     *
+     * Recursive: ถ้า tree ลึกมาก (เช่น > 10 ชั้น) อาจช้า แต่ในระบบนี้ลึกสุดแค่
+     * department(3) -> section(4) -> line(5) -> position(6) = 4 ชั้น ยังรับได้
+     */
+    private function getDescendantOrgIds($parentId): array
+    {
+        $result = [(int)$parentId];
+
+        $children = Orgchart::where('parent_id', $parentId)
+            ->where('active', self::ACTIVE)
+            ->pluck('id')
+            ->toArray();
+
+        foreach ($children as $childId) {
+            $result = array_merge($result, $this->getDescendantOrgIds($childId));
+        }
+
+        return $result;
     }
 
     /**
