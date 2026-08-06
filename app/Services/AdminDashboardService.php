@@ -117,26 +117,37 @@ class AdminDashboardService
     }
 
     /**
-     * แถวที่ 1 (4 การ์ด): คอร์สทั้งหมด / เนื้อหาทั้งหมด / ผู้ใช้ทั้งหมด / รออนุมัติ
+     * แถวที่ 1 (5 การ์ด): คอร์สพนักงานทั่วไป / คอร์สพนักงานใหม่ / เนื้อหาทั้งหมด / ผู้ใช้ทั้งหมด / รออนุมัติ
      *
      * ตอนนี้ apply filter แล้ว เพื่อให้การ์ดสอดคล้องกับข้อมูลด้านล่าง:
-     * 1. total_courses — กรอง org ผ่าน applyOrgFilterToQuery()
-     * 2. total_files — join file->lesson->course แล้วกรอง org
-     * 3. total_users — กรอง "คน" ตาม org hierarchy ผ่าน applyOrgFilterToUsers()
-     * 4. pending_approvals — join log_approve->users แล้วกรอง org
+     * 1. total_courses_general — คอร์สทั่วไป (is_onboarding = false) กรอง org ผ่าน applyOrgFilterToQuery()
+     * 2. total_courses_new_employee — คอร์สพนักงานใหม่ (is_onboarding = true) กรอง org เหมือนกัน
+     *    แยก query กันคนละตัว (ไม่ใช่ query เดียวแล้วนับ 2 เงื่อนไข) เพราะ is_onboarding
+     *    เป็นคนละกลุ่มความหมายกันโดยสิ้นเชิง ไม่ใช่แค่ filter ย่อยของ "คอร์สทั้งหมด"
+     * 3. total_files — join file->lesson->course แล้วกรอง org
+     * 4. total_users — กรอง "คน" ตาม org hierarchy ผ่าน applyOrgFilterToUsers()
+     * 5. pending_approvals — join log_approve->users แล้วกรอง org
      *
      * Trade-off: ถ้า filter หนัก (เช่น เลือก line เล็ก ๆ) ตัวเลขการ์ดจะเล็กลง
      * แต่ถูกต้องตามหลักการ (แสดงเฉพาะข้อมูลที่เลือก)
      */
     private function getOverviewStats(array $filters): array
     {
-        // 1. total_courses
-        $coursesQuery = DB::table('course_online')
-            ->where('active', 'y');
-        $coursesQuery = $this->applyOrgFilterToQuery($coursesQuery, $filters);
-        $totalCourses = $coursesQuery->count();
+        // 1. total_courses_general (คอร์สพนักงานทั่วไป)
+        $generalCoursesQuery = DB::table('course_online')
+            ->where('active', 'y')
+            ->where('is_onboarding', false);
+        $generalCoursesQuery = $this->applyOrgFilterToQuery($generalCoursesQuery, $filters);
+        $totalCoursesGeneral = $generalCoursesQuery->count();
 
-        // 2. total_files (join file->lesson->course)
+        // 2. total_courses_new_employee (คอร์สพนักงานใหม่)
+        $newEmployeeCoursesQuery = DB::table('course_online')
+            ->where('active', 'y')
+            ->where('is_onboarding', true);
+        $newEmployeeCoursesQuery = $this->applyOrgFilterToQuery($newEmployeeCoursesQuery, $filters);
+        $totalCoursesNewEmployee = $newEmployeeCoursesQuery->count();
+
+        // 3. total_files (join file->lesson->course)
         $filesQuery = DB::table('file')
             ->join('lesson', 'file.lesson_id', '=', 'lesson.id')
             ->join('course_online', 'lesson.course_id', '=', 'course_online.course_id')
@@ -145,13 +156,13 @@ class AdminDashboardService
         $filesQuery = $this->applyOrgFilterToQuery($filesQuery, $filters);
         $totalFiles = $filesQuery->count('file.id');
 
-        // 3. total_users (กรอง org_id ของคน ไม่ใช่คอร์ส)
+        // 4. total_users (กรอง org_id ของคน ไม่ใช่คอร์ส)
         $usersQuery = DB::table('users')
             ->where('status', '1');
         $usersQuery = $this->applyOrgFilterToUsers($usersQuery, $filters);
         $totalUsers = $usersQuery->count();
 
-        // 4. pending_approvals (join users)
+        // 5. pending_approvals (join users)
         $approvalsQuery = DB::table('log_approve')
             ->join('users', 'log_approve.user_id', '=', 'users.id')
             ->where('users.status', '1');
@@ -159,10 +170,11 @@ class AdminDashboardService
         $pendingApprovals = $approvalsQuery->count('log_approve.id');
 
         return [
-            'total_courses'     => $totalCourses,
-            'total_files'       => $totalFiles,
-            'total_users'       => $totalUsers,
-            'pending_approvals' => $pendingApprovals,
+            'total_courses_general'      => $totalCoursesGeneral,
+            'total_courses_new_employee' => $totalCoursesNewEmployee,
+            'total_files'                => $totalFiles,
+            'total_users'                => $totalUsers,
+            'pending_approvals'          => $pendingApprovals,
         ];
     }
 

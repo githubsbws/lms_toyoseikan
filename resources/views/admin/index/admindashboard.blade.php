@@ -81,7 +81,7 @@
 
 				<!-- SECTION 2 -->
 				<section class="container-fluid">
-					<div class="row row-eq-height four-col custom-row-gap justify-content-center" >
+					<div class="row row-eq-height five-col custom-row-gap justify-content-center" >
 						<div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
 							<div class="card" style="color: #0d6efd;">
 								<div class="summary">
@@ -91,7 +91,21 @@
 										</div>
 									</div>
 									<div class="summary-body">
-										<span>คอร์สทั้งหมด</span><strong>{{ number_format($dashboard['overview']['total_courses']) }}</strong><span>หลักสูตร</span>
+										<span>คอร์สพนักงานทั่วไป</span><strong>{{ number_format($dashboard['overview']['total_courses_general']) }}</strong><span>หลักสูตร</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+							<div class="card" style="color: #0dcaf0;">
+								<div class="summary">
+									<div class="summary-header">
+										<div style="background-color: color-mix(in srgb, #0dcaf0 15%, transparent);">
+											<i class="fa-solid fa-user-graduate fa-2xl"></i>
+										</div>
+									</div>
+									<div class="summary-body">
+										<span>คอร์สพนักงานใหม่</span><strong>{{ number_format($dashboard['overview']['total_courses_new_employee']) }}</strong><span>หลักสูตร</span>
 									</div>
 								</div>
 							</div>
