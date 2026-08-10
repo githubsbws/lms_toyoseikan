@@ -91,7 +91,8 @@
 										</div>
 									</div>
 									<div class="summary-body">
-										<span>คอร์สพนักงานทั่วไป</span><strong>{{ number_format($dashboard['overview']['total_courses_general']) }}</strong><span>หลักสูตร</span>
+										<span style="display:block;">คอร์สพนักงานทั่วไป</span>
+										<div><strong>{{ number_format($dashboard['overview']['total_courses_general']) }}</strong> <span>หลักสูตร</span></div>
 									</div>
 								</div>
 							</div>
@@ -105,7 +106,23 @@
 										</div>
 									</div>
 									<div class="summary-body">
-										<span>คอร์สพนักงานใหม่</span><strong>{{ number_format($dashboard['overview']['total_courses_new_employee']) }}</strong><span>หลักสูตร</span>
+										<span style="display:block;">คอร์สพนักงานใหม่</span>
+										<div><strong>{{ number_format($dashboard['overview']['total_courses_new_employee']) }}</strong> <span>หลักสูตร</span></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+							<div class="card" style="color: #0d6efd;">
+								<div class="summary">
+									<div class="summary-header">
+										<div style="background-color: color-mix(in srgb, #0d6efd 15%, transparent);">
+											<i class="fa-solid fa-video fa-2xl"></i>
+										</div>
+									</div>
+									<div class="summary-body">
+										<span style="display:block;">วิดีโอ</span>
+										<div><strong>{{ number_format($dashboard['overview']['total_videos']) }}</strong> <span>ไฟล์</span></div>
 									</div>
 								</div>
 							</div>
@@ -119,7 +136,8 @@
 										</div>
 									</div>
 									<div class="summary-body">
-										<span>เนื้อหาทั้งหมด</span><strong>{{ number_format($dashboard['overview']['total_files']) }}</strong><span>ไฟล์</span>
+										<span style="display:block;">ไฟล์</span>
+										<div><strong>{{ number_format($dashboard['overview']['total_documents']) }}</strong> <span>ไฟล์</span></div>
 									</div>
 								</div>
 							</div>

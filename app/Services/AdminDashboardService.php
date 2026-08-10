@@ -117,16 +117,19 @@ class AdminDashboardService
     }
 
     /**
-     * แถวที่ 1 (5 การ์ด): คอร์สพนักงานทั่วไป / คอร์สพนักงานใหม่ / เนื้อหาทั้งหมด / ผู้ใช้ทั้งหมด / รออนุมัติ
+     * แถวที่ 1 (6 การ์ด): คอร์สพนักงานทั่วไป / คอร์สพนักงานใหม่ / วิดีโอ / ไฟล์ / ผู้ใช้ทั้งหมด / รออนุมัติ
      *
      * ตอนนี้ apply filter แล้ว เพื่อให้การ์ดสอดคล้องกับข้อมูลด้านล่าง:
      * 1. total_courses_general — คอร์สทั่วไป (is_onboarding = false) กรอง org ผ่าน applyOrgFilterToQuery()
      * 2. total_courses_new_employee — คอร์สพนักงานใหม่ (is_onboarding = true) กรอง org เหมือนกัน
      *    แยก query กันคนละตัว (ไม่ใช่ query เดียวแล้วนับ 2 เงื่อนไข) เพราะ is_onboarding
      *    เป็นคนละกลุ่มความหมายกันโดยสิ้นเชิง ไม่ใช่แค่ filter ย่อยของ "คอร์สทั้งหมด"
-     * 3. total_files — join file->lesson->course แล้วกรอง org
-     * 4. total_users — กรอง "คน" ตาม org hierarchy ผ่าน applyOrgFilterToUsers()
-     * 5. pending_approvals — join log_approve->users แล้วกรอง org
+     * 3. total_videos — นับจากตาราง file (join file->lesson->course) กรอง org
+     * 4. total_documents — นับจากตาราง file_doc (join file_doc->lesson->course) กรอง org
+     *    แยก query กันคนละตัว เพราะวิดีโอกับไฟล์เอกสารเก็บอยู่คนละตาราง ไม่มี type column
+     *    ร่วมกันให้ filter ใน query เดียวได้
+     * 5. total_users — กรอง "คน" ตาม org hierarchy ผ่าน applyOrgFilterToUsers()
+     * 6. pending_approvals — join log_approve->users แล้วกรอง org
      *
      * Trade-off: ถ้า filter หนัก (เช่น เลือก line เล็ก ๆ) ตัวเลขการ์ดจะเล็กลง
      * แต่ถูกต้องตามหลักการ (แสดงเฉพาะข้อมูลที่เลือก)
@@ -147,14 +150,23 @@ class AdminDashboardService
         $newEmployeeCoursesQuery = $this->applyOrgFilterToQuery($newEmployeeCoursesQuery, $filters);
         $totalCoursesNewEmployee = $newEmployeeCoursesQuery->count();
 
-        // 3. total_files (join file->lesson->course)
-        $filesQuery = DB::table('file')
+        // 3a. total_videos (join file->lesson->course) — วิดีโอนับที่ตาราง file
+        $videosQuery = DB::table('file')
             ->join('lesson', 'file.lesson_id', '=', 'lesson.id')
             ->join('course_online', 'lesson.course_id', '=', 'course_online.course_id')
             ->where('file.active', 'y')
             ->where('course_online.active', 'y');
-        $filesQuery = $this->applyOrgFilterToQuery($filesQuery, $filters);
-        $totalFiles = $filesQuery->count('file.id');
+        $videosQuery = $this->applyOrgFilterToQuery($videosQuery, $filters);
+        $totalVideos = $videosQuery->count('file.id');
+
+        // 3b. total_documents (join file_doc->lesson->course) — ไฟล์นับที่ตาราง file_doc
+        $documentsQuery = DB::table('file_doc')
+            ->join('lesson', 'file_doc.lesson_id', '=', 'lesson.id')
+            ->join('course_online', 'lesson.course_id', '=', 'course_online.course_id')
+            ->where('file_doc.active', 'y')
+            ->where('course_online.active', 'y');
+        $documentsQuery = $this->applyOrgFilterToQuery($documentsQuery, $filters);
+        $totalDocuments = $documentsQuery->count('file_doc.id');
 
         // 4. total_users (กรอง org_id ของคน ไม่ใช่คอร์ส)
         $usersQuery = DB::table('users')
@@ -172,7 +184,8 @@ class AdminDashboardService
         return [
             'total_courses_general'      => $totalCoursesGeneral,
             'total_courses_new_employee' => $totalCoursesNewEmployee,
-            'total_files'                => $totalFiles,
+            'total_videos'                => $totalVideos,
+            'total_documents'             => $totalDocuments,
             'total_users'                => $totalUsers,
             'pending_approvals'          => $pendingApprovals,
         ];
