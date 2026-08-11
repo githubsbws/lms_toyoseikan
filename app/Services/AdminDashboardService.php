@@ -61,7 +61,7 @@ class AdminDashboardService
     public function getDashboardData(array $filters = []): array
     {
         return [
-            // แถวที่ 1: การ์ดสรุปตัวเลข 4 ใบ
+            // แถวที่ 1: การ์ดสรุปตัวเลข 6 ใบ
             'overview' => $this->getOverviewStats($filters),
 
             // แถวที่ 3 การ์ดที่ 1: คอร์สที่ต้องติดตาม
@@ -175,11 +175,10 @@ class AdminDashboardService
         $totalUsers = $usersQuery->count();
 
         // 5. pending_approvals (join users)
-        $approvalsQuery = DB::table('log_approve')
-            ->join('users', 'log_approve.user_id', '=', 'users.id')
-            ->where('users.status', '1');
+        $approvalsQuery = DB::table('coursescore')
+            ->where('coursescore.score_status', 'wait');
         $approvalsQuery = $this->applyOrgFilterToUsers($approvalsQuery, $filters, 'users');
-        $pendingApprovals = $approvalsQuery->count('log_approve.id');
+        $pendingApprovals = $approvalsQuery->count('coursescore.score_id');
 
         return [
             'total_courses_general'      => $totalCoursesGeneral,

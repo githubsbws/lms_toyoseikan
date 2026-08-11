@@ -18,7 +18,7 @@ class CourseService
     // app/Services/CourseService.php
     public function getCoursesForUser(Users $user)
     {
-        
+
         // 1. Base Query พร้อม Eager Loading ที่สะอาดขึ้น
         $query = Course::with([
             'lesson' => function($q) use ($user) {
@@ -54,13 +54,14 @@ class CourseService
                             'questions' => fn($subQ) => $subQ->select('ques_id', 'group_id', 'ques_type','ques_title','active') // เลือกเฉพาะฟิลด์ที่ใช้ประหยัด RAM
         ]),
         ])
-        ->where('course_online.active', self::STATUS_ACTIVE);
+        ->where('course_online.active', self::STATUS_ACTIVE)
+        ->orderBy('course_online.course_title','ASC');
 
         // 2. Branching Logic
         if ($user->team_id === Users::TEAM_NEWEMP) {
             return $this->applyRoadmapCriteria($query, $user);
         }
-        
+
 
         return $this->applyOrgCriteria($query, $user);
     }
@@ -243,7 +244,7 @@ class CourseService
             $examType = $course->groupTesting?->questions->first()?->ques_type;
             $course->exam_type = $examType; // 2=ปรนัย, 3=อัตนัย
         });
-        
+
     }
 
     public function completeCourse(int $userId, int $courseId): void
