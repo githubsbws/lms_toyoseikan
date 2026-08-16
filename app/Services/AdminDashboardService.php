@@ -72,6 +72,58 @@ class AdminDashboardService
 
             // แถวที่ 4 การ์ดที่ 2: หลักสูตรที่มีผู้เรียนมากที่สุด
             // 'popularCourses' => $this->getPopularCourses($filters),
+
+            // แถวที่ 3 การ์ดที่ 3: สถานะระบบ (พื้นที่จัดเก็บ / ผู้ใช้งานออนไลน์ / การใช้งานวันนี้)
+            // ไม่ apply $filters เพราะเป็นสถานะเครื่อง/เซิร์ฟเวอร์ ไม่เกี่ยวกับแผนก/ทีมที่เลือก
+            'systemStatus' => $this->getSystemStatus(),
+        ];
+    }
+
+    /**
+     * สถานะระบบ: พื้นที่จัดเก็บ / ผู้ใช้งานออนไลน์ / การใช้งานวันนี้
+     *
+     * พื้นที่จัดเก็บ: ใช้ disk_total_space()/disk_free_space() ของ PHP เอง — ฟังก์ชันนี้
+     * เป็น native PHP function ที่เรียก syscall ที่ถูกต้องให้เองตาม OS ที่ตัวเว็บรันอยู่จริง
+     * (Windows เรียก GetDiskFreeSpaceEx, Linux/Unix เรียก statvfs) โดยอัตโนมัติ
+     * ไม่ต้องเขียนโค้ดแยกเช็ค PHP_OS/PHP_OS_FAMILY แล้วเลือกคำสั่ง shell เอง
+     * (การยิง shell เช่น `df -h` หรือ `wmic` เสี่ยงกว่าและช้ากว่าฟังก์ชัน native มาก)
+     *
+     * ผู้ใช้งานออนไลน์: นับจาก users.online_status = 1 (คอลัมน์นี้ถูกอัปเดตจริงใน
+     * LoginController / CheckSingleLogin / UpdateOnlineStatus listener อยู่แล้ว)
+     *
+     * การใช้งานวันนี้: นับ record ในตาราง log_users ของวันนี้ (connection pgsql_noprefix
+     * ตามที่ประกาศไว้ใน Logusers model จึงไม่ต้องกังวลเรื่อง table prefix ที่นี่)
+     *
+     * Big O: 2 COUNT query (เร็ว, ใช้ index ธรรมชาติของ PK/status) + 1 native disk syscall
+     * ไม่มี loop ไม่มี N+1 ปลอดภัยแม้ users/log_users โตขึ้นหลายเท่า เพราะเป็น COUNT ล้วน
+     */
+    private function getSystemStatus(): array
+    {
+        $basePath = base_path();
+
+        $totalBytes = @disk_total_space($basePath) ?: 0;
+        $freeBytes  = @disk_free_space($basePath) ?: 0;
+        $usedBytes  = max($totalBytes - $freeBytes, 0);
+
+        $usedPercent = $totalBytes > 0
+            ? round(($usedBytes / $totalBytes) * 100)
+            : 0;
+
+        $onlineUsers = DB::table('users')
+            ->where('online_status', 1)
+            ->count();
+
+        // $todayUsage = DB::connection('pgsql_noprefix')
+        //     ->table('log_users')
+        //     ->whereDate('create_date', now()->toDateString())
+        //     ->count();
+
+        return [
+            'disk_used_gb'    => round($usedBytes / 1024 / 1024 / 1024, 1),
+            'disk_total_gb'   => round($totalBytes / 1024 / 1024 / 1024, 1),
+            'disk_used_percent' => $usedPercent,
+            'online_users'    => $onlineUsers,
+            // 'today_usage'     => $todayUsage,
         ];
     }
 
@@ -174,8 +226,11 @@ class AdminDashboardService
         $usersQuery = $this->applyOrgFilterToUsers($usersQuery, $filters);
         $totalUsers = $usersQuery->count();
 
-        // 5. pending_approvals (join users)
+        // 5. pending_approvals (ข้อสอบที่รอตรวจ) — ต้อง join users จริง ๆ ก่อน
+        // เพราะ applyOrgFilterToUsers() จะ where('users.org_id', ...) / where('users.team_id', ...)
+        // ถ้าไม่ join ให้ก่อน Postgres จะหา FROM-clause ของ tbl_users ไม่เจอ (บั๊กที่แก้อยู่นี้)
         $approvalsQuery = DB::table('coursescore')
+            ->join('users', 'coursescore.user_id', '=', 'users.id')
             ->where('coursescore.score_status', 'wait');
         $approvalsQuery = $this->applyOrgFilterToUsers($approvalsQuery, $filters, 'users');
         $pendingApprovals = $approvalsQuery->count('coursescore.score_id');

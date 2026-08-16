@@ -151,13 +151,13 @@
 										</div>
 									</div>
 									<div class="summary-body">
-										<span>ผู้ใช้ทั้งหมด</span><strong>{{ number_format($dashboard['overview']['total_users']) }}</strong><span>คน</span>
+										<span>ผู้ใช้ทั้งหมด</span><strong> {{ number_format($dashboard['overview']['total_users']) }} </strong><span>คน</span>
 									</div>
 								</div>
 							</div>
 						</div>
 						<div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
-							<div class="card">
+							<div class="card" style="color: #9e7804;">
 								<div class="summary">
 									<div class="summary-header">
 										<div style="padding: 10px; background-color: color-mix(in srgb, #ffc107 15%, transparent);">
@@ -165,9 +165,8 @@
 										</div>
 									</div>
 									<div class="summary-body">
-										<strong style="font-size: large;">การอนุมัติที่รออยู่</strong>
-										<h5><span style="color: #ffc107; font-weight:bold; font-size: large;">{{ $dashboard['overview']['pending_approvals'] }}</span>
-											รายการ</h5>
+										<span style="display:block;">ข้อสอบที่รอตรวจ</span>
+										<div><strong>{{ number_format($dashboard['overview']['pending_approvals']) }}</strong> <span>รายการ</span></div>
 									</div>
 								</div>
 							</div>
@@ -282,38 +281,32 @@
 							<div class="card">
 								<div class="card-header"><strong>สถานะระบบ</strong></div>
 								<div class="card-body">
-									<div style="display: flex; flex-direction: column; gap: 5px;">
-										<div style="display: flex; flex-direction: row; width: 100%; justify-content: space-between; align-items: end;">
-											<div style="display: flex; flex-direction: column; width: 90%;">
-												<div style="display: flex; flex-direction: row; justify-content: space-between;">
-													<span>พื้นที่จัดเก็บ</span>
-													<span>266 GB / 1 TB</span>
-												</div>
-												<div class="progress" style="height: 15px; width: 100%; margin: 2px;">
-													<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 25%;">
+									<div style="display: flex; flex-direction: column;">
+										<div>
+											<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: baseline;">
+												<span style="font-size: 13px; color: #6c757d;">พื้นที่จัดเก็บ</span>
+												<span style="font-size: 13px; font-weight: 600;">{{ $dashboard['systemStatus']['disk_used_gb'] }} GB / {{ $dashboard['systemStatus']['disk_total_gb'] }} GB</span>
+											</div>
+											<div style="display: flex; flex-direction: row; align-items: center; gap: 8px; margin-top: 6px;">
+												<div class="progress" style="height: 10px; width: 100%; margin: 0;">
+													<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{ $dashboard['systemStatus']['disk_used_percent'] }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ $dashboard['systemStatus']['disk_used_percent'] }}%;">
 													</div>
 												</div>
-											</div>
-											<span>25%</span>
-										</div>
-										<div class="card">
-											<div style="display: flex; flex-direction: row; justify-content: space-between;">
-												<span>ผู้ใช้งานออนไลน์</span>
-												<div style="display: flex; flex-direction:row; gap: 5px; align-items:center;">
-													<strong>45 คน</strong>
-
-												</div>
+												<span style="font-size: 12px; color: #6c757d; white-space: nowrap;">{{ $dashboard['systemStatus']['disk_used_percent'] }}%</span>
 											</div>
 										</div>
-										<div class="card">
-											<div style="display: flex; flex-direction: row; justify-content: space-between;">
-												<span>การใช้งานวันนี้</span>
-												<div style="display: flex; flex-direction:row; gap: 5px; align-items:center;">
-													<strong>1,246 ครั้ง</strong>
-
-												</div>
+										<div class="card" style="margin-top: 20px;">
+											<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+												<span style="font-size: 16px; color: #6c757d;">ผู้ใช้งานออนไลน์</span>
+												<strong style="font-size: 16px;">{{ number_format($dashboard['systemStatus']['online_users']) }} คน</strong>
 											</div>
 										</div>
+										{{-- <div class="card" style="margin-top: 10px; padding: 10px 12px;">
+											<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+												<span style="font-size: 13px; color: #6c757d;">การใช้งานวันนี้</span>
+												<strong style="font-size: 14px;">{{ number_format($dashboard['systemStatus']['today_usage']) }} ครั้ง</strong>
+											</div>
+										</div> --}}
 									</div>
 								</div>
 							</div>
