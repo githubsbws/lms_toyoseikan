@@ -84,6 +84,11 @@ class Course extends Model
         return $this->hasMany(Passcourse::class,'passcours_cours','course_id');
     }
 
+    public function learn()
+    {
+        return $this->hasMany(Learn::class,'course_id','course_id');
+    }
+
     public function courseScore()
     {
         return $this->hasMany(CourseScore::class,'course_id','course_id');

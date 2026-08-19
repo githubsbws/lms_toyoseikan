@@ -48,7 +48,7 @@
 									<select name="line_id" id="filterLine" class="form-control" {{ request('section_id') ? '' : 'disabled' }}>
 										<option value="" selected>ทั้งหมด</option>
 									</select>
-									<small class="text-muted" id="filterLineNote" style="display:none;">แผนกนี้ไม่มีไลน์ผลิต</small>
+									<small class="text-muted" id="filterLineNote" style="display:none;">ส่วนงานนี้ไม่มีไลน์ผลิต</small>
 								</div>
 							</div>
 						</div>
@@ -297,7 +297,7 @@
 										</div>
 										<div class="card" style="margin-top: 20px;">
 											<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-												<span style="font-size: 16px; color: #6c757d;">ผู้ใช้งานออนไลน์</span>
+												<span style="font-size: 16px; color: #6c757d;">ผู้ใช้งานออนไลน์ทั้งหมดในระบบ</span>
 												<strong style="font-size: 16px;">{{ number_format($dashboard['systemStatus']['online_users']) }} คน</strong>
 											</div>
 										</div>
@@ -356,7 +356,7 @@
 						<div class="col-lg-4 col-md-6 col-sm-12">
 							<div class="card">
 								<div class="card-header"><strong>หลักสูตรที่นักเรียนมากที่สุด</strong></div>
-								{{-- <div class="card-body" style="font-size: small;">
+								<div class="card-body" style="font-size: small;">
 									<div style="display: flex; flex-direction: column; gap: 5px;">
 										@php $maxLearner = $dashboard['popularCourses']->max('learner_count') ?: 1; @endphp
 										@forelse ($dashboard['popularCourses'] as $course)
@@ -381,7 +381,7 @@
 										<span class="text-muted">ไม่มีข้อมูลหลักสูตร</span>
 										@endforelse
 									</div>
-								</div> --}}
+								</div>
 
 							</div>
 						</div>
@@ -396,8 +396,11 @@
 @push('scripts')
 <script type="text/javascript">
     $(function() {
-        const LINE_LEVEL = '{{ \App\Services\AdminDashboardService::LINE_LEVEL }}';
-        const POSITION_LEVEL = '{{ \App\Services\AdminDashboardService::POSITION_LEVEL }}';
+        // บอก server ว่าอยากได้ "ชนิด" ไหน ไม่ส่งเลข level ไปเอง เพราะโครงสร้าง org
+        // ลึกไม่เท่ากันทุกสาย (สาย HR ไม่มีชั้นไลน์ ทำให้ตำแหน่งไปอยู่ level เดียวกับ
+        // ไลน์ผลิตของสายปกติ) ปล่อยให้ service เป็นคนตัดสินที่เดียว
+        const TYPE_SECTION = '{{ \App\Services\AdminDashboardService::ORG_TYPE_SECTION }}';
+        const TYPE_LINE = '{{ \App\Services\AdminDashboardService::ORG_TYPE_LINE }}';
         const orgChildrenUrl = "{{ route('admin.org_children') }}";
 
         const $department = $('#filterDepartment');
@@ -414,9 +417,51 @@
             });
         }
 
-        // ดึงลูกของ orgchart node จาก server
-        function fetchOrgChildren(parentId) {
-            return $.getJSON(orgChildrenUrl, { parent_id: parentId });
+        // ดึงตัวเลือกจาก server ตามชนิดที่ขอ
+        function fetchOrgChildren(parentId, type) {
+            return $.getJSON(orgChildrenUrl, { parent_id: parentId, type: type });
+        }
+
+        // โหลดตัวเลือกไม่สำเร็จ: บอกผู้ใช้ในช่องนั้นเลย ไม่ปล่อยให้ค้างว่างเงียบ ๆ
+        //
+        // การเช็ค session หมดอายุที่นี่ดูเป็น 2 แบบ เพราะระบบตอบกลับไม่เหมือนกัน:
+        // - 401 มาจาก controller เอง (ล็อกอินอยู่แต่ไม่ใช่ admin)
+        // - parsererror ทั้งที่ status 200 มาจาก middleware CheckIdleTimeout /
+        //   CheckTokenValidityAdmin ที่ใช้ redirect() ไปหน้า login ไม่ได้คืน 401
+        //   jQuery จะตาม redirect ไปเองแล้วได้ HTML หน้า login กลับมา พอ dataType เป็น json
+        //   จึง parse ไม่ผ่าน อาการนี้คือ session หมดอายุ ไม่ใช่เซิร์ฟเวอร์พัง
+        function showLoadError($select, jqXHR, textStatus, label) {
+            const gotHtmlInsteadOfJson = textStatus === 'parsererror';
+            const sessionExpired = jqXHR.status === 401 || jqXHR.status === 419 || gotHtmlInsteadOfJson;
+
+            fillSelect($select, [], sessionExpired
+                ? 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'
+                : 'โหลด' + label + 'ไม่สำเร็จ ลองเลือกใหม่อีกครั้ง');
+
+            $select.prop('disabled', true);
+        }
+
+        // เติมช่อง "ไลน์ผลิต" จากส่วนงานที่เลือก
+        // ถ้าสายงานนั้นไม่มีไลน์ (เช่น HR ที่จบที่ส่วนงานแล้วไปตำแหน่งเลย) จะได้ [] กลับมา
+        // ให้ปิดช่องไว้พร้อมบอกเหตุผล ไม่ใช่ปิดเงียบ ๆ ให้ผู้ใช้เดา
+        function loadLines(sectionId, selectedId) {
+            return fetchOrgChildren(sectionId, TYPE_LINE).done(function (lines) {
+                if (lines.length > 0) {
+                    fillSelect($line, lines);
+                    $line.prop('disabled', false);
+                    $lineNote.hide();
+
+                    if (selectedId) {
+                        $line.val(selectedId);
+                    }
+                } else {
+                    $line.prop('disabled', true);
+                    $lineNote.show();
+                }
+            }).fail(function (jqXHR, textStatus) {
+                $lineNote.hide();
+                showLoadError($line, jqXHR, textStatus, 'ไลน์ผลิต');
+            });
         }
 
         // เมื่อเลือกแผนก: โหลดส่วนงาน แล้วรีเซ็ตไลน์
@@ -433,15 +478,21 @@
                 return;
             }
 
-            fetchOrgChildren(deptId).done(function (sections) {
+            fetchOrgChildren(deptId, TYPE_SECTION).done(function (sections) {
                 if (sections.length > 0) {
                     fillSelect($section, sections);
                     $section.prop('disabled', false);
+                } else {
+                    // แผนกที่ไม่มีส่วนงานผูกไว้ บอกไปตรง ๆ ดีกว่าปล่อยช่องว่างให้เดา
+                    fillSelect($section, [], 'ไม่มีส่วนงาน');
+                    $section.prop('disabled', true);
                 }
+            }).fail(function (jqXHR, textStatus) {
+                showLoadError($section, jqXHR, textStatus, 'ส่วนงาน');
             });
         });
 
-        // เมื่อเลือกส่วนงาน: โหลดไลน์ (หรืออาจได้ตำแหน่งมาตรงถ้าไม่มีไลน์)
+        // เมื่อเลือกส่วนงาน: โหลดไลน์ของส่วนงานนั้น
         $section.on('change', function () {
             const sectionId = $(this).val();
 
@@ -453,24 +504,7 @@
                 return;
             }
 
-            fetchOrgChildren(sectionId).done(function (children) {
-                if (children.length === 0) {
-                    return;
-                }
-
-                const firstLevel = String(children[0].level);
-
-                if (firstLevel === LINE_LEVEL) {
-                    // แผนกนี้มีไลน์ผลิต
-                    fillSelect($line, children);
-                    $line.prop('disabled', false);
-                    $lineNote.hide();
-                } else if (firstLevel === POSITION_LEVEL) {
-                    // แผนกนี้ไม่มีไลน์ ข้ามไปตำแหน่งเลย (filter ยังไม่รองรับ position)
-                    $line.prop('disabled', true);
-                    $lineNote.show();
-                }
-            });
+            loadLines(sectionId);
         });
 
         // Init: ถ้ามีค่า department_id จาก query string ให้โหลด section/line กลับมา
@@ -479,33 +513,20 @@
         const selectedLineId = '{{ request('line_id') }}';
 
         if (selectedDeptId) {
-            fetchOrgChildren(selectedDeptId).done(function (sections) {
-                if (sections.length > 0) {
-                    fillSelect($section, sections);
-                    $section.prop('disabled', false);
-
-                    if (selectedSectionId) {
-                        $section.val(selectedSectionId);
-
-                        fetchOrgChildren(selectedSectionId).done(function (children) {
-                            if (children.length === 0) return;
-
-                            const firstLevel = String(children[0].level);
-
-                            if (firstLevel === LINE_LEVEL) {
-                                fillSelect($line, children);
-                                $line.prop('disabled', false);
-
-                                if (selectedLineId) {
-                                    $line.val(selectedLineId);
-                                }
-                            } else if (firstLevel === POSITION_LEVEL) {
-                                $line.prop('disabled', true);
-                                $lineNote.show();
-                            }
-                        });
-                    }
+            fetchOrgChildren(selectedDeptId, TYPE_SECTION).done(function (sections) {
+                if (sections.length === 0) {
+                    return;
                 }
+
+                fillSelect($section, sections);
+                $section.prop('disabled', false);
+
+                if (selectedSectionId) {
+                    $section.val(selectedSectionId);
+                    loadLines(selectedSectionId, selectedLineId);
+                }
+            }).fail(function (jqXHR, textStatus) {
+                showLoadError($section, jqXHR, textStatus, 'ส่วนงาน');
             });
         }
 

@@ -213,9 +213,16 @@ class AdminController extends Controller
      * AJAX: คืนลูกของ orgchart node ที่เลือก (ใช้กับแถบ filter แบบ dynamic dropdown
      * department -> section -> line ในหน้า admindashboard)
      *
-     * ฝั่ง frontend ส่ง parent_id มา จะได้ลูกกลับไปพร้อม level ของแต่ละตัว
-     * เผื่อกรณีบางแผนกไม่มี "ไลน์" (level 5) แล้วกระโดดไป "ตำแหน่ง" (level 6) เลย
-     * frontend เช็ค level ที่ได้กลับมาเพื่อรู้ว่าจะ render dropdown ไหนต่อ
+     * ฝั่ง frontend ส่ง parent_id + type ที่ต้องการมา ('section' สำหรับช่องส่วนงาน,
+     * 'line' สำหรับช่องไลน์ผลิต) แล้ว service จะจัดการเรื่องโครงสร้าง org ให้เอง
+     *
+     * ที่ส่งเป็น "ชนิด" ไม่ใช่ "เลข level" เพราะ level ในฐานข้อมูลเก็บแค่ความลึก
+     * ไม่ได้เก็บบทบาท และแต่ละสายลึกไม่เท่ากัน (สาย HR ไม่มีชั้นไลน์ ทำให้ตำแหน่ง
+     * ของ HR ไปอยู่ level 5 เท่ากับไลน์ผลิตของสายปกติ) การตัดสินว่าอะไรคือไลน์
+     * จึงต้องอยู่ใน service ที่เดียว frontend ไม่ต้องรู้รายละเอียดนี้
+     *
+     * ถ้าส่วนงานนั้นไม่มีไลน์ (เช่น HR) จะได้ [] ซึ่งเป็นคำตอบที่ถูกต้อง ไม่ใช่ error
+     * frontend เอาไปแสดงว่า "ส่วนงานนี้ไม่มีไลน์ผลิต"
      */
     public function getOrgChildren(Request $request, AdminDashboardService $adminService)
     {
@@ -229,9 +236,13 @@ class AdminController extends Controller
             return response()->json([]);
         }
 
-        $children = $adminService->getOrgChildren($parentId);
+        $type = $request->query('type');
 
-        return response()->json($children);
+        if (!in_array($type, AdminDashboardService::ORG_TYPES, true)) {
+            $type = AdminDashboardService::ORG_TYPE_SECTION;
+        }
+
+        return response()->json($adminService->getOrgOptions($type, $parentId));
     }
 
     // function admin(ManagerDashboardService $ManagerDashboardService){

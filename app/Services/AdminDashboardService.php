@@ -16,6 +16,25 @@ class AdminDashboardService
     const LINE_LEVEL = '5';
     const POSITION_LEVEL = '6';
     const ACTIVE = 'y';
+
+    /**
+     * แคช orgchart ทั้งต้นไว้ในหน่วยความจำ (ต่อ 1 request) เพื่อไล่ tree โดยไม่ยิง query ซ้ำ
+     * เก็บเป็น string ทุกคีย์ เพราะ orgchart.parent_id เป็น varchar แต่ id เป็น integer
+     */
+    private ?array $orgChildrenMap = null;   // parent_id => [child_id, ...]
+
+    private function loadOrgMaps(): void
+    {
+        if ($this->orgChildrenMap !== null) {
+            return;
+        }
+
+        $this->orgChildrenMap = Orgchart::where('active', self::ACTIVE)
+            ->get(['id', 'parent_id'])
+            ->groupBy(fn ($org) => (string) $org->parent_id)
+            ->map(fn ($group) => $group->pluck('id')->map(fn ($id) => (string) $id)->all())
+            ->all();
+    }
     /**
      * Entry point เดียวให้ Controller เรียก
      *
@@ -30,10 +49,30 @@ class AdminDashboardService
      * @return array แพ็กเก็ตข้อมูลแยกตามกลุ่มการ์ด/แถวใน view (1 key = 1 การ์ดหรือ 1 ตาราง)
      */
 
+    /**
+     * แผนกสำหรับดรอปดาวน์ตัวแรก
+     *
+     * เอาเฉพาะแผนกที่ยัง "เกาะอยู่กับผังจริง" คือ parent_id ชี้ไปที่โน้ดที่มีอยู่และ active
+     * เพราะในตารางมีแถวกำพร้าที่ parent_id ชี้ไปที่ id ที่ไม่มีอยู่ในตาราง (parent_id=3)
+     * และชื่อดันซ้ำกับแผนกตัวจริงเป๊ะ ๆ เช่น "HR, GA & Safety Department" มีทั้ง id 745
+     * (กำพร้า ไม่มีส่วนงาน ไม่มีผู้ใช้ ไม่มีคอร์ส) และ id 752 (ตัวจริง มี 4 ส่วนงาน)
+     * ถ้าโชว์ทั้งคู่ ผู้ใช้แยกไม่ออกและมีโอกาสกดตัวกำพร้าแล้วเจอดรอปดาวน์ส่วนงานว่าง
+     *
+     * เทียบ parent_id เป็น string เพราะคอลัมน์เป็น varchar แต่ id เป็น integer
+     * ถ้าปล่อยให้ Postgres เทียบข้ามชนิดกันจะ error
+     */
     public function getDepartment()
     {
-        $dept = Orgchart::where('level',self::DEPT_LEVEL)->where('active',self::ACTIVE)->get();
-        return $dept;
+        $existingIds = Orgchart::where('active', self::ACTIVE)
+            ->pluck('id')
+            ->map(fn ($id) => (string) $id)
+            ->all();
+
+        return Orgchart::where('level', self::DEPT_LEVEL)
+            ->where('active', self::ACTIVE)
+            ->whereIn('parent_id', $existingIds)
+            ->orderBy('title')
+            ->get();
     }
 
     public function getTeam()
@@ -43,19 +82,77 @@ class AdminDashboardService
     }
 
     /**
-     * ดึงลูกของ orgchart node ใดๆ (ใช้กับ dropdown แบบ dynamic: department -> section -> line)
-     *
-     * NOTE: บางแผนกไม่มี "ไลน์" (level 5) จะกระโดดจาก section (level 4) ไปที่ตำแหน่ง
-     * (level 6) เลย ฝั่ง frontend ต้องเช็ค level ของลูกที่ได้กลับมา ถ้าเป็น
-     * POSITION_LEVEL แทน LINE_LEVEL ให้รู้ว่าแผนกนี้ไม่มีไลน์ (ดรอปดาวน์ "ไลน์ผลิต"
-     * จะไม่มีตัวเลือกให้ ปล่อยเป็น "ทั้งหมด" ไปก่อน เพราะ filter ยังไม่รองรับ position_id)
+     * ชนิดของ dropdown ที่ยอมให้ขอได้ (กันไม่ให้ขอระดับ "ตำแหน่ง" ซึ่งแถบ filter
+     * ไม่มีช่องรองรับ และ service ก็ยังไม่รองรับ position_id)
      */
-    public function getOrgChildren($parentId)
+    const ORG_TYPE_SECTION = 'section';
+    const ORG_TYPE_LINE    = 'line';
+    const ORG_TYPES = [self::ORG_TYPE_SECTION, self::ORG_TYPE_LINE];
+
+    /**
+     * ดึงลูกของ orgchart node ตรง ๆ (ตัวช่วยพื้นฐาน)
+     */
+    public function getOrgChildren($parentId, ?string $level = null)
     {
-        return Orgchart::where('parent_id', $parentId)
-            ->where('active', self::ACTIVE)
+        $query = Orgchart::where('parent_id', $parentId)
+            ->where('active', self::ACTIVE);
+
+        if ($level !== null) {
+            $query->where('level', $level);
+        }
+
+        return $query
             ->orderBy('title')
             ->get(['id', 'title', 'level']);
+    }
+
+    /**
+     * ส่วนงาน (สายงาน) ของแผนกที่เลือก
+     * ใต้แผนกเป็น level 4 เสมอทุกสาย จึงกรองด้วย level ได้ตรง ๆ
+     */
+    public function getSections($departmentId)
+    {
+        return $this->getOrgChildren($departmentId, self::SECTION_LEVEL);
+    }
+
+    /**
+     * ไลน์ผลิตของส่วนงานที่เลือก
+     *
+     * IMPORTANT: ห้ามตัดสินด้วยเลข level ของตัวโน้ดเอง เพราะคอลัมน์ level เก็บแค่
+     * "ความลึก" ไม่ได้เก็บ "บทบาท" และโครงสร้างจริงลึกไม่เท่ากันทุกแผนก:
+     *
+     *   สายยาว (Production ฯลฯ): แผนก(3) -> ส่วนงาน(4) -> ไลน์ผลิต(5) -> ตำแหน่ง(6)
+     *   สายสั้น (HR ฯลฯ)       : แผนก(3) -> ส่วนงาน(4) -> ตำแหน่ง(5)   <-- ไม่มีชั้นไลน์
+     *
+     * ผลคือ "ตำแหน่ง" ของสายสั้นถูกเก็บเป็น level 5 เลขเดียวกับ "ไลน์ผลิต" ของสายยาว
+     * (ข้อมูลจริง: ใต้ส่วนงาน Human Resources เป็น level 5 ชื่อ Manager / Supervisor /
+     * Staff ทั้งหมด ส่วนใต้ Production Line 1 เป็น level 5 ชื่อ Mixing Line 1 ฯลฯ)
+     *
+     * เกณฑ์ที่ใช้: ดูทีละลูกว่า "เป็นชั้นสุดท้ายของสายนั้นหรือยัง"
+     * - ลูกที่ไม่มีอะไรต่อจากมันแล้ว = ชั้นสุดท้าย = ตำแหน่ง -> ไม่เอามาใส่ dropdown
+     * - ลูกที่ยังมีของต่อข้างใต้      = ยังไม่ใช่ชั้นสุดท้าย = ไลน์ -> เอามาแสดง
+     *
+     * ถ้าลูกทุกตัวเป็นชั้นสุดท้าย (เช่นสาย HR ที่ใต้ส่วนงานเป็นตำแหน่งเลย) จะได้ []
+     * กลับไป ฝั่งหน้าเว็บจะปิดช่องไลน์แล้วขึ้นว่าไม่มีไลน์ผลิต
+     */
+    public function getProductionLines($sectionId)
+    {
+        $this->loadOrgMaps();
+
+        return $this->getOrgChildren($sectionId)
+            ->filter(fn ($child) => !empty($this->orgChildrenMap[(string) $child->id]))
+            ->values();
+    }
+
+    /**
+     * ดึงตัวเลือก dropdown ตามชนิดที่ขอ (section / line)
+     * รวมทางเข้าไว้ที่เดียวเพื่อให้ controller ไม่ต้องรู้เรื่องโครงสร้าง level
+     */
+    public function getOrgOptions(string $type, $parentId)
+    {
+        return $type === self::ORG_TYPE_LINE
+            ? $this->getProductionLines($parentId)
+            : $this->getSections($parentId);
     }
 
     public function getDashboardData(array $filters = []): array
@@ -71,7 +168,7 @@ class AdminDashboardService
             'departmentLearning' => $this->getDepartmentLearning($filters),
 
             // แถวที่ 4 การ์ดที่ 2: หลักสูตรที่มีผู้เรียนมากที่สุด
-            // 'popularCourses' => $this->getPopularCourses($filters),
+            'popularCourses' => $this->getPopularCourses($filters),
 
             // แถวที่ 3 การ์ดที่ 3: สถานะระบบ (พื้นที่จัดเก็บ / ผู้ใช้งานออนไลน์ / การใช้งานวันนี้)
             // ไม่ apply $filters เพราะเป็นสถานะเครื่อง/เซิร์ฟเวอร์ ไม่เกี่ยวกับแผนก/ทีมที่เลือก
@@ -132,24 +229,35 @@ class AdminDashboardService
      * ที่มีคอลัมน์ course_id / department_org_id (ใช้ได้ทั้ง Eloquent builder ของ Course
      * และ DB::table('course_online')->... เพราะ interface where()/whereIn() เหมือนกัน)
      *
-     * Logic ตามที่ confirm ไว้ (ดู _PLAN_admin_dashboard_filters.md):
-     * - ไม่เลือกอะไร -> ไม่กรอง
+     * Logic:
+     * - ไม่เลือกอะไร -> ไม่กรอง (เอาคอร์สทั้งหมด)
      * - เลือก section_id หรือ line_id (ระดับลึกกว่า department) -> ไปดูที่ org_course.orgchart_id
      *   แทน department_org_id (ใช้ line_id ก่อนถ้ามีทั้งคู่ เพราะลึกกว่า)
      * - เลือกแค่ department_id -> กรอง department_org_id ตรง ๆ
+     *
+     * IMPORTANT: ตรวจข้อมูลจริงในฐานข้อมูลแล้ว org_course.orgchart_id เก็บ "ระดับตำแหน่ง"
+     * (level 6) เท่านั้น ไม่ได้เก็บ id ของ section (level 4) หรือ line (level 5) ไว้เลย
+     * ดังนั้นถ้า where('orgchart_id', $sectionId) ตรง ๆ จะไม่เจอแถวใดเลย
+     * ต้องกาง section/line ที่เลือกออกเป็น "ตำแหน่งลูกหลานทั้งหมด" ก่อนแล้วค่อย whereIn
+     *
+     * $columnPrefix: ใส่เมื่อ query มี join หลายตารางแล้วต้องระบุตารางให้ชัด
+     * (เช่น 'course_online.') ถ้า query อยู่บนตารางคอร์สตรง ๆ ปล่อยว่างไว้
      */
-    private function applyOrgFilter($query, array $filters)
+    private function applyOrgFilter($query, array $filters, string $columnPrefix = '')
     {
         $deepOrgId = $filters['line_id'] ?? $filters['section_id'] ?? null;
 
         if (!empty($deepOrgId)) {
+            $orgIds = $this->getDescendantOrgIds($deepOrgId);
+
             $courseIds = DB::table('org_course')
-                ->where('orgchart_id', $deepOrgId)
+                ->whereIn('orgchart_id', $orgIds)
+                ->distinct()
                 ->pluck('course_id');
 
-            $query->whereIn('course_id', $courseIds);
+            $query->whereIn($columnPrefix . 'course_id', $courseIds);
         } elseif (!empty($filters['department_id'])) {
-            $query->where('department_org_id', $filters['department_id']);
+            $query->where($columnPrefix . 'department_org_id', $filters['department_id']);
         }
 
         return $query;
@@ -246,23 +354,12 @@ class AdminDashboardService
     }
 
     /**
-     * Apply org filter ให้ query ที่มี course_online (DB::table builder)
-     * เหมือน applyOrgFilter() แต่รองรับ DB::table() ที่ไม่มี Eloquent relations
+     * Apply org filter ให้ query ที่ join course_online เข้ามา (ต้องระบุชื่อตารางให้ชัด)
+     * เป็นแค่ทางผ่านไป applyOrgFilter() เพื่อไม่ให้เงื่อนไข org แตกเป็น 2 ชุดที่ต้องแก้ซ้ำ
      */
     private function applyOrgFilterToQuery($query, array $filters)
     {
-        $deepOrgId = $filters['line_id'] ?? $filters['section_id'] ?? null;
-
-        if (!empty($deepOrgId)) {
-            $courseIds = DB::table('org_course')
-                ->where('orgchart_id', $deepOrgId)
-                ->pluck('course_id');
-            $query->whereIn('course_online.course_id', $courseIds);
-        } elseif (!empty($filters['department_id'])) {
-            $query->where('course_online.department_org_id', $filters['department_id']);
-        }
-
-        return $query;
+        return $this->applyOrgFilter($query, $filters, 'course_online.');
     }
 
     /**
@@ -292,26 +389,34 @@ class AdminDashboardService
     }
 
     /**
-     * หา org_id ทั้งหมดใน subtree ของ $parentId (รวมตัวมันเองด้วย)
-     * ใช้กับการกรอง users ที่ org_id ลึกกว่า department/section/line ที่เลือก
+     * หา org id ทั้งหมดใน subtree ของ $rootId (รวมตัวมันเองด้วย)
      *
-     * Recursive: ถ้า tree ลึกมาก (เช่น > 10 ชั้น) อาจช้า แต่ในระบบนี้ลึกสุดแค่
-     * department(3) -> section(4) -> line(5) -> position(6) = 4 ชั้น ยังรับได้
+     * ใช้ 2 ที่:
+     * - กาง section/line ที่เลือก -> ตำแหน่งลูกหลาน เพื่อไปหา course ใน org_course
+     * - กรอง users.org_id ที่เก็บ "ตำแหน่ง" ซึ่งลึกกว่า department/section/line ที่เลือก
+     *
+     * ดึง orgchart ทั้งต้นครั้งเดียวแล้วไล่ tree ใน PHP (ไม่ยิง query ต่อ 1 โน้ด)
+     * และเทียบเป็น string ตลอด เพราะ orgchart.parent_id เป็น varchar แต่ orgchart.id
+     * เป็น integer — ถ้าเทียบข้ามชนิดกับ Postgres จะพังได้
      */
-    private function getDescendantOrgIds($parentId): array
+    private function getDescendantOrgIds($rootId): array
     {
-        $result = [(int)$parentId];
+        $this->loadOrgMaps();
 
-        $children = Orgchart::where('parent_id', $parentId)
-            ->where('active', self::ACTIVE)
-            ->pluck('id')
-            ->toArray();
+        $rootId = (string) $rootId;
+        $ids    = [$rootId];
+        $queue  = [$rootId];
 
-        foreach ($children as $childId) {
-            $result = array_merge($result, $this->getDescendantOrgIds($childId));
+        while ($queue) {
+            $current = array_pop($queue);
+
+            foreach ($this->orgChildrenMap[$current] ?? [] as $childId) {
+                $ids[]   = $childId;
+                $queue[] = $childId;
+            }
         }
 
-        return $result;
+        return $ids;
     }
 
     /**
@@ -319,9 +424,14 @@ class AdminDashboardService
      * และยังมีผู้เรียนที่ยังไม่ผ่าน (passcourse ยัง pass ไม่ครบ)
      * เรียงจาก end_date ที่ใกล้วันปัจจุบันมากที่สุดก่อน (overdue ล่าสุด) เอามา 5 อันดับแรก
      *
-     * Org filter: department_id / section_id / line_id กรองที่ตัวคอร์สผ่าน applyOrgFilter()
-     * team_id: กรองเฉพาะ "ผู้เรียนที่ยังไม่ผ่าน" ที่นับ/แสดง (ไม่กรองว่าคอร์สจะติด overdue หรือไม่
-     * จากทีมอื่น เพราะ unfinished_count ต้องนับตามทีมที่เลือกเท่านั้น)
+     * รับค่า filter จากแถบค้นหาหน้า admindashboard ทั้งหมด:
+     * - department_id (แผนก)  -> กรองที่ course_online.department_org_id ตรง ๆ
+     * - section_id (ส่วนงาน) / line_id (สายงาน/ไลน์ผลิต) -> กางเป็นตำแหน่งลูกหลาน
+     *   แล้วไปหา course ที่ผูกไว้ใน org_course (ใช้ line_id ก่อนถ้าเลือกมาทั้งคู่ เพราะลึกกว่า)
+     *   ทั้งสองเคสจัดการอยู่ใน applyOrgFilter() ที่เดียว
+     * - team_id (ทีม) -> ใช้กรอง "ผู้เรียนที่ยังไม่ผ่าน" เท่านั้น (ทั้งเงื่อนไขว่าคอร์สนี้
+     *   ยังมีคนค้างอยู่ไหม และตัวเลข unfinished ที่เอาไปแสดง) เพราะทีมผูกกับ users
+     *   ไม่ได้ผูกกับตัวคอร์ส ถ้าเลือกทีมมาแล้วคอร์สนั้นไม่มีคนในทีมค้างเลย ก็ไม่ควรโชว์
      */
     private function getOverdueCourses(array $filters, int $limit = 5)
     {
@@ -338,11 +448,12 @@ class AdminDashboardService
             }
         };
 
-        $query = Course::where('active', 'y')
+        $query = Course::where('active', self::ACTIVE)
             ->whereDate('end_date', '<', now())
             ->whereHas('passcourse', $unfinishedCondition)
             ->select('course_id', 'course_title', 'end_date', 'department_org_id');
 
+        // กรองแผนก/ส่วนงาน/สายงาน ตามที่เลือกมาจากแถบค้นหา
         $this->applyOrgFilter($query, $filters);
 
         return $query
@@ -444,25 +555,61 @@ class AdminDashboardService
     }
 
     /**
-     * หลักสูตรที่มีผู้เรียนมากที่สุด: จำนวนผู้เรียน distinct ต่อคอร์ส (นับจาก learn)
-     * เรียงจากมากไปน้อย จำกัด top N — group ที่ DB ครั้งเดียว
+     * หลักสูตรที่มีผู้เรียนมากที่สุด: นับผู้เรียน distinct ต่อคอร์สจากตาราง learn
+     * เรียงจากมากไปน้อย เอา top N
+     *
+     * NOTE: ใช้ withCount + count(distinct user_id) แทนการ join แล้ว groupBy เอง
+     * เพราะ connection นี้ตั้ง table prefix ('tbl_') ไว้ และ selectRaw ไม่ผ่านการเติม
+     * prefix ให้ (แม้ใส่ alias ให้ตารางก็ไม่ช่วย เพราะ Laravel เติม prefix ให้ alias ด้วย
+     * กลายเป็น "tbl_learn" as "tbl_l" ทำให้ raw ที่อ้าง l.user_id หา FROM-clause ไม่เจอ)
+     * วิธีนี้ subquery มีตาราง learn อยู่ตัวเดียว จึงอ้าง user_id แบบไม่ต้องระบุตารางได้
+     * ไม่ต้อง hardcode prefix ลงไปใน SQL
+     *
+     * whereHas('learn') กรองคอร์สที่ยังไม่มีคนเรียนออกตั้งแต่ใน SQL (สร้าง EXISTS)
+     * ไม่ใช้ having บน alias เพราะ Postgres ไม่ยอมให้ HAVING อ้าง alias จาก SELECT
+     * (ORDER BY อ้างได้ จึง orderByDesc('learner_count') ตรง ๆ ได้)
      */
-    // private function getPopularCourses(array $filters, int $limit = 5)
-    // {
-    //     return Learn::join('course_online as c', 'c.course_id', '=', 'learn.course_id')
-    //         ->select('c.course_id', 'c.course_title')
-    //         ->selectRaw('COUNT(DISTINCT learn.user_id) as learner_count')
-    //         ->groupBy('c.course_id', 'c.course_title')
-    //         ->orderByDesc('learner_count')
-    //         ->limit($limit)
-    //         ->get()
-    //         ->map(function ($row, $index) {
-    //             return [
-    //                 'rank'          => $index + 1,
-    //                 'course_id'     => $row->course_id,
-    //                 'title'         => $row->course_title,
-    //                 'learner_count' => $row->learner_count,
-    //             ];
-    //         });
-    // }
+    private function getPopularCourses(array $filters, int $limit = 5)
+    {
+        $learnerCount = function ($query) use ($filters) {
+            $query->select(DB::raw('count(distinct user_id)'));
+
+            // ถ้าเลือกทีมมา ให้นับเฉพาะผู้เรียนในทีมนั้น (learn ผูกกับ user ผ่าน user_id)
+            if (!empty($filters['team_id'])) {
+                $query->whereIn('user_id', function ($sub) use ($filters) {
+                    $sub->select('id')
+                        ->from('users')
+                        ->where('team_id', $filters['team_id']);
+                });
+            }
+        };
+
+        $query = Course::where('active', self::ACTIVE)
+            ->select('course_id', 'course_title', 'department_org_id')
+            ->whereHas('learn', function ($q) use ($filters) {
+                if (!empty($filters['team_id'])) {
+                    $q->whereIn('user_id', function ($sub) use ($filters) {
+                        $sub->select('id')
+                            ->from('users')
+                            ->where('team_id', $filters['team_id']);
+                    });
+                }
+            })
+            ->withCount(['learn as learner_count' => $learnerCount]);
+
+        // กรองแผนก/ส่วนงาน/สายงาน ตามที่เลือกมาจากแถบค้นหา
+        $this->applyOrgFilter($query, $filters);
+
+        return $query
+            ->orderByDesc('learner_count')
+            ->limit($limit)
+            ->get()
+            ->values()
+            ->map(fn ($course, $index) => [
+                'rank'          => $index + 1,
+                'course_id'     => $course->course_id,
+                'title'         => $course->course_title,
+                'learner_count' => $course->learner_count,
+            ]);
+    }
 }
