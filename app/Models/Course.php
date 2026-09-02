@@ -15,12 +15,14 @@ class Course extends Model
 
     protected $fillable = [
         'course_lecturer',
+        'course_title',
+        'course_note',
         'active',
         'recommend',
         'course_retest_amount',
         'course_question_show',
         'cate_amount',
-        'time_test',
+        'course_time_quiz',
         'lang_id',
         'random_choice',
         'average_time_pretest',
