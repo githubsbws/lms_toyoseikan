@@ -43,8 +43,8 @@ class AdminDashboardService
      *   - section_id / line_id -> กรอง "ระดับล่างกว่า department" ผ่าน org_course.orgchart_id
      *     (ถ้ามีทั้งคู่ ใช้ line_id เพราะลึกกว่า section_id)
      *   - team_id -> กรอง users.team_id เฉพาะ query ที่ join ไปถึง users อยู่แล้ว
-     *   - date_from, date_to (ยังไม่ใช้ในรอบนี้)
-     *   - search (ยังไม่ใช้ในรอบนี้)
+     *   - date_from, date_to -> กรอง "วันที่เกิดกิจกรรม" ผ่าน applyDateFilter()
+     *     ไม่มีคีย์นี้ = ไม่กรองวันที่ (ค่าเริ่มต้นตอนเปิดหน้า)
      *
      * @return array แพ็กเก็ตข้อมูลแยกตามกลุ่มการ์ด/แถวใน view (1 key = 1 การ์ดหรือ 1 ตาราง)
      */
@@ -277,6 +277,30 @@ class AdminDashboardService
     }
 
     /**
+     * Filter helper กลาง: apply ช่วงเวลาให้คอลัมน์วันที่ที่ระบุ
+     *
+     * ไม่ส่ง date_from/date_to มา (ค่าเริ่มต้นตอนเปิดหน้า) = ไม่กรองวันที่เลย
+     * รองรับกรณีส่งมาข้างเดียวด้วย (เลือกแต่วันเริ่ม หรือแต่วันจบ)
+     *
+     * ใช้ whereDate เพื่อเทียบแค่ส่วนวันที่ ไม่เอาเวลา เพราะคอลัมน์เหล่านี้เป็น timestamp
+     * ถ้าเทียบตรง ๆ กับ 'Y-m-d' ข้อมูลของวันสุดท้ายที่มีเวลาติดมาจะหลุดออกจากช่วง
+     *
+     * $column ต้องเป็นชื่อคอลัมน์จากโค้ดเราเองเท่านั้น ห้ามรับจาก request
+     */
+    private function applyDateFilter($query, array $filters, string $column)
+    {
+        if (!empty($filters['date_from'])) {
+            $query->whereDate($column, '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->whereDate($column, '<=', $filters['date_to']);
+        }
+
+        return $query;
+    }
+
+    /**
      * แถวที่ 1 (6 การ์ด): คอร์สพนักงานทั่วไป / คอร์สพนักงานใหม่ / วิดีโอ / ไฟล์ / ผู้ใช้ทั้งหมด / รออนุมัติ
      *
      * ตอนนี้ apply filter แล้ว เพื่อให้การ์ดสอดคล้องกับข้อมูลด้านล่าง:
@@ -341,6 +365,8 @@ class AdminDashboardService
             ->join('users', 'coursescore.user_id', '=', 'users.id')
             ->where('coursescore.score_status', 'wait');
         $approvalsQuery = $this->applyOrgFilterToUsers($approvalsQuery, $filters, 'users');
+        // ช่วงเวลา: นับข้อสอบที่ถูกส่งมาในช่วงที่เลือก
+        $this->applyDateFilter($approvalsQuery, $filters, 'coursescore.create_date');
         $pendingApprovals = $approvalsQuery->count('coursescore.score_id');
 
         return [
@@ -456,6 +482,11 @@ class AdminDashboardService
         // กรองแผนก/ส่วนงาน/สายงาน ตามที่เลือกมาจากแถบค้นหา
         $this->applyOrgFilter($query, $filters);
 
+        // ช่วงเวลา: จำกัดให้เหลือคอร์สที่ครบกำหนดในช่วงที่เลือก
+        // (ยังคงเงื่อนไข end_date < now() ไว้ เพราะการ์ดนี้คือ "เลยกำหนดแล้ว" เท่านั้น
+        // ถ้าเลือกช่วงที่เป็นอนาคต จะไม่มีคอร์สแสดง ซึ่งถูกต้องตามความหมายของการ์ด)
+        $this->applyDateFilter($query, $filters, 'end_date');
+
         return $query
             ->withCount(['passcourse as unfinished_count' => $unfinishedCondition])
             ->orderByDesc('end_date')
@@ -529,11 +560,15 @@ class AdminDashboardService
             $passedCount = 0;
 
             if ($learnerCount > 0 && $totalCourses > 0) {
-                $passedCount = DB::table('passcours')
+                $passedQuery = DB::table('passcours')
                     ->whereIn('passcours_cours', $courseIds)
                     ->whereIn('passcours_user', $userIds)
-                    ->where('passcours_status', 'pass')
-                    ->count();
+                    ->where('passcours_status', 'pass');
+
+                // ช่วงเวลา: นับเฉพาะที่เรียนผ่านภายในช่วงที่เลือก
+                $this->applyDateFilter($passedQuery, $filters, 'passcours_date');
+
+                $passedCount = $passedQuery->count();
             }
 
             $denominator = $totalCourses * $learnerCount;
@@ -571,9 +606,9 @@ class AdminDashboardService
      */
     private function getPopularCourses(array $filters, int $limit = 5)
     {
-        $learnerCount = function ($query) use ($filters) {
-            $query->select(DB::raw('count(distinct user_id)'));
-
+        // เงื่อนไข "การเรียนที่นับ" ใช้ตัวเดียวกันทั้งใน whereHas และ withCount
+        // ถ้าใช้เงื่อนไขไม่ตรงกัน จะเกิดเคสคอร์สติดอยู่ในลิสต์แต่ learner_count = 0
+        $learnCondition = function ($query) use ($filters) {
             // ถ้าเลือกทีมมา ให้นับเฉพาะผู้เรียนในทีมนั้น (learn ผูกกับ user ผ่าน user_id)
             if (!empty($filters['team_id'])) {
                 $query->whereIn('user_id', function ($sub) use ($filters) {
@@ -582,19 +617,19 @@ class AdminDashboardService
                         ->where('team_id', $filters['team_id']);
                 });
             }
+
+            // ช่วงเวลา: นับเฉพาะการเรียนที่เกิดในช่วงที่เลือก
+            $this->applyDateFilter($query, $filters, 'learn_date');
+        };
+
+        $learnerCount = function ($query) use ($learnCondition) {
+            $query->select(DB::raw('count(distinct user_id)'));
+            $learnCondition($query);
         };
 
         $query = Course::where('active', self::ACTIVE)
             ->select('course_id', 'course_title', 'department_org_id')
-            ->whereHas('learn', function ($q) use ($filters) {
-                if (!empty($filters['team_id'])) {
-                    $q->whereIn('user_id', function ($sub) use ($filters) {
-                        $sub->select('id')
-                            ->from('users')
-                            ->where('team_id', $filters['team_id']);
-                    });
-                }
-            })
+            ->whereHas('learn', $learnCondition)
             ->withCount(['learn as learner_count' => $learnerCount]);
 
         // กรองแผนก/ส่วนงาน/สายงาน ตามที่เลือกมาจากแถบค้นหา

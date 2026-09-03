@@ -192,12 +192,15 @@ class AdminController extends Controller
             $dashboardTitle = 'Dashboard ผู้ดูแลระบบ';
             $dashboardSector = 'ทุกแผนก';
 
-            // แถบค้นหาบนสุด (แผนก/ส่วนงาน/ไลน์/ทีม/ช่วงเวลา/keyword) จะต่อสายเข้า $filters
-            // ตอนทำแถบค้นหา ยังไม่ต้องแก้ signature ของ service
+            // แถบค้นหาบนสุด (แผนก/ส่วนงาน/ไลน์/ทีม/ช่วงเวลา)
             $filters = request()->only([
                 'department_id', 'section_id', 'line_id', 'team_id',
-                'date_from', 'date_to',
             ]);
+
+            // ช่วงเวลามาจาก daterangepicker เป็นช่องเดียว รูปแบบ "DD/MM/YYYY - DD/MM/YYYY"
+            // แปลงเป็น date_from/date_to (Y-m-d) ที่นี่ที่เดียว เพื่อให้ service รับรูปแบบเดียว
+            // ถ้าผู้ใช้ยังไม่เลือกช่วงเวลา (ค่าเริ่มต้นตอนเปิดหน้า) จะไม่มีคีย์นี้เลย = ไม่กรองวันที่
+            $filters += $this->parseDateRange(request('date_range'));
 
             $dept = $adminService->getDepartment();
             $team = $adminService->getTeam();
@@ -207,6 +210,42 @@ class AdminController extends Controller
         }
 
         abort(403, 'ไม่พบสิทธิ์การเข้าถึง Dashboard');
+    }
+
+    /**
+     * แปลงช่วงเวลาจาก daterangepicker ("DD/MM/YYYY - DD/MM/YYYY") เป็น date_from/date_to
+     *
+     * คืน [] เมื่อไม่ได้เลือกช่วงเวลาหรือรูปแบบไม่ถูกต้อง เพื่อให้ service มองว่า
+     * "ไม่ต้องกรองวันที่" ตามค่าเริ่มต้นของหน้า ไม่ใช่กรองด้วยช่วงที่ผิด
+     *
+     * ใช้ createFromFormat + ตรวจ error ของ Carbon เพราะถ้าให้ Carbon เดารูปแบบเอง
+     * 07/08/2026 จะถูกอ่านสลับเป็นเดือน 7 วันที่ 8 (แบบอเมริกัน) ทำให้กรองผิดช่วง
+     * ถ้าวันเริ่มมาหลังวันจบ ให้สลับให้ ไม่ต้องเด้ง error ใส่ผู้ใช้
+     */
+    private function parseDateRange(?string $dateRange): array
+    {
+        if (empty($dateRange) || !str_contains($dateRange, ' - ')) {
+            return [];
+        }
+
+        [$rawFrom, $rawTo] = array_map('trim', explode(' - ', $dateRange, 2));
+
+        try {
+            $from = Carbon::createFromFormat('d/m/Y', $rawFrom);
+            $to   = Carbon::createFromFormat('d/m/Y', $rawTo);
+        } catch (\Exception $e) {
+            // รูปแบบไม่ถูกต้อง (เช่นผู้ใช้พิมพ์เอง) ถือว่าไม่ได้เลือกช่วงเวลา
+            return [];
+        }
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to, $from];
+        }
+
+        return [
+            'date_from' => $from->startOfDay()->toDateString(),
+            'date_to'   => $to->endOfDay()->toDateString(),
+        ];
     }
 
     /**
