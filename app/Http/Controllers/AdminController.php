@@ -3193,6 +3193,8 @@ class AdminController extends Controller
             'ques_type' => 'required',
             'ques_title' => 'required',
             'answer'     => 'required_if:ques_type,3',
+            'images'     => 'nullable|array|max:2',
+            'images.*'   => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $userId = auth()->id();
@@ -3229,6 +3231,16 @@ class AdminController extends Controller
                         'update_by'     => $userId,
                     ]);
                 }
+            }
+        }
+
+        // ถ้ามีรูปภาพแนบมา (เฉพาะคำถามอธิบาย ques_type=3)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $path = $imageFile->store('images/uploads', 'public');
+                $question->images()->create([
+                    'path' => $path,
+                ]);
             }
         }
 
