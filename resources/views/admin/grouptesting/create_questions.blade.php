@@ -1,4 +1,4 @@
-﻿@extends('admin/layouts/mainlayout')
+@extends('admin/layouts/mainlayout')
 @section('title', 'Admin')
 @section('content')
 <body class="">
@@ -54,8 +54,8 @@
                                 <!-- Images -->
                                 <div class="mb-3" id="image-wrapper" style="display:none;">
                                     <label>รูปภาพประกอบ</label>
-                                    <input type="file" name="images[]" class="form-control" multiple accept="image/*">
-                                    <small class="text-danger">กรุณาเพิ่มรูปภาพประกอบคำถามที่นี่ (ถ้ามี) แนบได้สูงสุด 2 รูป</small>
+                                    <input type="file" name="images[]" class="form-control-file d-block" multiple accept="image/*">
+                                    <small class="text-danger d-block mt-2">กรุณาเพิ่มรูปภาพประกอบคำถามที่นี่ (ถ้ามี) แนบได้สูงสุด 2 รูป</small>
                                 </div>
                                 <!-- Choices -->
                                 <div id="choice-wrapper">
