@@ -3262,6 +3262,23 @@ class AdminController extends Controller
     {
         $question = Question::where('ques_id', $id)->first();
 
+        // นับจำนวนรูปเดิมที่จะยังเหลืออยู่
+        $existingImageIds = $question->images()->pluck('id');
+        $deleteImageIds = collect($request->input('delete_images', []))->map(fn($v) => (int) $v);
+        $remainingExistingCount = $existingImageIds->diff($deleteImageIds)->count();
+        $newImagesCount = $request->hasFile('images') ? count($request->file('images')) : 0;
+
+        $request->validate([
+            'images'   => 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        if (($remainingExistingCount + $newImagesCount) > 2) {
+            return redirect()->back()->withErrors([
+                'images' => 'แนบรูปภาพได้สูงสุด 2 รูปต่อคำถาม (รวมรูปเดิมที่ไม่ได้ลบ)',
+            ])->withInput();
+        }
+
         $question->update([
             'ques_type' => $request->ques_type,
             'ques_title' => htmlspecialchars($request->ques_title),
@@ -3290,6 +3307,21 @@ class AdminController extends Controller
                 }
             }
         }
+        // ลบรูปที่ผู้ใช้ติ๊กเลือกลบ
+        if ($deleteImageIds->isNotEmpty()) {
+            $question->images()->whereIn('id', $deleteImageIds)->delete();
+        }
+
+        // เพิ่มรูปใหม่ที่แนบมา
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $path = $imageFile->store('images/uploads', 'public');
+                $question->images()->create([
+                    'path' => $path,
+                ]);
+            }
+        }
+
 
         return redirect()->back()->with('success','อัพเดทสำเร็จ');
     }

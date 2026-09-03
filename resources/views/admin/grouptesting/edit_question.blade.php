@@ -1,4 +1,4 @@
-@extends('admin/layouts/mainlayout')
+﻿@extends('admin/layouts/mainlayout')
 @section('title', 'Admin')
 @section('content')
 <body class="">
@@ -27,7 +27,7 @@
                         เพิ่มคำถาม
                     </div>
                     <div class="card-body">
-                             <form method="POST" action="{{ route('questions.update', ['id'=>$question->ques_id]) }}">
+                             <form method="POST" action="{{ route('questions.update', ['id'=>$question->ques_id]) }}" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="ques_type" value="{{ $question->ques_type }}">
                                 <!-- ประเภท -->
@@ -49,6 +49,27 @@
                                 <div class="mb-3" id="answer-wrapper" style="display:none;">
                                     <label>คำตอบ</label>
                                     <textarea name="answer" id="summernote2" class="form-control" rows="5">{!! htmlspecialchars_decode($question->answer) !!}</textarea>
+                                </div>
+                                <!-- Images -->
+                                <div class="mb-3" id="image-wrapper" style="display:none;">
+                                    <label>รูปภาพประกอบ</label>
+
+                                    @if($question->images && $question->images->isNotEmpty())
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        @foreach($question->images as $img)
+                                        <div class="text-center">
+                                            <img src="{{ asset('storage/' . $img->path) }}" style="width:120px;height:120px;object-fit:cover;border-radius:6px;border:1px solid #dee2e6;">
+                                            <div class="form-check mt-1">
+                                                <input class="form-check-input" type="checkbox" name="delete_images[]" value="{{ $img->id }}" id="delete-image-{{ $img->id }}">
+                                                <label class="form-check-label text-danger small" for="delete-image-{{ $img->id }}">ลบรูปนี้</label>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    @endif
+
+                                    <input type="file" name="images[]" class="form-control-file d-block" multiple accept="image/*">
+                                    <small class="text-danger d-block mt-2">กรุณาเพิ่มรูปภาพประกอบคำถามที่นี่ (ถ้ามี) แนบได้สูงสุด 2 รูป (รวมรูปเดิมที่ไม่ได้ลบ)</small>
                                 </div>
                                 <!-- Choices -->
                                 <div id="choice-wrapper">
@@ -130,6 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let wrapper = document.getElementById('choice-wrapper');
     let btn = document.getElementById('add-choice');
     let answerWrapper = document.getElementById('answer-wrapper');
+    let imageWrapper = document.getElementById('image-wrapper');
 
     if (type == '3') {
 
@@ -140,6 +162,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // แสดง answer
         answerWrapper.style.display = 'block';
 
+        // แสดงช่องแนบรูปภาพ
+        imageWrapper.style.display = 'block';
+
     } else {
 
         // แสดง choice
@@ -148,6 +173,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // ซ่อน answer
         answerWrapper.style.display = 'none';
+
+        // ซ่อนช่องแนบรูปภาพ
+        imageWrapper.style.display = 'none';
     }
 });
 
