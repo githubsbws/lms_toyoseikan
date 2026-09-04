@@ -53,4 +53,27 @@ class DashboardController extends Controller
         );
     }
 
+    public function courseListAjax(Request $request, DashboardService $dashboardService)
+{
+    $allowedStatuses = ['completed', 'inProgress', 'notStarted', 'failed'];
+
+    $status = in_array($request->get('status'), $allowedStatuses, true)
+        ? $request->get('status')
+        : 'completed';
+
+    $page = max(1, (int) $request->get('page', 1));
+
+    $courseList = $dashboardService->getCourseListByStatus(
+        Auth::user(),
+        $status,
+        $page,
+        10
+    );
+
+    return view(
+        'dashboard.partials.course-list',
+        compact('courseList', 'status')
+    );
+}
+
 }
