@@ -1,234 +1,362 @@
-			<div class="container-fluid">
+@extends('admin.layouts.dashboard-layout')
+
+@section('dashboard-content')
+<div class="main-content admin-dashboard" style="max-width: 100%; margin: 0 auto; padding: 0 20px;">
+	<div class="container-fluid">
 
 				<section class="section-1 row">
+
+					{{-- พนักงาน --}}
 					<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 custom-5-col">
 						<div class="card card-stat color-purple">
-							<div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+
+							<div class="stat-icon">
+								<i class="fa-solid fa-users"></i>
+							</div>
+
 							<div class="stat-content">
-								<div class="stat-title">พนักงานทั้งหมด</div>
+
+								<div class="stat-title">
+									พนักงานทั้งหมด
+								</div>
+
 								<div class="stat-value-row">
-									<span class="stat-qty">512</span><span class="stat-unit">คน</span>
+
+									<span class="stat-qty">
+										{{ number_format($dashboard['summary']['total_users']) }}
+									</span>
+
+									<span class="stat-unit">
+										คน
+									</span>
+
 								</div>
-								<div class="stat-trend">
-									<span class="text-up"><i class="fa-solid fa-caret-up"></i> 8</span> <span class="trend-desc">จากช่วงก่อนหน้า</span>
-								</div>
+
 							</div>
 						</div>
 					</div>
 
+
+					{{-- Completion --}}
 					<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 custom-5-col">
+
 						<div class="card card-stat color-green">
-							<div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+
+							<div class="stat-icon">
+								<i class="fa-solid fa-circle-check"></i>
+							</div>
+
 							<div class="stat-content">
-								<div class="stat-title2">Completion Rate</div>
+
+								<div class="stat-title2">
+									Completion Rate
+								</div>
+
 								<div class="stat-value-row">
-									<span class="stat-qty2">78%</span>
+
+									<span class="stat-qty2">
+										{{ $dashboard['summary']['completion_rate'] }}%
+									</span>
+
 								</div>
-								<div class="stat-trend">
-									<span class="text-up"><i class="fa-solid fa-caret-up"></i> 6%</span> <span class="trend-desc">จากช่วงก่อนหน้า</span>
-								</div>
+
 							</div>
 						</div>
 					</div>
 
+
+					{{-- Pass Rate --}}
 					<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 custom-5-col">
+
 						<div class="card card-stat color-blue">
-							<div class="stat-icon"><i class="fa-solid fa-medal"></i></div>
+
+							<div class="stat-icon">
+								<i class="fa-solid fa-medal"></i>
+							</div>
+
 							<div class="stat-content">
-								<div class="stat-title3">Pass Rate</div>
+
+								<div class="stat-title3">
+									Pass Rate
+								</div>
+
 								<div class="stat-value-row">
-									<span class="stat-qty3">72%</span>
+
+									<span class="stat-qty3">
+										{{ $dashboard['summary']['pass_rate'] }}%
+									</span>
+
 								</div>
-								<div class="stat-trend">
-									<span class="text-up"><i class="fa-solid fa-caret-up"></i> 4%</span> <span class="trend-desc">จากช่วงก่อนหน้า</span>
-								</div>
+
 							</div>
 						</div>
 					</div>
 
+
+					{{-- Overdue --}}
 					<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 custom-5-col">
+
 						<div class="card card-stat color-orange">
-							<div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+
+							<div class="stat-icon">
+								<i class="fa-solid fa-clock"></i>
+							</div>
+
 							<div class="stat-content">
-								<div class="stat-title4">Course Overdue</div>
+
+								<div class="stat-title4">
+									Course Overdue
+								</div>
+
 								<div class="stat-value-row">
-									<span class="stat-qty4">34</span><span class="stat-unit">หลักสูตร</span>
+
+									<span class="stat-qty4">
+										{{ number_format($dashboard['summary']['overdue_courses']) }}
+									</span>
+
+									<span class="stat-unit">
+										หลักสูตร
+									</span>
+
 								</div>
-								<div class="stat-trend">
-									<span class="text-up"><i class="fa-solid fa-caret-up"></i> 5</span> <span class="trend-desc">หลักสูตร</span>
-								</div>
+
 							</div>
 						</div>
 					</div>
 
+
+					{{-- Retry --}}
 					<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 custom-5-col">
+
 						<div class="card card-stat color-red">
-							<div class="stat-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+
+							<div class="stat-icon">
+								<i class="fa-solid fa-circle-exclamation"></i>
+							</div>
+
 							<div class="stat-content">
-								<div class="stat-title">ต้องสอบซ่อม</div>
+
+								<div class="stat-title">
+									ต้องสอบซ่อม
+								</div>
+
 								<div class="stat-value-row">
-									<span class="stat-qty5">28</span><span class="stat-unit">คน</span>
+
+									<span class="stat-qty5">
+										{{ number_format($dashboard['summary']['retry_users']) }}
+									</span>
+
+									<span class="stat-unit">
+										คน
+									</span>
+
 								</div>
-								<div class="stat-trend">
-									<span class="text-up"><i class="fa-solid fa-caret-up"></i> 7</span> <span class="trend-desc">คน</span>
-								</div>
+
 							</div>
 						</div>
 					</div>
+
 				</section>
 
 				<section class="section-2 row row-eq-height">
 					<div class="col-lg-6 col-md-12 col-12">
+
 						<div class="card h-100">
+
 							<div class="card-header">
-								<h5>Completion Rate ของแต่ละ Line</h5>
+								<h5>
+									Completion Rate ของแต่ละ Line
+								</h5>
 							</div>
 
 							<div class="completion-rate-list">
-								<div class="cr-row">
-									<div class="cr-label">Line 1</div>
-									<div class="cr-bar-container">
-										<div class="cr-bar" style="width: 85%;"></div>
-										<div class="cr-pct">85%</div>
+
+								@forelse($dashboard['lineCompletion'] as $line)
+
+									<div class="cr-row">
+
+										<div class="cr-label">
+											{{ $line['name'] }}
+										</div>
+
+										<div class="cr-bar-container">
+
+											<div
+												class="cr-bar"
+												style="width: {{ $line['completion_rate'] }}%;"
+											></div>
+
+											<div class="cr-pct">
+												{{ $line['completion_rate'] }}%
+											</div>
+
+										</div>
+
+										<div class="cr-trend text-up">
+											<i class="fa-solid fa-caret-up"></i>
+											{{ $line['trend'] }}%
+										</div>
+
 									</div>
-									<div class="cr-trend text-up"><i class="fa-solid fa-caret-up"></i> 5%</div>
-								</div>
-								<div class="cr-row">
-									<div class="cr-label">Line 2</div>
-									<div class="cr-bar-container">
-										<div class="cr-bar" style="width: 70%;"></div>
-										<div class="cr-pct">70%</div>
+
+								@empty
+
+									<div class="text-muted text-center p-3">
+										ไม่พบข้อมูล
 									</div>
-									<div class="cr-trend text-down"><i class="fa-solid fa-caret-down"></i> 2%</div>
-								</div>
-								<div class="cr-row">
-									<div class="cr-label">Line 3</div>
-									<div class="cr-bar-container">
-										<div class="cr-bar" style="width: 72%;"></div>
-										<div class="cr-pct">72%</div>
-									</div>
-									<div class="cr-trend text-up"><i class="fa-solid fa-caret-up"></i> 4%</div>
-								</div>
-								<div class="cr-row">
-									<div class="cr-label">Line 4</div>
-									<div class="cr-bar-container">
-										<div class="cr-bar" style="width: 70%;"></div>
-										<div class="cr-pct">70%</div>
-									</div>
-									<div class="cr-trend text-up"><i class="fa-solid fa-caret-up"></i> 1%</div>
-								</div>
-								<div class="cr-row" style="margin-bottom: 5px;">
-									<div class="cr-label">Line 5<br><span class="cr-sub-label">(Headquarter)</span></div>
-									<div class="cr-bar-container">
-										<div class="cr-bar" style="width: 40%;"></div>
-										<div class="cr-pct">40%</div>
-									</div>
-									<div class="cr-trend text-down"><i class="fa-solid fa-caret-down"></i> 3%</div>
-								</div>
+
+								@endforelse
+
 
 								<div class="cr-axis-row">
-									<div style="width: 80px; flex-shrink: 0;"></div>
+
+									<div style="width:80px; flex-shrink:0;"></div>
+
 									<div class="cr-axis-labels">
+
 										<span>0%</span>
 										<span>25%</span>
 										<span>50%</span>
 										<span>75%</span>
 										<span>100%</span>
+
 									</div>
-									<div style="width: 90px; flex-shrink: 0;"></div>
+
+									<div style="width:90px; flex-shrink:0;"></div>
+
 								</div>
+
 							</div>
-							<!-- <div class="card-footer"><a href="#" class="btn-outline-purple">ดูรายละเอียด</a></div> -->
+
 						</div>
+
 					</div>
 
 					<div class="col-lg-6 col-md-6 col-12">
+
 						<div class="card h-100">
+
 							<div class="card-header">
-								<h5>Pass Rate ของแต่ละ Section</h5>
+
+								<h5>
+									Pass Rate ของแต่ละ Section
+								</h5>
+
 							</div>
+
 							<div class="donut-chart-layout">
+
 								<div class="donut-chart-wrapper">
+
 									<canvas id="passRateChart"></canvas>
+
 									<div class="donut-center-text">
-										<span class="pct">72%</span>
-										<span class="label">Pass Rate</span>
+
+										<span class="pct">
+											{{ $dashboard['summary']['pass_rate'] }}%
+										</span>
+
+										<span class="label">
+											Pass Rate
+										</span>
+
 									</div>
+
 								</div>
 
+
 								<div class="custom-donut-legend">
-									<div class="legend-item-row">
-										<div class="leg-left"><span class="leg-color" style="background:#3b82f6;"></span> Raw material</div>
-										<div class="leg-right">75%</div>
-									</div>
-									<div class="legend-item-row">
-										<div class="leg-left"><span class="leg-color" style="background:#ef4444;"></span> Blowing</div>
-										<div class="leg-right">72%</div>
-									</div>
-									<div class="legend-item-row">
-										<div class="leg-left"><span class="leg-color" style="background:#f59e0b;"></span> Mixing</div>
-										<div class="leg-right">78%</div>
-									</div>
-									<div class="legend-item-row">
-										<div class="leg-left"><span class="leg-color" style="background:#6366f1;"></span> Filling</div>
-										<div class="leg-right">73%</div>
-									</div>
-									<div class="legend-item-row">
-										<div class="leg-left"><span class="leg-color" style="background:#14b8a6;"></span> Packing</div>
-										<div class="leg-right">70%</div>
-									</div>
-									<div class="legend-item-row">
-										<div class="leg-left"><span class="leg-color" style="background:#0d9488;"></span> Packaging material</div>
-										<div class="leg-right">68%</div>
-									</div>
+
+									@foreach($dashboard['sectionPassRate'] as $section)
+
+										<div class="legend-item-row">
+
+											<div class="leg-left">
+
+												<span
+													class="leg-color"
+													style="background:#3b82f6;"
+												></span>
+
+												{{ $section['name'] }}
+
+											</div>
+
+											<div class="leg-right">
+
+												{{ $section['pass_rate'] }}%
+
+											</div>
+
+										</div>
+
+									@endforeach
+
 								</div>
+
 							</div>
-							<!-- <div class="card-footer"><a href="#" class="btn-outline-purple">ดูรายละเอียด</a></div> -->
+
 						</div>
+
 					</div>
 
 					<div class="col-lg-12 col-md-6 col-12">
+
 						<div class="card h-100">
+
 							<div class="card-header">
-								<h5>Top 5 หลักสูตรที่ไม่ผ่านมากที่สุด</h5>
-								<span class="sub-text">จำนวนผู้ไม่ผ่าน</span>
+
+								<h5>
+									Top 5 หลักสูตรที่ไม่ผ่านมากที่สุด
+								</h5>
+
+								<span class="sub-text">
+									จำนวนผู้ไม่ผ่าน
+								</span>
+
 							</div>
+
 							<div class="card-body">
+
 								<div class="top5-list">
-									<div class="top5-item">
-										<span class="top5-rank">1</span>
-										<span class="top5-name">ความปลอดภัยในการทำงาน</span>
-										<span class="top5-status">ไม่ผ่าน</span>
-										<span class="top5-count">18 คน</span>
-									</div>
-									<div class="top5-item">
-										<span class="top5-rank">2</span>
-										<span class="top5-name">การควบคุมคุณภาพในกระบวนการผลิต</span>
-										<span class="top5-status">ไม่ผ่าน</span>
-										<span class="top5-count">15 คน</span>
-									</div>
-									<div class="top5-item">
-										<span class="top5-rank">3</span>
-										<span class="top5-name">การบำรุงรักษาเบื้องต้น</span>
-										<span class="top5-status">ไม่ผ่าน</span>
-										<span class="top5-count">12 คน</span>
-									</div>
-									<div class="top5-item">
-										<span class="top5-rank">4</span>
-										<span class="top5-name">การตั้งค่าเครื่องจักรเบื้องต้น</span>
-										<span class="top5-status">ไม่ผ่าน</span>
-										<span class="top5-count">10 คน</span>
-									</div>
-									<div class="top5-item">
-										<span class="top5-rank">5</span>
-										<span class="top5-name">5 ส ในการปฏิบัติงาน</span>
-										<span class="top5-status">ไม่ผ่าน</span>
-										<span class="top5-count">9 คน</span>
-									</div>
+
+									@forelse($dashboard['failedCourses'] as $course)
+
+										<div class="top5-item">
+
+											<span class="top5-rank">
+												{{ $course['rank'] }}
+											</span>
+
+											<span class="top5-name">
+												{{ $course['title'] }}
+											</span>
+
+											<span class="top5-status">
+												ไม่ผ่าน
+											</span>
+
+											<span class="top5-count">
+												{{ number_format($course['failed_count']) }}
+												คน
+											</span>
+
+										</div>
+
+									@empty
+
+										<div class="text-muted text-center p-3">
+											ไม่พบข้อมูล
+										</div>
+
+									@endforelse
+
 								</div>
+
 							</div>
-							<!-- <div class="card-footer"><a href="#" class="btn-outline-purple">ดูรายละเอียด</a></div> -->
+
 						</div>
+
 					</div>
 				</section>
 
@@ -252,41 +380,66 @@
 									</div>
 
 									<div class="custom-donut-legend employee-legend">
+
 										<div class="legend-item-row">
-											<div class="leg-left"><span class="leg-color" style="background:#6b4ce6;"></span> ครบ 30 วัน</div>
+											<div class="leg-left">
+												<span class="leg-color"></span>
+												ครบ 30 วัน
+											</div>
+
 											<div class="leg-right">
-												<span class="leg-count">42 คน</span>
-												<span class="leg-pct">(85%)</span>
+												{{ $dashboard['newEmployees']['30'] }} คน
 											</div>
 										</div>
+
+
 										<div class="legend-item-row">
-											<div class="leg-left"><span class="leg-color" style="background:#f87171;"></span> ครบ 60 วัน</div>
+											<div class="leg-left">
+												<span class="leg-color"></span>
+												ครบ 60 วัน
+											</div>
+
 											<div class="leg-right">
-												<span class="leg-count">38 คน</span>
-												<span class="leg-pct">(76%)</span>
+												{{ $dashboard['newEmployees']['60'] }} คน
 											</div>
 										</div>
+
+
 										<div class="legend-item-row">
-											<div class="leg-left"><span class="leg-color" style="background:#60a5fa;"></span> ครบ 90 วัน</div>
+											<div class="leg-left">
+												<span class="leg-color"></span>
+												ครบ 90 วัน
+											</div>
+
 											<div class="leg-right">
-												<span class="leg-count">26 คน</span>
-												<span class="leg-pct">(64%)</span>
+												{{ $dashboard['newEmployees']['90'] }} คน
 											</div>
 										</div>
+
+
 										<div class="legend-item-row">
-											<div class="leg-left"><span class="leg-color" style="background:#2dd4bf;"></span> ครบ 120 วัน</div>
+											<div class="leg-left">
+												<span class="leg-color"></span>
+												ครบ 120 วัน
+											</div>
+
 											<div class="leg-right">
-												<span class="leg-count">22 คน</span>
-												<span class="leg-pct">(54%)</span>
+												{{ $dashboard['newEmployees']['120'] }} คน
 											</div>
 										</div>
+
+
 										<div class="legend-item-row">
-											<div class="leg-left"><span class="leg-color" style="background:#059669;"></span> เกิน 120 วัน</div>
+											<div class="leg-left">
+												<span class="leg-color"></span>
+												เกิน 120 วัน
+											</div>
+
 											<div class="leg-right">
-												<span class="leg-count">22 คน</span>
-												<span class="leg-pct">(44%)</span>
+												{{ $dashboard['newEmployees']['over120'] }} คน
 											</div>
 										</div>
+
 									</div>
 								</div>
 							</div>
@@ -369,67 +522,68 @@
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>Production</td>
-											<td>248</td>
-											<td>80% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 5%</span></td>
-											<td>74% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 4%</span></td>
-											<td>18 <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 3</span></td>
-											<td>12 <span class="trend-down"><i class="fa-solid fa-caret-down"></i> 1</span></td>
-											<td>29%</td>
-											<td><a href="#" class="btn-table-outline">ดูรายละเอียด</a></td>
-										</tr>
-										<tr>
-											<td>Quality Control</td>
-											<td>64</td>
-											<td>82% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 3%</span></td>
-											<td>76% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 2%</span></td>
-											<td>6 <span class="trend-dash">-</span></td>
-											<td>5 <span class="trend-down"><i class="fa-solid fa-caret-down"></i> 1</span></td>
-											<td>24%</td>
-											<td><a href="#" class="btn-table-outline">ดูรายละเอียด</a></td>
-										</tr>
-										<tr>
-											<td>Maintenance</td>
-											<td>48</td>
-											<td>75% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 2%</span></td>
-											<td>70% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 3%</span></td>
-											<td>7 <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 1</span></td>
-											<td>6 <span class="trend-dash">-</span></td>
-											<td>27%</td>
-											<td><a href="#" class="btn-table-outline">ดูรายละเอียด</a></td>
-										</tr>
-										<tr>
-											<td>Supply Chain</td>
-											<td>42</td>
-											<td>78% <span class="trend-down"><i class="fa-solid fa-caret-down"></i> 1%</span></td>
-											<td>71% <span class="trend-down"><i class="fa-solid fa-caret-down"></i> 1%</span></td>
-											<td>5 <span class="trend-dash">-</span></td>
-											<td>3 <span class="trend-dash">-</span></td>
-											<td>22%</td>
-											<td><a href="#" class="btn-table-outline">ดูรายละเอียด</a></td>
-										</tr>
-										<tr>
-											<td>Engineering</td>
-											<td>38</td>
-											<td>79% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 6%</span></td>
-											<td>74% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 5%</span></td>
-											<td>4 <span class="trend-down"><i class="fa-solid fa-caret-down"></i> 1</span></td>
-											<td>2 <span class="trend-dash">-</span></td>
-											<td>19%</td>
-											<td><a href="#" class="btn-table-outline">ดูรายละเอียด</a></td>
-										</tr>
-										<tr>
-											<td>Administration</td>
-											<td>72</td>
-											<td>74% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 4%</span></td>
-											<td>69% <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 4%</span></td>
-											<td>6 <span class="trend-dash">-</span></td>
-											<td>4 <span class="trend-up"><i class="fa-solid fa-caret-up"></i> 1</span></td>
-											<td>21%</td>
-											<td><a href="#" class="btn-table-outline">ดูรายละเอียด</a></td>
-										</tr>
-									</tbody>
+
+										@forelse($dashboard['departmentComparison'] as $department)
+
+											<tr>
+
+												<td>
+													{{ $department['department'] }}
+												</td>
+
+												<td>
+													{{ number_format($department['employees']) }}
+												</td>
+
+												<td>
+													{{ $department['completion_rate'] }}%
+												</td>
+
+												<td>
+													{{ $department['pass_rate'] }}%
+												</td>
+
+												<td>
+													{{ number_format($department['overdue']) }}
+												</td>
+
+												<td>
+													{{ number_format($department['retry']) }}
+												</td>
+
+												<td>
+													{{ $department['skill_gap'] }}%
+												</td>
+
+												<td>
+
+													<a
+														href="#"
+														class="btn-table-outline"
+													>
+														ดูรายละเอียด
+													</a>
+
+												</td>
+
+											</tr>
+
+										@empty
+
+											<tr>
+
+												<td
+													colspan="8"
+													class="text-center text-muted"
+												>
+													ไม่พบข้อมูล
+												</td>
+
+											</tr>
+
+										@endforelse
+
+										</tbody>
 								</table>
 							</div>
 						</div>
@@ -454,3 +608,144 @@
 					</div>
 				</section>
 			</div>
+</div>
+@endsection
+@push('scripts')
+<script type="text/javascript">
+    $(function() {
+        const LINE_LEVEL = '{{ \App\Services\AdminDashboardService::LINE_LEVEL }}';
+        const POSITION_LEVEL = '{{ \App\Services\AdminDashboardService::POSITION_LEVEL }}';
+        const orgChildrenUrl = "{{ route('admin.org_children') }}";
+
+        const $department = $('#filterDepartment');
+        const $section = $('#filterSection');
+        const $line = $('#filterLine');
+        const $lineNote = $('#filterLineNote');
+
+        // เติม option ให้ select ตัวใดตัวหนึ่ง
+        function fillSelect($select, items, placeholder = 'ทั้งหมด') {
+            $select.empty();
+            $select.append($('<option>', { value: '', text: placeholder }));
+            items.forEach(function (item) {
+                $select.append($('<option>', { value: item.id, text: item.title }));
+            });
+        }
+
+        // ดึงลูกของ orgchart node จาก server
+        function fetchOrgChildren(parentId) {
+            return $.getJSON(orgChildrenUrl, { parent_id: parentId });
+        }
+
+        // เมื่อเลือกแผนก: โหลดส่วนงาน แล้วรีเซ็ตไลน์
+        $department.on('change', function () {
+            const deptId = $(this).val();
+
+            fillSelect($section, []);
+            fillSelect($line, []);
+            $section.prop('disabled', true);
+            $line.prop('disabled', true);
+            $lineNote.hide();
+
+            if (!deptId) {
+                return;
+            }
+
+            fetchOrgChildren(deptId).done(function (sections) {
+                if (sections.length > 0) {
+                    fillSelect($section, sections);
+                    $section.prop('disabled', false);
+                }
+            });
+        });
+
+        // เมื่อเลือกส่วนงาน: โหลดไลน์ (หรืออาจได้ตำแหน่งมาตรงถ้าไม่มีไลน์)
+        $section.on('change', function () {
+            const sectionId = $(this).val();
+
+            fillSelect($line, []);
+            $line.prop('disabled', true);
+            $lineNote.hide();
+
+            if (!sectionId) {
+                return;
+            }
+
+            fetchOrgChildren(sectionId).done(function (children) {
+                if (children.length === 0) {
+                    return;
+                }
+
+                const firstLevel = String(children[0].level);
+
+                if (firstLevel === LINE_LEVEL) {
+                    // แผนกนี้มีไลน์ผลิต
+                    fillSelect($line, children);
+                    $line.prop('disabled', false);
+                    $lineNote.hide();
+                } else if (firstLevel === POSITION_LEVEL) {
+                    // แผนกนี้ไม่มีไลน์ ข้ามไปตำแหน่งเลย (filter ยังไม่รองรับ position)
+                    $line.prop('disabled', true);
+                    $lineNote.show();
+                }
+            });
+        });
+
+        // Init: ถ้ามีค่า department_id จาก query string ให้โหลด section/line กลับมา
+        const selectedDeptId = '{{ request('department_id') }}';
+        const selectedSectionId = '{{ request('section_id') }}';
+        const selectedLineId = '{{ request('line_id') }}';
+
+        if (selectedDeptId) {
+            fetchOrgChildren(selectedDeptId).done(function (sections) {
+                if (sections.length > 0) {
+                    fillSelect($section, sections);
+                    $section.prop('disabled', false);
+
+                    if (selectedSectionId) {
+                        $section.val(selectedSectionId);
+
+                        fetchOrgChildren(selectedSectionId).done(function (children) {
+                            if (children.length === 0) return;
+
+                            const firstLevel = String(children[0].level);
+
+                            if (firstLevel === LINE_LEVEL) {
+                                fillSelect($line, children);
+                                $line.prop('disabled', false);
+
+                                if (selectedLineId) {
+                                    $line.val(selectedLineId);
+                                }
+                            } else if (firstLevel === POSITION_LEVEL) {
+                                $line.prop('disabled', true);
+                                $lineNote.show();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        $('#dateSec3').daterangepicker({
+            autoUpdateInput: true,
+            locale: {
+                format: 'DD/MM/YYYY',
+                separator: ' - ',
+                applyLabel: 'เลือก',
+                cancelLabel: 'ล้าง',
+                fromLabel: 'จาก',
+                toLabel: 'ถึง',
+                customRangeLabel: 'กำหนดเอง',
+                weekLabel: 'W',
+                daysOfWeek: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
+                monthNames: [
+                    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+                ],
+                firstDay: 1
+            }
+        });
+    });
+
+</script>
+@endpush

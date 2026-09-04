@@ -118,6 +118,7 @@ use App\Helpers\ChildOrgHelper;
 use App\Services\RoadmapService;
 use Google\LongRunning\Operation;
 use App\Services\ManagerDashboardService;
+use App\Services\ManagementDashboardService;
 use App\Services\AdminDashboardService;
 
 class AdminController extends Controller
@@ -126,6 +127,7 @@ class AdminController extends Controller
     public int $limit = 100;
     public function indexDashboard(
         ManagerDashboardService $ManagerDashboardService,
+        ManagementDashboardService $managementService,
         // ManagementDashboardService $managementService,
         AdminDashboardService $adminService
     ) {
@@ -182,7 +184,42 @@ class AdminController extends Controller
                 'dashboardTitle',
                 'dashboardSector'));
         }
+        if ($groupId == '3') {
 
+            $dashboardTitle =
+                'Dashboard Management';
+
+            $dashboardSector =
+                'ทุกแผนก';
+
+            $filters = request()->only([
+                'department_id',
+                'section_id',
+                'line_id',
+                'team_id',
+                'date_from',
+                'date_to',
+            ]);
+
+            $departments =
+                $managementService->getDepartments();
+
+            $dashboard =
+                $managementService
+                    ->getDashboardData($filters);
+
+            return view(
+                'admin.index.adminmanagement',
+                compact(
+                    'user',
+                    'dashboardTitle',
+                    'dashboardSector',
+                    'departments',
+                    'dashboard',
+                    'filters'
+                )
+            );
+        }
         // if ($groupId == '3') {
         //     $data = $managementService->getDashboardData($user);
         //     return view('admin.index.adminmanagement', $data);
