@@ -899,4 +899,180 @@ class DashboardService
 
         return round($examScore + $assessmentScore);
     }
+
+    /**
+     * ดึงรายการคอร์สของพนักงาน + สถานะ isNewEmployee + roadmap (ถ้ามี)
+     * เป็น logic เดียวกับช่วงต้นของ getEmployeeDashboard() แยกออกมาไว้ใช้ซ้ำ
+     * กับ getCourseListByStatus() โดยไม่ไปแก้ getEmployeeDashboard() เดิม
+     */
+    private function resolveEmployeeCourses($user): array
+    {
+        $isNewEmployee = $user->team_id === Users::TEAM_NEWEMP;
+
+        $roadmap = null;
+
+        if ($isNewEmployee) {
+
+            $roadmap = Roadmap::where('line_id', $user->Orgchart?->line?->id)
+                ->where('active', 'y')
+                ->with([
+                    'courses' => function ($q) use ($isNewEmployee) {
+
+                        $q->where('course_online.active', 'y')
+                        ->where('is_onboarding', $isNewEmployee ? true : false)
+                        ->withPivot([
+                            'milestone_days',
+                            'order'
+                        ]);
+                    },
+                    'courses.category',
+                    'courses.lesson' => function ($q) {
+
+                        $q->where('active', 'y');
+
+                    },
+                    'courses.lesson.learn' => function ($q) use ($user) {
+
+                        $q->where('user_id', $user->id)
+                        ->where('pass_year', now()->year);
+
+                    },
+                    'courses.groupTesting.questions',
+                    'courses.courseScore' => function ($q) use ($user) {
+                        $q->where('user_id', $user->id)
+                        ->where('active', 'y')
+                        ->where('pass_year', now()->year);
+                    }
+                ])
+                ->first();
+
+            $courses = $roadmap?->courses ?? collect();
+
+        } else {
+
+            $courses = Course::where('active', 'y')
+                ->where('is_onboarding', false)
+                ->whereDate('start_date', '<=', today())
+                ->whereDate('end_date', '>=', today())
+                ->with([
+                    'category',
+                    'lesson' => function ($q) {
+                        $q->where('active', 'y');
+                    },
+                    'lesson.learn' => function ($q) use ($user) {
+                        $q->where('user_id', $user->id)
+                        ->where('pass_year', now()->year);
+                    },
+                    'groupTesting.questions',
+                    'courseScore' => function ($q) use ($user) {
+                        $q->where('user_id', $user->id)
+                        ->where('active', 'y')
+                        ->where('pass_year', now()->year);
+                    },
+                ])
+                ->get();
+        }
+
+        return [$courses, $isNewEmployee, $roadmap];
+    }
+
+    /**
+     * จัดสถานะคอร์ส ให้ตรงกับ logic เดิมในลูปนับ completed/failed/inProgress/notStarted
+     * ของ getEmployeeDashboard() ทุกประการ (เรียงลำดับเงื่อนไขเหมือนกัน)
+     */
+    private function classifyCourseStatus($course, $user): string
+    {
+        $score = $course->courseScore
+            ->sortByDesc('create_date')
+            ->first();
+
+        if ($score && $score->score_status == 'pass') {
+            return 'completed';
+        }
+
+        if ($score && $score->score_status == 'fail') {
+            return 'failed';
+        }
+
+        return $this->calculateCourseProgress($course, $user) > 0
+            ? 'inProgress'
+            : 'notStarted';
+    }
+
+    /**
+     * หา deadline/วันหมดอายุของคอร์ส ให้ตรงกับ logic เดิมที่ใช้ใน
+     * deadlineCourses และ continueCourses ของ getEmployeeDashboard()
+     */
+    private function resolveCourseDeadline($course, $user, bool $isNewEmployee): ?Carbon
+    {
+        if ($isNewEmployee) {
+
+            $days = $course->pivot->milestone_days ?? 0;
+
+            return $user->work_start
+                ? Carbon::parse($user->work_start)->addDays($days)
+                : null;
+        }
+
+        return $course->end_date
+            ? Carbon::parse($course->end_date)
+            : null;
+    }
+
+    /**
+     * รายการคอร์สตามสถานะ (completed / inProgress / notStarted / failed)
+     * แบบแบ่งหน้า สำหรับ popup ที่กดจากปุ่ม "ดูบทเรียน" บน Dashboard
+     * เรียงจากคอร์สที่ใกล้หมดอายุ (deadline) ก่อนเสมอ
+     */
+    public function getCourseListByStatus($user, string $status, int $page = 1, int $perPage = 10): LengthAwarePaginator
+    {
+        [$courses, $isNewEmployee, $roadmap] = $this->resolveEmployeeCourses($user);
+
+        if ($isNewEmployee && !$roadmap) {
+            $courses = collect();
+        }
+
+        $list = $courses
+            ->filter(function ($course) use ($user, $status) {
+                return $this->classifyCourseStatus($course, $user) === $status;
+            })
+            ->map(function ($course) use ($user, $isNewEmployee) {
+
+                $deadline = $this->resolveCourseDeadline($course, $user, $isNewEmployee);
+
+                $latestScore = $course->courseScore
+                    ->sortByDesc('create_date')
+                    ->first();
+
+                return [
+                    'course_id'          => $course->course_id,
+                    'course_title'       => $course->course_title,
+                    'course_short_title' => strip_tags($course->course_short_title ?? ''),
+                    'percent'            => $this->calculateCourseProgress($course, $user),
+                    'deadline'           => $deadline,
+                    'deadline_text'      => $deadline
+                        ? $deadline->locale('th')->translatedFormat('d M y')
+                        : 'ไม่ระบุ',
+                    'score_number'       => $latestScore->score_number ?? null,
+                    'score_total'        => $latestScore->score_total ?? null,
+                ];
+            })
+            ->sortBy(function ($item) {
+                return $item['deadline'] ?? Carbon::maxValue();
+            })
+            ->values();
+
+        $page = max(1, $page);
+
+        return new LengthAwarePaginator(
+            $list->forPage($page, $perPage),
+            $list->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
+        );
+    }
 }

@@ -1,6 +1,68 @@
 @extends('admin.layouts.dashboard-layout')
 
 @section('dashboard-content')
+<style>
+	/* หลักสูตรที่นักเรียนมากที่สุด */
+	.popular-course-list {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.popular-course-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 0;
+		border-bottom: 1px solid #f0f0f0;
+	}
+
+	.popular-course-row:last-child {
+		border-bottom: none;
+	}
+
+	.popular-course-rank {
+		flex: 0 0 24px;
+		height: 24px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background-color: #f1f3f5;
+		color: #6c757d;
+		font-size: 12px;
+		font-weight: 700;
+	}
+
+	.popular-course-row:nth-child(1) .popular-course-rank {
+		/* ใช้ rgba ไม่ใช่ color-mix() เพราะ html2canvas (ปุ่ม Export) parse color-mix ไม่ได้
+		   ค่าที่ได้เท่ากันเป๊ะ: color-mix(in srgb, #3e1f92 12%, transparent) = rgba(62,31,146,.12) */
+		background-color: rgba(62, 31, 146, 0.12);
+		color: #3e1f92;
+	}
+
+	.popular-course-title {
+		flex: 1 1 auto;
+		min-width: 0;
+		font-size: 13px;
+		line-height: 1.4;
+		color: #212529;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.popular-course-count {
+		flex: 0 0 auto;
+		font-size: 12px;
+		color: #6c757d;
+		white-space: nowrap;
+	}
+
+	.popular-course-count strong {
+		font-size: 14px;
+		color: #212529;
+	}
+</style>
 <div class="main-content admin-dashboard" style="max-width: 100%; margin: 0 auto; padding: 0 20px;">
             <div class="container-fluid">
 				<!-- SECTION 1 -->
@@ -11,7 +73,7 @@
 							<div style="margin-top: auto; width: 100%;">
 								<span>ช่วงเวลา</span>
 								<div class="input-group date-input">
-									<input type="text" id="dateSec3" name="date_range" class="form-control" style="border-right: none;">
+									<input type="text" id="dateSec3" name="date_range" class="form-control" style="border-right: none;" value="{{ request('date_range') }}" placeholder="ทั้งหมด" autocomplete="off" readonly>
 									<span class="input-group-addon" style="background:#fff;">
 										<i class="fa-regular fa-calendar"></i>
 									</span>
@@ -48,7 +110,7 @@
 									<select name="line_id" id="filterLine" class="form-control" {{ request('section_id') ? '' : 'disabled' }}>
 										<option value="" selected>ทั้งหมด</option>
 									</select>
-									<small class="text-muted" id="filterLineNote" style="display:none;">แผนกนี้ไม่มีไลน์ผลิต</small>
+									<small class="text-muted" id="filterLineNote" style="display:none;">ส่วนงานนี้ไม่มีไลน์ผลิต</small>
 								</div>
 							</div>
 						</div>
@@ -70,7 +132,7 @@
 								<button type="submit" class="btn btn-primary w-50" style="border: rgb(62, 31, 146) 2px solid; background: rgb(62, 31, 146); color: white;">
 									<i class="fa-solid fa-filter"></i> <strong>ค้นหา</strong>
 								</button>
-								<button type="button" class="btn btn-default w-50" style="border: rgb(62, 31, 146) 2px solid; color: rgb(62, 31, 146);">
+								<button type="button" id="btnExportImage" class="btn btn-default w-50" style="border: rgb(62, 31, 146) 2px solid; color: rgb(62, 31, 146);">
 									<i class="fa-solid fa-download"></i> <strong>Export</strong>
 								</button>
 							</div>
@@ -86,7 +148,7 @@
 							<div class="card" style="color: #0d6efd;">
 								<div class="summary">
 									<div class="summary-header">
-										<div style="background-color: color-mix(in srgb, #0d6efd 15%, transparent);">
+										<div style="background-color: rgba(13, 110, 253, 0.15);">
 											<i class="fa-solid fa-book-open fa-2xl"></i>
 										</div>
 									</div>
@@ -101,7 +163,7 @@
 							<div class="card" style="color: #0dcaf0;">
 								<div class="summary">
 									<div class="summary-header">
-										<div style="background-color: color-mix(in srgb, #0dcaf0 15%, transparent);">
+										<div style="background-color: rgba(13, 202, 240, 0.15);">
 											<i class="fa-solid fa-user-graduate fa-2xl"></i>
 										</div>
 									</div>
@@ -116,7 +178,7 @@
 							<div class="card" style="color: #0d6efd;">
 								<div class="summary">
 									<div class="summary-header">
-										<div style="background-color: color-mix(in srgb, #0d6efd 15%, transparent);">
+										<div style="background-color: rgba(13, 110, 253, 0.15);">
 											<i class="fa-solid fa-video fa-2xl"></i>
 										</div>
 									</div>
@@ -131,7 +193,7 @@
 							<div class="card" style="color: #198754;">
 								<div class="summary">
 									<div class="summary-header">
-										<div style="background-color: color-mix(in srgb, #198754 15%, transparent);">
+										<div style="background-color: rgba(25, 135, 84, 0.15);">
 											<i class="fa-regular fa-file-lines fa-2xl"></i>
 										</div>
 									</div>
@@ -146,7 +208,7 @@
 							<div class="card" style="color: #6f42c1;">
 								<div class="summary">
 									<div class="summary-header">
-										<div style="background-color: color-mix(in srgb, #6f42c1 15%, transparent);">
+										<div style="background-color: rgba(111, 66, 193, 0.15);">
 											<i class="fa-solid fa-user-group fa-2xl"></i>
 										</div>
 									</div>
@@ -160,7 +222,7 @@
 							<div class="card" style="color: #9e7804;">
 								<div class="summary">
 									<div class="summary-header">
-										<div style="padding: 10px; background-color: color-mix(in srgb, #ffc107 15%, transparent);">
+										<div style="padding: 10px; background-color: rgba(255, 193, 7, 0.15);">
 											<i class="fa-solid fa-user-clock fa-xl" style="color: #ffc107;"></i>
 										</div>
 									</div>
@@ -259,7 +321,7 @@
 												<div class="card-body" style="display: flex; align-items: center; height: 100%;">
 													<div class="summary">
 														<div class="summary-header">
-															<div style="background-color: color-mix(in srgb, #6f42c1 15%, transparent); padding-inline: 10px; border-radius: 50%;">
+															<div style="background-color: rgba(111, 66, 193, 0.15); padding-inline: 10px; border-radius: 50%;">
 																<i class="fa-solid fa-user-group fa-lg" style="color: #6f42c1;"></i>
 															</div>
 														</div>
@@ -297,7 +359,7 @@
 										</div>
 										<div class="card" style="margin-top: 20px;">
 											<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-												<span style="font-size: 16px; color: #6c757d;">ผู้ใช้งานออนไลน์</span>
+												<span style="font-size: 16px; color: #6c757d;">ผู้ใช้งานออนไลน์ทั้งหมดในระบบ</span>
 												<strong style="font-size: 16px;">{{ number_format($dashboard['systemStatus']['online_users']) }} คน</strong>
 											</div>
 										</div>
@@ -356,32 +418,21 @@
 						<div class="col-lg-4 col-md-6 col-sm-12">
 							<div class="card">
 								<div class="card-header"><strong>หลักสูตรที่นักเรียนมากที่สุด</strong></div>
-								{{-- <div class="card-body" style="font-size: small;">
-									<div style="display: flex; flex-direction: column; gap: 5px;">
-										@php $maxLearner = $dashboard['popularCourses']->max('learner_count') ?: 1; @endphp
+								<div class="card-body">
+									<div class="popular-course-list">
 										@forelse ($dashboard['popularCourses'] as $course)
-										<div style="display:flex; flex-direction: row; justify-content:space-between;">
-											<div style="display:flex; flex-direction: row; align-items: center; gap:20px;">
-												<h4 style="margin: 0; font-weight:bold;">{{ $course['rank'] }}</h4>
-												<div style="display: flex; flex-direction: column;">
-													<strong>{{ $course['title'] }}</strong>
-													<span>ผู้เรียน {{ $course['learner_count'] }} คน</span>
-												</div>
-											</div>
-											@php $percent = round(($course['learner_count'] / $maxLearner) * 100); @endphp
-											<div style="display:flex; flex-direction: row; align-items: center; gap: 5px; width: 40%">
-												<div class="progress" style="height: 15px; flex: 1; margin-bottom: 0;">
-													<div class="progress-bar" role="progressbar" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ $percent }}%;">
-													</div>
-												</div>
-												<span style="white-space: nowrap;">{{ $percent }}%</span>
-											</div>
+										<div class="popular-course-row">
+											<span class="popular-course-rank">{{ $course['rank'] }}</span>
+											<span class="popular-course-title" title="{{ $course['title'] }}">{{ $course['title'] }}</span>
+											<span class="popular-course-count">
+												<strong>{{ number_format($course['learner_count']) }}</strong> คน
+											</span>
 										</div>
 										@empty
 										<span class="text-muted">ไม่มีข้อมูลหลักสูตร</span>
 										@endforelse
 									</div>
-								</div> --}}
+								</div>
 
 							</div>
 						</div>
@@ -396,8 +447,11 @@
 @push('scripts')
 <script type="text/javascript">
     $(function() {
-        const LINE_LEVEL = '{{ \App\Services\AdminDashboardService::LINE_LEVEL }}';
-        const POSITION_LEVEL = '{{ \App\Services\AdminDashboardService::POSITION_LEVEL }}';
+        // บอก server ว่าอยากได้ "ชนิด" ไหน ไม่ส่งเลข level ไปเอง เพราะโครงสร้าง org
+        // ลึกไม่เท่ากันทุกสาย (สาย HR ไม่มีชั้นไลน์ ทำให้ตำแหน่งไปอยู่ level เดียวกับ
+        // ไลน์ผลิตของสายปกติ) ปล่อยให้ service เป็นคนตัดสินที่เดียว
+        const TYPE_SECTION = '{{ \App\Services\AdminDashboardService::ORG_TYPE_SECTION }}';
+        const TYPE_LINE = '{{ \App\Services\AdminDashboardService::ORG_TYPE_LINE }}';
         const orgChildrenUrl = "{{ route('admin.org_children') }}";
 
         const $department = $('#filterDepartment');
@@ -414,9 +468,51 @@
             });
         }
 
-        // ดึงลูกของ orgchart node จาก server
-        function fetchOrgChildren(parentId) {
-            return $.getJSON(orgChildrenUrl, { parent_id: parentId });
+        // ดึงตัวเลือกจาก server ตามชนิดที่ขอ
+        function fetchOrgChildren(parentId, type) {
+            return $.getJSON(orgChildrenUrl, { parent_id: parentId, type: type });
+        }
+
+        // โหลดตัวเลือกไม่สำเร็จ: บอกผู้ใช้ในช่องนั้นเลย ไม่ปล่อยให้ค้างว่างเงียบ ๆ
+        //
+        // การเช็ค session หมดอายุที่นี่ดูเป็น 2 แบบ เพราะระบบตอบกลับไม่เหมือนกัน:
+        // - 401 มาจาก controller เอง (ล็อกอินอยู่แต่ไม่ใช่ admin)
+        // - parsererror ทั้งที่ status 200 มาจาก middleware CheckIdleTimeout /
+        //   CheckTokenValidityAdmin ที่ใช้ redirect() ไปหน้า login ไม่ได้คืน 401
+        //   jQuery จะตาม redirect ไปเองแล้วได้ HTML หน้า login กลับมา พอ dataType เป็น json
+        //   จึง parse ไม่ผ่าน อาการนี้คือ session หมดอายุ ไม่ใช่เซิร์ฟเวอร์พัง
+        function showLoadError($select, jqXHR, textStatus, label) {
+            const gotHtmlInsteadOfJson = textStatus === 'parsererror';
+            const sessionExpired = jqXHR.status === 401 || jqXHR.status === 419 || gotHtmlInsteadOfJson;
+
+            fillSelect($select, [], sessionExpired
+                ? 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'
+                : 'โหลด' + label + 'ไม่สำเร็จ ลองเลือกใหม่อีกครั้ง');
+
+            $select.prop('disabled', true);
+        }
+
+        // เติมช่อง "ไลน์ผลิต" จากส่วนงานที่เลือก
+        // ถ้าสายงานนั้นไม่มีไลน์ (เช่น HR ที่จบที่ส่วนงานแล้วไปตำแหน่งเลย) จะได้ [] กลับมา
+        // ให้ปิดช่องไว้พร้อมบอกเหตุผล ไม่ใช่ปิดเงียบ ๆ ให้ผู้ใช้เดา
+        function loadLines(sectionId, selectedId) {
+            return fetchOrgChildren(sectionId, TYPE_LINE).done(function (lines) {
+                if (lines.length > 0) {
+                    fillSelect($line, lines);
+                    $line.prop('disabled', false);
+                    $lineNote.hide();
+
+                    if (selectedId) {
+                        $line.val(selectedId);
+                    }
+                } else {
+                    $line.prop('disabled', true);
+                    $lineNote.show();
+                }
+            }).fail(function (jqXHR, textStatus) {
+                $lineNote.hide();
+                showLoadError($line, jqXHR, textStatus, 'ไลน์ผลิต');
+            });
         }
 
         // เมื่อเลือกแผนก: โหลดส่วนงาน แล้วรีเซ็ตไลน์
@@ -433,15 +529,21 @@
                 return;
             }
 
-            fetchOrgChildren(deptId).done(function (sections) {
+            fetchOrgChildren(deptId, TYPE_SECTION).done(function (sections) {
                 if (sections.length > 0) {
                     fillSelect($section, sections);
                     $section.prop('disabled', false);
+                } else {
+                    // แผนกที่ไม่มีส่วนงานผูกไว้ บอกไปตรง ๆ ดีกว่าปล่อยช่องว่างให้เดา
+                    fillSelect($section, [], 'ไม่มีส่วนงาน');
+                    $section.prop('disabled', true);
                 }
+            }).fail(function (jqXHR, textStatus) {
+                showLoadError($section, jqXHR, textStatus, 'ส่วนงาน');
             });
         });
 
-        // เมื่อเลือกส่วนงาน: โหลดไลน์ (หรืออาจได้ตำแหน่งมาตรงถ้าไม่มีไลน์)
+        // เมื่อเลือกส่วนงาน: โหลดไลน์ของส่วนงานนั้น
         $section.on('change', function () {
             const sectionId = $(this).val();
 
@@ -453,24 +555,7 @@
                 return;
             }
 
-            fetchOrgChildren(sectionId).done(function (children) {
-                if (children.length === 0) {
-                    return;
-                }
-
-                const firstLevel = String(children[0].level);
-
-                if (firstLevel === LINE_LEVEL) {
-                    // แผนกนี้มีไลน์ผลิต
-                    fillSelect($line, children);
-                    $line.prop('disabled', false);
-                    $lineNote.hide();
-                } else if (firstLevel === POSITION_LEVEL) {
-                    // แผนกนี้ไม่มีไลน์ ข้ามไปตำแหน่งเลย (filter ยังไม่รองรับ position)
-                    $line.prop('disabled', true);
-                    $lineNote.show();
-                }
-            });
+            loadLines(sectionId);
         });
 
         // Init: ถ้ามีค่า department_id จาก query string ให้โหลด section/line กลับมา
@@ -479,38 +564,31 @@
         const selectedLineId = '{{ request('line_id') }}';
 
         if (selectedDeptId) {
-            fetchOrgChildren(selectedDeptId).done(function (sections) {
-                if (sections.length > 0) {
-                    fillSelect($section, sections);
-                    $section.prop('disabled', false);
-
-                    if (selectedSectionId) {
-                        $section.val(selectedSectionId);
-
-                        fetchOrgChildren(selectedSectionId).done(function (children) {
-                            if (children.length === 0) return;
-
-                            const firstLevel = String(children[0].level);
-
-                            if (firstLevel === LINE_LEVEL) {
-                                fillSelect($line, children);
-                                $line.prop('disabled', false);
-
-                                if (selectedLineId) {
-                                    $line.val(selectedLineId);
-                                }
-                            } else if (firstLevel === POSITION_LEVEL) {
-                                $line.prop('disabled', true);
-                                $lineNote.show();
-                            }
-                        });
-                    }
+            fetchOrgChildren(selectedDeptId, TYPE_SECTION).done(function (sections) {
+                if (sections.length === 0) {
+                    return;
                 }
+
+                fillSelect($section, sections);
+                $section.prop('disabled', false);
+
+                if (selectedSectionId) {
+                    $section.val(selectedSectionId);
+                    loadLines(selectedSectionId, selectedLineId);
+                }
+            }).fail(function (jqXHR, textStatus) {
+                showLoadError($section, jqXHR, textStatus, 'ส่วนงาน');
             });
         }
 
-        $('#dateSec3').daterangepicker({
-            autoUpdateInput: true,
+        // ช่วงเวลา: autoUpdateInput เป็น false เพื่อให้ "เปิดหน้ามาแล้วยังไม่กรองเวลา"
+        // ถ้าเป็น true ปลั๊กอินจะเติมวันที่ของวันนี้ลงช่องให้เองทันทีที่โหลด
+        // ทำให้ค่าเริ่มต้นกลายเป็นกรองแค่วันนี้วันเดียวโดยที่ผู้ใช้ไม่ได้เลือก
+        // ช่องจะมีค่าเฉพาะเมื่อผู้ใช้กด "เลือก" เอง หรือส่งค่ากลับมาจาก request เท่านั้น
+        const $dateRange = $('#dateSec3');
+
+        $dateRange.daterangepicker({
+            autoUpdateInput: false,
             locale: {
                 format: 'DD/MM/YYYY',
                 separator: ' - ',
@@ -527,6 +605,76 @@
                 ],
                 firstDay: 1
             }
+        });
+
+        // กด "เลือก" = ใส่ค่าลงช่องเอง (เพราะปิด autoUpdateInput ไว้)
+        $dateRange.on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+        });
+
+        // กด "ล้าง" = เคลียร์ช่องให้กลับไปเป็นไม่กรองเวลา
+        $dateRange.on('cancel.daterangepicker', function () {
+            $(this).val('');
+        });
+
+        // ===== Export: แคปหน้า dashboard ทั้งหน้าเป็นรูป PNG =====
+        //
+        // แคปฝั่ง browser ด้วย html2canvas เพราะได้ภาพตรงกับที่ผู้ใช้เห็นจริง
+        // (รวมผลของ filter ที่เลือกอยู่) โดยไม่ต้องมี headless browser ฝั่ง server
+        //
+        // จุดที่ต้องจัดการ ไม่ใช่เรียก html2canvas แล้วจบ:
+        // - ต้องแคปให้ครบความสูงจริงของเนื้อหา ไม่ใช่แค่ส่วนที่เห็นในจอ
+        // - ต้องใส่พื้นหลังขาว เพราะค่าเริ่มต้นของ canvas เป็นโปร่งใส เปิดใน viewer
+        //   บางตัวจะกลายเป็นพื้นดำ
+        // - ต้องไม่แคปตัวปุ่ม Export เอง (ตอนกดมันจะอยู่ในสถานะกำลังโหลด ติดไปในภาพ)
+        const $exportBtn = $('#btnExportImage');
+        const exportBtnHtml = $exportBtn.html();
+
+        $exportBtn.on('click', function () {
+            // html2canvas-pro ปล่อย global มาเป็นชื่อไหนขึ้นกับรุ่นของ bundle
+            // เลยหาให้ครบทั้งสองชื่อ ไม่เดาชื่อเดียวแล้วพังเงียบ ๆ ตอนอัปเวอร์ชัน
+            const capture = window.html2canvas || window.html2canvasPro;
+
+            // CDN โหลดไม่ติด (เน็ตองค์กรบล็อก / ออฟไลน์) บอกผู้ใช้ตรง ๆ ดีกว่าปล่อยให้กดแล้วเงียบ
+            if (typeof capture !== 'function') {
+                alert('ยังโหลดตัวช่วยบันทึกภาพไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้าอีกครั้ง');
+                return;
+            }
+
+            const target = document.querySelector('.main-content.admin-dashboard');
+
+            if (!target) {
+                alert('ไม่พบพื้นที่เนื้อหาสำหรับบันทึกภาพ');
+                return;
+            }
+
+            $exportBtn.prop('disabled', true)
+                .html('<i class="fa-solid fa-spinner fa-spin"></i> <strong>กำลังบันทึก...</strong>');
+
+            capture(target, {
+                backgroundColor: '#ffffff',
+                scale: 2,                    // ให้ตัวหนังสือคมพออ่านได้ ไม่เบลอ
+                useCORS: true,               // รูป/ไอคอนที่มาจาก CDN จะไม่หลุดหาย
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: target.scrollWidth,
+                windowHeight: target.scrollHeight,
+                ignoreElements: function (el) {
+                    return el.id === 'btnExportImage';
+                }
+            }).then(function (canvas) {
+                const stamp = moment().format('YYYYMMDD_HHmmss');
+                const link = document.createElement('a');
+
+                link.download = 'dashboard_' + stamp + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(function (err) {
+                console.error('Export screenshot failed:', err);
+                alert('บันทึกภาพไม่สำเร็จ กรุณาลองอีกครั้ง');
+            }).finally(function () {
+                $exportBtn.prop('disabled', false).html(exportBtnHtml);
+            });
         });
     });
 

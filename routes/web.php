@@ -177,6 +177,7 @@ Route::post('course/reset/{course_id}', [CourseController::class, 'courseReset']
 Route::post('/choiceAnswer/{id}',[ChoiceController::class,'choiceAnswer'])->name('choice.Answer')->middleware('checkIdleTimeout');
 // ----- dashboard
 Route::get('dashboard',[DashboardController::class,'dashboard'])->name('dashboard')->middleware('checkIdleTimeout');
+Route::get('/dashboard/course-list-ajax', [DashboardController::class, 'courseListAjax'])->name('dashboard.course-list.ajax')->middleware('checkIdleTimeout');
 
 Route::get('download',[DownloadController::class,'download'])->name('download')->middleware('checkIdleTimeout');
 Route::get('downloads/{id}',[DownloadController::class,'downloadfiles'])->name('download.downloadfiles')->middleware('checkIdleTimeout');

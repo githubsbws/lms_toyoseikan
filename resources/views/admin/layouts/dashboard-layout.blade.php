@@ -13,6 +13,13 @@
 
 	<!-- Chart Js -->
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+	<!-- html2canvas-pro: ใช้กับปุ่ม Export ที่แคปหน้าจอ dashboard เป็นรูป (ปักเวอร์ชันไว้กันของเปลี่ยนใต้เท้า)
+	     ใช้ตัว -pro ไม่ใช่ html2canvas ตัวเดิม เพราะตัวเดิมหยุดพัฒนาแล้วและ parse
+	     ฟังก์ชันสียุคใหม่ไม่ได้ (color-mix, oklch, color) ซึ่งมีอยู่ใน CSS ของ
+	     Font Awesome 7 ที่โหลดจาก CDN และเราแก้ไฟล์นั้นเองไม่ได้
+	     -pro เป็น fork ที่ API เหมือนเดิมเป๊ะ แค่รองรับสียุคใหม่เพิ่ม -->
+	<script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.2.3/dist/html2canvas-pro.min.js"></script>
 </head>
 
 <style>
