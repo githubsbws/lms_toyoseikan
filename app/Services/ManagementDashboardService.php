@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Course;
 use App\Models\Orgchart;
 use Illuminate\Support\Facades\DB;
 
@@ -56,27 +57,46 @@ class ManagementDashboardService
 
     public function getDashboardData(array $filters = [])
     {
+        /**
+         * ปิดฟังก์ชันด้านล่างชั่วคราว (คืนค่า default ว่าง/0 แทน) เพราะทำให้หน้า
+         * Management Dashboard โหลดไม่ขึ้น — สาเหตุที่น่าจะเป็นไปได้มากที่สุดคือ
+         * getLineCompletion() / getSectionPassRate() / getDepartmentComparison()
+         * ที่ loop ผ่านทุก line/section/department ทั้งหมด แล้วในแต่ละรอบยังเรียก
+         * getDescendantOrgIds() แบบ recursive + ยิงหลาย query ซ้ำอีกต่อรอบ
+         * (N+1 query ต่อ org node) ถ้า org tree มีข้อมูลมากหรือลึก จะทำให้ request
+         * ช้าจนดูเหมือนโหลดไม่ขึ้น หรือถ้า parent_id มีข้อมูลวนเป็นวงกลมอาจทำให้
+         * recursive function วนไม่จบเลย
+         *
+         * TODO: ยังไม่ได้แก้ logic จริงของฟังก์ชันเหล่านี้ แค่ปิดไว้ก่อนเพื่อให้เห็น
+         * โครงหน้าและตัดสินใจว่าจะต้องแสดงข้อมูลอะไรบ้าง ก่อนไปแก้ performance จริง
+         */
         return [
 
-            // Section 1
+            // Section 1 — เปิดใช้งานอยู่ (ไม่ loop ต่อ org node จึงไม่ใช่สาเหตุที่ทำให้โหลดไม่ขึ้น)
             'summary' => $this->getTrainingSummary($filters),
 
-            // Section 2
-            'lineCompletion' => $this->getLineCompletion($filters),
+            // Section 2 (ปิดชั่วคราว)
+            'lineCompletion' => collect(),
 
-            'sectionPassRate' => $this->getSectionPassRate($filters),
+            'sectionPassRate' => collect(),
 
-            'failedCourses' => $this->getTopFailedCourses($filters),
+            'failedCourses' => collect(),
 
-            // Section 3
-            'newEmployees' => $this->getNewEmployeeProgress($filters),
+            // Section 3 (ปิดชั่วคราว)
+            'newEmployees' => [
+                '30' => 0,
+                '60' => 0,
+                '90' => 0,
+                '120' => 0,
+                'over120' => 0,
+            ],
 
-            'skillGapTeams' => $this->getTeamSkillGap($filters),
+            'skillGapTeams' => collect(),
 
-            // Section 4
-            'departmentComparison' => $this->getDepartmentComparison($filters),
+            // Section 4 (ปิดชั่วคราว)
+            'departmentComparison' => collect(),
 
-            'monthlyTrend' => $this->getMonthlyTrend($filters),
+            'monthlyTrend' => collect(),
         ];
     }
 
@@ -86,9 +106,10 @@ class ManagementDashboardService
      *
      * พนักงานทั้งหมด
      * Completion Rate
-     * Pass Rate
      * Course Overdue
      * ต้องสอบซ่อม
+     *
+     * (ตัด Pass Rate ออกตามที่ผู้ใช้ยืนยัน เพราะซ้ำซ้อนกับ Completion Rate)
      * ============================================================
      */
 
@@ -113,6 +134,8 @@ class ManagementDashboardService
          *
          * จำนวน passcours ที่ผ่าน
          * เทียบกับจำนวน user x course
+         *
+         * (ใช้สูตรเดิมตามที่ผู้ใช้ยืนยันให้ลองใช้สูตรนี้ก่อน)
          */
         $passedCourses = 0;
 
@@ -135,58 +158,44 @@ class ManagementDashboardService
             : 0;
 
         /**
-         * Pass Rate
+         * Course Overdue
          *
-         * ใช้ผลสอบที่มี score/pass status
+         * ใช้นิยามเดียวกับ AdminDashboardService::getOverdueCourses() ตามที่ผู้ใช้ยืนยัน:
+         * นับเฉพาะคอร์สที่ end_date ผ่านไปแล้ว (active='y') และ "ยังมีคนเรียนไม่จบค้างอยู่"
+         * (มี passcourse ที่ passcours_status != 'pass' อย่างน้อย 1 คน) ไม่ใช่นับคอร์ส
+         * หมดเขตทั้งหมดแบบเดิม
+         *
+         * ใช้ whereHas (EXISTS subquery) แทน having() บน alias เพราะ PostgreSQL
+         * ไม่ยอมให้ HAVING อ้าง alias จาก SELECT ได้ (เหตุผลเดียวกับที่ AdminDashboardService ใช้)
          */
-        $passQuery = DB::table('passcours')
-            ->whereIn('passcours_cours', $courseIds)
-            ->where('passcours_status', 'pass');
+        $unfinishedCondition = function ($q) use ($filters) {
+            $q->where('passcours_status', '!=', 'pass');
 
-        if ($totalUsers > 0) {
-            $passQuery->whereIn(
-                'passcours_user',
-                $usersQuery->pluck('id')
-            );
-        }
+            if (!empty($filters['team_id'])) {
+                $q->whereHas('user', function ($uq) use ($filters) {
+                    $uq->where('team_id', $filters['team_id']);
+                });
+            }
+        };
 
-        $passCount = $passQuery->count();
+        $overdueQuery = Course::where('active', self::ACTIVE)
+            ->whereDate('end_date', '<', now())
+            ->whereHas('passcourse', $unfinishedCondition);
 
-        $attemptQuery = DB::table('passcours')
-            ->whereIn('passcours_cours', $courseIds);
+        $this->applyCourseFilter($overdueQuery, $filters);
+        $this->applyDateFilter($overdueQuery, $filters, 'end_date');
 
-        if ($totalUsers > 0) {
-            $attemptQuery->whereIn(
-                'passcours_user',
-                $usersQuery->pluck('id')
-            );
-        }
-
-        $attemptCount = $attemptQuery->count();
-
-        $passRate = $attemptCount > 0
-            ? round(($passCount / $attemptCount) * 100, 2)
-            : 0;
-
-        /**
-         * Overdue
-         */
-        $overdueCourses = DB::table('course_online')
-            ->where('active', self::ACTIVE)
-            ->whereDate('end_date', '<', now());
-
-        $this->applyCourseFilter($overdueCourses, $filters);
-
-        $overdueCount = $overdueCourses->count();
+        $overdueCount = $overdueQuery->count();
 
         /**
          * ต้องสอบซ่อม
          *
-         * ตรงนี้ใช้ score_status = retry
-         * ถ้าฐานข้อมูลจริงใช้ค่าอื่น เปลี่ยนตรงนี้ได้
+         * นับจาก coursescore.score_status = 'fail' (คนที่สอบตก = ต้องสอบซ่อม)
+         * ตามที่ผู้ใช้ยืนยัน — ค่า 'retry' ที่ใช้อยู่เดิมไม่มีอยู่จริงในระบบ
+         * (ค่า score_status ที่ใช้จริงมีแค่ pass/fail/wait) ทำให้ query เดิมได้ 0 เสมอ
          */
         $retryQuery = DB::table('coursescore')
-            ->where('score_status', 'retry');
+            ->where('score_status', 'fail');
 
         $this->applyUserJoinFilter(
             $retryQuery,
@@ -201,8 +210,6 @@ class ManagementDashboardService
             'total_users' => $totalUsers,
 
             'completion_rate' => $completionRate,
-
-            'pass_rate' => $passRate,
 
             'overdue_courses' => $overdueCount,
 
@@ -780,6 +787,23 @@ class ManagementDashboardService
                 $prefix . 'team_id',
                 $filters['team_id']
             );
+        }
+
+        return $query;
+    }
+
+    /**
+     * Filter helper: กรอง date_from/date_to (ใช้ pattern เดียวกับ
+     * AdminDashboardService::applyDateFilter()) ไม่มีคีย์นี้ = ไม่กรองวันที่
+     */
+    private function applyDateFilter($query, array $filters, string $column)
+    {
+        if (!empty($filters['date_from'])) {
+            $query->whereDate($column, '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->whereDate($column, '<=', $filters['date_to']);
         }
 
         return $query;

@@ -192,17 +192,20 @@ class AdminController extends Controller
             $dashboardSector =
                 'ทุกแผนก';
 
+            // แถบ filter (แผนก/ส่วนงาน/ไลน์/ทีม/ช่วงเวลา) ใช้ pattern เดียวกับ admindashboard
+            // เพราะ dropdown ตรงนี้ต้องเรียก endpoint org_children ตัวเดียวกัน
+            // (route('admin.org_children') ที่รับ parent_id + type แล้วคืนตาม
+            // AdminDashboardService::getOrgOptions() ไม่ใช่ level แบบเดิมที่ management เคยใช้)
             $filters = request()->only([
-                'department_id',
-                'section_id',
-                'line_id',
-                'team_id',
-                'date_from',
-                'date_to',
+                'department_id', 'section_id', 'line_id', 'team_id',
             ]);
 
-            $departments =
-                $managementService->getDepartments();
+            $filters += $this->parseDateRange(request('date_range'));
+
+            // ใช้ $adminService (AdminDashboardService) สำหรับ dept/team เพื่อให้ dropdown
+            // ของหน้านี้เหมือนกับ admindashboard ทั้งหมด (ไม่ใช้ $managementService->getDepartments()/getTeams() เดิม)
+            $dept = $adminService->getDepartment();
+            $team = $adminService->getTeam();
 
             $dashboard =
                 $managementService
@@ -214,7 +217,8 @@ class AdminController extends Controller
                     'user',
                     'dashboardTitle',
                     'dashboardSector',
-                    'departments',
+                    'dept',
+                    'team',
                     'dashboard',
                     'filters'
                 )
