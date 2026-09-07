@@ -97,7 +97,7 @@
 
                                 <div class="col-md-4">
                                     <label for="question_amount">
-                                        <u>จำนวนข้อสอบ</u>
+                                        <u>จำนวนข้อสอบที่แสดง</u>
                                         <span class="text-danger">*</span>
                                     </label>
                                     <input
@@ -108,7 +108,7 @@
                                         min="1"
                                     >
                                 </div>
-                                
+
                                 <div class="col-md-4">
                                     <label for="retest_amount">
                                         <u>จำนวนครั้งที่สามารถสอบซ่อมได้</u>
@@ -119,6 +119,18 @@
                                         class="form-control"
                                         name="retest_amount"
                                         value="{{ $course_detail->course_retest_amount }}"
+                                    >
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="retest_amount">
+                                        <u>เวลาในการทำข้อสอบ(นาที)</u>
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number"
+                                    class="form-control"
+                                    name="time_quiz"
+                                    value="{{ $course_detail->course_time_quiz }}"
                                     >
                                 </div>
 

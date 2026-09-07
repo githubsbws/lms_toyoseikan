@@ -118,6 +118,8 @@ use App\Helpers\ChildOrgHelper;
 use App\Services\RoadmapService;
 use Google\LongRunning\Operation;
 use App\Services\ManagerDashboardService;
+use App\Services\ManagementDashboardService;
+use App\Services\AdminDashboardService;
 
 class AdminController extends Controller
 {
@@ -125,8 +127,9 @@ class AdminController extends Controller
     public int $limit = 100;
     public function indexDashboard(
         ManagerDashboardService $ManagerDashboardService,
+        ManagementDashboardService $managementService,
         // ManagementDashboardService $managementService,
-        // UserDashboardService $userService
+        AdminDashboardService $adminService
     ) {
         // 1. เช็ค Authentication
         if (!AuthFacade::useradmin()) {
@@ -181,20 +184,147 @@ class AdminController extends Controller
                 'dashboardTitle',
                 'dashboardSector'));
         }
+        if ($groupId == '3') {
 
+            $dashboardTitle =
+                'Dashboard Management';
+
+            $dashboardSector =
+                'ทุกแผนก';
+
+            // แถบ filter (แผนก/ส่วนงาน/ไลน์/ทีม/ช่วงเวลา) ใช้ pattern เดียวกับ admindashboard
+            // เพราะ dropdown ตรงนี้ต้องเรียก endpoint org_children ตัวเดียวกัน
+            // (route('admin.org_children') ที่รับ parent_id + type แล้วคืนตาม
+            // AdminDashboardService::getOrgOptions() ไม่ใช่ level แบบเดิมที่ management เคยใช้)
+            $filters = request()->only([
+                'department_id', 'section_id', 'line_id', 'team_id',
+            ]);
+
+            $filters += $this->parseDateRange(request('date_range'));
+
+            // ใช้ $adminService (AdminDashboardService) สำหรับ dept/team เพื่อให้ dropdown
+            // ของหน้านี้เหมือนกับ admindashboard ทั้งหมด (ไม่ใช้ $managementService->getDepartments()/getTeams() เดิม)
+            $dept = $adminService->getDepartment();
+            $team = $adminService->getTeam();
+
+            $dashboard =
+                $managementService
+                    ->getDashboardData($filters);
+
+            return view(
+                'admin.index.adminmanagement',
+                compact(
+                    'user',
+                    'dashboardTitle',
+                    'dashboardSector',
+                    'dept',
+                    'team',
+                    'dashboard',
+                    'filters'
+                )
+            );
+        }
         // if ($groupId == '3') {
         //     $data = $managementService->getDashboardData($user);
         //     return view('admin.index.adminmanagement', $data);
         // }
 
         if (in_array($groupId, ['1', '2'])) {
-            $data = [];
-            // $data = $userService->getDashboardData($user);
-            return view('admin.index.admindashboard', $data);
+            $dashboardTitle = 'Dashboard ผู้ดูแลระบบ';
+            $dashboardSector = 'ทุกแผนก';
+
+            // แถบค้นหาบนสุด (แผนก/ส่วนงาน/ไลน์/ทีม/ช่วงเวลา)
+            $filters = request()->only([
+                'department_id', 'section_id', 'line_id', 'team_id',
+            ]);
+
+            // ช่วงเวลามาจาก daterangepicker เป็นช่องเดียว รูปแบบ "DD/MM/YYYY - DD/MM/YYYY"
+            // แปลงเป็น date_from/date_to (Y-m-d) ที่นี่ที่เดียว เพื่อให้ service รับรูปแบบเดียว
+            // ถ้าผู้ใช้ยังไม่เลือกช่วงเวลา (ค่าเริ่มต้นตอนเปิดหน้า) จะไม่มีคีย์นี้เลย = ไม่กรองวันที่
+            $filters += $this->parseDateRange(request('date_range'));
+
+            $dept = $adminService->getDepartment();
+            $team = $adminService->getTeam();
+            $dashboard = $adminService->getDashboardData($filters);
+
+            return view('admin.index.admindashboard', compact('dept','team','dashboard','dashboardTitle','dashboardSector'));
         }
 
         abort(403, 'ไม่พบสิทธิ์การเข้าถึง Dashboard');
     }
+
+    /**
+     * แปลงช่วงเวลาจาก daterangepicker ("DD/MM/YYYY - DD/MM/YYYY") เป็น date_from/date_to
+     *
+     * คืน [] เมื่อไม่ได้เลือกช่วงเวลาหรือรูปแบบไม่ถูกต้อง เพื่อให้ service มองว่า
+     * "ไม่ต้องกรองวันที่" ตามค่าเริ่มต้นของหน้า ไม่ใช่กรองด้วยช่วงที่ผิด
+     *
+     * ใช้ createFromFormat + ตรวจ error ของ Carbon เพราะถ้าให้ Carbon เดารูปแบบเอง
+     * 07/08/2026 จะถูกอ่านสลับเป็นเดือน 7 วันที่ 8 (แบบอเมริกัน) ทำให้กรองผิดช่วง
+     * ถ้าวันเริ่มมาหลังวันจบ ให้สลับให้ ไม่ต้องเด้ง error ใส่ผู้ใช้
+     */
+    private function parseDateRange(?string $dateRange): array
+    {
+        if (empty($dateRange) || !str_contains($dateRange, ' - ')) {
+            return [];
+        }
+
+        [$rawFrom, $rawTo] = array_map('trim', explode(' - ', $dateRange, 2));
+
+        try {
+            $from = Carbon::createFromFormat('d/m/Y', $rawFrom);
+            $to   = Carbon::createFromFormat('d/m/Y', $rawTo);
+        } catch (\Exception $e) {
+            // รูปแบบไม่ถูกต้อง (เช่นผู้ใช้พิมพ์เอง) ถือว่าไม่ได้เลือกช่วงเวลา
+            return [];
+        }
+
+        if ($from->gt($to)) {
+            [$from, $to] = [$to, $from];
+        }
+
+        return [
+            'date_from' => $from->startOfDay()->toDateString(),
+            'date_to'   => $to->endOfDay()->toDateString(),
+        ];
+    }
+
+    /**
+     * AJAX: คืนลูกของ orgchart node ที่เลือก (ใช้กับแถบ filter แบบ dynamic dropdown
+     * department -> section -> line ในหน้า admindashboard)
+     *
+     * ฝั่ง frontend ส่ง parent_id + type ที่ต้องการมา ('section' สำหรับช่องส่วนงาน,
+     * 'line' สำหรับช่องไลน์ผลิต) แล้ว service จะจัดการเรื่องโครงสร้าง org ให้เอง
+     *
+     * ที่ส่งเป็น "ชนิด" ไม่ใช่ "เลข level" เพราะ level ในฐานข้อมูลเก็บแค่ความลึก
+     * ไม่ได้เก็บบทบาท และแต่ละสายลึกไม่เท่ากัน (สาย HR ไม่มีชั้นไลน์ ทำให้ตำแหน่ง
+     * ของ HR ไปอยู่ level 5 เท่ากับไลน์ผลิตของสายปกติ) การตัดสินว่าอะไรคือไลน์
+     * จึงต้องอยู่ใน service ที่เดียว frontend ไม่ต้องรู้รายละเอียดนี้
+     *
+     * ถ้าส่วนงานนั้นไม่มีไลน์ (เช่น HR) จะได้ [] ซึ่งเป็นคำตอบที่ถูกต้อง ไม่ใช่ error
+     * frontend เอาไปแสดงว่า "ส่วนงานนี้ไม่มีไลน์ผลิต"
+     */
+    public function getOrgChildren(Request $request, AdminDashboardService $adminService)
+    {
+        if (!AuthFacade::useradmin()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $parentId = $request->query('parent_id');
+
+        if (empty($parentId)) {
+            return response()->json([]);
+        }
+
+        $type = $request->query('type');
+
+        if (!in_array($type, AdminDashboardService::ORG_TYPES, true)) {
+            $type = AdminDashboardService::ORG_TYPE_SECTION;
+        }
+
+        return response()->json($adminService->getOrgOptions($type, $parentId));
+    }
+
     // function admin(ManagerDashboardService $ManagerDashboardService){
     //     if(AuthFacade::useradmin()){
     //         $user = Auth::user();
@@ -1560,6 +1690,7 @@ class AdminController extends Controller
                     'org_ids' => 'required',
                     'retest_amount' => 'required|integer',
                     'question_amount' => 'required|integer',
+                    'time_quiz' => 'required|integer',
 
                 ]);
                 // dd($validator);
@@ -1577,6 +1708,7 @@ class AdminController extends Controller
                 $course_update->course_retest_amount = $request->input('retest_amount');
                 $course_update->course_question_show = $request->input('question_amount');
                 $course_update->course_note = $request->input('course_note');
+                $course_update->course_time_quiz = $request->input('time_quiz');
                 $course_update->update_by = Auth::user()->id;
                 $course_update->active = 'y';
                 $course_update->department_org_id = Auth::user()->department_org_id;
@@ -1756,6 +1888,7 @@ class AdminController extends Controller
                     'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'retest_amount' => 'required|integer',
                     'question_amount' => 'required|integer',
+                    'time_quiz' => 'required | integer',
 
                 ]);
                 $teacher = Teacher::where('teacher_name',$request->input('teacher_name'))->first();
@@ -1775,6 +1908,7 @@ class AdminController extends Controller
                 $course_update->course_detail = htmlspecialchars($request->input('course_detail'));
                 $course_update->course_retest_amount = $request->input('retest_amount');
                 $course_update->course_question_show = $request->input('question_amount');
+                $course_update->course_time_quiz = $request->input('time_quiz');
                 $course_update->update_by = Auth::user()->id;
                 $course_update->create_by = Auth::user()->id;
                 $course_update->active = 'y';
@@ -3100,6 +3234,8 @@ class AdminController extends Controller
             'ques_type' => 'required',
             'ques_title' => 'required',
             'answer'     => 'required_if:ques_type,3',
+            'images'     => 'nullable|array|max:2',
+            'images.*'   => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $userId = auth()->id();
@@ -3139,6 +3275,16 @@ class AdminController extends Controller
             }
         }
 
+        // ถ้ามีรูปภาพแนบมา (เฉพาะคำถามอธิบาย ques_type=3)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $path = $imageFile->store('images/uploads', 'public');
+                $question->images()->create([
+                    'path' => $path,
+                ]);
+            }
+        }
+
         return redirect()->back()->with('success', 'บันทึกสำเร็จ');
     }
 
@@ -3156,6 +3302,23 @@ class AdminController extends Controller
     public function questions_update(Request $request, $id)
     {
         $question = Question::where('ques_id', $id)->first();
+
+        // นับจำนวนรูปเดิมที่จะยังเหลืออยู่
+        $existingImageIds = $question->images()->pluck('id');
+        $deleteImageIds = collect($request->input('delete_images', []))->map(fn($v) => (int) $v);
+        $remainingExistingCount = $existingImageIds->diff($deleteImageIds)->count();
+        $newImagesCount = $request->hasFile('images') ? count($request->file('images')) : 0;
+
+        $request->validate([
+            'images'   => 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        if (($remainingExistingCount + $newImagesCount) > 2) {
+            return redirect()->back()->withErrors([
+                'images' => 'แนบรูปภาพได้สูงสุด 2 รูปต่อคำถาม (รวมรูปเดิมที่ไม่ได้ลบ)',
+            ])->withInput();
+        }
 
         $question->update([
             'ques_type' => $request->ques_type,
@@ -3185,6 +3348,21 @@ class AdminController extends Controller
                 }
             }
         }
+        // ลบรูปที่ผู้ใช้ติ๊กเลือกลบ
+        if ($deleteImageIds->isNotEmpty()) {
+            $question->images()->whereIn('id', $deleteImageIds)->delete();
+        }
+
+        // เพิ่มรูปใหม่ที่แนบมา
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $path = $imageFile->store('images/uploads', 'public');
+                $question->images()->create([
+                    'path' => $path,
+                ]);
+            }
+        }
+
 
         return redirect()->back()->with('success','อัพเดทสำเร็จ');
     }

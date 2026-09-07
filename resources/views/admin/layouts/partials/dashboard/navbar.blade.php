@@ -8,7 +8,7 @@
             </div>
             <div style="display: flex; flex-direction: column;">
                 <strong>{{ $dashboardTitle ?? 'Dashboard' }}</strong>
-                <span style="font-size: smaller;">ภาพรวมการเรียนรู้ของทีม {{ $dashboardSector ?? 'Line' }}</span>
+                <span style="font-size: smaller;">ภาพรวมการเรียนรู้ {{ $dashboardSector ?? 'Line' }}</span>
             </div>
         </div>
     </a>

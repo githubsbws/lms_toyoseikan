@@ -303,11 +303,17 @@ class CourseExamService
             }
 
             // 3. สร้างรอบการสอบใหม่ (Insert ลง DB)
+            // ใช้เวลาที่ admin ตั้งไว้ต่อคอร์สจาก course_time_quiz (หน่วยนาที)
+            // ถ้าไม่ได้ตั้งไว้ (null/0) ให้ fallback เป็น 60 นาที (ของเดิมคือ addHour()
+            // ตรง ๆ ซึ่งเท่ากับ 60 นาทีอยู่แล้ว จึงใช้ค่านี้กันบัคไม่ให้พฤติกรรมเปลี่ยน
+            // สำหรับคอร์สที่ยังไม่เคยตั้งเวลาไว้)
+            $quizMinutes = Course::find($courseId)->course_time_quiz ?: 60;
+
             return ExamTimeLog::create([
                 'user_id'    => $userId,
                 'course_id'  => $courseId,
                 'start_at' => now(),
-                'expire_at' => now()->addHour(), // addHour() ตั้งเวลา 1 ชม. (หรือตามที่น้องกำหนด)
+                'expire_at' => now()->addMinutes($quizMinutes),
                 'status'     => 'in_progress',
             ]);
         }
