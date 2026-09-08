@@ -16,6 +16,28 @@ class ManagementDashboardService
     const ACTIVE = 'y';
 
     /**
+     * Cache ผลลัพธ์ของ getDescendantOrgIds() ต่อ org id (มีอายุแค่ 1 request
+     * เพราะ service ถูกสร้าง instance ใหม่ทุก request) — ดูเหตุผลเต็ม ๆ ที่
+     * getDescendantOrgIds()
+     */
+    private array $descendantOrgIdsCache = [];
+
+    /**
+     * โครงต้นไม้ org chart ดิบ (parent_id => [child_id, ...]) โหลดครั้งเดียว
+     * ต่อ request แล้ว traverse ในหน่วยความจำแทนการ query ทีละ node — ดู
+     * loadOrgChildrenMap() / getDescendantOrgIds()
+     */
+    private ?array $orgChildrenMap = null;
+
+    /**
+     * ข้อมูล org node ดิบ เก็บเป็น id => ['title'=>.., 'parent_id'=>..,
+     * 'level'=>..] โหลดพร้อมกับ $orgChildrenMap ในคราวเดียวกัน (query
+     * เดียวกัน ไม่ query เพิ่ม) ใช้สำหรับเดินขึ้นหา ancestor (เช่น หา
+     * แผนกของ section/line) — ดู getAncestorDepartmentTitle()
+     */
+    private ?array $orgNodesById = null;
+
+    /**
      * ============================================================
      * Master Data
      * ============================================================
@@ -58,45 +80,44 @@ class ManagementDashboardService
     public function getDashboardData(array $filters = [])
     {
         /**
-         * ปิดฟังก์ชันด้านล่างชั่วคราว (คืนค่า default ว่าง/0 แทน) เพราะทำให้หน้า
-         * Management Dashboard โหลดไม่ขึ้น — สาเหตุที่น่าจะเป็นไปได้มากที่สุดคือ
-         * getLineCompletion() / getSectionPassRate() / getDepartmentComparison()
-         * ที่ loop ผ่านทุก line/section/department ทั้งหมด แล้วในแต่ละรอบยังเรียก
-         * getDescendantOrgIds() แบบ recursive + ยิงหลาย query ซ้ำอีกต่อรอบ
-         * (N+1 query ต่อ org node) ถ้า org tree มีข้อมูลมากหรือลึก จะทำให้ request
-         * ช้าจนดูเหมือนโหลดไม่ขึ้น หรือถ้า parent_id มีข้อมูลวนเป็นวงกลมอาจทำให้
-         * recursive function วนไม่จบเลย
+         * เปิด Section 2-4 กลับมาแล้ว หลังแก้ต้นตอที่ทำให้หน้าโหลดไม่ขึ้น:
+         * getDescendantOrgIds() ตอนนี้ cache ผลลัพธ์ต่อ org id ไว้ในระดับ
+         * request (ไม่ยิง query recursive ซ้ำทุกครั้งที่ถูกเรียกด้วย id เดิม)
+         * และกัน infinite loop ถ้า org tree มี parent_id วนเป็นวงกลม — ดู
+         * รายละเอียดที่ getDescendantOrgIds() ไม่ได้แตะ logic การคำนวณเดิมของ
+         * เมธอดด้านล่างนี้ (ยกเว้นจุดที่คอมเมนต์ไว้เฉพาะจุด)
          *
-         * TODO: ยังไม่ได้แก้ logic จริงของฟังก์ชันเหล่านี้ แค่ปิดไว้ก่อนเพื่อให้เห็น
-         * โครงหน้าและตัดสินใจว่าจะต้องแสดงข้อมูลอะไรบ้าง ก่อนไปแก้ performance จริง
+         * ข้อยกเว้น: skillGapTeams ยังเรียก getTeamSkillGap() ที่คืนค่าว่างอยู่
+         * เหมือนเดิม เพราะยังไม่มี skill matrix table จริงให้อ้างอิง (ดูหมายเหตุ
+         * ที่เมธอดนั้น) การ์ดนี้จะขึ้น "ไม่พบข้อมูล" แทนตัวเลข mock ที่เคยฝังตรง
+         * ใน blade
          */
         return [
 
-            // Section 1 — เปิดใช้งานอยู่ (ไม่ loop ต่อ org node จึงไม่ใช่สาเหตุที่ทำให้โหลดไม่ขึ้น)
+            // Section 1
             'summary' => $this->getTrainingSummary($filters),
 
-            // Section 2 (ปิดชั่วคราว)
-            'lineCompletion' => collect(),
+            // Section 2
+            'lineCompletion' => $this->getLineCompletion($filters),
 
-            'sectionPassRate' => collect(),
+            'sectionPassRate' => $this->getSectionPassRate($filters),
 
-            'failedCourses' => collect(),
+            // Pass Rate รวม สำหรับตัวเลขกลาง donut ของการ์ด "Pass Rate ของแต่ละ
+            // Section" — แยกจาก summary.pass_rate ที่ตัดออกไปแล้วตามที่ตกลงกับ
+            // ผู้ใช้ไว้ก่อนหน้า (ดูหมายเหตุที่ getTrainingSummary())
+            'overallPassRate' => $this->getOverallPassRate($filters),
 
-            // Section 3 (ปิดชั่วคราว)
-            'newEmployees' => [
-                '30' => 0,
-                '60' => 0,
-                '90' => 0,
-                '120' => 0,
-                'over120' => 0,
-            ],
+            'failedCourses' => $this->getTopFailedCourses($filters),
 
-            'skillGapTeams' => collect(),
+            // Section 3
+            'newEmployees' => $this->getNewEmployeeProgress($filters),
 
-            // Section 4 (ปิดชั่วคราว)
-            'departmentComparison' => collect(),
+            'skillGapTeams' => $this->getTeamSkillGap($filters),
 
-            'monthlyTrend' => collect(),
+            // Section 4
+            'departmentComparison' => $this->getDepartmentComparison($filters),
+
+            'monthlyTrend' => $this->getMonthlyTrend($filters),
         ];
     }
 
@@ -232,32 +253,34 @@ class ManagementDashboardService
 
         $result = collect();
 
+        /**
+         * ย้าย getDescendantOrgIds() ของ department_id/section_id ออกมานอก
+         * loop เพราะค่า filter ไม่เปลี่ยนต่อรอบ line (เดิมเรียกซ้ำทุก line
+         * ในลูป) — getDescendantOrgIds() มี cache แล้วก็จริง แต่ hoist ตรงนี้
+         * ให้ชัดเจนไปเลยว่าเป็นค่าคงที่ตลอด loop
+         */
+        $departmentOrgIds = !empty($filters['department_id'])
+            ? $this->getDescendantOrgIds($filters['department_id'])
+            : null;
+
+        $filterSectionOrgIds = !empty($filters['section_id'])
+            ? $this->getDescendantOrgIds($filters['section_id'])
+            : null;
+
         foreach ($lines as $line) {
 
             /**
              * ถ้าเลือก Department
              * ต้องเช็คว่า Line อยู่ใต้ Department หรือไม่
              */
-            if (!empty($filters['department_id'])) {
-
-                $lineIds = $this->getDescendantOrgIds(
-                    $filters['department_id']
-                );
-
-                if (!in_array($line->id, $lineIds)) {
-                    continue;
-                }
+            if ($departmentOrgIds !== null &&
+                !in_array($line->id, $departmentOrgIds)) {
+                continue;
             }
 
-            if (!empty($filters['section_id'])) {
-
-                $sectionIds = $this->getDescendantOrgIds(
-                    $filters['section_id']
-                );
-
-                if (!in_array($line->id, $sectionIds)) {
-                    continue;
-                }
+            if ($filterSectionOrgIds !== null &&
+                !in_array($line->id, $filterSectionOrgIds)) {
+                continue;
             }
 
             if (!empty($filters['line_id']) &&
@@ -314,6 +337,7 @@ class ManagementDashboardService
             $result->push([
                 'id' => $line->id,
                 'name' => $line->title,
+                'department' => $this->getAncestorDepartmentTitle($line->id),
                 'completion_rate' => $completion,
                 'trend' => 0,
             ]);
@@ -337,7 +361,27 @@ class ManagementDashboardService
 
         $result = collect();
 
+        /**
+         * เดิมเมธอดนี้ไม่เช็ค department_id/section_id เลย (ต่างจาก
+         * getLineCompletion) ทำให้เลือกกรองแผนกแล้ว section ของแผนกอื่นยัง
+         * หลุดเข้ามาคำนวณด้วย เพิ่ม scope check ให้เป็น pattern เดียวกับ
+         * getLineCompletion()
+         */
+        $departmentOrgIds = !empty($filters['department_id'])
+            ? $this->getDescendantOrgIds($filters['department_id'])
+            : null;
+
         foreach ($sections as $section) {
+
+            if ($departmentOrgIds !== null &&
+                !in_array($section->id, $departmentOrgIds)) {
+                continue;
+            }
+
+            if (!empty($filters['section_id']) &&
+                $filters['section_id'] != $section->id) {
+                continue;
+            }
 
             $orgIds = $this->getDescendantOrgIds(
                 $section->id
@@ -378,11 +422,53 @@ class ManagementDashboardService
             $result->push([
                 'id' => $section->id,
                 'name' => $section->title,
+                'department' => $this->getAncestorDepartmentTitle($section->id),
                 'pass_rate' => $rate,
             ]);
         }
 
         return $result;
+    }
+
+    /**
+     * ============================================================
+     * 3.1 Pass Rate รวม (ตัวเลขกลาง donut ของการ์ด "Pass Rate ของแต่ละ
+     * Section")
+     *
+     * เดิม blade อ้าง $dashboard['summary']['pass_rate'] ซึ่งไม่มีจริงแล้ว
+     * (ตัดออกจาก summary ไปตามที่ตกลงกับผู้ใช้ไว้ก่อนหน้า เพราะซ้ำซ้อนกับ
+     * completion_rate ในบริบทของ Section 1 — ดู getTrainingSummary()) เลย
+     * ขึ้น 0% ตลอด เพิ่มเมธอดนี้แยกต่างหากแทนการใส่กลับเข้า summary เพื่อไม่
+     * ให้ขัดกับการตัดสินใจเดิม — เป็นคนละตัวเลขกับค่าเฉลี่ยของ % ต่อ section
+     * ด้านล่าง (ตรงนี้คือ pass รวม/attempt รวมทั้งหมดในขอบเขตปัจจุบัน)
+     * ============================================================
+     */
+
+    private function getOverallPassRate(array $filters)
+    {
+        $usersQuery = DB::table('users')
+            ->where('status', '1');
+
+        $this->applyUserFilter($usersQuery, $filters);
+
+        $userIds = $usersQuery->pluck('id');
+
+        $courseIds = $this->getCourseIds($filters);
+
+        $pass = DB::table('passcours')
+            ->whereIn('passcours_user', $userIds)
+            ->whereIn('passcours_cours', $courseIds)
+            ->where('passcours_status', 'pass')
+            ->count();
+
+        $attempt = DB::table('passcours')
+            ->whereIn('passcours_user', $userIds)
+            ->whereIn('passcours_cours', $courseIds)
+            ->count();
+
+        return $attempt > 0
+            ? round(($pass / $attempt) * 100, 2)
+            : 0;
     }
 
     /**
@@ -417,8 +503,18 @@ class ManagementDashboardService
                 'c.course_id',
                 'c.course_title'
             )
+            /**
+             * selectRaw() ไม่ผ่าน query builder grammar เลย จึงไม่ได้ table
+             * prefix (เช่น tbl_) ที่ตั้งไว้ใน config/database.php ให้อัตโนมัติ
+             * เหมือน ->where()/->join() ตัวอื่นในเมธอดนี้ (นั่นคือสาเหตุที่ SQL
+             * ที่ generate ออกมาก่อนหน้านี้มี tbl_passcours ทุกจุด ยกเว้นตรงนี้
+             * จุดเดียวที่ยังเป็น passcours เฉย ๆ) ตัดชื่อ table ออกจาก column
+             * referenceไปเลยแทนที่จะไป hardcode prefix — ไม่ชนกับ c.* เพราะ
+             * course_online ไม่มีคอลัมน์ชื่อ passcours_user จะได้ไม่ต้องพึ่ง
+             * prefix ตรงนี้อีกไม่ว่า config จะตั้งเป็นอะไรก็ตาม
+             */
             ->selectRaw(
-                'COUNT(DISTINCT passcours.passcours_user) as failed_count'
+                'COUNT(DISTINCT passcours_user) as failed_count'
             )
             ->groupBy(
                 'c.course_id',
@@ -448,15 +544,14 @@ class ManagementDashboardService
     private function getNewEmployeeProgress(array $filters)
     {
         /**
-         * ตรงนี้ต้องปรับตาม field วันที่เริ่มงานจริงของระบบ
-         *
-         * สมมติ users.start_date
+         * field วันที่เริ่มงาน: users.work_start (ยืนยันจาก DB จริงแล้ว — เดิม
+         * สมมติไว้เป็น start_date ซึ่งไม่มีคอลัมน์นี้จริง)
          */
         $query = DB::table('users')
             ->where('status', '1')
-            ->whereNotNull('start_date')
+            ->whereNotNull('work_start')
             ->where(
-                'start_date',
+                'work_start',
                 '>=',
                 now()->subDays(120)
             );
@@ -476,7 +571,7 @@ class ManagementDashboardService
         foreach ($users as $user) {
 
             $days = now()->diffInDays(
-                $user->start_date
+                $user->work_start
             );
 
             if ($days < 30) {
@@ -508,6 +603,12 @@ class ManagementDashboardService
          *
          * ถ้ายังไม่มี table skill matrix
          * ยังไม่ควร hard-code ตัวเลข
+         *
+         * TODO ยังต้องตัดสินใจก่อนว่า "skill gap" คำนวณจากอะไร (ผูกกับ
+         * skill matrix จริง หรือจะ derive จาก completion/pass rate ต่อทีม
+         * ไปพลาง ๆ ก่อน) — blade (adminmanagement.blade.php) แก้ให้วนตาม
+         * collection นี้แล้ว แต่ละแถวที่คืนควรมีรูปแบบ:
+         * ['rank' => int, 'team_id' => ..., 'team' => string, 'value' => float]
          */
 
         return collect();
@@ -611,6 +712,16 @@ class ManagementDashboardService
                 )
                 ->count();
 
+            /**
+             * ต้องสอบซ่อม ต่อแผนก — ใช้นิยามเดียวกับ getTrainingSummary()
+             * (coursescore.score_status = 'fail')
+             */
+            $retryCount = DB::table('coursescore')
+                ->whereIn('user_id', $userIds)
+                ->where('score_status', 'fail')
+                ->distinct('user_id')
+                ->count('user_id');
+
             $result->push([
                 'department_id' => $department->id,
                 'department' => $department->title,
@@ -623,10 +734,14 @@ class ManagementDashboardService
 
                 'overdue' => $overdue,
 
-                'retry' => 0,
+                'retry' => $retryCount,
 
+                // ยังผูกกับ skill matrix จริงไม่ได้ (เหตุผลเดียวกับ
+                // getTeamSkillGap()) คงไว้ที่ 0 ก่อน
                 'skill_gap' => 0,
 
+                // ยังไม่ได้ตัดสินใจว่า "trend" เทียบกับ period ไหน (เดือน
+                // ก่อนหน้า / ช่วงเดียวกันปีก่อน ฯลฯ) คงไว้ที่ 0 ก่อน
                 'completion_trend' => 0,
                 'pass_trend' => 0,
             ]);
@@ -645,6 +760,10 @@ class ManagementDashboardService
     {
         $result = collect();
 
+        // เดิมเรียก getCourseIds() ซ้ำทุกรอบเดือน (6 ครั้ง) ทั้งที่ $filters
+        // ไม่เปลี่ยนระหว่าง loop — ย้ายออกมานอก loop เรียกครั้งเดียวพอ
+        $courseIds = $this->getCourseIds($filters);
+
         for ($i = 5; $i >= 0; $i--) {
 
             $date = now()
@@ -657,8 +776,6 @@ class ManagementDashboardService
             $end = $date
                 ->copy()
                 ->endOfMonth();
-
-            $courseIds = $this->getCourseIds($filters);
 
             $query = DB::table('passcours')
                 ->whereIn(
@@ -829,28 +946,153 @@ class ManagementDashboardService
         return $query;
     }
 
-    private function getDescendantOrgIds(
-        $parentId
-    ): array {
-        $result = [(int) $parentId];
+    /**
+     * คืน id ของ org node ทั้งหมดที่อยู่ใต้ $parentId (รวม $parentId เอง)
+     *
+     * รอบแรกที่แก้ (เพิ่มแค่ cache ต่อ id + กัน infinite loop) ยังไม่พอ:
+     * cache ช่วยเฉพาะตอนเรียกซ้ำด้วย "id เดิม" แต่ getLineCompletion() /
+     * getSectionPassRate() / getDepartmentComparison() loop แล้วเรียกด้วย
+     * id ที่ "ต่างกันทุกรอบ" (id ของแต่ละ line/section/department เอง) —
+     * ยิ่งตอนนี้ filter เป็น "ทั้งหมด" (ไม่กรอง department/section/line เลย)
+     * ทุก line/section/department ในระบบจะถูกวนครบ แต่ละตัวยัง query หา
+     * ลูกของตัวเองแบบ recursive ใหม่หมด ทำให้ยังช้า/timeout อยู่
+     *
+     * รอบนี้แก้จริง: โหลด org chart ทั้งก้อนมาครั้งเดียว (query เดียว) แล้ว
+     * สร้างเป็น map ในหน่วยความจำ (parent_id => [child_id, ...]) จากนั้น
+     * traverse หา descendant จาก map นี้แทนการ query ทีละ node — ไม่ว่าจะ
+     * เรียกด้วย id กี่ตัวก็ตาม จะยิง query จริงแค่ครั้งเดียวทั้ง request
+     *
+     * ยังกัน infinite loop ด้วย $visited เหมือนเดิม เผื่อ parent_id ใน
+     * ข้อมูลวนเป็นวงกลม
+     */
+    private function getDescendantOrgIds($parentId): array
+    {
+        $parentId = (int) $parentId;
 
-        $children = Orgchart::where(
-                'parent_id',
-                $parentId
-            )
-            ->where(
-                'active',
-                self::ACTIVE
-            )
-            ->pluck('id')
-            ->toArray();
+        if (isset($this->descendantOrgIdsCache[$parentId])) {
+            return $this->descendantOrgIdsCache[$parentId];
+        }
+
+        $childrenMap = $this->loadOrgChildrenMap();
+
+        return $this->descendantOrgIdsCache[$parentId] =
+            $this->collectDescendantOrgIds($parentId, $childrenMap, []);
+    }
+
+    /**
+     * โหลด org chart ที่ active ทั้งหมดมาครั้งเดียว แล้วจัดเป็น 2 โครงสร้าง
+     * จาก query เดียวกัน (ไม่ query ซ้ำ):
+     * - $orgChildrenMap: parent_id => [child_id, ...] ใช้หา descendant
+     * - $orgNodesById: id => ['title'=>.., 'parent_id'=>.., 'level'=>..]
+     *   ใช้เดินขึ้นหา ancestor (getAncestorDepartmentTitle())
+     */
+    private function loadOrgChildrenMap(): array
+    {
+        $this->loadOrgChartOnce();
+
+        return $this->orgChildrenMap;
+    }
+
+    private function loadOrgNodesById(): array
+    {
+        $this->loadOrgChartOnce();
+
+        return $this->orgNodesById;
+    }
+
+    private function loadOrgChartOnce(): void
+    {
+        if ($this->orgChildrenMap !== null) {
+            return;
+        }
+
+        $childrenMap = [];
+        $nodesById = [];
+
+        $rows = Orgchart::where('active', self::ACTIVE)
+            ->get(['id', 'parent_id', 'title', 'level']);
+
+        foreach ($rows as $row) {
+
+            $id = (int) $row->id;
+            $parentId = (int) $row->parent_id;
+
+            $childrenMap[$parentId][] = $id;
+
+            $nodesById[$id] = [
+                'title' => $row->title,
+                'parent_id' => $parentId,
+                'level' => $row->level,
+            ];
+        }
+
+        $this->orgChildrenMap = $childrenMap;
+        $this->orgNodesById = $nodesById;
+    }
+
+    /**
+     * เดินขึ้นจาก $nodeId ไปหา ancestor ที่ level ตรงกับ DEPT_LEVEL แล้วคืน
+     * title ของ department นั้น (คืน null ถ้าไม่เจอ) — ใช้กำกับชื่อแผนกไว้
+     * ข้าง section/line ตอน filter แผนกเป็น "ทั้งหมด" กันงงเวลาชื่อซ้ำกันข้าม
+     * แผนก เดินจาก $orgNodesById ในหน่วยความจำ ไม่มี query เพิ่ม กัน
+     * infinite loop ด้วย $visited เหมือนจุดอื่น ๆ
+     */
+    private function getAncestorDepartmentTitle($nodeId): ?string
+    {
+        $nodes = $this->loadOrgNodesById();
+
+        $currentId = (int) $nodeId;
+        $visited = [];
+
+        while (isset($nodes[$currentId])) {
+
+            if (in_array($currentId, $visited, true)) {
+                return null;
+            }
+
+            $visited[] = $currentId;
+
+            $node = $nodes[$currentId];
+
+            if ((string) $node['level'] === self::DEPT_LEVEL) {
+                return $node['title'];
+            }
+
+            if (!$node['parent_id']) {
+                return null;
+            }
+
+            $currentId = $node['parent_id'];
+        }
+
+        return null;
+    }
+
+    private function collectDescendantOrgIds(
+        $parentId,
+        array $childrenMap,
+        array $visited
+    ): array {
+        $parentId = (int) $parentId;
+
+        if (in_array($parentId, $visited, true)) {
+            return [];
+        }
+
+        $visited[] = $parentId;
+
+        $result = [$parentId];
+
+        $children = $childrenMap[$parentId] ?? [];
 
         foreach ($children as $childId) {
 
             $result = array_merge(
                 $result,
-                $this->getDescendantOrgIds(
-                    $childId
+                $this->collectDescendantOrgIds(
+                    $childId,
+                    $childrenMap,
+                    $visited
                 )
             );
         }

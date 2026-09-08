@@ -174,6 +174,12 @@
 
 										<div class="cr-label">
 											{{ $line['name'] }}
+											{{-- โชว์ชื่อแผนกกำกับเฉพาะตอนไม่ได้เลือกกรองแผนก (เลือก "ทั้งหมด")
+											     กันงงเวลาชื่อซ้ำกันข้ามแผนก ถ้าเลือกแผนกใดแผนกหนึ่งแล้วไม่ต้อง
+											     ซ้ำ เพราะรู้อยู่แล้วว่าเป็นแผนกไหน --}}
+											@if(!request('department_id') && !empty($line['department']))
+												<span class="text-muted">({{ $line['department'] }})</span>
+											@endif
 										</div>
 
 										<div class="cr-bar-container">
@@ -249,11 +255,12 @@
 
 									<div class="donut-center-text">
 
-										{{-- summary.pass_rate ถูกตัดออกจาก section-1 แล้ว (ตัดสินใจร่วมกับผู้ใช้ว่าซ้ำซ้อน)
-										     ใส่ ?? 0 กันไว้ชั่วคราวเพื่อไม่ให้ error ตรงนี้ยังไม่ใช่ scope ที่แก้รอบนี้
-										     (section-2 จะแก้ในรอบถัดไป) --}}
+										{{-- แก้แล้ว: เดิมอ้าง summary.pass_rate ที่ถูกตัดออกจาก section-1 ไปแล้ว
+										     (ตัดสินใจร่วมกับผู้ใช้ว่าซ้ำซ้อนกับ completion_rate) เลยขึ้น 0% ตลอด
+										     เปลี่ยนมาใช้ $dashboard['overallPassRate'] ที่คำนวณแยกต่างหากแทน
+										     (ดู ManagementDashboardService::getOverallPassRate()) --}}
 										<span class="pct">
-											{{ $dashboard['summary']['pass_rate'] ?? 0 }}%
+											{{ $dashboard['overallPassRate'] }}%
 										</span>
 
 										<span class="label">
@@ -279,6 +286,12 @@
 												></span>
 
 												{{ $section['name'] }}
+
+												{{-- โชว์ชื่อแผนกกำกับเฉพาะตอนไม่ได้เลือกกรองแผนก (เลือก "ทั้งหมด")
+												     กันงงเวลาชื่อซ้ำกันข้ามแผนก --}}
+												@if(!request('department_id') && !empty($section['department']))
+													<span class="text-muted">({{ $section['department'] }})</span>
+												@endif
 
 											</div>
 
@@ -459,41 +472,36 @@
 										<span style="width:100px;">Team</span>
 										<span style="flex:1; text-align:right;">Completion Rate</span>
 									</div>
-									<div class="team-gap-item">
-										<span class="gap-rank">1</span><span class="gap-team">Line 4 - Team C</span>
-										<div class="gap-bar-wrap">
-											<div class="gap-bar-fill" style="width: 65%;"></div>
+
+									{{--
+										แก้แล้ว: เดิม 5 แถวด้านล่าง hardcode ตรงในไฟล์นี้ (65%, 60%, 58%,
+										55%, 50%) ไม่ได้ผูกกับ $dashboard['skillGapTeams'] เลย แก้ให้วน
+										forelse ตามข้อมูลจริงแทน — ตอนนี้ getTeamSkillGap() ฝั่ง service
+										ยังคืนค่าว่างอยู่ (ยังไม่มี skill matrix table จริงให้อ้างอิง ดู
+										หมายเหตุที่เมธอดนั้น) การ์ดนี้เลยจะขึ้น "ไม่พบข้อมูล" ไปก่อนแทนเลข
+										mock เดิม จนกว่าจะตัดสินใจว่าจะคำนวณ skill gap จากอะไร แต่ละแถวที่
+										getTeamSkillGap() ต้องคืนควรมีรูปแบบ:
+										['rank' => int, 'team_id' => ..., 'team' => string, 'value' => float]
+									--}}
+
+									@forelse($dashboard['skillGapTeams'] as $team)
+
+										<div class="team-gap-item">
+											<span class="gap-rank">{{ $team['rank'] }}</span><span class="gap-team">{{ $team['team'] }}</span>
+											<div class="gap-bar-wrap">
+												<div class="gap-bar-fill" style="width: {{ $team['value'] }}%;"></div>
+											</div>
+											<span class="gap-pct">{{ $team['value'] }}%</span>
 										</div>
-										<span class="gap-pct">65%</span>
-									</div>
-									<div class="team-gap-item">
-										<span class="gap-rank">2</span><span class="gap-team">Line 3 - Team B</span>
-										<div class="gap-bar-wrap">
-											<div class="gap-bar-fill" style="width: 60%;"></div>
+
+									@empty
+
+										<div class="text-muted text-center p-3">
+											ไม่พบข้อมูล
 										</div>
-										<span class="gap-pct">60%</span>
-									</div>
-									<div class="team-gap-item">
-										<span class="gap-rank">3</span><span class="gap-team">Line 2 - Team C</span>
-										<div class="gap-bar-wrap">
-											<div class="gap-bar-fill" style="width: 58%;"></div>
-										</div>
-										<span class="gap-pct">58%</span>
-									</div>
-									<div class="team-gap-item">
-										<span class="gap-rank">4</span><span class="gap-team">Line 4 - Team B</span>
-										<div class="gap-bar-wrap">
-											<div class="gap-bar-fill" style="width: 55%;"></div>
-										</div>
-										<span class="gap-pct">55%</span>
-									</div>
-									<div class="team-gap-item">
-										<span class="gap-rank">5</span><span class="gap-team">Line 5 - Team A</span>
-										<div class="gap-bar-wrap">
-											<div class="gap-bar-fill" style="width: 50%;"></div>
-										</div>
-										<span class="gap-pct">50%</span>
-									</div>
+
+									@endforelse
+
 								</div>
 							</div>
 							<!-- <div class="card-footer"><a href="#" class="btn-outline-purple">ดูรายละเอียด</a></div> -->
