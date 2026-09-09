@@ -92,19 +92,54 @@ class ManagementDashboardService
          * ที่เมธอดนั้น) การ์ดนี้จะขึ้น "ไม่พบข้อมูล" แทนตัวเลข mock ที่เคยฝังตรง
          * ใน blade
          */
+        /**
+         * Section 2 (Completion Rate ของแต่ละ Section / แต่ละ Line) แยก
+         * เงื่อนไข query ของ 2 การ์ดนี้ออกจากกันคนละตัวแปร ตามที่ผู้ใช้ยืนยัน:
+         * - การ์ด Section: query เมื่อเลือก section_id (นำ section_id ไป query
+         *   โดยตรง ไม่ต้องรอ line_id)
+         * - การ์ด Line: query เมื่อเลือกลงไปถึง line_id (นำ line_id ไป query
+         *   โดยตรง แค่เลือก section_id อย่างเดียวไม่พอ)
+         * ถ้ายังไม่เลือกของตัวเอง งดยิง query ไปเลย ไม่ใช่ยิงแล้วได้ collection
+         * เปล่า แล้วให้ blade โชว์ข้อความแทน
+         */
+        /**
+         * เปลี่ยนจุดเปิดการ์ดให้เป็นแบบ "drill-down" ทีละชั้น ตามที่ผู้ใช้
+         * ยืนยันรอบล่าสุด (เดิมรอบก่อนใช้ section_id/line_id ของตัวเองเป๊ะ ๆ
+         * ทำให้เลือกแค่แผนกอย่างเดียวไม่เห็นอะไรเลยทั้งคู่):
+         * - การ์ด Section: เปิดเมื่อเลือก "แผนก" แล้ว (โชว์ทุก section ใต้
+         *   แผนกนั้น ยังไม่เจาะจง section เดียวจนกว่าจะเลือก section_id ด้วย
+         *   — getSectionCompletion() มี scope check แผนกอยู่แล้ว)
+         * - การ์ด Line: เปิดเมื่อเลือก "ส่วนงาน (section)" แล้ว (โชว์ทุกไลน์
+         *   ใต้ section นั้น ยังไม่เจาะจงไลน์เดียวจนกว่าจะเลือก line_id ด้วย
+         *   — getLineCompletion() มี scope check department/section อยู่แล้ว)
+         */
+        $sectionSelected = !empty($filters['department_id']);
+        $lineSelected = !empty($filters['section_id']);
+
         return [
 
             // Section 1
             'summary' => $this->getTrainingSummary($filters),
 
             // Section 2
-            'lineCompletion' => $this->getLineCompletion($filters),
+            // ส่งค่านี้ไปให้ blade เช็คว่าจะโชว์ข้อความ "กรุณาเลือกแผนก/ส่วนงาน
+            // ก่อน" หรือโชว์ผลลัพธ์จริง ของแต่ละการ์ดแยกกัน
+            'sectionSelected' => $sectionSelected,
+            'lineSelected' => $lineSelected,
 
-            'sectionPassRate' => $this->getSectionPassRate($filters),
+            'sectionCompletion' => $sectionSelected
+                ? $this->getSectionCompletion($filters)
+                : collect(),
 
-            // Pass Rate รวม สำหรับตัวเลขกลาง donut ของการ์ด "Pass Rate ของแต่ละ
-            // Section" — แยกจาก summary.pass_rate ที่ตัดออกไปแล้วตามที่ตกลงกับ
-            // ผู้ใช้ไว้ก่อนหน้า (ดูหมายเหตุที่ getTrainingSummary())
+            'lineCompletion' => $lineSelected
+                ? $this->getLineCompletion($filters)
+                : collect(),
+
+            // Pass Rate รวม สำหรับตัวเลขกลาง donut ของการ์ด "Completion Rate
+            // ของแต่ละ Section" — แยกจาก summary.pass_rate ที่ตัดออกไปแล้วตาม
+            // ที่ตกลงกับผู้ใช้ไว้ก่อนหน้า (ดูหมายเหตุที่ getTrainingSummary())
+            // ตัวเลขนี้เป็นสรุปทั้งขอบเขตที่กรอง (department/team ก็มีผลได้)
+            // ไม่ได้ผูกกับ section/line โดยเฉพาะ จึงยังคำนวณเสมอไม่ต้องรอเลือก
             'overallPassRate' => $this->getOverallPassRate($filters),
 
             'failedCourses' => $this->getTopFailedCourses($filters),
@@ -348,11 +383,15 @@ class ManagementDashboardService
 
     /**
      * ============================================================
-     * 3. Pass Rate ของแต่ละ Section
+     * 3. Completion Rate ของแต่ละ Section
+     *
+     * สูตรเดียวกับ getLineCompletion(): ผ่าน ÷ (จำนวนคน x จำนวนคอร์ส) x 100
+     * ผู้ใช้ยืนยันให้ใช้สูตร completion เดียวกันทั้ง Section และ Line (เดิม
+     * เมธอดนี้ใช้ pass/attempt แบบ pass rate ต่างจาก Line เปลี่ยนให้ตรงกัน)
      * ============================================================
      */
 
-    private function getSectionPassRate(array $filters)
+    private function getSectionCompletion(array $filters)
     {
         $sections = Orgchart::where('level', self::SECTION_LEVEL)
             ->where('active', self::ACTIVE)
@@ -362,10 +401,9 @@ class ManagementDashboardService
         $result = collect();
 
         /**
-         * เดิมเมธอดนี้ไม่เช็ค department_id/section_id เลย (ต่างจาก
-         * getLineCompletion) ทำให้เลือกกรองแผนกแล้ว section ของแผนกอื่นยัง
-         * หลุดเข้ามาคำนวณด้วย เพิ่ม scope check ให้เป็น pattern เดียวกับ
-         * getLineCompletion()
+         * เดิมเมธอดนี้ไม่เช็ค department_id เลย (ต่างจาก getLineCompletion)
+         * ทำให้เลือกกรองแผนกแล้ว section ของแผนกอื่นยังหลุดเข้ามาคำนวณด้วย
+         * เพิ่ม scope check ให้เป็น pattern เดียวกับ getLineCompletion()
          */
         $departmentOrgIds = !empty($filters['department_id'])
             ? $this->getDescendantOrgIds($filters['department_id'])
@@ -404,26 +442,28 @@ class ManagementDashboardService
                 'section_id' => $section->id
             ]);
 
-            $pass = DB::table('passcours')
-                ->whereIn('passcours_user', $userIds)
-                ->whereIn('passcours_cours', $courseIds)
-                ->where('passcours_status', 'pass')
-                ->count();
+            $total = count($userIds) * count($courseIds);
 
-            $attempt = DB::table('passcours')
-                ->whereIn('passcours_user', $userIds)
-                ->whereIn('passcours_cours', $courseIds)
-                ->count();
+            $passed = 0;
 
-            $rate = $attempt > 0
-                ? round(($pass / $attempt) * 100, 2)
+            if ($total > 0) {
+
+                $passed = DB::table('passcours')
+                    ->whereIn('passcours_user', $userIds)
+                    ->whereIn('passcours_cours', $courseIds)
+                    ->where('passcours_status', 'pass')
+                    ->count();
+            }
+
+            $completion = $total > 0
+                ? round(($passed / $total) * 100, 2)
                 : 0;
 
             $result->push([
                 'id' => $section->id,
                 'name' => $section->title,
                 'department' => $this->getAncestorDepartmentTitle($section->id),
-                'pass_rate' => $rate,
+                'completion_rate' => $completion,
             ]);
         }
 
@@ -756,55 +796,71 @@ class ManagementDashboardService
      * ============================================================
      */
 
+    /**
+     * "แนวโน้ม" หมายถึงผลงานของแต่ละเดือนเทียบกับเดือนก่อน ไม่ใช่ยอดสะสม —
+     * ถ้าใช้ยอดสะสม completion_rate จะไต่ขึ้นทุกเดือนเสมอ (สะสมมีแต่เพิ่ม
+     * ไม่มีวันลด) ทำให้กราฟดูเหมือน "ดีขึ้นตลอด" ไม่ว่าเดือนนั้นจะมีคนเรียน
+     * จบเพิ่มมากน้อยแค่ไหน บอกไม่ได้ว่าเดือนไหนดีเดือนไหนแย่จริง
+     *
+     * ทั้ง completion_rate และ retry ในเมธอดนี้จึงคำนวณ "เฉพาะเดือนนั้น"
+     * ทั้งคู่ (ไม่สะสม) เพื่อให้เทียบกันได้ในมิติเดียวกัน (ผลงานของเดือนนั้น)
+     * ต่างจาก completion_rate ที่ใช้ในการ์ด Section 1 / Section / Line ซึ่ง
+     * ตอบคำถามคนละแบบ ("ตอนนี้ผ่านไปกี่ % ของทั้งหมด" ไม่ใช่ "เดือนนี้ทำได้
+     * แค่ไหน") จึงยังเป็นยอดสะสมตามเดิมที่นั่น ไม่ได้เปลี่ยนตรงนั้น
+     */
     private function getMonthlyTrend(array $filters)
     {
         $result = collect();
 
-        // เดิมเรียก getCourseIds() ซ้ำทุกรอบเดือน (6 ครั้ง) ทั้งที่ $filters
-        // ไม่เปลี่ยนระหว่าง loop — ย้ายออกมานอก loop เรียกครั้งเดียวพอ
+        // ขอบเขต user/course คงที่ตลอดทั้ง 6 เดือน (ไม่เปลี่ยนตามเดือน) —
+        // หาครั้งเดียวพอ ไม่ต้อง query ซ้ำทุกรอบ loop
         $courseIds = $this->getCourseIds($filters);
 
+        $usersQuery = DB::table('users')->where('status', '1');
+        $this->applyUserFilter($usersQuery, $filters);
+        $userIds = $usersQuery->pluck('id');
+
+        // เป้าหมายของ "เดือนนั้น" ใช้คนละสูตรกับ completion_rate สะสมที่อื่น:
+        // ที่นั่นเป้าหมายคือคน x คอร์ส ทั้งหมด แต่ที่นี่ต้องหารด้วยจำนวน
+        // "ครั้งที่ควรสอบผ่านในเดือนนั้น" ซึ่งประมาณจากจำนวนคนที่มีกิจกรรม
+        // สอบ (passcours) จริงในเดือนนั้น เพราะไม่มีทางรู้ล่วงหน้าว่าใครควร
+        // เรียนจบเดือนไหน (ไม่มี due date ต่อคนต่อคอร์สในระบบ)
         for ($i = 5; $i >= 0; $i--) {
 
-            $date = now()
-                ->subMonths($i);
+            $date = now()->subMonths($i);
+            $start = $date->copy()->startOfMonth();
+            $end = $date->copy()->endOfMonth();
 
-            $start = $date
-                ->copy()
-                ->startOfMonth();
+            $monthlyAttemptQuery = DB::table('passcours')
+                ->whereIn('passcours_cours', $courseIds)
+                ->whereIn('passcours_user', $userIds)
+                ->whereBetween('created_at', [$start, $end]);
 
-            $end = $date
-                ->copy()
-                ->endOfMonth();
+            $totalAttempts = $monthlyAttemptQuery->count();
 
-            $query = DB::table('passcours')
-                ->whereIn(
-                    'passcours_cours',
-                    $courseIds
-                )
-                ->whereBetween(
-                    'created_at',
-                    [$start, $end]
-                );
-
-            $total = $query->count();
-
-            $passed = (clone $query)
-                ->where(
-                    'passcours_status',
-                    'pass'
-                )
+            $passedThisMonth = (clone $monthlyAttemptQuery)
+                ->where('passcours_status', 'pass')
                 ->count();
 
-            $passRate = $total > 0
-                ? round(($passed / $total) * 100, 2)
+            $completionRate = $totalAttempts > 0
+                ? round(($passedThisMonth / $totalAttempts) * 100, 2)
                 : 0;
+
+            // ต้องสอบซ่อม: นับเฉพาะที่ตกในเดือนนี้ (ไม่สะสม) เพราะเป็น
+            // เหตุการณ์ ไม่ใช่สถานะคงค้าง — coursescore ไม่มีคอลัมน์บอกว่า
+            // ซ่อมผ่านแล้วหรือยัง นับสะสมจะทำให้ตัวเลขพุ่งขึ้นเรื่อย ๆ
+            $retryQuery = DB::table('coursescore')
+                ->where('score_status', 'fail')
+                ->whereBetween('create_date', [$start, $end]);
+
+            $this->applyUserJoinFilter($retryQuery, $filters);
+
+            $retryCount = $retryQuery->distinct('user_id')->count('user_id');
 
             $result->push([
                 'month' => $date->format('M Y'),
-                'completion_rate' => $passRate,
-                'pass_rate' => $passRate,
-                'retry' => 0,
+                'completion_rate' => $completionRate,
+                'retry' => $retryCount,
             ]);
         }
 
@@ -951,7 +1007,7 @@ class ManagementDashboardService
      *
      * รอบแรกที่แก้ (เพิ่มแค่ cache ต่อ id + กัน infinite loop) ยังไม่พอ:
      * cache ช่วยเฉพาะตอนเรียกซ้ำด้วย "id เดิม" แต่ getLineCompletion() /
-     * getSectionPassRate() / getDepartmentComparison() loop แล้วเรียกด้วย
+     * getSectionCompletion() / getDepartmentComparison() loop แล้วเรียกด้วย
      * id ที่ "ต่างกันทุกรอบ" (id ของแต่ละ line/section/department เอง) —
      * ยิ่งตอนนี้ filter เป็น "ทั้งหมด" (ไม่กรอง department/section/line เลย)
      * ทุก line/section/department ในระบบจะถูกวนครบ แต่ละตัวยัง query หา

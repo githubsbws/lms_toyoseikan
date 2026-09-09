@@ -72,6 +72,12 @@
 								<button type="submit" class="btn btn-primary w-50" style="border: rgb(62, 31, 146) 2px solid; background: rgb(62, 31, 146); color: white;">
 									<i class="fa-solid fa-filter"></i> <strong>ค้นหา</strong>
 								</button>
+								{{-- ปุ่ม Export: ยกมาจาก admindashboard.blade.php ทั้งหมด (html2canvas-pro
+								     โหลดอยู่แล้วใน dashboard-layout.blade.php ที่ไฟล์นี้ extends อยู่
+								     ไม่ต้องเพิ่ม script tag ใหม่) ดูสคริปต์ #btnExportImage ด้านล่าง --}}
+								<button type="button" id="btnExportImage" class="btn btn-default w-50" style="border: rgb(62, 31, 146) 2px solid; color: rgb(62, 31, 146);">
+									<i class="fa-solid fa-download"></i> <strong>Export</strong>
+								</button>
 							</div>
 						</div>
 					</div>
@@ -156,6 +162,87 @@
 				</section>
 
 				<section class="section-2 row row-eq-height">
+					<div class="col-lg-6 col-md-6 col-12">
+
+						<div class="card h-100">
+
+							<div class="card-header">
+
+								<h5>
+									Completion Rate ของแต่ละ Section
+								</h5>
+
+							</div>
+
+							<div class="completion-rate-list">
+
+								{{-- ตัดกราฟ donut (canvas + ตัวเลข Pass Rate กลาง) ออกทั้งหมดตามที่
+								     ผู้ใช้ขอ แล้วเปลี่ยน wrapper จาก .donut-chart-layout (flex row จัดกลาง
+								     คู่กับกล่อง donut 200px ทำให้ legend เขยิบไปกลาง/ขวา) มาใช้
+								     .completion-rate-list ตัวเดียวกับการ์ด Line เพื่อให้ legend ชิดซ้าย
+								     เต็มความกว้างเหมือนกัน --}}
+								<div class="custom-donut-legend" style="width:100%;">
+
+									{{-- Section 2 เดิมวนทุก section ทั้งองค์กรเมื่อไม่ได้กรองอะไรเลย
+									     ทำให้หนักและไม่มีประโยชน์ ผู้ใช้ยืนยันให้การ์ดนี้เปิดเมื่อเลือก
+									     "แผนก" แล้ว (โชว์ทุก section ใต้แผนกนั้น) sectionSelected มาจาก
+									     ManagementDashboardService::getDashboardData() ถ้ายังไม่เลือกจะไม่
+									     query เลย ($dashboard['sectionCompletion'] เป็น collect() เปล่า) --}}
+									@if(!$dashboard['sectionSelected'])
+
+										<div class="text-muted p-3">
+											กรุณาเลือกแผนกก่อน เพื่อดูข้อมูล
+										</div>
+
+									@else
+
+										@forelse($dashboard['sectionCompletion'] as $section)
+
+											<div class="legend-item-row">
+
+												<div class="cr-row">
+
+													<span
+														class="leg-color mr-2"
+														style="background:#3b82f6;"
+													></span>
+
+													{{ $section['name'] }}
+
+													{{-- โชว์ชื่อแผนกกำกับเฉพาะตอนไม่ได้เลือกกรองแผนก (เลือก "ทั้งหมด")
+													     กันงงเวลาชื่อซ้ำกันข้ามแผนก --}}
+													@if(!request('department_id') && !empty($section['department']))
+														<span class="text-muted">({{ $section['department'] }})</span>
+													@endif
+
+												</div>
+
+												<div class="cr-row">
+
+													{{ $section['completion_rate'] }}%
+
+												</div>
+
+											</div>
+
+										@empty
+
+											<div class="text-muted p-3">
+												ไม่พบข้อมูล
+											</div>
+
+										@endforelse
+
+									@endif
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
 					<div class="col-lg-6 col-md-12 col-12">
 
 						<div class="card h-100">
@@ -168,144 +255,58 @@
 
 							<div class="completion-rate-list">
 
-								@forelse($dashboard['lineCompletion'] as $line)
-
-									<div class="cr-row">
-
-										<div class="cr-label">
-											{{ $line['name'] }}
-											{{-- โชว์ชื่อแผนกกำกับเฉพาะตอนไม่ได้เลือกกรองแผนก (เลือก "ทั้งหมด")
-											     กันงงเวลาชื่อซ้ำกันข้ามแผนก ถ้าเลือกแผนกใดแผนกหนึ่งแล้วไม่ต้อง
-											     ซ้ำ เพราะรู้อยู่แล้วว่าเป็นแผนกไหน --}}
-											@if(!request('department_id') && !empty($line['department']))
-												<span class="text-muted">({{ $line['department'] }})</span>
-											@endif
-										</div>
-
-										<div class="cr-bar-container">
-
-											<div
-												class="cr-bar"
-												style="width: {{ $line['completion_rate'] }}%;"
-											></div>
-
-											<div class="cr-pct">
-												{{ $line['completion_rate'] }}%
-											</div>
-
-										</div>
-
-										<div class="cr-trend text-up">
-											<i class="fa-solid fa-caret-up"></i>
-											{{ $line['trend'] }}%
-										</div>
-
-									</div>
-
-								@empty
+								{{-- การ์ดนี้เปิดเมื่อเลือก "ส่วนงาน (section)" แล้ว (โชว์ทุกไลน์ใต้
+								     section นั้น) lineSelected มาจาก
+								     ManagementDashboardService::getDashboardData() --}}
+								@if(!$dashboard['lineSelected'])
 
 									<div class="text-muted text-center p-3">
-										ไม่พบข้อมูล
+										กรุณาเลือกส่วนงานก่อน เพื่อดูข้อมูล หากไม่มี Line จะไม่แสดงข้อมูล
 									</div>
 
-								@endforelse
+								@else
 
+									@forelse($dashboard['lineCompletion'] as $line)
 
-								<div class="cr-axis-row">
+										<div class="cr-row">
 
-									<div style="width:80px; flex-shrink:0;"></div>
-
-									<div class="cr-axis-labels">
-
-										<span>0%</span>
-										<span>25%</span>
-										<span>50%</span>
-										<span>75%</span>
-										<span>100%</span>
-
-									</div>
-
-									<div style="width:90px; flex-shrink:0;"></div>
-
-								</div>
-
-							</div>
-
-						</div>
-
-					</div>
-
-					<div class="col-lg-6 col-md-6 col-12">
-
-						<div class="card h-100">
-
-							<div class="card-header">
-
-								<h5>
-									Pass Rate ของแต่ละ Section
-								</h5>
-
-							</div>
-
-							<div class="donut-chart-layout">
-
-								<div class="donut-chart-wrapper">
-
-									<canvas id="passRateChart"></canvas>
-
-									<div class="donut-center-text">
-
-										{{-- แก้แล้ว: เดิมอ้าง summary.pass_rate ที่ถูกตัดออกจาก section-1 ไปแล้ว
-										     (ตัดสินใจร่วมกับผู้ใช้ว่าซ้ำซ้อนกับ completion_rate) เลยขึ้น 0% ตลอด
-										     เปลี่ยนมาใช้ $dashboard['overallPassRate'] ที่คำนวณแยกต่างหากแทน
-										     (ดู ManagementDashboardService::getOverallPassRate()) --}}
-										<span class="pct">
-											{{ $dashboard['overallPassRate'] }}%
-										</span>
-
-										<span class="label">
-											Pass Rate
-										</span>
-
-									</div>
-
-								</div>
-
-
-								<div class="custom-donut-legend">
-
-									@foreach($dashboard['sectionPassRate'] as $section)
-
-										<div class="legend-item-row">
-
-											<div class="leg-left">
-
-												<span
-													class="leg-color"
-													style="background:#3b82f6;"
-												></span>
-
-												{{ $section['name'] }}
-
+											<div class="cr-label">
+												{{ $line['name'] }}
 												{{-- โชว์ชื่อแผนกกำกับเฉพาะตอนไม่ได้เลือกกรองแผนก (เลือก "ทั้งหมด")
-												     กันงงเวลาชื่อซ้ำกันข้ามแผนก --}}
-												@if(!request('department_id') && !empty($section['department']))
-													<span class="text-muted">({{ $section['department'] }})</span>
+												     กันงงเวลาชื่อซ้ำกันข้ามแผนก ถ้าเลือกแผนกใดแผนกหนึ่งแล้วไม่ต้อง
+												     ซ้ำ เพราะรู้อยู่แล้วว่าเป็นแผนกไหน --}}
+												@if(!request('department_id') && !empty($line['department']))
+													<span class="text-muted">({{ $line['department'] }})</span>
 												@endif
-
 											</div>
 
-											<div class="leg-right">
+											<div class="cr-bar-container">
 
-												{{ $section['pass_rate'] }}%
+												<div
+													class="cr-bar"
+													style="width: {{ $line['completion_rate'] }}%;"
+												></div>
+
+												<div class="cr-pct">
+													{{ $line['completion_rate'] }}%
+												</div>
 
 											</div>
 
 										</div>
 
-									@endforeach
+									@empty
 
-								</div>
+										<div class="text-muted text-center p-3">
+											ไม่พบข้อมูล
+										</div>
+
+									@endforelse
+
+									{{-- ตัดแถบไม้บรรทัด 0-100% ด้านล่างออกตามที่ผู้ใช้ขอ (% ต่อแถวที่
+									     .cr-pct แสดงไว้ทางขวาของแต่ละแถวอยู่แล้วเพียงพอ) --}}
+
+								@endif
 
 							</div>
 
@@ -563,17 +564,6 @@
 													{{ $department['skill_gap'] }}%
 												</td>
 
-												<td>
-
-													<a
-														href="#"
-														class="btn-table-outline"
-													>
-														ดูรายละเอียด
-													</a>
-
-												</td>
-
 											</tr>
 
 										@empty
@@ -603,8 +593,7 @@
 							</div>
 							<div class="line-chart-layout">
 								<div class="line-chart-legend">
-									<div class="leg-item"><span class="leg-color" style="background:#6b4ce6;"></span> Completion Rate (%)</div>
-									<div class="leg-item"><span class="leg-color" style="background:#3b82f6;"></span> Pass Rate (%)</div>
+									<div class="leg-item mr-2"><span class="leg-color" style="background:#6b4ce6;"></span> Completion Rate (%)</div>
 									<div class="leg-item"><span class="leg-color" style="background:#ef4444;"></span> ต้องสอบซ่อม (คน)</div>
 								</div>
 								<div class="line-chart-wrapper">
@@ -773,6 +762,139 @@
 
         $dateRange.on('cancel.daterangepicker', function () {
             $(this).val('');
+        });
+
+        // แนวโน้มการเรียนรู้รายเดือน: Completion Rate (%) กับต้องสอบซ่อม (คน)
+        // เป็นคนละหน่วยกันโดยธรรมชาติ (% เทียบกับจำนวนคน) จึงแยกเป็น 2 แกน y
+        // ถ้าใช้แกนเดียวกัน เส้นจำนวนคนจะแบนราบมองไม่เห็นความเปลี่ยนแปลง
+        // เพราะสเกลไม่เท่ากับแกน % (0-100)
+        const trendData = @json($dashboard['monthlyTrend']);
+
+        new Chart(document.getElementById('trendLineChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: trendData.map(row => row.month),
+                datasets: [
+                    {
+                        label: 'Completion Rate (%)',
+                        data: trendData.map(row => row.completion_rate),
+                        borderColor: '#6b4ce6',
+                        backgroundColor: '#6b4ce6',
+                        tension: 0.1,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#6b4ce6',
+                        yAxisID: 'yPercent',
+                    },
+                    {
+                        label: 'ต้องสอบซ่อม (คน)',
+                        data: trendData.map(row => row.retry),
+                        borderColor: '#ef4444',
+                        backgroundColor: '#ef4444',
+                        tension: 0.1,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#ef4444',
+                        yAxisID: 'yCount',
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                // เผื่อขอบบนไว้หน่อย เพราะจุดที่ completion rate แตะ 100% (เพดาน
+                // ของแกน yPercent) จะชนกรอบบนของ canvas พอดี ทำให้ marker โดน
+                // ตัดครึ่ง ไม่ใช่บั๊กของสเกลแกน แค่ไม่มีที่ว่างให้จุดโผล่พ้นขอบ
+                layout: {
+                    padding: { top: 12 },
+                },
+                plugins: {
+                    // ใช้ legend ที่วาดเองใน .line-chart-legend อยู่แล้ว ปิด legend ของ Chart.js
+                    legend: { display: false },
+                },
+                scales: {
+                    yPercent: {
+                        type: 'linear',
+                        position: 'left',
+                        min: 0,
+                        max: 100,
+                        ticks: { stepSize: 20 },
+                        grid: { color: '#f0f0f0' },
+                    },
+                    yCount: {
+                        type: 'linear',
+                        position: 'right',
+                        min: 0,
+                        // ไม่ต้องวาดกริดของแกนนี้ซ้ำกับแกนซ้าย จะรกจอ
+                        grid: { drawOnChartArea: false },
+                    },
+                    x: {
+                        grid: { display: false },
+                        offset: true,
+                    },
+                },
+            },
+        });
+        // ===== Export: แคปหน้า dashboard ทั้งหน้าเป็นรูป PNG =====
+        // ยกมาจาก admindashboard.blade.php ทั้งหมด (logic เดียวกันเป๊ะ แค่เปลี่ยน
+        // ชื่อไฟล์ดาวน์โหลดจาก dashboard_ เป็น management_ ให้แยกแยะได้ว่ามาจากหน้าไหน)
+        //
+        // แคปฝั่ง browser ด้วย html2canvas เพราะได้ภาพตรงกับที่ผู้ใช้เห็นจริง
+        // (รวมผลของ filter ที่เลือกอยู่) โดยไม่ต้องมี headless browser ฝั่ง server
+        //
+        // จุดที่ต้องจัดการ ไม่ใช่เรียก html2canvas แล้วจบ:
+        // - ต้องแคปให้ครบความสูงจริงของเนื้อหา ไม่ใช่แค่ส่วนที่เห็นในจอ
+        // - ต้องใส่พื้นหลังขาว เพราะค่าเริ่มต้นของ canvas เป็นโปร่งใส เปิดใน viewer
+        //   บางตัวจะกลายเป็นพื้นดำ
+        // - ต้องไม่แคปตัวปุ่ม Export เอง (ตอนกดมันจะอยู่ในสถานะกำลังโหลด ติดไปในภาพ)
+        const $exportBtn = $('#btnExportImage');
+        const exportBtnHtml = $exportBtn.html();
+
+        $exportBtn.on('click', function () {
+            // html2canvas-pro ปล่อย global มาเป็นชื่อไหนขึ้นกับรุ่นของ bundle
+            // เลยหาให้ครบทั้งสองชื่อ ไม่เดาชื่อเดียวแล้วพังเงียบ ๆ ตอนอัปเวอร์ชัน
+            const capture = window.html2canvas || window.html2canvasPro;
+
+            // CDN โหลดไม่ติด (เน็ตองค์กรบล็อก / ออฟไลน์) บอกผู้ใช้ตรง ๆ ดีกว่าปล่อยให้กดแล้วเงียบ
+            if (typeof capture !== 'function') {
+                alert('ยังโหลดตัวช่วยบันทึกภาพไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้าอีกครั้ง');
+                return;
+            }
+
+            const target = document.querySelector('.main-content.admin-dashboard');
+
+            if (!target) {
+                alert('ไม่พบพื้นที่เนื้อหาสำหรับบันทึกภาพ');
+                return;
+            }
+
+            $exportBtn.prop('disabled', true)
+                .html('<i class="fa-solid fa-spinner fa-spin"></i> <strong>กำลังบันทึก...</strong>');
+
+            capture(target, {
+                backgroundColor: '#ffffff',
+                scale: 2,                    // ให้ตัวหนังสือคมพออ่านได้ ไม่เบลอ
+                useCORS: true,               // รูป/ไอคอนที่มาจาก CDN จะไม่หลุดหาย
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: target.scrollWidth,
+                windowHeight: target.scrollHeight,
+                ignoreElements: function (el) {
+                    return el.id === 'btnExportImage';
+                }
+            }).then(function (canvas) {
+                const stamp = moment().format('YYYYMMDD_HHmmss');
+                const link = document.createElement('a');
+
+                link.download = 'management_' + stamp + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(function (err) {
+                console.error('Export screenshot failed:', err);
+                alert('บันทึกภาพไม่สำเร็จ กรุณาลองอีกครั้ง');
+            }).finally(function () {
+                $exportBtn.prop('disabled', false).html(exportBtnHtml);
+            });
         });
     });
 
