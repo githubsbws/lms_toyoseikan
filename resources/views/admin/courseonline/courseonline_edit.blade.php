@@ -172,7 +172,7 @@
                                             <option value="60" {{ $currentMilestone == 60 ? 'selected' : '' }}>เดือนที่ 2</option>
                                             <option value="90" {{ $currentMilestone == 90 ? 'selected' : '' }}>เดือนที่ 3</option>
                                             <option value="119" {{ $currentMilestone == 119 ? 'selected' : '' }}>เดือนที่ 4</option>
-                                            <option value="999" {{ $currentMilestone == 999 ? 'selected' : '' }}>หลังเดือนที่ 4(ก่อนขึ้นเป็นพนังงานทั่วไป)</option>
+                                            <option value="999" {{ $currentMilestone == 999 ? 'selected' : '' }}>หลังเดือนที่ 4(ก่อนขึ้นเป็นพนักงานทั่วไป)</option>
                                         </select>
                                     </div>
                                 </div>
