@@ -140,7 +140,7 @@ class AdminController extends Controller
         $groupId = $user->group_id;
 
         // 2. เรียก Service ตาม group_id
-    if ($groupId == '5') {
+    if (in_array($groupId, ['4', '5'])) {
             $dashboardTitle = 'Dashboard หัวหน้าพนักงาน';
 
             $dashboardSector = $user->orgchart->line->title ?? 'ไม่พบข้อมูลสายงาน';
@@ -2771,13 +2771,22 @@ class AdminController extends Controller
         }
     }
     //new p
-    function grouptesting_create(Request $request){
+    function grouptesting_create(Request $request, $type){
         if(AuthFacade::useradmin()){
+            // แยกหน้าเพิ่มชุดข้อสอบ "พนักงานทั่วไป" กับ "พนักงานใหม่" ด้วย is_onboarding
+            // ใช้ pattern เดียวกับ lesson_create($request, $type) ไม่สร้างฟังก์ชันใหม่
+            $is_onboarding = match($type){
+                'general' => false,
+                'onboarding' => true,
+                default => abort(404)
+            };
+
              $usedCourseIds = Grouptesting::where('active', 'y')
                 ->pluck('course_id')
                 ->toArray();
 
             $lesson = Course::where('active', 'y')
+                ->where('is_onboarding', $is_onboarding)
                 ->whereNotIn('course_id', $usedCourseIds)
                 ->get();
 
@@ -2807,7 +2816,7 @@ class AdminController extends Controller
             }
 
 
-            return view("admin.grouptesting.grouptesting-create",['lesson' => $lesson]);
+            return view("admin.grouptesting.grouptesting-create",['lesson' => $lesson, 'type' => $type]);
         }else{
             return redirect()->route('login.admin');
         }
@@ -3234,8 +3243,6 @@ class AdminController extends Controller
             'ques_type' => 'required',
             'ques_title' => 'required',
             'answer'     => 'required_if:ques_type,3',
-            'images'     => 'nullable|array|max:2',
-            'images.*'   => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $userId = auth()->id();
@@ -3275,16 +3282,6 @@ class AdminController extends Controller
             }
         }
 
-        // ถ้ามีรูปภาพแนบมา (เฉพาะคำถามอธิบาย ques_type=3)
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $imageFile) {
-                $path = $imageFile->store('images/uploads', 'public');
-                $question->images()->create([
-                    'path' => $path,
-                ]);
-            }
-        }
-
         return redirect()->back()->with('success', 'บันทึกสำเร็จ');
     }
 
@@ -3302,23 +3299,6 @@ class AdminController extends Controller
     public function questions_update(Request $request, $id)
     {
         $question = Question::where('ques_id', $id)->first();
-
-        // นับจำนวนรูปเดิมที่จะยังเหลืออยู่
-        $existingImageIds = $question->images()->pluck('id');
-        $deleteImageIds = collect($request->input('delete_images', []))->map(fn($v) => (int) $v);
-        $remainingExistingCount = $existingImageIds->diff($deleteImageIds)->count();
-        $newImagesCount = $request->hasFile('images') ? count($request->file('images')) : 0;
-
-        $request->validate([
-            'images'   => 'nullable|array',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-        ]);
-
-        if (($remainingExistingCount + $newImagesCount) > 2) {
-            return redirect()->back()->withErrors([
-                'images' => 'แนบรูปภาพได้สูงสุด 2 รูปต่อคำถาม (รวมรูปเดิมที่ไม่ได้ลบ)',
-            ])->withInput();
-        }
 
         $question->update([
             'ques_type' => $request->ques_type,
@@ -3348,21 +3328,6 @@ class AdminController extends Controller
                 }
             }
         }
-        // ลบรูปที่ผู้ใช้ติ๊กเลือกลบ
-        if ($deleteImageIds->isNotEmpty()) {
-            $question->images()->whereIn('id', $deleteImageIds)->delete();
-        }
-
-        // เพิ่มรูปใหม่ที่แนบมา
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $imageFile) {
-                $path = $imageFile->store('images/uploads', 'public');
-                $question->images()->create([
-                    'path' => $path,
-                ]);
-            }
-        }
-
 
         return redirect()->back()->with('success','อัพเดทสำเร็จ');
     }

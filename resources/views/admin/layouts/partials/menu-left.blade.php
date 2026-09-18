@@ -291,8 +291,13 @@ use App\Helpers\PermissionHelper;
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{url('grouptesting_create')}}" class="nav-link {{ request()->is('grouptesting_create') ? 'active' : '' }}">
-                                <p>เพิ่มชุดข้อสอบ</p>
+                            <a href="{{url('grouptesting_create/general')}}" class="nav-link {{ request()->is('grouptesting_create/general') ? 'active' : '' }}">
+                                <p>เพิ่มชุดข้อสอบพนักงานทั่วไป</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{url('grouptesting_create/onboarding')}}" class="nav-link {{ request()->is('grouptesting_create/onboarding') ? 'active' : '' }}">
+                                <p>เพิ่มชุดข้อสอบพนักงานใหม่</p>
                             </a>
                         </li>
                         <li class="nav-item">

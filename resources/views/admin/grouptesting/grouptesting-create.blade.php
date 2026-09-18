@@ -29,7 +29,7 @@
                     <div class="card-body">
                         <p>ค่าที่มี <span class="text-danger">*</span> จำเป็นต้องใส่ให้ครบ</p>
 
-                        <form action="{{route('grouptesting_create')}}" method="POST" enctype="multipart/form-data">
+                        <form action="{{route('grouptesting_create', ['type' => $type])}}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="form-group">
                                 <label for="cate_id">ชื่อหลักสูตรออนไลน์ <span class="text-danger">*</span></label>
