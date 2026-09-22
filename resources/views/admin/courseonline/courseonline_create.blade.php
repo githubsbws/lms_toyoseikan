@@ -142,7 +142,7 @@
                                             <option value="60">เดือนที่ 2</option>
                                             <option value="90">เดือนที่ 3</option>
                                             <option value="119">เดือนที่ 4</option>
-                                            <option value="999">หลังเดือนที่ 4(ก่อนขึ้นเป็นพนังงานทั่วไป)</option>
+                                            <option value="999">หลังเดือนที่ 4(ก่อนขึ้นเป็นพนักงานทั่วไป)</option>
                                         </select>
                                     </div>
                                 </div>

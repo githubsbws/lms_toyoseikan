@@ -36,7 +36,7 @@
                 {{-- Header คำถาม --}}
                 <div style="background: #1F7BCC;color: white; padding: 25px 30px; border-bottom: 1px solid;">
                     <h4 style="font-size: 24px; font-weight: 600; color: white; margin: 0; line-height: 1.5;">
-                        {{ $index + 1 }}. {!! strip_tags(html_entity_decode($question->ques_title), '<b><strong><i><em><u>') !!}
+                        {{ $index + 1 }}. {!! htmlspecialchars_decode($question->ques_title) !!}
                     </h4>
                 </div>
 

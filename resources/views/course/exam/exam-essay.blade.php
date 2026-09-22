@@ -42,26 +42,9 @@
                     {{-- Body --}}
                     <div style="padding: 30px;">
 
-                        {{-- รูปภาพ --}}
-                        <div style="border: 2px dashed #dee2e6; border-radius: 8px; background: #f8f9fa; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 16px; margin-bottom: 20px;">
-                            @if($question->images && $question->images->isNotEmpty())
-                                @foreach($question->images as $img)
-                                    <div style="flex: 1 1 220px; max-width: 220px; min-height: 180px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 8px; overflow: hidden; padding: 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);">
-                                        <img src="{{ asset('storage/' . $img->path) }}"
-                                            style="width: 100%; height: 100%; object-fit: contain;" alt="รูปภาพประกอบ">
-                                    </div>
-                                @endforeach
-                            @else
-                                <div style="text-align: center; color: #adb5bd; width: 100%;">
-                                    <i class="far fa-image fa-2x"></i>
-                                    <p style="margin: 5px 0 0 0; font-size: 14px;">ไม่มีรูปภาพประกอบ</p>
-                                </div>
-                            @endif
-                        </div>
-
-                        {{-- คำถาม --}}
+                        {{-- คำถาม (กลับไปใช้แบบเดิม: แนบรูปผ่าน summernote ในตัว ques_title เลย) --}}
                         <h5 style="font-weight: bold; color: #334155; line-height: 1.6; margin-bottom: 20px;">
-                            {!! strip_tags(html_entity_decode($question->ques_title)) !!}
+                            {{ $index + 1 }}. {!! htmlspecialchars_decode($question->ques_title) !!}
                         </h5>
 
                         {{-- textarea --}}

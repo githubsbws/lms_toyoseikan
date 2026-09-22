@@ -350,8 +350,10 @@ Route::post('grouptesting_plan/{id?}/{type?}',[AdminController::class,'grouptest
 
 Route::post('grouptesting_plan_delete/{id?}',[AdminController::class,'grouptesting_plan_delete'])->name('grouptesting_plan.delete')->middleware('checkIdleTimeout');
 
-Route::get('/grouptesting_create',[AdminController::class,'grouptesting_create'])->name('grouptesting_create')->middleware('checkIdleTimeout');
-Route::post('/grouptesting_create',[AdminController::class,'grouptesting_create'])->name('grouptesting_create')->middleware('checkIdleTimeout');
+// {type} คือ 'general' หรือ 'onboarding' ใช้ฟังก์ชัน grouptesting_create ตัวเดียวกัน
+// แค่แยก query Course ด้วย is_onboarding ตาม $type (เหมือน pattern ของ lesson_create/{type})
+Route::get('/grouptesting_create/{type}',[AdminController::class,'grouptesting_create'])->name('grouptesting_create')->middleware('checkIdleTimeout');
+Route::post('/grouptesting_create/{type}',[AdminController::class,'grouptesting_create'])->name('grouptesting_create')->middleware('checkIdleTimeout');
 
 Route::get('/group_question_create/{id?}',[AdminController::class,'group_question_create'])->name('group_question.create')->middleware('checkIdleTimeout');
 Route::post('/group_question_create/{id?}',[AdminController::class,'group_question_create'])->name('group_question.create')->middleware('checkIdleTimeout');
