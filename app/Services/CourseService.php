@@ -313,11 +313,11 @@ class CourseService
 
     public function findCoursePage(Users $user, $courseId): int
     {
-        $query = Course::query()
-            ->where('course_online.active', self::STATUS_ACTIVE);
-
         if ($user->team_id === Users::TEAM_NEWEMP) {
 
+            // ต้องเรียง/กรองให้ตรงกับ applyRoadmapCriteria() เป๊ะ ๆ ไม่งั้น index
+            // ที่คำนวณได้ที่นี่จะไม่ตรงกับตำแหน่งจริงของคอร์สในหน้าที่แสดง
+            // (ดูคอมเมนต์ชุดเดียวกันในสาย else ด้านล่าง)
             $courseIds = RoadmapCourse::query()
                 ->join('roadmap', 'roadmap.id', '=', 'roadmap_course.roadmap_id')
                 ->where('roadmap.line_id', $user->Orgchart?->line?->id)
@@ -327,8 +327,29 @@ class CourseService
 
         } else {
 
-            $courseIds = Orgcourse::where('orgchart_id', $user->org_id)
-                ->pluck('course_id');
+            /**
+             * ต้อง orderBy + where เงื่อนไขเดียวกับ applyOrgCriteria() เป๊ะ ๆ
+             * (course_title ASC, active=y, start_date <= now, end_date >= now)
+             * ไม่ใช่แค่ orderBy อย่างเดียว เพราะเดิม query นี้ไม่มี orderBy เลย
+             * (เรียงตามลำดับที่ DB คืนมาโดยไม่การันตี) ขณะที่หน้าจริงเรียงตาม
+             * course_title — ทำให้ index ที่คำนวณได้ที่นี่ไม่ตรงกับตำแหน่งจริง
+             * ของคอร์สในหน้าที่แสดง กด "ดูบทเรียน" แล้วไป course_id ผิดตัวหรือ
+             * ไปหน้าที่ course นั้นไม่ได้อยู่จริง (อาการที่ผู้ใช้แจ้งมา)
+             *
+             * เช่นเดียวกัน ถ้าไม่กรอง start_date/end_date คอร์สที่ยังไม่เริ่ม
+             * หรือหมดเขตแล้ว (ซึ่งไม่โผล่ในหน้า course.blade.php เลย) จะถูกนับ
+             * รวมเข้า index ด้วย ทำให้เลขหน้าเพี้ยนไปอีกชั้น
+             */
+            $courseIds = Course::query()
+                ->where('course_online.active', self::STATUS_ACTIVE)
+                ->whereIn(
+                    'course_online.course_id',
+                    Orgcourse::where('orgchart_id', $user->org_id)->pluck('course_id')
+                )
+                ->where('course_online.start_date', '<=', now())
+                ->where('course_online.end_date', '>=', now())
+                ->orderBy('course_online.course_title', 'ASC')
+                ->pluck('course_online.course_id');
         }
 
         $orderedIds = $courseIds->values();
@@ -341,7 +362,15 @@ class CourseService
 
         $perPage = 5; // ให้ตรงกับ paginate()
 
-        return (int) floor($index / $perPage) ;
+        /**
+         * +1 เพราะ Laravel paginate() เริ่มเลขหน้าที่ 1 แต่ floor(index/perPage)
+         * ให้ผลแบบ 0-indexed (index 0-4 = หน้า 1 -> floor ได้ 0, index 5-9 =
+         * หน้า 2 -> floor ได้ 1) เดิมไม่ได้ +1 ทำให้ redirect พาไปหน้าก่อนหน้า
+         * ตัวเองเสมอทุกครั้งที่คอร์สไม่ได้อยู่หน้า 1 (เช่น คอร์สอันดับ 6-10
+         * ควรไป page=2 แต่ของเดิมคำนวณได้ 1 แล้ว controller เช็ค page > 1
+         * เป็น false เลยไม่ redirect ค้างอยู่หน้า 1 ไม่ใช่หน้าที่คอร์สนั้นอยู่จริง)
+         */
+        return (int) floor($index / $perPage) + 1;
     }
 
 }

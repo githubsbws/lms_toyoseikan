@@ -898,7 +898,7 @@ use App\Models\Ques_ans;
             width: 130px;
             height: 130px;
             margin: 0 auto;
-            
+
         }
 
         .progress-circle-svg {
@@ -1926,7 +1926,7 @@ use App\Models\Ques_ans;
 
 
             @endif
-            
+
 
             <section class="section-1 row">
                 <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 custom-5-col">
@@ -2083,7 +2083,7 @@ use App\Models\Ques_ans;
 
                                     <div class="timeline-step">
 
-                                        <div class="circle-badge 
+                                        <div class="circle-badge
                                             {{ $item['percent']==100?'green':'' }}">
 
                                             {{ $item['day'] }} วัน
@@ -2255,7 +2255,7 @@ use App\Models\Ques_ans;
 
                                     </div>
                                     @empty
-                                    
+
 
                                     <div class="text-center text-muted py-3">
                                         ไม่มีบทเรียนที่ต้องเรียน
@@ -2347,7 +2347,7 @@ use App\Models\Ques_ans;
                         <div class="card-body">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 @forelse($dashboard['failCourses'] as $course)
-                                
+
                                     <div class="course-row-responsive"
                                         style="padding-left:10px;
                                                 border-left:5px solid red;
@@ -2380,7 +2380,7 @@ use App\Models\Ques_ans;
 
                                         <div style="width:20%;text-align:center;">
 
-                                            <a href="{{ url('course/'.$course['course_id']) }}"
+                                            <a href="{{ route('course', ['course_id' => $course['course_id']]) }}"
                                             class="btn"
                                             style="border:1px solid red;color:red;">
 
@@ -2611,7 +2611,7 @@ use App\Models\Ques_ans;
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </section>
         </div>
     </div>
@@ -3111,7 +3111,7 @@ use App\Models\Ques_ans;
                             </div>
                         </div>
                     </div>
-                    
+
                 </section>
             </div>
         </div>
