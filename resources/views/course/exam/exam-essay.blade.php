@@ -42,7 +42,28 @@
                     {{-- Body --}}
                     <div style="padding: 30px;">
 
-                        {{-- คำถาม (กลับไปใช้แบบเดิม: แนบรูปผ่าน summernote ในตัว ques_title เลย) --}}
+                        {{-- รูปภาพจาก Excel import (question_images ผ่าน storage) --}}
+                        {{-- คำถามที่สร้างเองผ่านหน้าเว็บแนบรูปในตัว ques_title ด้วย summernote
+                             อยู่แล้ว (จึงไม่มี record ใน images relation) ส่วนคำถามที่ import
+                             จาก Excel รูปจะถูกอัปโหลดแยกไปเก็บใน question_images/storage แล้ว
+                             ผูกกับคำถามผ่าน relation นี้ (ดู App\Imports\QuesImportEssay::onRow()
+                             ที่ยัง $q->images()->create(['path' => ...]) อยู่เหมือนเดิม ไม่ได้
+                             เปลี่ยนพฤติกรรมตอนตัดโค้ดแสดงผลออกไปในคอมมิต e0efb778)
+                             ใช้ pattern asset('storage/'.$img->path) เดียวกับ
+                             admin/grouptesting/ques_detail.blade.php --}}
+                        @if($question->images && $question->images->isNotEmpty())
+                            <div style="border: 2px dashed #dee2e6; border-radius: 8px; background: #f8f9fa; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 16px; margin-bottom: 20px;">
+                                @foreach($question->images as $img)
+                                    <div style="flex: 1 1 220px; max-width: 220px; min-height: 180px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 8px; overflow: hidden; padding: 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);">
+                                        <img src="{{ asset('storage/' . $img->path) }}"
+                                            style="width: 100%; height: 100%; object-fit: contain;" alt="รูปภาพประกอบ">
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- คำถาม: แนบรูปผ่าน summernote ในตัว ques_title ได้ (สำหรับคำถามที่
+                             สร้างเองผ่านหน้าเว็บ) --}}
                         <h5 style="font-weight: bold; color: #334155; line-height: 1.6; margin-bottom: 20px;">
                             {{ $index + 1 }}. {!! htmlspecialchars_decode($question->ques_title) !!}
                         </h5>
