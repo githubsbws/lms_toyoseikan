@@ -985,7 +985,7 @@
                                 <div class="row" style="width: 100%;">
                                     <div class=" col-lg-4">
                                         <a href="{{ url('course') }}">
-                                            <div class="menu-card card-pink" onclick="location.href='#'">
+                                            <div class="menu-card card-pink">
                                                 <img src="{{ asset('assets/images/menu1.png') }}" alt="E-Learning Banner"
                                                     class="hero-banner-img">
                                                 <span>หลักสูตรของฉัน</span>
@@ -1002,8 +1002,8 @@
                                     </div>
 
                                     <div class="col-lg-4">
-                                        <a href="{{ url('course') }}">
-                                            <div class="menu-card card-green" onclick="location.href='#'">
+                                        <a href="{{ url('dashboard') }}">
+                                            <div class="menu-card card-green">
                                                 <img src="{{ asset('assets/images/check-list.png') }}"
                                                     alt="E-Learning Banner" class="hero-banner-img">
                                                 <span>แดชบอร์ด</span>
@@ -1029,7 +1029,7 @@
                         <div class="row">
                             @if ($course_detail->isNotEmpty())
                                 @foreach ($course_detail as $course)
-                                    <a href="{{ url('course') }}">
+                                    {{-- <a href="{{ url('course') }}"> --}}
                                         <div class="col-md-4 col-sm-6">
                                             <div class="course-card-item">
                                                 <div class="course-image-area">
@@ -1045,7 +1045,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </a>
+                                    {{-- </a> --}}
                                 @endforeach
                             @else
                                 <h3>ยังไม่มีหลักสูตรในสายงานของคุณ</h3>

@@ -192,21 +192,32 @@ class CourseExamService
         ->where('user_id', $userId)
         ->firstOrFail();
 
-        //นับคะแนนเต็ม
-        $maxScoreCount = $this->getMaxScore($courseId);
+        // นับคะแนนเต็ม: ใช้ course_question_show (จำนวนข้อที่สุ่มมาแสดงจริงตอนสอบ
+        // ตามที่ getMultipleChoiceExam() ใช้ take($courseQuestionShow)) เป็นตัวหาร
+        // ไม่ใช่ getMaxScore() ที่นับข้อสอบทั้งหมดในคลังของ course เพราะสองค่านี้
+        // ไม่เท่ากัน (getMaxScore() มักมากกว่า ทำให้คะแนนออกมาต่ำกว่าที่ควรเป็นเสมอ)
+        //
+        // ต้องเช็ค 3 เงื่อนไขก่อนใช้ course_question_show: ไม่ใช่ null, ไม่ใช่ค่าว่าง,
+        // และไม่ใช่ 0 (ถ้าเป็น 0 แล้วเอาไปหารจะกลายเป็นหารด้วยศูนย์) ถ้าเข้าเงื่อนไขใดเงื่อนไข
+        // หนึ่งให้ fallback ไปใช้ getMaxScore() เหมือนพฤติกรรมเดิมทันที
+        $courseQuestionShow = Course::find($courseId)->course_question_show;
+
+        $maxScoreCount = (!is_null($courseQuestionShow) && $courseQuestionShow !== '' && (int) $courseQuestionShow > 0)
+            ? (int) $courseQuestionShow
+            : $this->getMaxScore($courseId);
 
         // 2. เช็คเงื่อนไข "ตกทันที" (ส่งมาว่า Timeout OR เวลาใน DB หมดแล้วจริง)
         $isActuallyTimeout = ($timeout == 1 || now()->gt($examSession->expire_at));
         return DB::transaction(function () use ($userId, $courseId, $answers, $isActuallyTimeout, $examSession, $maxScoreCount) {
             if ($isActuallyTimeout) {
                 $currentScore = 0;
-                $maxScore = $maxScoreCount; // หรือจะนับจำนวนข้อสอบจริงส่งมาก็ได้
+                $maxScore = $maxScoreCount;
                 $status = 'fail';
                 $sessionStatus = 'timeout';
             } else {
                 // Logic ตรวจคำตอบปกติ
                 $selectedChoiceIds = array_values($answers);
-                $maxScore = $maxScoreCount; // หรือดึงจำนวนข้อสอบจริงจาก DB จะแม่นยำกว่า
+                $maxScore = $maxScoreCount;
 
                 $correctChoicesCount = Choice::whereIn('choice_id', $selectedChoiceIds)
                     ->where('choice_answer', 1)
